@@ -183,21 +183,28 @@ export default function LabResultModal({
               </div>
             )}
 
+            {/* Smart Lab Test Selection with Auto-Fill */}
+            <div className="space-y-4">
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-blue-500" />
+                  Lab Test Name (Smart Auto-Fill Enabled)
+                </FormLabel>
+                <LabTestAutocomplete
+                  value={selectedLabTest}
+                  onSelect={handleLabTestSelect}
+                  onAutoFill={handleLabTestAutoFill}
+                  placeholder="Search lab tests (e.g., CBC, Blood Glucose, Malaria Test)..."
+                  className="w-full"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  ✨ Select a standardized test to automatically fill reference ranges and ensure data consistency.
+                </p>
+              </FormItem>
+            </div>
+
             {/* Lab Result Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="testName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Test Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="e.g., Blood Sugar, CBC" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
