@@ -32,8 +32,9 @@ import {
 } from "@/components/ui/select";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import LabTestAutocomplete from "./lab-test-autocomplete";
 
 interface LabResultModalProps {
   open: boolean;
@@ -50,6 +51,7 @@ export default function LabResultModal({
   const queryClient = useQueryClient();
   const [patientSearchOpen, setPatientSearchOpen] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState<number | undefined>(patientId);
+  const [selectedLabTest, setSelectedLabTest] = useState<{name: string; category: string; referenceRange: string} | null>(null);
 
   const { data: patients } = useQuery<Patient[]>({
     queryKey: ["/api/patients"],
@@ -93,6 +95,16 @@ export default function LabResultModal({
       });
     },
   });
+
+  const handleLabTestSelect = (test: {name: string; category: string; referenceRange: string}) => {
+    setSelectedLabTest(test);
+    form.setValue("testName", test.name);
+  };
+
+  const handleLabTestAutoFill = (test: {name: string; category: string; referenceRange: string}) => {
+    // Auto-fill the normal range when a test is selected
+    form.setValue("normalRange", test.referenceRange);
+  };
 
   const onSubmit = (data: Omit<InsertLabResult, "patientId">) => {
     if (!selectedPatientId) {

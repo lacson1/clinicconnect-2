@@ -1,0 +1,71 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Combobox } from '@headlessui/react';
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
+
+interface Diagnosis {
+  id: number;
+  name: string;
+}
+
+const DiagnosisAutocomplete: React.FC<{ onSelect: (diagnosis: string) => void }> = ({ onSelect }) => {
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<Diagnosis[]>([]);
+  const [selected, setSelected] = useState<Diagnosis | null>(null);
+
+  useEffect(() => {
+    if (query.length < 2) return; // avoid too many requests
+    axios
+      .get(`/api/suggestions/diagnosis?q=${query}`)
+      .then((res) => setSuggestions(res.data))
+      .catch((err) => console.error(err));
+  }, [query]);
+
+  const handleSelect = (diagnosis: Diagnosis) => {
+    setSelected(diagnosis);
+    onSelect(diagnosis.name);
+  };
+
+  return (
+    <div className="w-full">
+      <label className="block mb-1 font-semibold text-sm text-gray-700">Diagnosis</label>
+      <Combobox value={selected} onChange={handleSelect}>
+        <div className="relative">
+          <Combobox.Input
+            className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            displayValue={(diagnosis: Diagnosis) => diagnosis?.name || ''}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Type to search for a diagnosis"
+          />
+          <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+          </Combobox.Button>
+
+          {suggestions.length > 0 && (
+            <Combobox.Options className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg max-h-60 overflow-auto">
+              {suggestions.map((d) => (
+                <Combobox.Option
+                  key={d.id}
+                  value={d}
+                  className={({ active }) =>
+                    `cursor-pointer p-2 ${active ? 'bg-blue-500 text-white' : 'text-gray-900'}`
+                  }
+                >
+                  {({ selected }) => (
+                    <span className="flex items-center">
+                      {selected && <CheckIcon className="h-4 w-4 mr-1" aria-hidden="true" />}
+                      {d.name}
+                    </span>
+                  )}
+                </Combobox.Option>
+              ))}
+            </Combobox.Options>
+          )}
+        </div>
+      </Combobox>
+      <p className="text-xs text-gray-500 mt-1">Choose a standard diagnosis from suggestions for accuracy.</p>
+    </div>
+  );
+};
+
+export default DiagnosisAutocomplete;

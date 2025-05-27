@@ -89,6 +89,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch symptom suggestions" });
     }
   });
+
+  app.get("/api/suggestions/lab-tests", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string') {
+        return res.json([]);
+      }
+
+      // Standard lab tests commonly used in Nigerian clinics
+      const standardLabTests = [
+        { name: "Complete Blood Count (CBC)", category: "Hematology", referenceRange: "Various parameters" },
+        { name: "Blood Glucose (Fasting)", category: "Chemistry", referenceRange: "70-100 mg/dL" },
+        { name: "Blood Glucose (Random)", category: "Chemistry", referenceRange: "<200 mg/dL" },
+        { name: "HbA1c (Glycated Hemoglobin)", category: "Chemistry", referenceRange: "<7% (diabetics), <5.7% (normal)" },
+        { name: "Lipid Profile", category: "Chemistry", referenceRange: "Various parameters" },
+        { name: "Liver Function Tests (LFTs)", category: "Chemistry", referenceRange: "Various parameters" },
+        { name: "Kidney Function Tests", category: "Chemistry", referenceRange: "Various parameters" },
+        { name: "Thyroid Function Tests", category: "Endocrinology", referenceRange: "TSH: 0.4-4.0 mIU/L" },
+        { name: "Urinalysis", category: "Clinical Pathology", referenceRange: "Various parameters" },
+        { name: "Stool Analysis", category: "Clinical Pathology", referenceRange: "Various parameters" },
+        { name: "Malaria Parasite Test", category: "Parasitology", referenceRange: "Negative" },
+        { name: "Typhoid Test (Widal)", category: "Serology", referenceRange: "Negative" },
+        { name: "Hepatitis B Surface Antigen", category: "Serology", referenceRange: "Negative" },
+        { name: "HIV Screening", category: "Serology", referenceRange: "Negative" },
+        { name: "Pregnancy Test (β-hCG)", category: "Endocrinology", referenceRange: "Negative (non-pregnant)" },
+        { name: "Prostate Specific Antigen (PSA)", category: "Tumor Markers", referenceRange: "<4.0 ng/mL" },
+        { name: "Chest X-Ray", category: "Radiology", referenceRange: "Normal chest anatomy" },
+        { name: "Abdominal Ultrasound", category: "Radiology", referenceRange: "Normal organ structure" },
+        { name: "ECG (Electrocardiogram)", category: "Cardiology", referenceRange: "Normal sinus rhythm" },
+        { name: "Blood Culture", category: "Microbiology", referenceRange: "No growth" },
+        { name: "Urine Culture", category: "Microbiology", referenceRange: "No growth" },
+        { name: "C-Reactive Protein (CRP)", category: "Inflammation", referenceRange: "<3.0 mg/L" },
+        { name: "Erythrocyte Sedimentation Rate (ESR)", category: "Inflammation", referenceRange: "Male: <15mm/hr, Female: <20mm/hr" },
+        { name: "Vitamin D", category: "Vitamins", referenceRange: "30-100 ng/mL" },
+        { name: "Vitamin B12", category: "Vitamins", referenceRange: "200-900 pg/mL" },
+        { name: "Iron Studies", category: "Hematology", referenceRange: "Various parameters" }
+      ];
+
+      const searchTerm = q.toLowerCase();
+      const filteredTests = standardLabTests
+        .filter(test => test.name.toLowerCase().includes(searchTerm) || 
+                       test.category.toLowerCase().includes(searchTerm))
+        .slice(0, 10);
+
+      res.json(filteredTests.map(test => ({
+        name: test.name,
+        category: test.category,
+        referenceRange: test.referenceRange
+      })));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch lab test suggestions" });
+    }
+  });
   
   // Patients routes - Medical staff only
   app.post("/api/patients", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
