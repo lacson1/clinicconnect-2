@@ -16,8 +16,15 @@ import {
   Stethoscope, 
   FlaskRound,
   Plus,
-  Pill
+  Pill,
+  Activity,
+  Heart,
+  Clock,
+  UserCheck,
+  FileText,
+  Edit
 } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import VisitRecordingModal from "@/components/visit-recording-modal";
 import LabResultModal from "@/components/lab-result-modal";
 import PrescriptionModal from "@/components/prescription-modal";

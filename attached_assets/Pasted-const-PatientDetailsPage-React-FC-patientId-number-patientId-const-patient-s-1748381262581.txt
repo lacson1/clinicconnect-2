@@ -1,0 +1,57 @@
+const PatientDetailsPage: React.FC<{ patientId: number }> = ({ patientId }) => {
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [tab, setTab] = useState<'dashboard' | 'visits' | 'labs' | 'medications' | 'referrals' | 'history'>('dashboard');
+
+  useEffect(() => {
+    axios.get(`/api/patients/${patientId}`).then(res => setPatient(res.data));
+  }, [patientId]);
+
+  if (!patient) return <div>Loading...</div>;
+
+  return (
+    <div className="p-6">
+      {/* Header */}
+      <div className="flex items-center mb-4">
+        <img src={patient.photoUrl || '/default-avatar.png'} className="w-16 h-16 rounded-full mr-4" />
+        <div>
+          <h2 className="text-xl font-bold">{patient.firstName} {patient.lastName}</h2>
+          <p className="text-sm text-gray-500">{patient.phone}</p>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="flex space-x-4 mb-4 border-b">
+        {['dashboard', 'visits', 'labs', 'medications', 'referrals', 'history'].map(t => (
+          <button key={t} onClick={() => setTab(t as any)} className={`pb-2 border-b-2 ${tab === t ? 'border-blue-500' : 'border-transparent'}`}>
+            {t.charAt(0).toUpperCase() + t.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div>
+        {tab === 'dashboard' && (
+          <div>
+            <h3 className="text-lg font-semibold">Patient Dashboard</h3>
+            <div className="grid grid-cols-2 gap-4 mt-2">
+              <div className="p-4 border rounded shadow">
+                <h4 className="font-bold">Vitals</h4>
+                {/* Display vitals here */}
+              </div>
+              <div className="p-4 border rounded shadow">
+                <h4 className="font-bold">Allergies</h4>
+                {/* Display allergies here */}
+              </div>
+              {/* More cards */}
+            </div>
+          </div>
+        )}
+        {tab === 'visits' && <VisitList patientId={patientId} />}
+        {tab === 'labs' && <LabResults patientId={patientId} />}
+        {tab === 'medications' && <Medications patientId={patientId} />}
+        {tab === 'referrals' && <Referrals patientId={patientId} />}
+        {tab === 'history' && <PastMedicalHistory patientId={patientId} />}
+      </div>
+    </div>
+  );
+};
