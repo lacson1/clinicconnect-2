@@ -18,28 +18,22 @@ export default function Patients() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showPatientModal, setShowPatientModal] = useState(false);
 
-  const { data: patients, isLoading } = useQuery<Patient[]>({
-    queryKey: ["/api/patients", searchQuery],
-    queryFn: async () => {
-      const response = await fetch(`/api/patients${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ""}`);
-      if (!response.ok) throw new Error("Failed to fetch patients");
-      return response.json();
-    },
+  const { data: patients = [], isLoading } = useQuery({
+    queryKey: ["/api/patients"],
   });
 
-  const getPatientInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  const filteredPatients = patients.filter((patient: Patient) => {
+    const matchesSearch = `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patient.phoneNumber?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
+
+  const getPatientInitials = (patient: Patient) => {
+    return `${patient.firstName[0]}${patient.lastName[0]}`.toUpperCase();
   };
 
-  const getPatientAge = (dateOfBirth: string) => {
-    const birth = new Date(dateOfBirth);
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
+  const calculateAge = (dateOfBirth: string) => {
+    return new Date().getFullYear() - new Date(dateOfBirth).getFullYear();
   };
 
   return (
@@ -144,15 +138,22 @@ export default function Patients() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
             <p className="text-slate-500 mt-2">Loading patients...</p>
           </div>
-        ) : patients && patients.length > 0 ? (
-          patients.map((patient: any) => (
+        ) : filteredPatients.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <Users className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500">
+              {searchQuery ? "No patients found matching your search." : "No patients registered yet."}
+            </p>
+          </div>
+        ) : (
+          filteredPatients.map((patient: Patient) => (
             <Card key={patient.id} className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer border-slate-200">
               <Link href={`/patients/${patient.id}`}>
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-4">
                     <Avatar className="w-14 h-14">
                       <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
-                        {getPatientInitials(patient.firstName, patient.lastName)}
+                        {getPatientInitials(patient)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
@@ -161,7 +162,7 @@ export default function Patients() {
                       </CardTitle>
                       <div className="flex items-center text-sm text-slate-500 mt-1">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {getPatientAge(patient.dateOfBirth)} years old
+                        {calculateAge(patient.dateOfBirth)} years old
                       </div>
                     </div>
                     <Badge variant="secondary" className="bg-green-100 text-green-800">Active</Badge>
@@ -214,13 +215,6 @@ export default function Patients() {
               </Link>
             </Card>
           ))
-        ) : (
-          <div className="col-span-full text-center py-12">
-            <Users className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500">
-              {searchQuery ? "No patients found matching your search." : "No patients registered yet."}
-            </p>
-          </div>
         )}
       </div>
 
@@ -229,89 +223,5 @@ export default function Patients() {
         onOpenChange={setShowPatientModal}
       />
     </div>
-  );
-}
-              All Patients
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="animate-pulse flex space-x-4 p-4">
-                    <div className="rounded-full bg-slate-200 h-12 w-12"></div>
-                    <div className="space-y-2 flex-1">
-                      <div className="h-4 bg-slate-200 rounded w-1/4"></div>
-                      <div className="h-3 bg-slate-200 rounded w-1/2"></div>
-                      <div className="h-3 bg-slate-200 rounded w-1/3"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : patients && patients.length > 0 ? (
-              <div className="space-y-4">
-                {patients.map((patient) => (
-                  <Link
-                    key={patient.id}
-                    href={`/patients/${patient.id}`}
-                    className="flex items-center space-x-4 p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-                  >
-                    <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                      <span className="text-white font-semibold">
-                        {getPatientInitials(patient.firstName, patient.lastName)}
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-slate-800">
-                        {patient.firstName} {patient.lastName}
-                      </h4>
-                      <p className="text-sm text-slate-500">
-                        ID: HC{patient.id.toString().padStart(6, "0")} | Age: {getPatientAge(patient.dateOfBirth)} | {patient.gender}
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        Phone: {patient.phone} {patient.email && `| Email: ${patient.email}`}
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        Registered: {new Date(patient.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="secondary">Active</Badge>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Users className="mx-auto h-12 w-12 text-slate-400" />
-                <h3 className="mt-4 text-lg font-medium text-slate-900">
-                  {searchQuery ? "No patients found" : "No patients yet"}
-                </h3>
-                <p className="mt-2 text-sm text-slate-500">
-                  {searchQuery
-                    ? "Try adjusting your search terms."
-                    : "Get started by registering your first patient."}
-                </p>
-                {!searchQuery && (
-                  <Button
-                    className="mt-4"
-                    onClick={() => setShowPatientModal(true)}
-                  >
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Add First Patient
-                  </Button>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </main>
-
-      {/* Modal */}
-      <PatientRegistrationModal
-        open={showPatientModal}
-        onOpenChange={setShowPatientModal}
-      />
-    </>
   );
 }
