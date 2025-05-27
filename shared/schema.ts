@@ -103,12 +103,27 @@ export const auditLogs = pgTable('audit_logs', {
   timestamp: timestamp('timestamp').defaultNow().notNull()
 });
 
+export const comments = pgTable('comments', {
+  id: serial('id').primaryKey(),
+  patientId: integer('patient_id').references(() => patients.id).notNull(),
+  userId: integer('user_id').references(() => users.id).notNull(),
+  message: text('message').notNull(),
+  isPrivate: boolean('is_private').default(false).notNull(), // Internal staff notes vs family-visible
+  priority: varchar('priority', { length: 20 }).default('normal').notNull(), // normal, urgent, critical
+  commentType: varchar('comment_type', { length: 50 }).default('general').notNull(), // general, medical_note, care_instruction, family_update
+  replyToId: integer('reply_to_id').references(() => comments.id), // For threaded conversations
+  isRead: boolean('is_read').default(false).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
 // Relations
 export const patientsRelations = relations(patients, ({ many }) => ({
   visits: many(visits),
   labResults: many(labResults),
   prescriptions: many(prescriptions),
   referrals: many(referrals),
+  comments: many(comments),
 }));
 
 export const visitsRelations = relations(visits, ({ one, many }) => ({
@@ -161,6 +176,22 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
     fields: [auditLogs.userId],
     references: [users.id],
   }),
+}));
+
+export const commentsRelations = relations(comments, ({ one, many }) => ({
+  patient: one(patients, {
+    fields: [comments.patientId],
+    references: [patients.id],
+  }),
+  user: one(users, {
+    fields: [comments.userId],
+    references: [users.id],
+  }),
+  replyTo: one(comments, {
+    fields: [comments.replyToId],
+    references: [comments.id],
+  }),
+  replies: many(comments),
 }));
 
 // Insert schemas
@@ -222,3 +253,12 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+
+export const insertCommentSchema = createInsertSchema(comments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Comment = typeof comments.$inferSelect;
+export type InsertComment = z.infer<typeof insertCommentSchema>;
