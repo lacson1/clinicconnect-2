@@ -1,0 +1,76 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Combobox } from '@headlessui/react';
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
+
+interface LabTest {
+  id: number;
+  name: string;
+  category: string;
+  description: string;
+  units: string | null;
+  referenceRange: string | null;
+}
+
+const LabTestAutocomplete: React.FC<{ onSelect: (test: LabTest) => void }> = ({ onSelect }) => {
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<LabTest[]>([]);
+  const [selected, setSelected] = useState<LabTest | null>(null);
+
+  // Fetch suggestions as the user types
+  useEffect(() => {
+    if (query.length < 2) return;
+    axios
+      .get(`/api/suggestions/lab-tests?q=${query}`)
+      .then((res) => setSuggestions(res.data))
+      .catch((err) => console.error(err));
+  }, [query]);
+
+  const handleSelect = (test: LabTest) => {
+    setSelected(test);
+    onSelect(test); // Pass selected lab test to parent component
+  };
+
+  return (
+    <div className="w-full">
+      <label className="block mb-1 font-semibold text-sm text-gray-700">Lab Test</label>
+      <Combobox value={selected} onChange={handleSelect}>
+        <div className="relative">
+          <Combobox.Input
+            className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            displayValue={(test: LabTest) => test?.name || ''}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search lab tests..."
+          />
+          <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+          </Combobox.Button>
+
+          {suggestions.length > 0 && (
+            <Combobox.Options className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg max-h-60 overflow-auto">
+              {suggestions.map((test) => (
+                <Combobox.Option
+                  key={test.id}
+                  value={test}
+                  className={({ active }) =>
+                    `cursor-pointer p-2 ${active ? 'bg-blue-500 text-white' : 'text-gray-900'}`
+                  }
+                >
+                  {({ selected }) => (
+                    <span className="flex items-center">
+                      {selected && <CheckIcon className="h-4 w-4 mr-1" aria-hidden="true" />}
+                      {test.name} - <span className="text-xs text-gray-400 ml-1">{test.category}</span>
+                    </span>
+                  )}
+                </Combobox.Option>
+              ))}
+            </Combobox.Options>
+          )}
+        </div>
+      </Combobox>
+      <p className="text-xs text-gray-500 mt-1">Choose a lab test and auto-fill other fields below.</p>
+    </div>
+  );
+};
+
+export default LabTestAutocomplete;

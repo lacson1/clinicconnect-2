@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -30,18 +30,26 @@ export default function LabTestAutocomplete({
 }: LabTestAutocompleteProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [labTests, setLabTests] = useState<LabTest[]>([]);
 
-  // Fetch lab test suggestions
-  const { data: labTests = [] } = useQuery<LabTest[]>({
-    queryKey: ["/api/suggestions/lab-tests", searchQuery],
-    queryFn: async () => {
-      if (!searchQuery || searchQuery.length < 2) return [];
-      const response = await fetch(`/api/suggestions/lab-tests?q=${encodeURIComponent(searchQuery)}`);
-      if (!response.ok) throw new Error("Failed to fetch lab test suggestions");
-      return response.json();
-    },
-    enabled: searchQuery.length >= 2,
-  });
+  // Fetch lab test suggestions using Axios
+  const fetchLabTests = async (q: string) => {
+    try {
+      const res = await axios.get(`/api/suggestions/lab-tests?q=${q}`);
+      setLabTests(res.data);
+    } catch (error) {
+      console.error("Failed to fetch lab test suggestions:", error);
+      setLabTests([]);
+    }
+  };
+
+  useEffect(() => {
+    if (searchQuery.length >= 2) {
+      fetchLabTests(searchQuery);
+    } else {
+      setLabTests([]);
+    }
+  }, [searchQuery]);
 
   const handleSelect = (test: LabTest) => {
     onSelect(test);
