@@ -7,11 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Pill, Plus, Package, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useRole } from "@/components/role-guard";
 import type { Medicine } from "@shared/schema";
 
 export default function Pharmacy() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useRole();
   const [editingQuantity, setEditingQuantity] = useState<{ [key: number]: string }>({});
 
   const { data: medicines, isLoading } = useQuery<Medicine[]>({
