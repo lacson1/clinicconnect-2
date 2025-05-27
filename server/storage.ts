@@ -181,13 +181,13 @@ export class DatabaseStorage implements IStorage {
     lowStockItems: number;
     pendingLabs: number;
   }> {
-    const [totalPatientsResult] = await db.select({ count: patients.id }).from(patients);
+    const totalPatientsResult = await db.select().from(patients);
     const todayVisitsResult = await this.getTodaysVisits();
     const lowStockResult = await this.getLowStockMedicines();
     const pendingLabsResult = await this.getPendingLabResults();
 
     return {
-      totalPatients: totalPatientsResult?.count || 0,
+      totalPatients: totalPatientsResult.length,
       todayVisits: todayVisitsResult.length,
       lowStockItems: lowStockResult.length,
       pendingLabs: pendingLabsResult.length,
