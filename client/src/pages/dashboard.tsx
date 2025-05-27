@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Users, Stethoscope, Pill, FlaskRound, Search, Bell, ArrowUp, TriangleAlert, Clock, UserPlus, UserCheck } from "lucide-react";
+import { Users, Stethoscope, Pill, FlaskRound, Search, Bell, ArrowUp, TriangleAlert, Clock, UserPlus, UserCheck, UserCog, Settings, Activity } from "lucide-react";
 import PatientRegistrationModal from "@/components/patient-registration-modal";
 import VisitRecordingModal from "@/components/visit-recording-modal";
 import LabResultModal from "@/components/lab-result-modal";
@@ -305,6 +305,138 @@ export default function Dashboard() {
                     <p className="text-sm text-slate-600">Referrals assigned to pharmacy</p>
                     <Button variant="outline" className="w-full" asChild>
                       <Link href="/referrals">View Pharmacy Referrals</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Admin-Specific Dashboard */}
+        {user?.role === 'admin' && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">Admin Dashboard</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* User Management */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <UserCog className="mr-2 h-5 w-5" />
+                    User Management
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <p className="text-sm text-slate-600">Manage clinic staff accounts</p>
+                    <Button className="w-full" variant="outline">
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Add New User
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      View All Users
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* System Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Activity className="mr-2 h-5 w-5" />
+                    System Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="text-slate-600">Patients:</div>
+                      <div className="font-medium">{stats?.totalPatients || 0}</div>
+                      <div className="text-slate-600">Today Visits:</div>
+                      <div className="font-medium">{stats?.todayVisits || 0}</div>
+                      <div className="text-slate-600">Low Stock:</div>
+                      <div className="font-medium text-red-600">{stats?.lowStockItems || 0}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Settings className="mr-2 h-5 w-5" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button variant="outline" size="sm" className="w-full" asChild>
+                      <Link href="/patients">Manage Patients</Link>
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full" asChild>
+                      <Link href="/pharmacy">Manage Pharmacy</Link>
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full" asChild>
+                      <Link href="/referrals">Manage Referrals</Link>
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full" asChild>
+                      <Link href="/visits">View All Visits</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Physiotherapist-Specific Dashboard */}
+        {user?.role === 'physiotherapist' && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">Physiotherapist Dashboard</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Patient Management */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Users className="mr-2 h-5 w-5" />
+                    Patient Management
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        placeholder="Search patients..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    </div>
+                    
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href="/patients">View All Patients</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Assigned Referrals */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <UserCheck className="mr-2 h-5 w-5" />
+                    Therapy Referrals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-sm text-slate-600">Referrals assigned to physiotherapy</p>
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href="/referrals">View Therapy Referrals</Link>
                     </Button>
                   </div>
                 </CardContent>
