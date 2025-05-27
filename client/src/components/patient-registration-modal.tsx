@@ -248,45 +248,129 @@ export default function PatientRegistrationModal({
               />
             </div>
 
-            {/* Medical Information */}
+            {/* Smart Medical Information with Autocomplete */}
             <div>
-              <h3 className="text-lg font-medium text-slate-800 mb-4">Medical Information</h3>
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="allergies"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Allergies</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          rows={2}
-                          placeholder="List any known allergies..."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+              <h3 className="text-lg font-medium text-slate-800 mb-4 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-blue-500" />
+                Medical Information (Smart Auto-Complete)
+              </h3>
+              
+              <div className="space-y-6">
+                {/* Smart Allergy Selection */}
+                <div>
+                  <FormLabel className="flex items-center gap-2 mb-3">
+                    Allergies (Smart Selection)
+                    <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+                      Quick Add
+                    </Badge>
+                  </FormLabel>
+                  
+                  <AllergyAutocomplete
+                    value=""
+                    onSelect={handleAllergySelect}
+                    placeholder="Search common allergies (e.g., Penicillin, Peanuts)..."
+                    className="mb-3"
+                  />
+                  
+                  {/* Selected Allergies Display */}
+                  {selectedAllergies.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                      {selectedAllergies.map((allergy) => (
+                        <Badge
+                          key={allergy}
+                          variant="secondary"
+                          className="bg-orange-100 text-orange-800 border-orange-300 flex items-center gap-1"
+                        >
+                          {allergy}
+                          <X
+                            className="h-3 w-3 cursor-pointer hover:bg-orange-200 rounded-full"
+                            onClick={() => removeAllergy(allergy)}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
                   )}
-                />
+                  
+                  <FormField
+                    control={form.control}
+                    name="allergies"
+                    render={({ field }) => (
+                      <FormItem className="mt-3">
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={2}
+                            placeholder="Additional allergies or manual entry..."
+                            className="text-sm"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <p className="text-xs text-slate-500 mt-1">
+                    ✨ Use the search above to quickly add standardized allergies, or type additional ones below.
+                  </p>
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="medicalHistory"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Medical History</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          rows={3}
-                          placeholder="Previous conditions, surgeries, chronic illnesses..."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                {/* Smart Medical History Selection */}
+                <div>
+                  <FormLabel className="flex items-center gap-2 mb-3">
+                    Medical History (Smart Selection)
+                    <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                      Quick Add
+                    </Badge>
+                  </FormLabel>
+                  
+                  <MedicalConditionAutocomplete
+                    value=""
+                    onSelect={handleConditionSelect}
+                    placeholder="Search medical conditions (e.g., Hypertension, Diabetes)..."
+                    className="mb-3"
+                  />
+                  
+                  {/* Selected Conditions Display */}
+                  {selectedConditions.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                      {selectedConditions.map((condition) => (
+                        <Badge
+                          key={condition}
+                          variant="secondary"
+                          className="bg-emerald-100 text-emerald-800 border-emerald-300 flex items-center gap-1"
+                        >
+                          {condition}
+                          <X
+                            className="h-3 w-3 cursor-pointer hover:bg-emerald-200 rounded-full"
+                            onClick={() => removeCondition(condition)}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
                   )}
-                />
+                  
+                  <FormField
+                    control={form.control}
+                    name="medicalHistory"
+                    render={({ field }) => (
+                      <FormItem className="mt-3">
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            rows={3}
+                            placeholder="Additional medical history, surgeries, or manual entry..."
+                            className="text-sm"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <p className="text-xs text-slate-500 mt-1">
+                    ✨ Use the search above to quickly add standardized conditions, or type additional history below.
+                  </p>
+                </div>
               </div>
             </div>
 
