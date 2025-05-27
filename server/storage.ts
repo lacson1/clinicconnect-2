@@ -6,6 +6,8 @@ import {
   prescriptions,
   users,
   referrals,
+  consultationForms,
+  consultationRecords,
   type Patient, 
   type InsertPatient,
   type Visit,
@@ -19,7 +21,11 @@ import {
   type User,
   type InsertUser,
   type Referral,
-  type InsertReferral
+  type InsertReferral,
+  type ConsultationForm,
+  type InsertConsultationForm,
+  type ConsultationRecord,
+  type InsertConsultationRecord
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, gte, lte, and, ilike, or } from "drizzle-orm";
@@ -67,6 +73,17 @@ export interface IStorage {
   getReferrals(filters?: { toRole?: string; fromUserId?: number; status?: string }): Promise<Referral[]>;
   createReferral(referral: InsertReferral): Promise<Referral>;
   updateReferralStatus(id: number, status: string): Promise<Referral>;
+  
+  // Consultation Forms
+  getConsultationForm(id: number): Promise<ConsultationForm | undefined>;
+  getConsultationForms(filters?: { specialistRole?: string; isActive?: boolean }): Promise<ConsultationForm[]>;
+  createConsultationForm(form: InsertConsultationForm): Promise<ConsultationForm>;
+  updateConsultationForm(id: number, updates: Partial<InsertConsultationForm>): Promise<ConsultationForm>;
+  
+  // Consultation Records
+  getConsultationRecord(id: number): Promise<ConsultationRecord | undefined>;
+  getConsultationRecordsByPatient(patientId: number): Promise<ConsultationRecord[]>;
+  createConsultationRecord(record: InsertConsultationRecord): Promise<ConsultationRecord>;
   
   // Dashboard stats
   getDashboardStats(): Promise<{
@@ -310,6 +327,73 @@ export class DatabaseStorage implements IStorage {
       .where(eq(referrals.id, id))
       .returning();
     return referral;
+  }
+
+  // Consultation Forms
+  async getConsultationForm(id: number): Promise<ConsultationForm | undefined> {
+    const [form] = await db.select().from(consultationForms).where(eq(consultationForms.id, id));
+    return form || undefined;
+  }
+
+  async getConsultationForms(filters?: { specialistRole?: string; isActive?: boolean }): Promise<ConsultationForm[]> {
+    const conditions = [];
+    
+    if (filters?.specialistRole) {
+      conditions.push(eq(consultationForms.specialistRole, filters.specialistRole));
+    }
+    
+    if (filters?.isActive !== undefined) {
+      conditions.push(eq(consultationForms.isActive, filters.isActive));
+    }
+
+    if (conditions.length > 0) {
+      return await db.select()
+        .from(consultationForms)
+        .where(and(...conditions))
+        .orderBy(desc(consultationForms.createdAt));
+    }
+
+    return await db.select()
+      .from(consultationForms)
+      .orderBy(desc(consultationForms.createdAt));
+  }
+
+  async createConsultationForm(insertForm: InsertConsultationForm): Promise<ConsultationForm> {
+    const [form] = await db
+      .insert(consultationForms)
+      .values(insertForm)
+      .returning();
+    return form;
+  }
+
+  async updateConsultationForm(id: number, updates: Partial<InsertConsultationForm>): Promise<ConsultationForm> {
+    const [form] = await db
+      .update(consultationForms)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(consultationForms.id, id))
+      .returning();
+    return form;
+  }
+
+  // Consultation Records
+  async getConsultationRecord(id: number): Promise<ConsultationRecord | undefined> {
+    const [record] = await db.select().from(consultationRecords).where(eq(consultationRecords.id, id));
+    return record || undefined;
+  }
+
+  async getConsultationRecordsByPatient(patientId: number): Promise<ConsultationRecord[]> {
+    return await db.select()
+      .from(consultationRecords)
+      .where(eq(consultationRecords.patientId, patientId))
+      .orderBy(desc(consultationRecords.createdAt));
+  }
+
+  async createConsultationRecord(insertRecord: InsertConsultationRecord): Promise<ConsultationRecord> {
+    const [record] = await db
+      .insert(consultationRecords)
+      .values(insertRecord)
+      .returning();
+    return record;
   }
 
   // Dashboard stats

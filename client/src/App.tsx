@@ -15,6 +15,7 @@ import Pharmacy from "@/pages/pharmacy";
 import Referrals from "@/pages/referrals";
 import ProfilePage from "@/pages/profile";
 import UserManagement from "@/pages/user-management";
+import FormBuilder from "@/pages/form-builder";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 

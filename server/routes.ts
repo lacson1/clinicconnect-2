@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, users, auditLogs, labTests, medications, labOrders, labOrderItems } from "@shared/schema";
+import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, users, auditLogs, labTests, medications, labOrders, labOrderItems } from "@shared/schema";
 import { z } from "zod";
 import { authenticateToken, requireRole, requireAnyRole, hashPassword, comparePassword, generateToken, type AuthRequest } from "./middleware/auth";
 import { initializeFirebase, sendNotificationToRole, sendUrgentNotification, NotificationTypes } from "./notifications";
@@ -858,6 +858,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(referral);
     } catch (error) {
       res.status(500).json({ message: "Failed to update referral status" });
+    }
+  });
+
+  // Consultation Forms API - Specialist form creation and management
+  app.post("/api/consultation-forms", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const formData = insertConsultationFormSchema.parse({
+        ...req.body,
+        createdBy: req.user!.id
+      });
+      
+      const form = await storage.createConsultationForm(formData);
+      
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction(AuditActions.SYSTEM_BACKUP, {
+        action: 'consultation_form_created',
+        formId: form.id,
+        formName: form.name
+      });
+      
+      res.json(form);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid form data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create consultation form" });
+      }
+    }
+  });
+
+  app.get("/api/consultation-forms", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { specialistRole } = req.query;
+      const forms = await storage.getConsultationForms({
+        specialistRole: specialistRole as string,
+        isActive: true
+      });
+      res.json(forms);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch consultation forms" });
+    }
+  });
+
+  app.get("/api/consultation-forms/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const form = await storage.getConsultationForm(id);
+      
+      if (!form) {
+        return res.status(404).json({ message: "Consultation form not found" });
+      }
+      
+      res.json(form);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch consultation form" });
+    }
+  });
+
+  app.patch("/api/consultation-forms/:id", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updateData = req.body;
+      
+      const form = await storage.updateConsultationForm(id, updateData);
+      
+      if (!form) {
+        return res.status(404).json({ message: "Consultation form not found" });
+      }
+      
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction(AuditActions.SYSTEM_BACKUP, {
+        action: 'consultation_form_updated',
+        formId: form.id,
+        formName: form.name
+      });
+      
+      res.json(form);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update consultation form" });
+    }
+  });
+
+  // Consultation Records API - Fill and save form responses
+  app.post("/api/consultation-records", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const recordData = insertConsultationRecordSchema.parse({
+        ...req.body,
+        filledBy: req.user!.id
+      });
+      
+      const record = await storage.createConsultationRecord(recordData);
+      
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logPatientAction(AuditActions.PATIENT_RECORD_UPDATED, recordData.patientId, {
+        action: 'consultation_record_created',
+        recordId: record.id,
+        formId: recordData.formId
+      });
+      
+      res.json(record);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid consultation data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to save consultation record" });
+      }
+    }
+  });
+
+  app.get("/api/patients/:patientId/consultation-records", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.patientId);
+      const records = await storage.getConsultationRecordsByPatient(patientId);
+      res.json(records);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch consultation records" });
     }
   });
 
