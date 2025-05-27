@@ -5,6 +5,7 @@ import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMe
 import { z } from "zod";
 import { authenticateToken, requireRole, requireAnyRole, hashPassword, comparePassword, generateToken, type AuthRequest } from "./middleware/auth";
 import { initializeFirebase, sendNotificationToRole, sendUrgentNotification, NotificationTypes } from "./notifications";
+import { AuditLogger, AuditActions } from "./audit";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Firebase for push notifications

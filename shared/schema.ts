@@ -91,6 +91,18 @@ export const referrals = pgTable('referrals', {
   status: varchar('status', { length: 20 }).default('pending')
 });
 
+export const auditLogs = pgTable('audit_logs', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull(),
+  action: varchar('action', { length: 255 }).notNull(),
+  entityType: varchar('entity_type', { length: 100 }).notNull(), // 'patient', 'visit', 'prescription', etc.
+  entityId: integer('entity_id'), // ID of the affected record
+  details: text('details'), // JSON string with additional details
+  ipAddress: varchar('ip_address', { length: 45 }), // IPv4/IPv6 support
+  userAgent: varchar('user_agent', { length: 500 }),
+  timestamp: timestamp('timestamp').defaultNow().notNull()
+});
+
 // Relations
 export const patientsRelations = relations(patients, ({ many }) => ({
   visits: many(visits),
@@ -140,6 +152,13 @@ export const referralsRelations = relations(referrals, ({ one }) => ({
   }),
   fromUser: one(users, {
     fields: [referrals.fromUserId],
+    references: [users.id],
+  }),
+}));
+
+export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [auditLogs.userId],
     references: [users.id],
   }),
 }));
@@ -195,3 +214,11 @@ export type Prescription = typeof prescriptions.$inferSelect;
 export type InsertPrescription = z.infer<typeof insertPrescriptionSchema>;
 export type Referral = typeof referrals.$inferSelect;
 export type InsertReferral = z.infer<typeof insertReferralSchema>;
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
+  id: true,
+  timestamp: true,
+});
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
