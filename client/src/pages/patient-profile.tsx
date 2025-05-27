@@ -196,27 +196,25 @@ export default function PatientProfile() {
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4 text-slate-500" />
-                  <span className="text-sm">Born: {new Date(patient.dateOfBirth).toLocaleDateString()}</span>
+                  <span className="text-sm">
+                    {patient.dateOfBirth ? `Born: ${new Date(patient.dateOfBirth).toLocaleDateString()}` : 'Date of Birth: Not provided'}
+                  </span>
                 </div>
                 
                 <div className="flex items-center space-x-2">
                   <Phone className="h-4 w-4 text-slate-500" />
-                  <span className="text-sm">{patient.phone}</span>
+                  <span className="text-sm">{patient.phone || 'Phone: Not provided'}</span>
                 </div>
                 
-                {patient.email && (
-                  <div className="flex items-center space-x-2">
-                    <Mail className="h-4 w-4 text-slate-500" />
-                    <span className="text-sm">{patient.email}</span>
-                  </div>
-                )}
+                <div className="flex items-center space-x-2">
+                  <Mail className="h-4 w-4 text-slate-500" />
+                  <span className="text-sm">{patient.email || 'Email: Not provided'}</span>
+                </div>
                 
-                {patient.address && (
-                  <div className="flex items-start space-x-2">
-                    <MapPin className="h-4 w-4 text-slate-500 mt-0.5" />
-                    <span className="text-sm">{patient.address}</span>
-                  </div>
-                )}
+                <div className="flex items-start space-x-2">
+                  <MapPin className="h-4 w-4 text-slate-500 mt-0.5" />
+                  <span className="text-sm">{patient.address || 'Address: Not provided'}</span>
+                </div>
 
                 {patient.allergies && (
                   <div>
