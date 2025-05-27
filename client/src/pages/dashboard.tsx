@@ -184,6 +184,135 @@ export default function Dashboard() {
           </Card>
         </div>
 
+        {/* Nurse-Specific Dashboard */}
+        {user?.role === 'nurse' && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">Nurse Dashboard</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Today's Visits */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Stethoscope className="mr-2 h-5 w-5" />
+                    Today's Patient Visits
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <Button
+                      onClick={() => setShowPatientModal(true)}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Register New Patient
+                    </Button>
+                    
+                    <Button
+                      onClick={() => setShowLabModal(true)}
+                      className="w-full"
+                    >
+                      <FlaskRound className="mr-2 h-4 w-4" />
+                      Add Lab Result
+                    </Button>
+                    
+                    <div className="pt-4 border-t">
+                      <p className="text-sm font-medium text-slate-600 mb-3">Quick Actions</p>
+                      <Button variant="outline" className="w-full" asChild>
+                        <Link href="/visits">View All Visits</Link>
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Patient Referrals */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <UserCheck className="mr-2 h-5 w-5" />
+                    Patient Referrals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-sm text-slate-600">Refer patients to specialists</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href="/referrals">To Pharmacist</Link>
+                      </Button>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href="/referrals">To Physiotherapist</Link>
+                      </Button>
+                    </div>
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href="/referrals">Manage All Referrals</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Pharmacist-Specific Dashboard */}
+        {user?.role === 'pharmacist' && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">Pharmacist Dashboard</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Medicine Inventory */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Pill className="mr-2 h-5 w-5" />
+                    Medicine Inventory
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                      <div>
+                        <p className="font-medium text-red-800">Low Stock Alert</p>
+                        <p className="text-sm text-red-600">
+                          {stats?.lowStockItems || 0} items need attention
+                        </p>
+                      </div>
+                      <Button size="sm" variant="outline" asChild>
+                        <Link href="/pharmacy">View Details</Link>
+                      </Button>
+                    </div>
+                    
+                    <Button className="w-full" asChild>
+                      <Link href="/pharmacy">
+                        <Pill className="mr-2 h-4 w-4" />
+                        Manage Pharmacy
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Prescription Referrals */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <UserCheck className="mr-2 h-5 w-5" />
+                    Prescription Referrals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-sm text-slate-600">Referrals assigned to pharmacy</p>
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href="/referrals">View Pharmacy Referrals</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
         {/* Doctor-Specific Dashboard */}
         {user?.role === 'doctor' && (
           <div className="mb-8">
