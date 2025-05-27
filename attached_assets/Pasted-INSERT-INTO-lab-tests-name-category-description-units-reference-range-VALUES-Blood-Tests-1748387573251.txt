@@ -1,0 +1,34 @@
+INSERT INTO lab_tests (name, category, description, units, reference_range) VALUES
+-- 🩸 Blood Tests
+('Complete Blood Count (CBC)', 'Blood', 'Includes WBC, RBC, platelets', 'cells/µL', '4,500 - 11,000'),
+('Fasting Blood Sugar (FBS)', 'Blood', 'Blood glucose after fasting', 'mg/dL', '70 - 100'),
+('Random Blood Sugar (RBS)', 'Blood', 'Blood glucose at any time', 'mg/dL', '< 140'),
+('Lipid Profile', 'Blood', 'Cholesterol and triglyceride levels', 'mg/dL', 'varies'),
+('Creatinine', 'Blood', 'Assess kidney function', 'mg/dL', '0.6 - 1.3'),
+('Urea', 'Blood', 'Assess kidney function', 'mg/dL', '7 - 20'),
+('Liver Function Test (LFT)', 'Blood', 'Assess liver enzymes', 'IU/L', 'varies'),
+('Electrolyte Panel', 'Blood', 'Sodium, Potassium, Chloride', 'mEq/L', 'varies'),
+('HIV Test', 'Serology', 'Screening for HIV infection', NULL, 'Negative'),
+('Hepatitis B Surface Antigen', 'Serology', 'Hepatitis B infection', NULL, 'Negative'),
+
+-- 💩 Stool Tests
+('Stool Microscopy', 'Stool', 'Examine parasites, eggs, cysts', NULL, 'Negative'),
+('Stool Culture', 'Stool', 'Bacterial culture for enteric pathogens', NULL, 'Negative'),
+('Stool Occult Blood', 'Stool', 'Check for hidden blood', NULL, 'Negative'),
+
+-- 🧪 Urine Tests
+('Urinalysis', 'Urine', 'Physical, chemical, microscopic exam', NULL, 'varies'),
+('Urine Culture', 'Urine', 'Bacterial culture', NULL, 'Negative'),
+('Pregnancy Test', 'Urine', 'hCG detection', NULL, 'Positive/Negative'),
+
+-- 🩻 Radiology
+('Chest X-Ray', 'Radiology', 'Imaging for lungs and chest cavity', NULL, 'Normal'),
+('Abdominal Ultrasound', 'Radiology', 'Ultrasound of abdomen', NULL, 'Normal'),
+('Pelvic Ultrasound', 'Radiology', 'Ultrasound of pelvic organs', NULL, 'Normal'),
+('Mammography', 'Radiology', 'X-ray of the breast', NULL, 'Normal'),
+
+-- 🧬 Other Investigations
+('Thyroid Stimulating Hormone (TSH)', 'Hormone', 'Thyroid function assessment', 'µIU/mL', '0.4 - 4.0'),
+('Prostate Specific Antigen (PSA)', 'Blood', 'Prostate health marker', 'ng/mL', '< 4'),
+('D-Dimer', 'Blood', 'Clotting marker', 'µg/mL', '< 0.5'),
+('C-Reactive Protein (CRP)', 'Blood', 'Inflammation marker', 'mg/L', '< 10');
