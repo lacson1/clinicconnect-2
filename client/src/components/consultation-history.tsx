@@ -144,8 +144,8 @@ export default function ConsultationHistory({ patientId }: ConsultationHistoryPr
                       <div className="border-t pt-4">
                         <h5 className="font-medium text-gray-900 mb-3">Assessment Details</h5>
                         <div className="grid gap-3">
-                          {consultation.data && typeof consultation.data === 'object' ? (
-                            Object.entries(consultation.data).map(([key, value]) => (
+                          {consultation.formData && typeof consultation.formData === 'object' ? (
+                            Object.entries(consultation.formData).map(([key, value]) => (
                               <div key={key} className="bg-gray-50 rounded-lg p-3">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                   <div className="font-medium text-gray-700 capitalize">
