@@ -85,6 +85,19 @@ export interface IStorage {
   getConsultationRecordsByPatient(patientId: number): Promise<ConsultationRecord[]>;
   createConsultationRecord(record: InsertConsultationRecord): Promise<ConsultationRecord>;
   
+  // Medical Records
+  getVaccinationsByPatient(patientId: number): Promise<Vaccination[]>;
+  createVaccination(vaccination: InsertVaccination): Promise<Vaccination>;
+  deleteVaccination(id: number): Promise<void>;
+  
+  getAllergiesByPatient(patientId: number): Promise<Allergy[]>;
+  createAllergy(allergy: InsertAllergy): Promise<Allergy>;
+  deleteAllergy(id: number): Promise<void>;
+  
+  getMedicalHistoryByPatient(patientId: number): Promise<MedicalHistory[]>;
+  createMedicalHistory(history: InsertMedicalHistory): Promise<MedicalHistory>;
+  deleteMedicalHistory(id: number): Promise<void>;
+  
   // Dashboard stats
   getDashboardStats(): Promise<{
     totalPatients: number;
@@ -414,6 +427,55 @@ export class DatabaseStorage implements IStorage {
       lowStockItems: lowStockResult.length,
       pendingLabs: pendingLabsResult.length,
     };
+  }
+
+  // Medical Records Implementation
+  async getVaccinationsByPatient(patientId: number): Promise<Vaccination[]> {
+    return await db.select().from(vaccinations).where(eq(vaccinations.patientId, patientId));
+  }
+
+  async createVaccination(insertVaccination: InsertVaccination): Promise<Vaccination> {
+    const [vaccination] = await db
+      .insert(vaccinations)
+      .values(insertVaccination)
+      .returning();
+    return vaccination;
+  }
+
+  async deleteVaccination(id: number): Promise<void> {
+    await db.delete(vaccinations).where(eq(vaccinations.id, id));
+  }
+
+  async getAllergiesByPatient(patientId: number): Promise<Allergy[]> {
+    return await db.select().from(allergies).where(eq(allergies.patientId, patientId));
+  }
+
+  async createAllergy(insertAllergy: InsertAllergy): Promise<Allergy> {
+    const [allergy] = await db
+      .insert(allergies)
+      .values(insertAllergy)
+      .returning();
+    return allergy;
+  }
+
+  async deleteAllergy(id: number): Promise<void> {
+    await db.delete(allergies).where(eq(allergies.id, id));
+  }
+
+  async getMedicalHistoryByPatient(patientId: number): Promise<MedicalHistory[]> {
+    return await db.select().from(medicalHistory).where(eq(medicalHistory.patientId, patientId));
+  }
+
+  async createMedicalHistory(insertHistory: InsertMedicalHistory): Promise<MedicalHistory> {
+    const [history] = await db
+      .insert(medicalHistory)
+      .values(insertHistory)
+      .returning();
+    return history;
+  }
+
+  async deleteMedicalHistory(id: number): Promise<void> {
+    await db.delete(medicalHistory).where(eq(medicalHistory.id, id));
   }
 }
 

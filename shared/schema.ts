@@ -438,6 +438,30 @@ export type InsertConsultationForm = z.infer<typeof insertConsultationFormSchema
 export type ConsultationRecord = typeof consultationRecords.$inferSelect;
 export type InsertConsultationRecord = z.infer<typeof insertConsultationRecordSchema>;
 
+// Medical Records Insert Schemas
+export const insertVaccinationSchema = createInsertSchema(vaccinations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAllergySchema = createInsertSchema(allergies).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMedicalHistorySchema = createInsertSchema(medicalHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Medical Records Types
+export type Vaccination = typeof vaccinations.$inferSelect;
+export type InsertVaccination = z.infer<typeof insertVaccinationSchema>;
+export type Allergy = typeof allergies.$inferSelect;
+export type InsertAllergy = z.infer<typeof insertAllergySchema>;
+export type MedicalHistory = typeof medicalHistory.$inferSelect;
+export type InsertMedicalHistory = z.infer<typeof insertMedicalHistorySchema>;
+
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
   id: true,
   timestamp: true,
