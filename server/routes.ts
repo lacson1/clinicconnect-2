@@ -112,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/medicines", async (req, res) => {
+  app.get("/api/medicines", authenticateToken, requireAnyRole(['pharmacist', 'doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
       const medicines = await storage.getMedicines();
       res.json(medicines);
