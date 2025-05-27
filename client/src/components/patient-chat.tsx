@@ -57,11 +57,7 @@ export default function PatientChat({ patientId, patientName }: PatientChatProps
 
   const addCommentMutation = useMutation({
     mutationFn: async (data: InsertComment) => {
-      return await apiRequest('/api/comments', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return await apiRequest('POST', '/api/comments', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/comments', patientId] });
