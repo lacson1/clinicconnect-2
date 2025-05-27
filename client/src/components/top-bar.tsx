@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useRole } from "@/components/role-guard";
+import OfflineIndicator from "@/components/offline-indicator";
 
 export default function TopBar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -55,6 +56,9 @@ export default function TopBar() {
         >
           {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </Button>
+
+        {/* Offline Status Indicator */}
+        <OfflineIndicator />
 
         {/* Notifications */}
         <DropdownMenu>
