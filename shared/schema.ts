@@ -296,6 +296,22 @@ export const medicalHistory = pgTable('medical_history', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+export const appointments = pgTable('appointments', {
+  id: serial('id').primaryKey(),
+  patientId: integer('patient_id').references(() => patients.id).notNull(),
+  doctorId: integer('doctor_id').references(() => users.id).notNull(),
+  appointmentDate: date('appointment_date').notNull(),
+  appointmentTime: varchar('appointment_time', { length: 10 }).notNull(), // "09:00", "14:30"
+  duration: integer('duration').default(30).notNull(), // in minutes
+  type: varchar('type', { length: 50 }).default('consultation').notNull(),
+  status: varchar('status', { length: 20 }).default('scheduled').notNull(), // scheduled, confirmed, in-progress, completed, cancelled
+  notes: text('notes'),
+  priority: varchar('priority', { length: 20 }).default('medium').notNull(), // low, medium, high, urgent
+  organizationId: integer('organization_id').references(() => organizations.id),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
 export const comments = pgTable('comments', {
   id: serial('id').primaryKey(),
   patientId: integer('patient_id').references(() => patients.id).notNull(),
@@ -318,6 +334,7 @@ export const patientsRelations = relations(patients, ({ many }) => ({
   referrals: many(referrals),
   comments: many(comments),
   consultationRecords: many(consultationRecords),
+  appointments: many(appointments),
 }));
 
 export const visitsRelations = relations(visits, ({ one, many }) => ({
@@ -424,6 +441,17 @@ export const commentsRelations = relations(comments, ({ one, many }) => ({
   replies: many(comments),
 }));
 
+export const appointmentsRelations = relations(appointments, ({ one }) => ({
+  patient: one(patients, {
+    fields: [appointments.patientId],
+    references: [patients.id],
+  }),
+  doctor: one(users, {
+    fields: [appointments.doctorId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertPatientSchema = createInsertSchema(patients).omit({
   id: true,
@@ -502,6 +530,12 @@ export const insertReferralSchema = createInsertSchema(referrals).omit({
   date: true,
 });
 
+export const insertAppointmentSchema = createInsertSchema(appointments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -518,6 +552,8 @@ export type Prescription = typeof prescriptions.$inferSelect;
 export type InsertPrescription = z.infer<typeof insertPrescriptionSchema>;
 export type Referral = typeof referrals.$inferSelect;
 export type InsertReferral = z.infer<typeof insertReferralSchema>;
+export type Appointment = typeof appointments.$inferSelect;
+export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 
 // Consultation Forms Types
 export const insertConsultationFormSchema = createInsertSchema(consultationForms).omit({
