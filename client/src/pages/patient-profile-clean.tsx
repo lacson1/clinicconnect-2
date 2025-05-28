@@ -16,6 +16,7 @@ import { EditPatientModal } from "@/components/edit-patient-modal";
 import PatientVitalSignsTracker from "@/components/patient-vital-signs-tracker";
 import SmartAppointmentScheduler from "@/components/smart-appointment-scheduler";
 import PatientCommunicationHub from "@/components/patient-communication-hub";
+import { PatientExportPrint } from "@/components/patient-export-print";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function PatientProfile() {
@@ -140,14 +141,14 @@ export default function PatientProfile() {
             </div>
           </div>
           <div className="flex space-x-2">
-            {/* Print & Export Patient Summary */}
-            <PrintExportToolbar
-              elementId="patient-summary-print"
-              filename={`patient_${patient.firstName}_${patient.lastName}_summary`}
-              organization={currentOrganization}
-              data={visits || []}
-              showCSV={false}
-              className="mr-2"
+            {/* Enhanced Print & Export Patient Summary */}
+            <PatientExportPrint 
+              patient={patient}
+              visits={visits || []}
+              vitals={vitals || []}
+              labResults={labResults || []}
+              prescriptions={prescriptions || []}
+              organizationName={currentOrganization?.name || "ClinicConnect Health Center"}
             />
             
             {/* Doctor-only actions */}
