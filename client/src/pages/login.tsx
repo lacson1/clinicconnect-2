@@ -87,10 +87,9 @@ export default function Login() {
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <p className="text-sm font-medium text-blue-900 mb-2">Demo Accounts:</p>
             <div className="text-xs text-blue-700 space-y-1">
-              <div>Admin: admin / password123</div>
-              <div>Nurse: nurse1 / password123</div>
-              <div>Pharmacist: pharmacist1 / password123</div>
-              <div>Physiotherapist: physio1 / password123</div>
+              <div>Admin: admin / admin123</div>
+              <div>Doctor: ade / doctor123</div>
+              <div>Nurse: syb / nurse123</div>
             </div>
           </div>
         </CardContent>
