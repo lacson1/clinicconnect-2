@@ -77,6 +77,11 @@ export default function PatientProfile() {
     queryKey: ["/api/organizations/current"],
   });
 
+  const { data: vitals = [] } = useQuery({
+    queryKey: ["/api/patients", patientId, "vitals"],
+    enabled: !!patientId,
+  });
+
   if (patientLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
