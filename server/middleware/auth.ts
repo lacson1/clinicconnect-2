@@ -23,16 +23,12 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
-    const user = await storage.getUser(decoded.id);
     
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid token' });
-    }
-
+    // Use decoded token data directly for simplified authentication
     req.user = {
-      id: user.id,
-      username: user.username,
-      role: user.role
+      id: decoded.id,
+      username: decoded.username,
+      role: decoded.role
     };
     
     next();
