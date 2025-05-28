@@ -128,24 +128,24 @@ export default function PatientProfile() {
       </div>
 
       {/* Compact Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+      <header className="bg-white border-b border-slate-200 px-4 py-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center space-x-3 min-w-0 flex-1">
+            <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
               <span className="text-sm font-semibold text-primary">
                 {patient.firstName?.charAt(0)}{patient.lastName?.charAt(0)}
               </span>
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 whitespace-nowrap">
+            <div className="min-w-0">
+              <h2 className="text-lg font-bold text-slate-800 truncate">
                 {patient.firstName} {patient.lastName}
               </h2>
-              <p className="text-xs text-slate-500 whitespace-nowrap">
+              <p className="text-xs text-slate-500 truncate">
                 ID: HC{patient.id?.toString().padStart(6, "0")} | Age: {getPatientAge(patient.dateOfBirth)} | {patient.gender}
               </p>
             </div>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex items-center gap-1 flex-shrink-0">
             {/* Enhanced Print & Export Patient Summary */}
             <PatientExportPrint 
               patient={patient}
@@ -159,48 +159,55 @@ export default function PatientProfile() {
             {/* Doctor-only actions */}
             {user?.role === 'doctor' && (
               <>
-                <Button onClick={() => setShowVisitModal(true)}>
-                  <Stethoscope className="mr-2 h-4 w-4" />
-                  Record Visit
+                <Button size="sm" onClick={() => setShowVisitModal(true)}>
+                  <Stethoscope className="mr-1 h-3 w-3" />
+                  <span className="hidden sm:inline">Record Visit</span>
+                  <span className="sm:hidden">Visit</span>
                 </Button>
-                <Button variant="outline" onClick={() => setShowPrescriptionModal(true)}>
-                  <Pill className="mr-2 h-4 w-4" />
-                  Add Prescription
+                <Button size="sm" variant="outline" onClick={() => setShowPrescriptionModal(true)}>
+                  <Pill className="mr-1 h-3 w-3" />
+                  <span className="hidden md:inline">Add Prescription</span>
+                  <span className="md:hidden">Rx</span>
                 </Button>
               </>
             )}
             
             {/* Nurse and Doctor can add lab results */}
             {(user?.role === 'nurse' || user?.role === 'doctor') && (
-              <Button variant="outline" onClick={() => setShowLabModal(true)}>
-                <FlaskRound className="mr-2 h-4 w-4" />
-                Add Lab Result
+              <Button size="sm" variant="outline" onClick={() => setShowLabModal(true)}>
+                <FlaskRound className="mr-1 h-3 w-3" />
+                <span className="hidden md:inline">Add Lab Result</span>
+                <span className="md:hidden">Lab</span>
               </Button>
             )}
             
             {/* Admin has access to all actions */}
             {user?.role === 'admin' && (
               <>
-                <Button onClick={() => setShowVisitModal(true)}>
-                  <Stethoscope className="mr-2 h-4 w-4" />
-                  Record Visit
+                <Button size="sm" onClick={() => setShowVisitModal(true)}>
+                  <Stethoscope className="mr-1 h-3 w-3" />
+                  <span className="hidden sm:inline">Record Visit</span>
+                  <span className="sm:hidden">Visit</span>
                 </Button>
-                <Button variant="outline" onClick={() => setShowLabModal(true)}>
-                  <FlaskRound className="mr-2 h-4 w-4" />
-                  Add Lab Result
+                <Button size="sm" variant="outline" onClick={() => setShowLabModal(true)}>
+                  <FlaskRound className="mr-1 h-3 w-3" />
+                  <span className="hidden md:inline">Add Lab Result</span>
+                  <span className="md:hidden">Lab</span>
                 </Button>
-                <Button variant="outline" onClick={() => setShowPrescriptionModal(true)}>
-                  <Pill className="mr-2 h-4 w-4" />
-                  Add Prescription
+                <Button size="sm" variant="outline" onClick={() => setShowPrescriptionModal(true)}>
+                  <Pill className="mr-1 h-3 w-3" />
+                  <span className="hidden md:inline">Add Prescription</span>
+                  <span className="md:hidden">Rx</span>
                 </Button>
               </>
             )}
             
             {/* Edit patient info - available to admin, doctor, nurse */}
             {(user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse') && (
-              <Button variant="outline" onClick={() => setShowEditPatientModal(true)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Info
+              <Button size="sm" variant="outline" onClick={() => setShowEditPatientModal(true)}>
+                <Edit className="mr-1 h-3 w-3" />
+                <span className="hidden lg:inline">Edit Info</span>
+                <span className="lg:hidden">Edit</span>
               </Button>
             )}
           </div>
