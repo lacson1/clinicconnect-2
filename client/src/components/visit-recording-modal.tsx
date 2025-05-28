@@ -233,8 +233,18 @@ export default function VisitRecordingModal({
     }
   };
 
+  const handleDialogChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      // Reset form state when dialog closes
+      form.reset();
+      setSelectedPatientId(undefined);
+      setPatientSearchOpen(false);
+    }
+    onOpenChange(isOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Record Patient Visit</DialogTitle>
@@ -487,7 +497,12 @@ export default function VisitRecordingModal({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => onOpenChange(false)}
+                  onClick={() => {
+                    form.reset();
+                    setSelectedPatientId(undefined);
+                    setPatientSearchOpen(false);
+                    onOpenChange(false);
+                  }}
                 >
                   Cancel
                 </Button>
