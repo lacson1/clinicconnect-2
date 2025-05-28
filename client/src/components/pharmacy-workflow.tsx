@@ -21,12 +21,14 @@ import {
   User,
   Calendar,
   Truck,
-  BarChart3
+  BarChart3,
+  Shield
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { MedicationSelectionGuide } from "@/components/medication-selection-guide";
 import { z } from "zod";
 
 // Enhanced schemas for pharmacy workflow
@@ -61,6 +63,7 @@ export function PharmacyWorkflow({ medicines }: PharmacyWorkflowProps) {
   const [activeTab, setActiveTab] = useState("dispensing");
   const [showDispensingDialog, setShowDispensingDialog] = useState(false);
   const [showRestockDialog, setShowRestockDialog] = useState(false);
+  const [showMedicationGuide, setShowMedicationGuide] = useState(false);
 
   // Dispensing form
   const dispensingForm = useForm<DispensingForm>({
@@ -268,17 +271,29 @@ export function PharmacyWorkflow({ medicines }: PharmacyWorkflowProps) {
         <TabsContent value="dispensing" className="space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Medicine Dispensing</h3>
-            <Dialog open={showDispensingDialog} onOpenChange={setShowDispensingDialog}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Dispense Medicine
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Dispense Medicine</DialogTitle>
-                </DialogHeader>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowMedicationGuide(true)}
+                className="flex items-center gap-2"
+              >
+                <Shield className="w-4 h-4" />
+                Selection Guide
+              </Button>
+            </div>
+          </div>
+          
+          <Dialog open={showDispensingDialog} onOpenChange={setShowDispensingDialog}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Dispense Medicine
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Dispense Medicine</DialogTitle>
+                  </DialogHeader>
                 <Form {...dispensingForm}>
                   <form onSubmit={dispensingForm.handleSubmit((data) => dispenseMutation.mutate(data))} className="space-y-4">
                     <FormField
