@@ -1721,7 +1721,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { date } = req.query;
       
-      let query = db.select({
+      const allAppointments = await db.select({
         id: appointments.id,
         patientId: appointments.patientId,
         patientName: patients.firstName,
@@ -1739,22 +1739,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .from(appointments)
       .leftJoin(patients, eq(appointments.patientId, patients.id))
       .leftJoin(users, eq(appointments.doctorId, users.id))
-      .where(eq(appointments.organizationId, req.user!.organizationId!))
       .orderBy(appointments.appointmentDate, appointments.appointmentTime);
-
+      
+      // Filter by date if provided
+      let result = allAppointments;
       if (date && typeof date === 'string') {
-        query = query.where(eq(appointments.appointmentDate, date));
+        result = allAppointments.filter(appointment => appointment.appointmentDate === date);
       }
-
-      const result = await query;
       
       // Format the response to match the frontend interface
       const formattedAppointments = result.map(appointment => ({
         id: appointment.id,
         patientId: appointment.patientId,
-        patientName: `${appointment.patientName} ${appointment.patientLastName}`,
+        patientName: `${appointment.patientName || ''} ${appointment.patientLastName || ''}`.trim(),
         doctorId: appointment.doctorId,
-        doctorName: appointment.doctorName,
+        doctorName: appointment.doctorName || 'Unknown Doctor',
         appointmentDate: appointment.appointmentDate,
         appointmentTime: appointment.appointmentTime,
         duration: appointment.duration,
@@ -1773,10 +1772,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/appointments", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
-      const validatedData = insertAppointmentSchema.parse({
-        ...req.body,
-        organizationId: req.user!.organizationId,
-      });
+      const validatedData = insertAppointmentSchema.parse(req.body);
 
       const [appointment] = await db.insert(appointments)
         .values(validatedData)
