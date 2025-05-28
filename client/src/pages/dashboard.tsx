@@ -92,13 +92,7 @@ export default function Dashboard() {
               />
               <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
             </div>
-            {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                3
-              </span>
-            </Button>
+
           </div>
         </div>
       </header>
