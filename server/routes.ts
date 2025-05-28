@@ -1108,13 +1108,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       fromDate.setDate(fromDate.getDate() - timeRange);
 
       // Get visits grouped by week
-      const visits = await db.select().from(visitsTable)
-        .where(gte(visitsTable.createdAt, fromDate))
-        .orderBy(visitsTable.createdAt);
+      const visitsData = await db.select().from(visits)
+        .where(gte(visits.createdAt, fromDate))
+        .orderBy(visits.createdAt);
 
       // Group visits by week
       const weeklyData: { [key: string]: any[] } = {};
-      visits.forEach(visit => {
+      visitsData.forEach(visit => {
         const weekStart = new Date(visit.createdAt!);
         weekStart.setDate(weekStart.getDate() - weekStart.getDay());
         const weekKey = weekStart.toISOString().split('T')[0];
@@ -1167,15 +1167,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       fromDate.setDate(fromDate.getDate() - timeRange);
 
       // Get visits with diagnoses
-      const visits = await db.select().from(visitsTable)
+      const visitsData = await db.select().from(visits)
         .where(and(
-          gte(visitsTable.createdAt, fromDate),
-          isNotNull(visitsTable.diagnosis)
+          gte(visits.createdAt, fromDate),
+          isNotNull(visits.diagnosis)
         ));
 
       // Group by diagnosis
       const diagnosisGroups: { [key: string]: any[] } = {};
-      visits.forEach(visit => {
+      visitsData.forEach(visit => {
         if (visit.diagnosis && visit.diagnosis.trim() !== '') {
           const diagnosis = visit.diagnosis.toLowerCase();
           // Normalize common conditions
