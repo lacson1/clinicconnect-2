@@ -74,6 +74,9 @@ export default function SmartAppointmentScheduler({ patientId, defaultDate }: Sm
   const bookAppointmentMutation = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/appointments", {
       ...data,
+      patientId: parseInt(data.patientId),
+      doctorId: parseInt(data.doctorId),
+      duration: parseInt(data.duration),
       appointmentDate: selectedDate,
       status: 'scheduled'
     }),
