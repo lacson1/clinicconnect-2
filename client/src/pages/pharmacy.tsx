@@ -15,6 +15,7 @@ import { useRole } from "@/components/role-guard";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertMedicineSchema, type Medicine, type InsertMedicine } from "@shared/schema";
+import { PharmacyWorkflow } from "@/components/pharmacy-workflow";
 import { z } from "zod";
 
 // Form schema for adding medicine
@@ -356,6 +357,9 @@ export default function Pharmacy() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Enhanced Pharmacy Workflow */}
+        <PharmacyWorkflow medicines={medicines || []} />
 
         {/* Medicine Inventory */}
         <Card>
