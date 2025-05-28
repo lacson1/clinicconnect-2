@@ -429,62 +429,84 @@ export default function LabResultEntry({ className }: LabResultEntryProps) {
                         </div>
 
                         {/* Result Entry or Display */}
-                        {item.completedAt ? (
-                          <div className="bg-muted/30 p-4 rounded-lg">
-                            <p className="font-medium text-sm text-muted-foreground mb-2">Completed Result:</p>
-                            <p className="font-mono text-blue-600 dark:text-blue-400 mb-2">{item.result}</p>
+                        {item.result ? (
+                          <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <p className="font-medium text-sm text-green-700 dark:text-green-300">Result Saved</p>
+                            </div>
+                            <p className="font-mono text-lg text-green-600 dark:text-green-400 mb-2">{item.result}</p>
                             {item.remarks && (
                               <>
-                                <p className="font-medium text-sm text-muted-foreground mb-1">Notes:</p>
-                                <p className="text-sm">{item.remarks}</p>
+                                <p className="font-medium text-sm text-green-700 dark:text-green-300 mb-1">Notes:</p>
+                                <p className="text-sm text-green-600 dark:text-green-400">{item.remarks}</p>
                               </>
                             )}
-                            <p className="text-xs text-muted-foreground mt-2">
-                              Completed: {format(new Date(item.completedAt), 'MMM dd, yyyy HH:mm')}
-                            </p>
+                            {item.completedAt && (
+                              <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                                Saved: {format(new Date(item.completedAt), 'MMM dd, yyyy HH:mm')}
+                              </p>
+                            )}
                           </div>
                         ) : (
-                          <div className="space-y-4">
+                          <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg space-y-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                              <p className="font-medium text-sm text-yellow-700 dark:text-yellow-300">Enter Result for This Test</p>
+                            </div>
+                            
                             <div>
-                              <label className="block text-sm font-medium mb-2">
-                                Test Result *
+                              <label className="block text-sm font-medium mb-2 text-yellow-800 dark:text-yellow-200">
+                                Test Result * {item.units && <span className="text-xs text-yellow-600">({item.units})</span>}
                               </label>
                               <Input
-                                placeholder="Enter test result (e.g., 120/80, Normal, 5.2 mg/dL)"
+                                placeholder={`Enter result${item.units ? ` in ${item.units}` : ''} (e.g., 14.5, Normal, 120/80)`}
                                 value={resultValues[item.id]?.result || ''}
                                 onChange={(e) => handleResultChange(item.id, 'result', e.target.value)}
+                                className="border-yellow-300 focus:border-yellow-500"
                               />
+                              {item.referenceRange && (
+                                <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                  Normal range: {item.referenceRange}
+                                </p>
+                              )}
                             </div>
 
                             <div>
-                              <label className="block text-sm font-medium mb-2">
-                                Remarks (Optional)
+                              <label className="block text-sm font-medium mb-2 text-yellow-800 dark:text-yellow-200">
+                                Clinical Notes (Optional)
                               </label>
                               <Textarea
-                                placeholder="Additional notes or observations..."
+                                placeholder="Add any observations, abnormalities, or clinical notes..."
                                 rows={2}
                                 value={resultValues[item.id]?.remarks || ''}
                                 onChange={(e) => handleResultChange(item.id, 'remarks', e.target.value)}
+                                className="border-yellow-300 focus:border-yellow-500"
                               />
                             </div>
 
                             <Button
                               onClick={() => handleSaveResult(item.id)}
-                              disabled={updateResultMutation.isPending}
-                              className="w-full"
+                              disabled={updateResultMutation.isPending || !resultValues[item.id]?.result?.trim()}
+                              className="w-full bg-green-600 hover:bg-green-700 text-white"
+                              size="lg"
                             >
                               {updateResultMutation.isPending ? (
                                 <>
                                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  Saving...
+                                  Saving Result...
                                 </>
                               ) : (
                                 <>
                                   <Save className="mr-2 h-4 w-4" />
-                                  Save Result
+                                  Save This Test Result
                                 </>
                               )}
                             </Button>
+                            
+                            <p className="text-xs text-yellow-600 dark:text-yellow-400 text-center">
+                              💡 Save each test result individually as you complete them
+                            </p>
                           </div>
                         )}
                       </CardContent>
