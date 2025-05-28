@@ -83,7 +83,7 @@ export default function OrganizationManagement() {
 
   const createMutation = useMutation({
     mutationFn: (data: OrganizationFormData) => 
-      apiRequest("/api/organizations", { method: "POST", body: data }),
+      apiRequest("/api/organizations", "POST", data),
     onSuccess: () => {
       toast({ title: "Success", description: "Organization created successfully!" });
       setIsCreateModalOpen(false);
@@ -97,7 +97,7 @@ export default function OrganizationManagement() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: OrganizationFormData }) =>
-      apiRequest(`/api/organizations/${id}`, { method: "PATCH", body: data }),
+      apiRequest(`/api/organizations/${id}`, "PATCH", data),
     onSuccess: () => {
       toast({ title: "Success", description: "Organization updated successfully!" });
       setEditingOrg(null);
@@ -111,7 +111,7 @@ export default function OrganizationManagement() {
 
   const toggleStatusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
-      apiRequest(`/api/organizations/${id}/status`, { method: "PATCH", body: { isActive } }),
+      apiRequest(`/api/organizations/${id}/status`, "PATCH", { isActive }),
     onSuccess: () => {
       toast({ title: "Success", description: "Organization status updated!" });
       queryClient.invalidateQueries({ queryKey: ["/api/organizations"] });
