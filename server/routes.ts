@@ -582,7 +582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Recent patients for dashboard
   app.get("/api/patients/recent", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const patients = await db.select()
+      const recentPatients = await db.select()
         .from(patients)
         .orderBy(desc(patients.createdAt))
         .limit(5);
@@ -592,7 +592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
       
-      res.json(patients);
+      res.json(recentPatients);
     } catch (error) {
       console.error("Error fetching recent patients:", error);
       res.status(500).json({ message: "Failed to fetch recent patients" });

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PatientTimeline } from './patient-timeline';
 import { PatientAlertsPanel } from './patient-alerts-panel';
+import { PatientSafetyAlerts, QuickSafetyIndicator } from './patient-safety-alerts';
 import PatientVitalSignsTracker from './patient-vital-signs-tracker';
 import SmartAppointmentScheduler from './smart-appointment-scheduler';
 import { PatientCommunicationHub } from './patient-communication-hub';
@@ -107,13 +108,18 @@ export function ModernPatientOverview({
                 {getPatientInitials(patient.firstName, patient.lastName)}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">
-                {patient.firstName} {patient.lastName}
-              </h2>
-              <p className="text-xs text-gray-500">
-                ID: HC{patient.id?.toString().padStart(6, "0")} • {getPatientAge(patient.dateOfBirth)} years old • {patient.gender}
-              </p>
+            <div className="flex-1">
+              <div className="flex items-center space-x-3">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">
+                    {patient.firstName} {patient.lastName}
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    ID: HC{patient.id?.toString().padStart(6, "0")} • {getPatientAge(patient.dateOfBirth)} years old • {patient.gender}
+                  </p>
+                </div>
+                <QuickSafetyIndicator />
+              </div>
             </div>
           </div>
         </CardContent>
@@ -121,10 +127,14 @@ export function ModernPatientOverview({
 
       {/* Enhanced Tabbed Interface - Full Width */}
       <Tabs defaultValue="overview" className="w-full h-full">
-        <TabsList className="grid w-full grid-cols-6 mb-2 h-9">
+        <TabsList className="grid w-full grid-cols-7 mb-2 h-9">
           <TabsTrigger value="overview" className="flex items-center gap-1 text-xs">
             <User className="w-3 h-3" />
             Overview
+          </TabsTrigger>
+          <TabsTrigger value="safety" className="flex items-center gap-1 text-xs">
+            <Heart className="w-3 h-3" />
+            Safety Alerts
           </TabsTrigger>
           <TabsTrigger value="vitals" className="flex items-center gap-1 text-xs">
             <Monitor className="w-3 h-3" />
@@ -147,6 +157,21 @@ export function ModernPatientOverview({
             Communication
           </TabsTrigger>
         </TabsList>
+
+        {/* Safety Alerts Tab */}
+        <TabsContent value="safety" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Heart className="h-5 w-5 text-red-500" />
+                Patient Safety Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PatientSafetyAlerts patientId={patient.id} />
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Overview Tab - Compact Layout */}
         <TabsContent value="overview" className="space-y-3">
