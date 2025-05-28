@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,16 +34,33 @@ export function EditPatientModal({ open, onOpenChange, patient, onPatientUpdated
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
-    firstName: patient?.firstName || '',
-    lastName: patient?.lastName || '',
-    dateOfBirth: patient?.dateOfBirth || '',
-    gender: patient?.gender || '',
-    phone: patient?.phone || '',
-    email: patient?.email || '',
-    address: patient?.address || '',
-    allergies: patient?.allergies || '',
-    medicalHistory: patient?.medicalHistory || '',
+    firstName: '',
+    lastName: '',
+    dateOfBirth: '',
+    gender: '',
+    phone: '',
+    email: '',
+    address: '',
+    allergies: '',
+    medicalHistory: '',
   });
+
+  // Update form data when patient changes or modal opens
+  useEffect(() => {
+    if (patient && open) {
+      setFormData({
+        firstName: patient.firstName || '',
+        lastName: patient.lastName || '',
+        dateOfBirth: patient.dateOfBirth || '',
+        gender: patient.gender || '',
+        phone: patient.phone || '',
+        email: patient.email || '',
+        address: patient.address || '',
+        allergies: patient.allergies || '',
+        medicalHistory: patient.medicalHistory || '',
+      });
+    }
+  }, [patient, open]);
 
   const updatePatientMutation = useMutation({
     mutationFn: async (data: any) => {
