@@ -1257,13 +1257,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               gte(visits.createdAt, fromDate)
             ));
 
-          const visits = memberVisits.length;
+          const visitCount = memberVisits.length;
           const visitsWithTreatment = memberVisits.filter(v => v.treatment && v.treatment.trim() !== '');
-          const efficiency = visits > 0 ? Math.round((visitsWithTreatment.length / visits) * 100) : 0;
+          const efficiency = visitCount > 0 ? Math.round((visitsWithTreatment.length / visitCount) * 100) : 0;
           
           // Calculate satisfaction based on efficiency and follow-up compliance
           const visitsWithFollowUp = memberVisits.filter(v => v.followUpDate);
-          const followUpRate = visits > 0 ? (visitsWithFollowUp.length / visits) * 100 : 0;
+          const followUpRate = visitCount > 0 ? (visitsWithFollowUp.length / visitCount) * 100 : 0;
           const satisfaction = efficiency > 90 ? 4.7 + Math.random() * 0.2 :
             efficiency > 80 ? 4.4 + Math.random() * 0.2 :
             efficiency > 70 ? 4.1 + Math.random() * 0.2 : 3.8 + Math.random() * 0.2;
@@ -1272,7 +1272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             staffId: member.id,
             name: `${member.firstName} ${member.lastName}`,
             role: member.role.charAt(0).toUpperCase() + member.role.slice(1),
-            visits,
+            visits: visitCount,
             satisfaction: Number(satisfaction.toFixed(1)),
             efficiency: Math.max(75, efficiency), // Ensure realistic efficiency
             specialization: member.role === 'doctor' ? 'General Medicine' : 'Patient Care'
