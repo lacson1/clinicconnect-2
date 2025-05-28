@@ -947,18 +947,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderedBy: labOrders.orderedBy,
         createdAt: labOrders.createdAt,
         status: labOrders.status,
-        patient: {
-          firstName: patients.firstName,
-          lastName: patients.lastName,
-          dateOfBirth: patients.dateOfBirth
-        }
+        firstName: patients.firstName,
+        lastName: patients.lastName,
+        dateOfBirth: patients.dateOfBirth
       })
       .from(labOrders)
       .leftJoin(patients, eq(labOrders.patientId, patients.id))
       .where(eq(labOrders.status, 'pending'))
       .orderBy(labOrders.createdAt);
       
-      res.json(pendingOrders);
+      // Transform the data to match frontend expectations
+      const transformedOrders = pendingOrders.map(order => ({
+        id: order.id,
+        patientId: order.patientId,
+        orderedBy: order.orderedBy,
+        createdAt: order.createdAt,
+        status: order.status,
+        patient: {
+          firstName: order.firstName,
+          lastName: order.lastName,
+          dateOfBirth: order.dateOfBirth
+        }
+      }));
+      
+      res.json(transformedOrders);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch pending lab orders" });
     }
