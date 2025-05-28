@@ -111,7 +111,7 @@ export function ModernPatientOverview({
             <div className="flex-1">
               <div className="flex items-center space-x-3">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900">
+                  <h2 className="text-lg font-bold text-gray-900 whitespace-nowrap">
                     {patient.firstName} {patient.lastName}
                   </h2>
                   <p className="text-xs text-gray-500">
@@ -188,7 +188,7 @@ export function ModernPatientOverview({
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-lg font-bold text-gray-900">
+                <h2 className="text-lg font-bold text-gray-900 whitespace-nowrap">
                   {patient.firstName} {patient.lastName}
                 </h2>
                 <p className="text-xs text-gray-500">

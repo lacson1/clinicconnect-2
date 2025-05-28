@@ -137,10 +137,10 @@ export default function PatientProfile() {
               </span>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-800">
+              <h2 className="text-xl font-bold text-slate-800 whitespace-nowrap">
                 {patient.firstName} {patient.lastName}
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 whitespace-nowrap">
                 ID: HC{patient.id?.toString().padStart(6, "0")} | Age: {getPatientAge(patient.dateOfBirth)} | {patient.gender}
               </p>
             </div>
