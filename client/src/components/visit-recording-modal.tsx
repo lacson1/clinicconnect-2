@@ -64,8 +64,8 @@ export default function VisitRecordingModal({
     return saved ? JSON.parse(saved) : {
       bloodPressure: "",
       heartRate: undefined,
-      temperature: "",
-      weight: "",
+      temperature: undefined,
+      weight: undefined,
       complaint: "",
       diagnosis: "",
       treatment: "",

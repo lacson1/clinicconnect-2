@@ -354,26 +354,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/patients/:id/visits", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
       const patientId = parseInt(req.params.id);
-      console.log('Creating visit for patient:', patientId);
-      console.log('Visit data received:', req.body);
+      console.log('=== VISIT CREATION DEBUG ===');
+      console.log('Patient ID:', patientId);
+      console.log('Raw request body:', JSON.stringify(req.body, null, 2));
       
-      const visitData = insertVisitSchema.parse({ ...req.body, patientId });
-      console.log('Parsed visit data:', visitData);
+      // Clean up empty strings to undefined for optional fields
+      const cleanedData = { ...req.body };
+      if (cleanedData.heartRate === '') cleanedData.heartRate = undefined;
+      if (cleanedData.temperature === '') cleanedData.temperature = undefined;
+      if (cleanedData.weight === '') cleanedData.weight = undefined;
+      if (cleanedData.followUpDate === '') cleanedData.followUpDate = undefined;
+      
+      console.log('Cleaned data:', JSON.stringify(cleanedData, null, 2));
+      
+      const visitData = insertVisitSchema.parse({ ...cleanedData, patientId });
+      console.log('Parsed visit data:', JSON.stringify(visitData, null, 2));
       
       const visit = await storage.createVisit(visitData);
+      console.log('Visit created successfully:', visit);
       res.json(visit);
-    } catch (error) {
-      console.error('Visit creation error:', error);
-      console.error('Error stack:', error.stack);
+    } catch (error: any) {
+      console.error('=== VISIT CREATION ERROR ===');
+      console.error('Error type:', typeof error);
+      console.error('Error instance:', error.constructor.name);
       if (error instanceof z.ZodError) {
         console.error('Zod validation errors:', JSON.stringify(error.errors, null, 2));
         res.status(400).json({ message: "Invalid visit data", errors: error.errors });
       } else {
-        console.error('Non-Zod error details:', {
-          name: error.name,
-          message: error.message,
-          stack: error.stack
-        });
+        console.error('Non-Zod error:', error);
         res.status(500).json({ message: "Failed to create visit", error: error.message });
       }
     }
