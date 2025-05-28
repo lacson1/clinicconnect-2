@@ -333,6 +333,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const search = req.query.search as string | undefined;
       const patients = await storage.getPatients(search);
+      
+      // Prevent caching to ensure fresh data
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       res.json(patients);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch patients" });
