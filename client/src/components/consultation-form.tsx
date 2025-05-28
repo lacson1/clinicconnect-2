@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Save, Clock, User } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import SmartFormField from "@/components/smart-form-field";
 
 interface FormField {
   id: string;

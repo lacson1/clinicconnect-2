@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertVisitSchema, type InsertVisit, type Patient } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { z } from "zod";
+import SmartFormField from "@/components/smart-form-field";
 
 const visitFormSchema = z.object({
   complaint: z.string().min(1, "Chief complaint is required"),
