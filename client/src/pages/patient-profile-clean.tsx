@@ -26,12 +26,12 @@ export default function PatientProfile() {
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [showEditPatientModal, setShowEditPatientModal] = useState(false);
 
-  const { data: patientData, isLoading: patientLoading } = useQuery({
-    queryKey: ["/api/patients", patientId],
+  const { data: patientsData, isLoading: patientLoading } = useQuery({
+    queryKey: ["/api/patients"],
     enabled: !!patientId,
   });
 
-  const patient = Array.isArray(patientData) ? patientData.find(p => p.id === parseInt(patientId || '0')) : patientData;
+  const patient = Array.isArray(patientsData) ? patientsData.find(p => p.id === parseInt(patientId || '0')) : null;
 
   const { data: visitsData } = useQuery({
     queryKey: ["/api/patients", patientId, "visits"],
@@ -223,7 +223,8 @@ export default function PatientProfile() {
         patient={patient}
         onPatientUpdated={() => {
           // Refresh patient data after update
-          queryClient.invalidateQueries({ queryKey: ["/api/patients", patientId] });
+          queryClient.invalidateQueries({ queryKey: ["/api/patients"] });
+          queryClient.refetchQueries({ queryKey: ["/api/patients"] });
         }}
       />
 
