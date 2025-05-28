@@ -127,20 +127,20 @@ export default function PatientProfile() {
         </Link>
       </div>
 
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4">
+      {/* Compact Header */}
+      <header className="bg-white border-b border-slate-200 px-6 py-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-              <span className="text-lg font-semibold text-primary">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+              <span className="text-sm font-semibold text-primary">
                 {patient.firstName?.charAt(0)}{patient.lastName?.charAt(0)}
               </span>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">
+              <h2 className="text-xl font-bold text-slate-800">
                 {patient.firstName} {patient.lastName}
               </h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-xs text-slate-500">
                 ID: HC{patient.id?.toString().padStart(6, "0")} | Age: {getPatientAge(patient.dateOfBirth)} | {patient.gender}
               </p>
             </div>
