@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TestTube, Plus } from "lucide-react";
-import LabResultEntry from "@/components/lab-result-entry";
+import LabResultEntry from "@/components/lab-result-entry-fixed";
 import LabOrderForm from "@/components/lab-order-form";
 import { useRole } from "@/components/role-guard";
 

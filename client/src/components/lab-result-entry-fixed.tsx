@@ -20,6 +20,7 @@ interface LabOrder {
   id: number;
   patientId: number;
   orderedBy: number;
+  status: string;
   createdAt: string;
   patient?: {
     firstName: string;
@@ -211,8 +212,8 @@ export default function LabResultEntry({ className }: LabResultEntryProps) {
       <Card className={className}>
         <CardContent className="p-6">
           <div className="flex items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span className="ml-2">Loading pending orders...</span>
+            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+            <span>Loading pending orders...</span>
           </div>
         </CardContent>
       </Card>
@@ -429,68 +430,69 @@ export default function LabResultEntry({ className }: LabResultEntryProps) {
 
                         {/* Result Entry or Display */}
                         {item.completedAt ? (
-                        <div className="bg-muted/30 p-4 rounded-lg">
-                          <p className="font-medium text-sm text-muted-foreground mb-2">Completed Result:</p>
-                          <p className="font-mono text-blue-600 dark:text-blue-400 mb-2">{item.result}</p>
-                          {item.remarks && (
-                            <>
-                              <p className="font-medium text-sm text-muted-foreground mb-1">Notes:</p>
-                              <p className="text-sm">{item.remarks}</p>
-                            </>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Completed: {format(new Date(item.completedAt), 'MMM dd, yyyy HH:mm')}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Test Result *
-                            </label>
-                            <Input
-                              placeholder="Enter test result (e.g., 120/80, Normal, 5.2 mg/dL)"
-                              value={resultValues[item.id]?.result || ''}
-                              onChange={(e) => handleResultChange(item.id, 'result', e.target.value)}
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Remarks (Optional)
-                            </label>
-                            <Textarea
-                              placeholder="Additional notes or observations..."
-                              rows={2}
-                              value={resultValues[item.id]?.remarks || ''}
-                              onChange={(e) => handleResultChange(item.id, 'remarks', e.target.value)}
-                            />
-                          </div>
-
-                          <Button
-                            onClick={() => handleSaveResult(item.id)}
-                            disabled={updateResultMutation.isPending}
-                            className="w-full"
-                          >
-                            {updateResultMutation.isPending ? (
+                          <div className="bg-muted/30 p-4 rounded-lg">
+                            <p className="font-medium text-sm text-muted-foreground mb-2">Completed Result:</p>
+                            <p className="font-mono text-blue-600 dark:text-blue-400 mb-2">{item.result}</p>
+                            {item.remarks && (
                               <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Saving...
-                              </>
-                            ) : (
-                              <>
-                                <Save className="mr-2 h-4 w-4" />
-                                Save Result
+                                <p className="font-medium text-sm text-muted-foreground mb-1">Notes:</p>
+                                <p className="text-sm">{item.remarks}</p>
                               </>
                             )}
-                          </Button>
-                        </div>
-                      )}
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Completed: {format(new Date(item.completedAt), 'MMM dd, yyyy HH:mm')}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                Test Result *
+                              </label>
+                              <Input
+                                placeholder="Enter test result (e.g., 120/80, Normal, 5.2 mg/dL)"
+                                value={resultValues[item.id]?.result || ''}
+                                onChange={(e) => handleResultChange(item.id, 'result', e.target.value)}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                Remarks (Optional)
+                              </label>
+                              <Textarea
+                                placeholder="Additional notes or observations..."
+                                rows={2}
+                                value={resultValues[item.id]?.remarks || ''}
+                                onChange={(e) => handleResultChange(item.id, 'remarks', e.target.value)}
+                              />
+                            </div>
+
+                            <Button
+                              onClick={() => handleSaveResult(item.id)}
+                              disabled={updateResultMutation.isPending}
+                              className="w-full"
+                            >
+                              {updateResultMutation.isPending ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Saving...
+                                </>
+                              ) : (
+                                <>
+                                  <Save className="mr-2 h-4 w-4" />
+                                  Save Result
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
                 </div>
-              )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
