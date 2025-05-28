@@ -357,6 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('=== VISIT CREATION DEBUG ===');
       console.log('Patient ID:', patientId);
       console.log('Raw request body:', JSON.stringify(req.body, null, 2));
+      console.log('User making request:', req.user?.username, 'Role:', req.user?.role);
       
       // Clean up empty strings to undefined for optional fields and fix field mapping
       const cleanedData = { ...req.body };

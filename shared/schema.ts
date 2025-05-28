@@ -369,6 +369,7 @@ export const insertVisitSchema = createInsertSchema(visits).omit({
   id: true,
   visitDate: true,
 }).extend({
+  patientId: z.number(),
   bloodPressure: z.string().optional().nullable(),
   heartRate: z.coerce.number().optional().nullable(),
   temperature: z.coerce.number().optional().nullable(),
@@ -379,7 +380,15 @@ export const insertVisitSchema = createInsertSchema(visits).omit({
   followUpDate: z.string().optional().nullable(),
   visitType: z.string().default("consultation"),
   status: z.string().default("final"),
-});
+}).transform(data => ({
+  ...data,
+  // Handle empty string to null conversions
+  bloodPressure: data.bloodPressure === "" ? null : data.bloodPressure,
+  complaint: data.complaint === "" ? null : data.complaint,
+  diagnosis: data.diagnosis === "" ? null : data.diagnosis,
+  treatment: data.treatment === "" ? null : data.treatment,
+  followUpDate: data.followUpDate === "" ? null : data.followUpDate,
+}));
 
 export const insertLabResultSchema = createInsertSchema(labResults).omit({
   id: true,
