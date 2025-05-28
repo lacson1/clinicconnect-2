@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { fileStorage } from "./storage-service";
-import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, users, auditLogs, labTests, medications, labOrders, labOrderItems, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns } from "@shared/schema";
+import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, users, auditLogs, labTests, medications, labOrders, labOrderItems, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, appointments } from "@shared/schema";
 import { z } from "zod";
 import { db } from "./db";
 import { eq, desc, or, ilike, gte, and, isNotNull, inArray } from "drizzle-orm";
@@ -1713,6 +1713,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error recording vitals:', error);
       res.status(500).json({ message: "Failed to record vital signs" });
+    }
+  });
+
+  // Appointments endpoints
+  app.get("/api/appointments", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { date } = req.query;
+      
+      let query = db.select({
+        id: appointments.id,
+        patientId: appointments.patientId,
+        patientName: patients.firstName,
+        patientLastName: patients.lastName,
+        doctorId: appointments.doctorId,
+        doctorName: users.username,
+        appointmentDate: appointments.appointmentDate,
+        appointmentTime: appointments.appointmentTime,
+        duration: appointments.duration,
+        type: appointments.type,
+        status: appointments.status,
+        notes: appointments.notes,
+        priority: appointments.priority,
+      })
+      .from(appointments)
+      .leftJoin(patients, eq(appointments.patientId, patients.id))
+      .leftJoin(users, eq(appointments.doctorId, users.id))
+      .where(eq(appointments.organizationId, req.user!.organizationId!))
+      .orderBy(appointments.appointmentDate, appointments.appointmentTime);
+
+      if (date && typeof date === 'string') {
+        query = query.where(eq(appointments.appointmentDate, date));
+      }
+
+      const result = await query;
+      
+      // Format the response to match the frontend interface
+      const formattedAppointments = result.map(appointment => ({
+        id: appointment.id,
+        patientId: appointment.patientId,
+        patientName: `${appointment.patientName} ${appointment.patientLastName}`,
+        doctorId: appointment.doctorId,
+        doctorName: appointment.doctorName,
+        appointmentDate: appointment.appointmentDate,
+        appointmentTime: appointment.appointmentTime,
+        duration: appointment.duration,
+        type: appointment.type,
+        status: appointment.status,
+        notes: appointment.notes,
+        priority: appointment.priority,
+      }));
+
+      res.json(formattedAppointments);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      res.status(500).json({ message: "Failed to fetch appointments" });
+    }
+  });
+
+  app.post("/api/appointments", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertAppointmentSchema.parse({
+        ...req.body,
+        organizationId: req.user!.organizationId,
+      });
+
+      const [appointment] = await db.insert(appointments)
+        .values(validatedData)
+        .returning();
+
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logPatientAction('APPOINTMENT_SCHEDULED', validatedData.patientId, {
+        appointmentId: appointment.id,
+        doctorId: validatedData.doctorId,
+        appointmentDate: validatedData.appointmentDate,
+        appointmentTime: validatedData.appointmentTime
+      });
+
+      res.json(appointment);
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      res.status(500).json({ message: "Failed to create appointment" });
+    }
+  });
+
+  app.patch("/api/appointments/:id", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const appointmentId = parseInt(req.params.id);
+      const updateData = req.body;
+
+      const [updatedAppointment] = await db.update(appointments)
+        .set({ ...updateData, updatedAt: new Date() })
+        .where(and(
+          eq(appointments.id, appointmentId),
+          eq(appointments.organizationId, req.user!.organizationId!)
+        ))
+        .returning();
+
+      if (!updatedAppointment) {
+        return res.status(404).json({ message: "Appointment not found" });
+      }
+
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logPatientAction('APPOINTMENT_UPDATED', updatedAppointment.patientId, {
+        appointmentId: updatedAppointment.id,
+        changes: updateData
+      });
+
+      res.json(updatedAppointment);
+    } catch (error) {
+      console.error('Error updating appointment:', error);
+      res.status(500).json({ message: "Failed to update appointment" });
     }
   });
 
