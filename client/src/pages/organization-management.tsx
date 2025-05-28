@@ -83,7 +83,7 @@ export default function OrganizationManagement() {
 
   const createMutation = useMutation({
     mutationFn: (data: OrganizationFormData) => 
-      apiRequest("/api/organizations", "POST", data),
+      apiRequest("POST", "/api/organizations", data),
     onSuccess: () => {
       toast({ title: "Success", description: "Organization created successfully!" });
       setIsCreateModalOpen(false);
@@ -99,7 +99,7 @@ export default function OrganizationManagement() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: OrganizationFormData }) =>
-      apiRequest(`/api/organizations/${id}`, "PATCH", data),
+      apiRequest("PATCH", `/api/organizations/${id}`, data),
     onSuccess: () => {
       toast({ title: "Success", description: "Organization updated successfully!" });
       setEditingOrg(null);
