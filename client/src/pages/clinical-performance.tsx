@@ -117,498 +117,335 @@ export default function ClinicalPerformance() {
   };
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800">Clinical Performance Analytics</h1>
-          <p className="text-slate-600 mt-2">Track and analyze your clinic's medical outcomes and efficiency</p>
+    <>
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-slate-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800">Clinical Performance</h2>
+            <p className="text-sm text-slate-500">Monitor treatment outcomes and staff efficiency</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Select value={timeRange} onValueChange={setTimeRange}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">Last 7 days</SelectItem>
+                <SelectItem value="30">Last 30 days</SelectItem>
+                <SelectItem value="90">Last 3 months</SelectItem>
+                <SelectItem value="365">Last year</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export Report
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">Last 7 days</SelectItem>
-              <SelectItem value="30">Last 30 days</SelectItem>
-              <SelectItem value="90">Last 3 months</SelectItem>
-              <SelectItem value="365">Last year</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Export Report
-          </Button>
-        </div>
-      </div>
+      </header>
 
-      {/* Key Performance Indicators */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-700">Total Visits</p>
-                <p className="text-2xl font-bold text-blue-800">{metrics.totalVisits}</p>
-              </div>
-              <Activity className="h-8 w-8 text-blue-600" />
-            </div>
-            <div className="mt-2">
-              {getPerformanceBadge(metrics.totalVisits, 150)}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto p-6">
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="performance">Performance Trends</TabsTrigger>
+            <TabsTrigger value="diagnosis">Diagnosis Analysis</TabsTrigger>
+            <TabsTrigger value="staff">Staff Performance</TabsTrigger>
+          </TabsList>
 
-        <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-700">Treatment Success</p>
-                <p className="text-2xl font-bold text-green-800">{metrics.treatmentSuccess}%</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-            <div className="mt-2">
-              {getPerformanceBadge(metrics.treatmentSuccess, 85)}
-            </div>
-          </CardContent>
-        </Card>
+          <TabsContent value="overview" className="space-y-6">
+            {/* Key Metrics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">Total Visits</p>
+                      <p className="text-3xl font-bold text-slate-800 mt-2">
+                        {metricsLoading ? "..." : metrics.totalVisits}
+                      </p>
+                      <p className="text-sm text-secondary mt-1">
+                        <TrendingUp className="inline w-3 h-3" /> +15% from last period
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Stethoscope className="text-blue-600 h-6 w-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-        <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-700">Avg Visit Time</p>
-                <p className="text-2xl font-bold text-purple-800">{metrics.avgVisitDuration}min</p>
-              </div>
-              <Clock className="h-8 w-8 text-purple-600" />
-            </div>
-            <div className="mt-2">
-              {getPerformanceBadge(25 - metrics.avgVisitDuration, 5)}
-            </div>
-          </CardContent>
-        </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">Avg Visit Duration</p>
+                      <p className="text-3xl font-bold text-slate-800 mt-2">
+                        {metricsLoading ? "..." : `${metrics.avgVisitDuration} min`}
+                      </p>
+                      <p className="text-sm text-green-600 mt-1">
+                        <TrendingUp className="inline w-3 h-3" /> -2 min improvement
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                      <Clock className="text-green-600 h-6 w-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-        <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-700">Patient Satisfaction</p>
-                <p className="text-2xl font-bold text-orange-800">{metrics.patientSatisfaction}/5</p>
-              </div>
-              <Heart className="h-8 w-8 text-orange-600" />
-            </div>
-            <div className="mt-2">
-              {getPerformanceBadge(metrics.patientSatisfaction, 4.5)}
-            </div>
-          </CardContent>
-        </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">Treatment Success</p>
+                      <p className="text-3xl font-bold text-slate-800 mt-2">
+                        {metricsLoading ? "..." : `${metrics.treatmentSuccess}%`}
+                      </p>
+                      <p className="text-sm text-green-600 mt-1">
+                        <CheckCircle className="inline w-3 h-3" /> Above target
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                      <Heart className="text-green-600 h-6 w-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-        <Card className="bg-gradient-to-r from-teal-50 to-teal-100 border-teal-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-teal-700">Follow-up Rate</p>
-                <p className="text-2xl font-bold text-teal-800">{metrics.followUpCompliance}%</p>
-              </div>
-              <Target className="h-8 w-8 text-teal-600" />
-            </div>
-            <div className="mt-2">
-              {getPerformanceBadge(metrics.followUpCompliance, 80)}
-            </div>
-          </CardContent>
-        </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">Patient Satisfaction</p>
+                      <p className="text-3xl font-bold text-slate-800 mt-2">
+                        {metricsLoading ? "..." : `${metrics.patientSatisfaction}/5.0`}
+                      </p>
+                      <p className="text-sm text-green-600 mt-1">
+                        <TrendingUp className="inline w-3 h-3" /> +0.2 from last month
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                      <Users className="text-yellow-600 h-6 w-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-        <Card className="bg-gradient-to-r from-indigo-50 to-indigo-100 border-indigo-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-indigo-700">Diagnosis Accuracy</p>
-                <p className="text-2xl font-bold text-indigo-800">{metrics.diagnosisAccuracy}%</p>
-              </div>
-              <Stethoscope className="h-8 w-8 text-indigo-600" />
-            </div>
-            <div className="mt-2">
-              {getPerformanceBadge(metrics.diagnosisAccuracy, 90)}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">Follow-up Compliance</p>
+                      <p className="text-3xl font-bold text-slate-800 mt-2">
+                        {metricsLoading ? "..." : `${metrics.followUpCompliance}%`}
+                      </p>
+                      <p className="text-sm text-yellow-600 mt-1">
+                        <AlertCircle className="inline w-3 h-3" /> Needs improvement
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                      <Calendar className="text-orange-600 h-6 w-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-      <Tabs defaultValue="trends" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="trends">Performance Trends</TabsTrigger>
-          <TabsTrigger value="diagnosis">Diagnosis Analysis</TabsTrigger>
-          <TabsTrigger value="staff">Staff Performance</TabsTrigger>
-          <TabsTrigger value="outcomes">Patient Outcomes</TabsTrigger>
-        </TabsList>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">Diagnosis Accuracy</p>
+                      <p className="text-3xl font-bold text-slate-800 mt-2">
+                        {metricsLoading ? "..." : `${metrics.diagnosisAccuracy}%`}
+                      </p>
+                      <p className="text-sm text-green-600 mt-1">
+                        <Target className="inline w-3 h-3" /> Excellent performance
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <Activity className="text-purple-600 h-6 w-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-        <TabsContent value="trends" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Performance Overview Chart */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <TrendingUp className="h-5 w-5 mr-2" />
-                  Visit Volume & Success Rate
+                  Performance Trends
                 </CardTitle>
-                <CardDescription>Weekly performance tracking</CardDescription>
+                <CardDescription>Weekly performance metrics over time</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={performance}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="period" />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip />
-                    <Area
-                      yAxisId="left"
-                      type="monotone"
-                      dataKey="visits"
-                      stroke="#8884d8"
-                      fill="#8884d8"
-                      fillOpacity={0.3}
-                    />
-                    <Line
-                      yAxisId="right"
-                      type="monotone"
-                      dataKey="successRate"
-                      stroke="#82ca9d"
-                      strokeWidth={3}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Clock className="h-5 w-5 mr-2" />
-                  Efficiency Metrics
-                </CardTitle>
-                <CardDescription>Average visit duration and patient satisfaction</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={performance}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="period" />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip />
-                    <Line
-                      yAxisId="left"
-                      type="monotone"
-                      dataKey="avgDuration"
-                      stroke="#ff7300"
-                      strokeWidth={2}
-                    />
-                    <Line
-                      yAxisId="right"
-                      type="monotone"
-                      dataKey="satisfaction"
-                      stroke="#00ff00"
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="diagnosis" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FlaskRound className="h-5 w-5 mr-2" />
-                  Most Common Conditions
-                </CardTitle>
-                <CardDescription>Distribution of diagnoses in your clinic</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {diagnosisLoading ? (
+                {performanceLoading ? (
                   <div className="flex items-center justify-center h-[300px]">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                   </div>
-                ) : diagnosisMetrics && diagnosisMetrics.length > 0 ? (
+                ) : performanceData && performanceData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={diagnosisMetrics}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ condition, count }) => `${condition}: ${count}`}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="count"
-                      >
-                        {diagnosisMetrics.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-[300px] text-slate-500">
-                    No diagnosis data available
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Target className="h-5 w-5 mr-2" />
-                  Treatment Success by Condition
-                </CardTitle>
-                <CardDescription>Success rates and treatment duration</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {diagnosisLoading ? (
-                  <div className="flex items-center justify-center h-[300px]">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                  </div>
-                ) : diagnosisMetrics && diagnosisMetrics.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={diagnosisMetrics}>
+                    <AreaChart data={performanceData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="condition" angle={-45} textAnchor="end" height={100} />
+                      <XAxis dataKey="period" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="successRate" fill="#82ca9d" />
-                    </BarChart>
+                      <Area type="monotone" dataKey="visits" stackId="1" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                      <Area type="monotone" dataKey="successRate" stackId="1" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+                    </AreaChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex items-center justify-center h-[300px] text-slate-500">
-                    No treatment success data available
+                    No performance data available
                   </div>
                 )}
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Detailed Diagnosis Metrics</CardTitle>
-              <CardDescription>Comprehensive analysis of treatment outcomes</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2">Condition</th>
-                      <th className="text-left p-2">Cases</th>
-                      <th className="text-left p-2">Success Rate</th>
-                      <th className="text-left p-2">Avg Treatment Days</th>
-                      <th className="text-left p-2">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {diagnosisMetrics && diagnosisMetrics.length > 0 ? diagnosisMetrics.map((item, index) => (
-                      <tr key={index} className="border-b hover:bg-slate-50">
-                        <td className="p-2 font-medium">{item.condition}</td>
-                        <td className="p-2">{item.count}</td>
-                        <td className={`p-2 font-semibold ${getPerformanceColor(item.successRate, 85)}`}>
-                          {item.successRate}%
-                        </td>
-                        <td className="p-2">{item.avgTreatmentDays} days</td>
-                        <td className="p-2">{getPerformanceBadge(item.successRate, 85)}</td>
-                      </tr>
-                    )) : (
-                      <tr>
-                        <td colSpan={5} className="p-4 text-center text-slate-500">
-                          No diagnosis data available
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="staff" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2" />
-                Staff Performance Overview
-              </CardTitle>
-              <CardDescription>Individual performance metrics for healthcare providers</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {staffLoading ? (
-                  [...Array(3)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="h-32 bg-slate-200 rounded-lg"></div>
+          <TabsContent value="diagnosis" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <FlaskRound className="h-5 w-5 mr-2" />
+                    Most Common Conditions
+                  </CardTitle>
+                  <CardDescription>Distribution of diagnoses in your clinic</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {diagnosisLoading ? (
+                    <div className="flex items-center justify-center h-[300px]">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                     </div>
-                  ))
-                ) : staffPerformance && staffPerformance.length > 0 ? staffPerformance.map((member) => (
-                  <Card key={member.staffId} className="border-slate-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h3 className="font-semibold text-slate-800">{member.name}</h3>
-                          <p className="text-sm text-slate-600">{member.role}</p>
-                        </div>
-                        <Badge variant="outline">{member.specialization}</Badge>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Visits:</span>
-                          <span className="font-medium">{member.visits}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Satisfaction:</span>
-                          <span className={`font-medium ${getPerformanceColor(member.satisfaction, 4.5)}`}>
-                            {member.satisfaction}/5
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Efficiency:</span>
-                          <span className={`font-medium ${getPerformanceColor(member.efficiency, 85)}`}>
-                            {member.efficiency}%
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-3 pt-3 border-t">
-                        {getPerformanceBadge(member.efficiency, 85)}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  ) : diagnosisMetrics && diagnosisMetrics.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={diagnosisMetrics}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ condition, count }) => `${condition}: ${count}`}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="count"
+                        >
+                          {diagnosisMetrics.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-[300px] text-slate-500">
+                      No diagnosis data available
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Staff Performance Comparison</CardTitle>
-              <CardDescription>Comparative analysis of team performance</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={staff}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="visits" fill="#8884d8" name="Visits" />
-                  <Bar dataKey="efficiency" fill="#82ca9d" name="Efficiency %" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Target className="h-5 w-5 mr-2" />
+                    Treatment Success by Condition
+                  </CardTitle>
+                  <CardDescription>Success rates and treatment duration</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {diagnosisLoading ? (
+                    <div className="flex items-center justify-center h-[300px]">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    </div>
+                  ) : diagnosisMetrics && diagnosisMetrics.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={diagnosisMetrics}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="condition" angle={-45} textAnchor="end" height={100} />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="successRate" fill="#82ca9d" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-[300px] text-slate-500">
+                      No treatment success data available
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-        <TabsContent value="outcomes" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="staff" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Heart className="h-5 w-5 mr-2" />
-                  Patient Recovery Trends
+                  <Users className="h-5 w-5 mr-2" />
+                  Staff Performance Overview
                 </CardTitle>
-                <CardDescription>Recovery rates and patient outcomes over time</CardDescription>
+                <CardDescription>Individual performance metrics for healthcare providers</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={performance}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="period" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="successRate"
-                      stroke="#82ca9d"
-                      strokeWidth={3}
-                      dot={{ fill: '#82ca9d', strokeWidth: 2, r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {staffLoading ? (
+                    [...Array(3)].map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-32 bg-slate-200 rounded-lg"></div>
+                      </div>
+                    ))
+                  ) : staffPerformance && staffPerformance.length > 0 ? staffPerformance.map((member) => (
+                    <Card key={member.staffId} className="border-slate-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-semibold text-slate-800">{member.name}</h4>
+                            <p className="text-sm text-slate-500">{member.role}</p>
+                          </div>
+                          <Badge variant="outline">{member.specialization}</Badge>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-600">Visits</span>
+                            <span className="font-medium">{member.visits}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-600">Satisfaction</span>
+                            <span className={`font-medium ${getPerformanceColor(member.satisfaction, 4.5)}`}>
+                              {member.satisfaction}/5.0
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-600">Efficiency</span>
+                            <span className={`font-medium ${getPerformanceColor(member.efficiency, 85)}`}>
+                              {member.efficiency}%
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3">
+                          {getPerformanceBadge(member.efficiency, 85)}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )) : (
+                    <div className="col-span-full text-center py-8 text-slate-500">
+                      No staff performance data available
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <AlertCircle className="h-5 w-5 mr-2" />
-                  Quality Indicators
-                </CardTitle>
-                <CardDescription>Key quality metrics for clinical care</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                  <span className="font-medium text-green-800">Readmission Rate</span>
-                  <span className="text-green-600 font-bold">3.2%</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                  <span className="font-medium text-blue-800">Medication Adherence</span>
-                  <span className="text-blue-600 font-bold">87%</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                  <span className="font-medium text-purple-800">Preventive Care Completion</span>
-                  <span className="text-purple-600 font-bold">92%</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-                  <span className="font-medium text-orange-800">Patient Safety Score</span>
-                  <span className="text-orange-600 font-bold">96%</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Clinical Quality Metrics</CardTitle>
-              <CardDescription>Comprehensive quality assessment</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-gradient-to-b from-green-50 to-green-100 rounded-lg">
-                  <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-2" />
-                  <h3 className="font-semibold text-green-800">Treatment Success</h3>
-                  <p className="text-2xl font-bold text-green-600">{metrics.treatmentSuccess}%</p>
-                  <p className="text-sm text-green-700 mt-1">Above target (85%)</p>
-                </div>
-                
-                <div className="text-center p-4 bg-gradient-to-b from-blue-50 to-blue-100 rounded-lg">
-                  <Target className="h-12 w-12 text-blue-600 mx-auto mb-2" />
-                  <h3 className="font-semibold text-blue-800">Follow-up Rate</h3>
-                  <p className="text-2xl font-bold text-blue-600">{metrics.followUpCompliance}%</p>
-                  <p className="text-sm text-blue-700 mt-1">Target: 80%</p>
-                </div>
-                
-                <div className="text-center p-4 bg-gradient-to-b from-purple-50 to-purple-100 rounded-lg">
-                  <Stethoscope className="h-12 w-12 text-purple-600 mx-auto mb-2" />
-                  <h3 className="font-semibold text-purple-800">Diagnosis Accuracy</h3>
-                  <p className="text-2xl font-bold text-purple-600">{metrics.diagnosisAccuracy}%</p>
-                  <p className="text-sm text-purple-700 mt-1">Excellent performance</p>
-                </div>
-                
-                <div className="text-center p-4 bg-gradient-to-b from-orange-50 to-orange-100 rounded-lg">
-                  <Heart className="h-12 w-12 text-orange-600 mx-auto mb-2" />
-                  <h3 className="font-semibold text-orange-800">Patient Satisfaction</h3>
-                  <p className="text-2xl font-bold text-orange-600">{metrics.patientSatisfaction}/5</p>
-                  <p className="text-sm text-orange-700 mt-1">Very satisfied</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+          </TabsContent>
+        </Tabs>
+      </main>
+    </>
   );
 }
