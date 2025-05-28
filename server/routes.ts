@@ -1163,9 +1163,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/patients/:patientId/consultation-records", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const patientId = parseInt(req.params.patientId);
-      const records = await storage.getConsultationRecordsByPatient(patientId);
+      
+      // Enhanced query to include user and form information
+      const records = await db
+        .select({
+          id: consultationRecords.id,
+          patientId: consultationRecords.patientId,
+          formId: consultationRecords.formId,
+          filledBy: consultationRecords.filledBy,
+          formData: consultationRecords.formData,
+          createdAt: consultationRecords.createdAt,
+          // User information
+          conductedByName: users.firstName,
+          conductedByUsername: users.username,
+          conductedByRole: users.role,
+          // Form information
+          formName: consultationForms.name,
+          formDescription: consultationForms.description,
+          specialistRole: consultationForms.specialistRole
+        })
+        .from(consultationRecords)
+        .leftJoin(users, eq(consultationRecords.filledBy, users.id))
+        .leftJoin(consultationForms, eq(consultationRecords.formId, consultationForms.id))
+        .where(eq(consultationRecords.patientId, patientId))
+        .orderBy(desc(consultationRecords.createdAt));
+      
       res.json(records);
     } catch (error) {
+      console.error('Error fetching consultation records:', error);
       res.status(500).json({ message: "Failed to fetch consultation records" });
     }
   });

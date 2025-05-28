@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Send, Clock } from "lucide-react";
+import { FileText, Send, Clock, User } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface ConsultationForm {
@@ -446,7 +446,7 @@ export default function ConsultationFormSelector({
                           <CardContent className="p-4">
                             <div className="flex items-center justify-between mb-3">
                               <h4 className="font-semibold text-lg text-gray-900">
-                                {forms.find(f => f.id === consultation.formId)?.name || 'Unknown Form'}
+                                {consultation.formName || 'Unknown Form'}
                               </h4>
                               <div className="flex items-center gap-2">
                                 <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
@@ -456,6 +456,19 @@ export default function ConsultationFormSelector({
                                   {new Date(consultation.consultationDate).toLocaleDateString()}
                                 </Badge>
                               </div>
+                            </div>
+                            
+                            {/* Conducted by information */}
+                            <div className="flex items-center gap-2 mb-3 p-2 bg-blue-50 rounded-lg">
+                              <FileText className="w-4 h-4 text-blue-600" />
+                              <span className="text-sm text-blue-800">
+                                <strong>Conducted by:</strong> {consultation.conductedByName || consultation.conductedByUsername || 'Unknown'}
+                              </span>
+                              {consultation.conductedByRole && (
+                                <Badge variant="outline" className="bg-white text-blue-700 border-blue-200 text-xs">
+                                  {consultation.conductedByRole}
+                                </Badge>
+                              )}
                             </div>
                             
                             {/* Consultation details */}
