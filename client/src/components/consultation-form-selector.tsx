@@ -427,7 +427,7 @@ export default function ConsultationFormSelector({
               No consultations recorded yet for this patient.
             </p>
           ) : (
-            <div className="max-h-96 overflow-y-auto pr-2">
+            <div className="max-h-[70vh] overflow-y-auto pr-2">
               <div className="relative">
                 {/* Timeline line */}
                 <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500"></div>

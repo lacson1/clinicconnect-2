@@ -97,13 +97,13 @@ export function ModernPatientOverview({
   }));
 
   return (
-    <div className="space-y-6">
-      {/* Patient Quick Info Header */}
-      <Card>
-        <CardContent className="p-4">
+    <div className="space-y-4 min-h-screen w-full">
+      {/* Patient Quick Info Header - Compact */}
+      <Card className="w-full">
+        <CardContent className="p-3">
           <div className="flex items-center space-x-4">
-            <Avatar className="w-12 h-12">
-              <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+            <Avatar className="w-10 h-10">
+              <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-sm">
                 {getPatientInitials(patient.firstName, patient.lastName)}
               </AvatarFallback>
             </Avatar>
@@ -111,7 +111,7 @@ export function ModernPatientOverview({
               <h2 className="text-lg font-bold text-gray-900">
                 {patient.firstName} {patient.lastName}
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500">
                 ID: HC{patient.id?.toString().padStart(6, "0")} • {getPatientAge(patient.dateOfBirth)} years old • {patient.gender}
               </p>
             </div>
@@ -119,9 +119,9 @@ export function ModernPatientOverview({
         </CardContent>
       </Card>
 
-      {/* Enhanced Tabbed Interface */}
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+      {/* Enhanced Tabbed Interface - Full Width */}
+      <Tabs defaultValue="overview" className="w-full h-full">
+        <TabsList className="grid w-full grid-cols-6 mb-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Overview
