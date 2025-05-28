@@ -170,9 +170,7 @@ export default function VisitRecordingModal({
         description: "Visit recorded successfully!",
       });
       
-      form.reset();
-      setSelectedPatientId(undefined);
-      onOpenChange(false);
+      handleDialogClose();
     },
     onError: (error) => {
       console.error('Visit recording error:', error);
@@ -233,14 +231,20 @@ export default function VisitRecordingModal({
     }
   };
 
+  const handleDialogClose = () => {
+    // Reset form state
+    form.reset();
+    setSelectedPatientId(undefined);
+    setPatientSearchOpen(false);
+    onOpenChange(false);
+  };
+
   const handleDialogChange = (isOpen: boolean) => {
     if (!isOpen) {
-      // Reset form state when dialog closes
-      form.reset();
-      setSelectedPatientId(undefined);
-      setPatientSearchOpen(false);
+      handleDialogClose();
+    } else {
+      onOpenChange(isOpen);
     }
-    onOpenChange(isOpen);
   };
 
   return (
@@ -497,12 +501,7 @@ export default function VisitRecordingModal({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => {
-                    form.reset();
-                    setSelectedPatientId(undefined);
-                    setPatientSearchOpen(false);
-                    onOpenChange(false);
-                  }}
+                  onClick={handleDialogClose}
                 >
                   Cancel
                 </Button>
