@@ -364,10 +364,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(visit);
     } catch (error) {
       console.error('Visit creation error:', error);
+      console.error('Error stack:', error.stack);
       if (error instanceof z.ZodError) {
+        console.error('Zod validation errors:', error.errors);
         res.status(400).json({ message: "Invalid visit data", errors: error.errors });
       } else {
-        res.status(500).json({ message: "Failed to create visit" });
+        console.error('Non-Zod error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+        res.status(500).json({ message: "Failed to create visit", error: error.message });
       }
     }
   });
