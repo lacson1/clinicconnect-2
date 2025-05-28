@@ -8,6 +8,7 @@ import PatientVitalSignsTracker from './patient-vital-signs-tracker';
 import SmartAppointmentScheduler from './smart-appointment-scheduler';
 import PatientCommunicationHub from './patient-communication-hub';
 import ConsultationFormSelector from './consultation-form-selector';
+import VisitRecordingModal from './visit-recording-modal';
 import { 
   User, 
   Calendar, 
@@ -21,7 +22,8 @@ import {
   MessageSquare,
   CalendarDays,
   Monitor,
-  FileText
+  FileText,
+  Stethoscope
 } from 'lucide-react';
 
 interface Patient {
@@ -119,10 +121,14 @@ export function ModernPatientOverview({
 
       {/* Enhanced Tabbed Interface */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Overview
+          </TabsTrigger>
+          <TabsTrigger value="record-visit" className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            Record Visit
           </TabsTrigger>
           <TabsTrigger value="consultation" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
@@ -131,18 +137,6 @@ export function ModernPatientOverview({
           <TabsTrigger value="vitals" className="flex items-center gap-2">
             <Monitor className="w-4 h-4" />
             Vital Signs
-          </TabsTrigger>
-          <TabsTrigger value="appointments" className="flex items-center gap-2">
-            <CalendarDays className="w-4 h-4" />
-            Appointments
-          </TabsTrigger>
-          <TabsTrigger value="communication" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
-            Communication
-          </TabsTrigger>
-          <TabsTrigger value="timeline" className="flex items-center gap-2">
-            <Activity className="w-4 h-4" />
-            Timeline
           </TabsTrigger>
         </TabsList>
 
@@ -250,6 +244,30 @@ export function ModernPatientOverview({
             </div>
           </TabsContent>
 
+          {/* Record Visit Tab */}
+          <TabsContent value="record-visit" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Stethoscope className="h-5 w-5" />
+                  Record Patient Visit
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600 mb-4">
+                    Document a new visit for {patient.firstName} {patient.lastName}
+                  </p>
+                  <VisitRecordingModal 
+                    open={true} 
+                    onOpenChange={() => {}} 
+                    patientId={patient.id} 
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Consultation Forms Tab */}
           <TabsContent value="consultation" className="space-y-6">
             <ConsultationFormSelector patientId={patient.id} />
@@ -258,26 +276,6 @@ export function ModernPatientOverview({
           {/* Vital Signs Tab */}
           <TabsContent value="vitals" className="space-y-6">
             <PatientVitalSignsTracker patientId={patient.id} />
-          </TabsContent>
-
-          {/* Appointments Tab */}
-          <TabsContent value="appointments" className="space-y-6">
-            <SmartAppointmentScheduler patientId={patient.id} />
-          </TabsContent>
-
-          {/* Communication Tab */}
-          <TabsContent value="communication" className="space-y-6">
-            <PatientCommunicationHub
-              patientId={patient.id}
-              patientName={`${patient.firstName} ${patient.lastName}`}
-              patientPhone={patient.phone}
-              patientEmail={patient.email}
-            />
-          </TabsContent>
-
-          {/* Timeline Tab */}
-          <TabsContent value="timeline" className="space-y-6">
-            <PatientTimeline events={timelineEvents} />
           </TabsContent>
         </Tabs>
     </div>
