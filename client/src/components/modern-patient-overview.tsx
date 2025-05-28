@@ -175,30 +175,30 @@ export function ModernPatientOverview({
               </div>
             </div>
             
-            <div className="space-y-3 text-sm">
+            <div className="space-y-1 text-xs">
               <div className="flex items-center space-x-2">
-                <Calendar className="w-4 h-4 text-gray-400" />
+                <Calendar className="w-3 h-3 text-gray-400" />
                 <span>{getPatientAge(patient.dateOfBirth)} years old</span>
                 <span className="text-gray-400">•</span>
                 <span className="capitalize">{patient.gender}</span>
               </div>
               
               <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4 text-gray-400" />
+                <Phone className="w-3 h-3 text-gray-400" />
                 <span>{patient.phone}</span>
               </div>
               
               {patient.email && (
                 <div className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4 text-gray-400" />
+                  <Mail className="w-3 h-3 text-gray-400" />
                   <span>{patient.email}</span>
                 </div>
               )}
               
               {patient.address && (
                 <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4 text-gray-400" />
-                  <span className="text-xs">{patient.address}</span>
+                  <MapPin className="w-3 h-3 text-gray-400" />
+                  <span>{patient.address}</span>
                 </div>
               )}
             </div>
