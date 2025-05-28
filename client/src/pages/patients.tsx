@@ -12,6 +12,8 @@ import {
   Heart, Clock, FileText, Grid3X3, List, LayoutGrid
 } from "lucide-react";
 import PatientRegistrationModal from "@/components/patient-registration-modal";
+import SmartAppointmentScheduler from "@/components/smart-appointment-scheduler";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRole } from "@/components/role-guard";
 import type { Patient } from "@shared/schema";
 
@@ -45,7 +47,7 @@ export default function Patients() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">Patient Management</h1>
-          <p className="text-slate-600 mt-1">Manage patient records and medical history</p>
+          <p className="text-slate-600 mt-1">Manage patient records, appointments, and medical history</p>
         </div>
         {/* Only admin, doctor, and nurse can add new patients */}
         {(user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse') && (
@@ -55,6 +57,22 @@ export default function Patients() {
           </Button>
         )}
       </div>
+
+      {/* Tabs for Patient Records and Appointments */}
+      <Tabs defaultValue="patients" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="patients" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Patient Records
+          </TabsTrigger>
+          <TabsTrigger value="appointments" className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            Appointments
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="patients" className="mt-6">
+          <div className="space-y-6">
 
       {/* Search and Filters */}
       <Card className="shadow-sm">
@@ -407,6 +425,13 @@ export default function Patients() {
         open={showPatientModal}
         onOpenChange={setShowPatientModal}
       />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="appointments" className="mt-6">
+          <SmartAppointmentScheduler />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
