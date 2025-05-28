@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { TestTube, Save, User, Calendar, Loader2 } from "lucide-react";
+import { TestTube, Save, User, Calendar, Loader2, Printer, Download, FileText, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -106,6 +106,103 @@ export default function LabResultEntry({ className }: LabResultEntryProps) {
     });
   };
 
+  const handlePrintOrder = (order: LabOrder) => {
+    const printContent = generateLabOrderPrint(order, orderItems);
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const handleExportOrder = (order: LabOrder) => {
+    const csvContent = generateLabOrderCSV(order, orderItems);
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lab-order-${order.id}-${format(new Date(order.createdAt), 'yyyy-MM-dd')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const generateLabOrderPrint = (order: LabOrder, items: LabOrderItem[]): string => {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Lab Order #${order.id}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .patient-info { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .test-list { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .test-list th, .test-list td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .test-list th { background-color: #f2f2f2; }
+        .footer { margin-top: 30px; text-align: center; color: #666; }
+        @media print { body { margin: 0; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Laboratory Order</h1>
+        <p>Order #${order.id} | Date: ${format(new Date(order.createdAt), 'PPP')}</p>
+      </div>
+      
+      <div class="patient-info">
+        <h3>Patient Information</h3>
+        <p><strong>Name:</strong> ${order.patient?.firstName} ${order.patient?.lastName}</p>
+        <p><strong>Patient ID:</strong> ${order.patientId}</p>
+        <p><strong>Date of Birth:</strong> ${order.patient?.dateOfBirth ? format(new Date(order.patient.dateOfBirth), 'PPP') : 'Not specified'}</p>
+      </div>
+
+      <h3>Ordered Tests</h3>
+      <table class="test-list">
+        <thead>
+          <tr>
+            <th>Test Name</th>
+            <th>Category</th>
+            <th>Reference Range</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map(item => `
+            <tr>
+              <td>${item.testName}</td>
+              <td>${item.testCategory || 'General'}</td>
+              <td>${item.referenceRange || 'See lab standards'}</td>
+              <td>${item.status}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+
+      <div class="footer">
+        <p>Generated on ${format(new Date(), 'PPP')} | Total Tests: ${items.length}</p>
+      </div>
+    </body>
+    </html>`;
+  };
+
+  const generateLabOrderCSV = (order: LabOrder, items: LabOrderItem[]): string => {
+    const headers = ['Order ID', 'Patient Name', 'Test Name', 'Category', 'Reference Range', 'Status', 'Order Date'];
+    const rows = items.map(item => [
+      order.id,
+      `${order.patient?.firstName} ${order.patient?.lastName}`,
+      item.testName,
+      item.testCategory || 'General',
+      item.referenceRange || 'See lab standards',
+      item.status,
+      format(new Date(order.createdAt), 'yyyy-MM-dd')
+    ]);
+    
+    return [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+  };
+
   if (ordersLoading) {
     return (
       <Card className={className}>
@@ -148,7 +245,7 @@ export default function LabResultEntry({ className }: LabResultEntryProps) {
                   onClick={() => setSelectedOrder(order.id)}
                 >
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1">
                       <h4 className="font-medium">
                         {order.patient ? `${order.patient.firstName} ${order.patient.lastName}` : `Patient ID: ${order.patientId}`}
                       </h4>
@@ -157,9 +254,51 @@ export default function LabResultEntry({ className }: LabResultEntryProps) {
                           <Calendar className="h-3 w-3" />
                           {format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}
                         </div>
+                        <div className="flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          Order #{order.id}
+                        </div>
                       </div>
                     </div>
-                    <Badge variant="outline">Order #{order.id}</Badge>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePrintOrder(order);
+                        }}
+                        className="h-8"
+                      >
+                        <Printer className="h-3 w-3 mr-1" />
+                        Print
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleExportOrder(order);
+                        }}
+                        className="h-8"
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        Export
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedOrder(selectedOrder === order.id ? null : order.id);
+                        }}
+                        className="h-8"
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        {selectedOrder === order.id ? 'Hide' : 'View'} Details
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -168,17 +307,48 @@ export default function LabResultEntry({ className }: LabResultEntryProps) {
         </CardContent>
       </Card>
 
-      {/* Test Results Entry */}
+      {/* Test Details and Results Entry */}
       {selectedOrder && (
         <Card>
           <CardHeader>
-            <CardTitle>Enter Test Results - Order #{selectedOrder}</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Lab Order Details - Order #{selectedOrder}</CardTitle>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const order = pendingOrders.find(o => o.id === selectedOrder);
+                    if (order) handlePrintOrder(order);
+                  }}
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print Order
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const order = pendingOrders.find(o => o.id === selectedOrder);
+                    if (order) handleExportOrder(order);
+                  }}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {itemsLoading ? (
               <div className="flex items-center justify-center py-6">
                 <Loader2 className="h-6 w-6 animate-spin" />
                 <span className="ml-2">Loading test details...</span>
+              </div>
+            ) : orderItems.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No test details found for this order.</p>
               </div>
             ) : (
               <div className="space-y-6">

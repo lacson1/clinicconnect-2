@@ -991,6 +991,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/lab-orders/:id/items', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const labOrderId = parseInt(req.params.id);
+      
+      const orderItems = await db.select({
+        id: labOrderItems.id,
+        labOrderId: labOrderItems.labOrderId,
+        labTestId: labOrderItems.labTestId,
+        result: labOrderItems.result,
+        remarks: labOrderItems.remarks,
+        status: labOrderItems.status,
+        completedBy: labOrderItems.completedBy,
+        completedAt: labOrderItems.completedAt,
+        testName: labTests.name,
+        testCategory: labTests.category,
+        referenceRange: labTests.referenceRange,
+        units: labTests.units
+      })
+      .from(labOrderItems)
+      .leftJoin(labTests, eq(labOrderItems.labTestId, labTests.id))
+      .where(eq(labOrderItems.labOrderId, labOrderId))
+      .orderBy(labTests.name);
+      
+      res.json(orderItems);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch lab order items" });
+    }
+  });
+
   app.get("/api/users/:username", authenticateToken, requireAnyRole(['admin', 'doctor']), async (req, res) => {
     try {
       const username = req.params.username;
