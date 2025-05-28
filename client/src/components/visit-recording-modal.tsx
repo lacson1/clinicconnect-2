@@ -12,12 +12,12 @@ const visitFormSchema = z.object({
   diagnosis: z.string().min(1, "Diagnosis is required"),
   treatment: z.string().min(1, "Treatment plan is required"),
   visitType: z.string().default("consultation"),
-  bloodPressure: z.string().optional(),
-  heartRate: z.number().optional(),
-  temperature: z.number().optional(),
-  weight: z.number().optional(),
-  height: z.string().optional(),
-  followUpDate: z.string().optional(),
+  bloodPressure: z.string().default(""),
+  heartRate: z.string().default(""),
+  temperature: z.string().default(""),
+  weight: z.string().default(""),
+  height: z.string().default(""),
+  followUpDate: z.string().default(""),
 });
 
 import { useToast } from "@/hooks/use-toast";
@@ -81,9 +81,10 @@ export default function VisitRecordingModal({
       const saved = localStorage.getItem(draftKey);
       return saved ? JSON.parse(saved) : {
         bloodPressure: "",
-        heartRate: undefined,
-        temperature: undefined,
-        weight: undefined,
+        heartRate: "",
+        temperature: "",
+        weight: "",
+        height: "",
         complaint: "",
         diagnosis: "",
         treatment: "",
@@ -106,7 +107,7 @@ export default function VisitRecordingModal({
     }
   }, [draftKey]);
 
-  const form = useForm<Omit<InsertVisit, "patientId">>({
+  const form = useForm({
     resolver: zodResolver(visitFormSchema),
     defaultValues: loadDraft,
   });
@@ -195,13 +196,20 @@ export default function VisitRecordingModal({
       return;
     }
 
-    // Clean up empty strings to avoid validation issues
+    // Clean up and convert data for API submission
     const cleanedData = {
-      ...data,
-      bloodPressure: data.bloodPressure?.trim() || undefined,
-      temperature: data.temperature?.toString()?.trim() || undefined,
-      weight: data.weight?.toString()?.trim() || undefined,
-      followUpDate: data.followUpDate?.trim() || undefined,
+      patientId: selectedPatientId,
+      chiefComplaint: data.complaint,
+      diagnosis: data.diagnosis,
+      treatment: data.treatment,
+      visitType: data.visitType,
+      visitDate: new Date().toISOString().split('T')[0],
+      bloodPressure: data.bloodPressure?.trim() || null,
+      heartRate: data.heartRate ? parseInt(data.heartRate) : null,
+      temperature: data.temperature ? parseFloat(data.temperature) : null,
+      weight: data.weight ? parseFloat(data.weight) : null,
+      height: data.height?.trim() || null,
+      followUpDate: data.followUpDate?.trim() || null,
     };
 
     recordVisitMutation.mutate({
