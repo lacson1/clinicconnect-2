@@ -8,6 +8,7 @@ import { z } from "zod";
 import { db } from "./db";
 import { eq, desc, or, ilike, gte, and, isNotNull, inArray } from "drizzle-orm";
 import { authenticateToken, requireRole, requireAnyRole, hashPassword, comparePassword, generateToken, type AuthRequest } from "./middleware/auth";
+import { checkPermission, getUserPermissions } from "./middleware/permissions";
 import { initializeFirebase, sendNotificationToRole, sendUrgentNotification, NotificationTypes } from "./notifications";
 import { AuditLogger, AuditActions } from "./audit";
 

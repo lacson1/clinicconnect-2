@@ -19,11 +19,33 @@ export const organizations = pgTable('organizations', {
   updatedAt: timestamp('updated_at').defaultNow()
 });
 
+// RBAC System Tables
+export const roles = pgTable('roles', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 50 }).unique().notNull(),
+  description: varchar('description', { length: 255 }),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
+export const permissions = pgTable('permissions', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).unique().notNull(),
+  description: varchar('description', { length: 255 }),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
+export const rolePermissions = pgTable('role_permissions', {
+  id: serial('id').primaryKey(),
+  roleId: integer('role_id').references(() => roles.id).notNull(),
+  permissionId: integer('permission_id').references(() => permissions.id).notNull()
+});
+
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   username: varchar('username', { length: 50 }).notNull().unique(),
   password: varchar('password', { length: 255 }).notNull(),
-  role: varchar('role', { length: 20 }).notNull(), // e.g., admin, nurse, doctor, pharmacist, physiotherapist
+  role: varchar('role', { length: 20 }).notNull(), // Keep for backward compatibility
+  roleId: integer('role_id').references(() => roles.id), // New RBAC role reference
   email: varchar('email', { length: 100 }),
   phone: varchar('phone', { length: 20 }),
   photoUrl: varchar('photo_url', { length: 255 }),
