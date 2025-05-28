@@ -203,12 +203,12 @@ export default function Patients() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <CardTitle className="text-xl text-slate-800">
+                      <CardTitle className="text-xl text-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">
                         {patient.firstName} {patient.lastName}
                       </CardTitle>
-                      <div className="flex items-center text-sm text-slate-500 mt-1">
+                      <div className="flex items-center text-sm text-slate-500 mt-1 whitespace-nowrap">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {calculateAge(patient.dateOfBirth)} years old
+                        <span>{calculateAge(patient.dateOfBirth)} years old</span>
                       </div>
                     </div>
                     <Badge variant="secondary" className="bg-green-100 text-green-800">Active</Badge>
@@ -355,15 +355,15 @@ export default function Patients() {
                           </Avatar>
                           <div className="flex-1">
                             <div className="flex items-center space-x-3">
-                              <h3 className="text-lg font-semibold text-slate-800">
+                              <h3 className="text-lg font-semibold text-slate-800 whitespace-nowrap">
                                 {patient.firstName} {patient.lastName}
                               </h3>
                               <Badge variant="secondary" className="bg-green-100 text-green-800">Active</Badge>
                             </div>
                             <div className="flex items-center space-x-6 mt-1 text-sm text-slate-500">
-                              <div className="flex items-center">
+                              <div className="flex items-center whitespace-nowrap">
                                 <Calendar className="h-4 w-4 mr-1" />
-                                {calculateAge(patient.dateOfBirth)} years old
+                                <span>{calculateAge(patient.dateOfBirth)} years old</span>
                               </div>
                               {patient.phone && (
                                 <div className="flex items-center">
