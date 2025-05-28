@@ -1195,6 +1195,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Unified Patient Activity Trail - Consultations + Visits + Vital Signs
+  app.get("/api/patients/:patientId/activity-trail", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.patientId);
+      
+      // Get consultation records
+      const consultations = await db
+        .select({
+          id: consultationRecords.id,
+          type: sql<string>`'consultation'`,
+          date: consultationRecords.createdAt,
+          title: consultationForms.name,
+          description: consultationForms.description,
+          conductedBy: users.firstName,
+          conductedByRole: users.role,
+          data: consultationRecords.formData
+        })
+        .from(consultationRecords)
+        .leftJoin(users, eq(consultationRecords.filledBy, users.id))
+        .leftJoin(consultationForms, eq(consultationRecords.formId, consultationForms.id))
+        .where(eq(consultationRecords.patientId, patientId));
+
+      // Get visit records
+      const visitsData = await db
+        .select({
+          id: visits.id,
+          type: sql<string>`'visit'`,
+          date: visits.visitDate,
+          title: sql<string>`'Medical Visit'`,
+          description: visits.chiefComplaint,
+          conductedBy: users.firstName,
+          conductedByRole: users.role,
+          data: sql<any>`json_build_object(
+            'visitType', ${visits.visitType},
+            'chiefComplaint', ${visits.chiefComplaint},
+            'diagnosis', ${visits.diagnosis},
+            'treatment', ${visits.treatment}
+          )`
+        })
+        .from(visits)
+        .leftJoin(users, eq(visits.doctorId, users.id))
+        .where(eq(visits.patientId, patientId));
+
+      // Combine and sort by date
+      const activities = [...consultations, ...visitsData]
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      res.json(activities);
+    } catch (error) {
+      console.error('Error fetching patient activity trail:', error);
+      res.status(500).json({ message: "Failed to fetch patient activity trail" });
+    }
+  });
+
   // Get patient consultations with form details
   app.get("/api/patients/:id/consultations", authenticateToken, async (req: AuthRequest, res) => {
     try {

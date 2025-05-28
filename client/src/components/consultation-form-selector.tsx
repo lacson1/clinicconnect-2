@@ -453,7 +453,7 @@ export default function ConsultationFormSelector({
                                   #{consultation.id}
                                 </Badge>
                                 <Badge variant="secondary">
-                                  {new Date(consultation.consultationDate).toLocaleDateString()}
+                                  {new Date(consultation.createdAt).toLocaleDateString()}
                                 </Badge>
                               </div>
                             </div>
@@ -475,7 +475,7 @@ export default function ConsultationFormSelector({
                             <div className="space-y-2">
                               <div className="flex items-center gap-4 text-sm">
                                 <span className="text-gray-600">
-                                  <strong>Date:</strong> {new Date(consultation.consultationDate).toLocaleDateString('en-US', { 
+                                  <strong>Date:</strong> {new Date(consultation.createdAt).toLocaleDateString('en-US', { 
                                     weekday: 'long', 
                                     year: 'numeric', 
                                     month: 'long', 
@@ -483,7 +483,7 @@ export default function ConsultationFormSelector({
                                   })}
                                 </span>
                                 <span className="text-gray-600">
-                                  <strong>Time:</strong> {new Date(consultation.consultationDate).toLocaleTimeString('en-US', { 
+                                  <strong>Time:</strong> {new Date(consultation.createdAt).toLocaleTimeString('en-US', { 
                                     hour: '2-digit', 
                                     minute: '2-digit' 
                                   })}
