@@ -619,9 +619,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { username, password } = req.body;
-      const user = await storage.getUserByUsername(username);
+      console.log('Login attempt for username:', username);
       
-      if (!user || !(await comparePassword(password, user.password))) {
+      const user = await storage.getUserByUsername(username);
+      console.log('User found:', user ? 'Yes' : 'No');
+      
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      const passwordMatch = await comparePassword(password, user.password);
+      console.log('Password match:', passwordMatch);
+      
+      if (!passwordMatch) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
@@ -636,6 +646,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
+      console.error('Login error:', error);
       res.status(500).json({ message: "Login failed" });
     }
   });
