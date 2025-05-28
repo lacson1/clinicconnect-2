@@ -151,7 +151,7 @@ export default function UserManagement() {
   const handleUpdateUser = () => {
     if (!selectedUser) return;
 
-    const updateData = {
+    const updateData: any = {
       username: formData.username,
       role: formData.role,
       email: formData.email,
@@ -159,9 +159,14 @@ export default function UserManagement() {
       photoUrl: formData.photoUrl
     };
 
+    // Include organization if provided
+    if (formData.organizationId) {
+      updateData.organizationId = parseInt(formData.organizationId);
+    }
+
     // Only include password if it's provided
     if (formData.password) {
-      (updateData as any).password = formData.password;
+      updateData.password = formData.password;
     }
 
     updateUserMutation.mutate({ id: selectedUser.id, userData: updateData });
@@ -175,7 +180,8 @@ export default function UserManagement() {
       role: user.role,
       email: user.email || "",
       phone: user.phone || "",
-      photoUrl: user.photoUrl || ""
+      photoUrl: user.photoUrl || "",
+      organizationId: user.organizationId?.toString() || ""
     });
     setEditDialogOpen(true);
   };
@@ -256,6 +262,22 @@ export default function UserManagement() {
                     {USER_ROLES.map((role) => (
                       <SelectItem key={role.value} value={role.value}>
                         {role.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="organization">Organization *</Label>
+                <Select value={formData.organizationId} onValueChange={(value) => setFormData({ ...formData, organizationId: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select organization" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {organizations.map((org: any) => (
+                      <SelectItem key={org.id} value={org.id.toString()}>
+                        {org.name} ({org.type})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -445,6 +467,22 @@ export default function UserManagement() {
                   {USER_ROLES.map((role) => (
                     <SelectItem key={role.value} value={role.value}>
                       {role.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="edit-organization">Organization</Label>
+              <Select value={formData.organizationId} onValueChange={(value) => setFormData({ ...formData, organizationId: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org: any) => (
+                    <SelectItem key={org.id} value={org.id.toString()}>
+                      {org.name} ({org.type})
                     </SelectItem>
                   ))}
                 </SelectContent>
