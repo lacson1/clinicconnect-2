@@ -75,7 +75,7 @@ export default function VisitRecordingModal({
   };
 
   const form = useForm<Omit<InsertVisit, "patientId">>({
-    resolver: zodResolver(insertVisitSchema.omit({ patientId: true })),
+    resolver: zodResolver(visitFormSchema),
     defaultValues: loadDraft(),
   });
 
