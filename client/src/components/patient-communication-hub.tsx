@@ -62,6 +62,11 @@ export function PatientCommunicationHub({ patientId }: { patientId?: number }) {
   const [messageType, setMessageType] = useState<string>('general');
   const [priority, setPriority] = useState<string>('normal');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [communicationPrefs, setCommunicationPrefs] = useState({
+    phone: 'emergency',
+    sms: 'primary', 
+    email: 'secondary'
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -120,6 +125,24 @@ export function PatientCommunicationHub({ patientId }: { patientId?: number }) {
     mutationFn: (messageId: number) => apiRequest('PATCH', `/api/messages/${messageId}/read`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/messages', selectedPatient] });
+    }
+  });
+
+  // Update communication preferences mutation
+  const updatePreferencesMutation = useMutation({
+    mutationFn: (prefsData: any) => apiRequest('PATCH', `/api/patients/${selectedPatient}/communication-preferences`, prefsData),
+    onSuccess: () => {
+      toast({
+        title: "Preferences Updated",
+        description: "Communication preferences have been saved successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update preferences. Please try again.",
+        variant: "destructive"
+      });
     }
   });
 
@@ -185,6 +208,35 @@ export function PatientCommunicationHub({ patientId }: { patientId?: number }) {
       setNewMessage(template.template);
       setMessageType(template.type);
       setSelectedTemplate(templateId);
+    }
+  };
+
+  const handlePreferenceUpdate = (method: string, preference: string) => {
+    const newPrefs = { ...communicationPrefs, [method]: preference };
+    setCommunicationPrefs(newPrefs);
+    
+    if (selectedPatient) {
+      updatePreferencesMutation.mutate(newPrefs);
+    }
+  };
+
+  const getPreferenceLabel = (pref: string) => {
+    switch (pref) {
+      case 'primary': return 'Primary method';
+      case 'secondary': return 'Secondary method';
+      case 'emergency': return 'Emergency only';
+      case 'disabled': return 'Disabled';
+      default: return 'Not set';
+    }
+  };
+
+  const getPreferenceColor = (pref: string) => {
+    switch (pref) {
+      case 'primary': return 'bg-blue-50 border-blue-200';
+      case 'secondary': return 'bg-green-50 border-green-200';
+      case 'emergency': return 'bg-yellow-50 border-yellow-200';
+      case 'disabled': return 'bg-gray-50 border-gray-200';
+      default: return 'bg-gray-50 border-gray-200';
     }
   };
 
@@ -478,22 +530,84 @@ export function PatientCommunicationHub({ patientId }: { patientId?: number }) {
 
               <Card className="p-4">
                 <h4 className="font-medium mb-3">Communication Preferences</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-3 border rounded-lg">
-                    <Phone className="w-6 h-6 mx-auto mb-2 text-blue-500" />
-                    <p className="text-sm font-medium">Phone Calls</p>
-                    <p className="text-xs text-gray-500">Emergency only</p>
+                <div className="space-y-4">
+                  {/* Phone Preferences */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm font-medium">Phone Calls</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {['primary', 'secondary', 'emergency', 'disabled'].map((pref) => (
+                        <button
+                          key={pref}
+                          onClick={() => handlePreferenceUpdate('phone', pref)}
+                          className={`p-2 text-xs rounded border transition-colors ${
+                            communicationPrefs.phone === pref 
+                              ? getPreferenceColor(pref) + ' border-2' 
+                              : 'bg-white border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
+                          {getPreferenceLabel(pref)}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="text-center p-3 border rounded-lg bg-blue-50">
-                    <MessageSquare className="w-6 h-6 mx-auto mb-2 text-blue-500" />
-                    <p className="text-sm font-medium">SMS Messages</p>
-                    <p className="text-xs text-gray-500">Primary method</p>
+
+                  {/* SMS Preferences */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm font-medium">SMS Messages</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {['primary', 'secondary', 'emergency', 'disabled'].map((pref) => (
+                        <button
+                          key={pref}
+                          onClick={() => handlePreferenceUpdate('sms', pref)}
+                          className={`p-2 text-xs rounded border transition-colors ${
+                            communicationPrefs.sms === pref 
+                              ? getPreferenceColor(pref) + ' border-2' 
+                              : 'bg-white border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
+                          {getPreferenceLabel(pref)}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="text-center p-3 border rounded-lg">
-                    <Mail className="w-6 h-6 mx-auto mb-2 text-blue-500" />
-                    <p className="text-sm font-medium">Email</p>
-                    <p className="text-xs text-gray-500">Secondary method</p>
+
+                  {/* Email Preferences */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm font-medium">Email</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {['primary', 'secondary', 'emergency', 'disabled'].map((pref) => (
+                        <button
+                          key={pref}
+                          onClick={() => handlePreferenceUpdate('email', pref)}
+                          className={`p-2 text-xs rounded border transition-colors ${
+                            communicationPrefs.email === pref 
+                              ? getPreferenceColor(pref) + ' border-2' 
+                              : 'bg-white border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
+                          {getPreferenceLabel(pref)}
+                        </button>
+                      ))}
+                    </div>
                   </div>
+
+                  {selectedPatient && (
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center gap-2 text-sm text-blue-700">
+                        <CheckCircle className="w-4 h-4" />
+                        Preferences are automatically saved when changed
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Card>
             </TabsContent>
