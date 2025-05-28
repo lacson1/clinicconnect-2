@@ -1,0 +1,99 @@
+Perfect! Let’s create SQL seed scripts for:
+
+✅ Roles
+✅ Permissions
+✅ Role-permissions mappings
+
+so you can run them in your Postgres database (e.g., via Replit, Railway, or your local Postgres console). 🚀
+
+⸻
+
+🌟 1️⃣ Seed Roles
+
+INSERT INTO roles (name, description) VALUES
+('doctor', 'Can view and edit patient data, consultations, and lab results'),
+('nurse', 'Can view and update basic patient data and lab orders'),
+('pharmacist', 'Can view prescriptions and manage medication orders'),
+('admin', 'Can manage staff, patients, and settings'),
+('superadmin', 'Full platform access');
+
+
+⸻
+
+🌟 2️⃣ Seed Permissions
+
+INSERT INTO permissions (name, description) VALUES
+-- Patient Data
+('viewPatients', 'View patient data'),
+('editPatients', 'Edit patient data'),
+('createPatients', 'Create new patient profiles'),
+
+-- Lab Orders & Results
+('createLabOrder', 'Create lab orders'),
+('viewLabResults', 'View lab results'),
+('editLabResults', 'Update lab results'),
+
+-- Consultations
+('createConsultation', 'Create specialist consultations'),
+('viewConsultation', 'View consultation records'),
+
+-- Medications & Prescriptions
+('viewMedications', 'View prescribed medications'),
+('manageMedications', 'Manage and dispense medications'),
+
+-- Staff & Users
+('manageUsers', 'Manage staff and user roles'),
+
+-- Dashboard & Analytics
+('viewDashboard', 'Access the dashboard'),
+('viewReports', 'View analytics and performance reports');
+
+
+⸻
+
+🌟 3️⃣ Seed Role-Permissions Mappings
+
+Here’s an example of mapping common permissions to roles:
+
+-- Doctor
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT 1, id FROM permissions WHERE name IN
+('viewPatients', 'editPatients', 'createLabOrder', 'viewLabResults', 'createConsultation', 'viewConsultation', 'viewMedications', 'viewDashboard');
+
+-- Nurse
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT 2, id FROM permissions WHERE name IN
+('viewPatients', 'createLabOrder', 'viewLabResults', 'viewMedications', 'viewDashboard');
+
+-- Pharmacist
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT 3, id FROM permissions WHERE name IN
+('viewPatients', 'viewMedications', 'manageMedications', 'viewDashboard');
+
+-- Admin
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT 4, id FROM permissions; -- Admins get all permissions
+
+-- Superadmin
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT 5, id FROM permissions; -- Superadmins get all permissions
+
+
+⸻
+
+🌟 How to Run in Postgres
+
+✅ Save as a file (e.g., rbac_seed.sql) and run:
+
+psql -d your_database_name -f rbac_seed.sql
+
+Or copy-paste each block directly into your Postgres console.
+
+⸻
+
+Would you like me to:
+
+🔹 Bundle these SQL snippets into a single file for easy download?
+🔹 Or show you how to link this RBAC data to your Express app (e.g., JWT token includes roleId, check permissions in middleware)?
+
+Let me know—ready to power up your RBAC system! 🚀✨

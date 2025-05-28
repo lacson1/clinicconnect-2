@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
 import { storage } from "./storage";
+import { fileStorage } from "./storage-service";
 import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, users, auditLogs, labTests, medications, labOrders, labOrderItems, consultationForms, consultationRecords, organizations, visits, patients } from "@shared/schema";
 import { z } from "zod";
 import { db } from "./db";
@@ -12,6 +14,27 @@ import { AuditLogger, AuditActions } from "./audit";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Firebase for push notifications
   initializeFirebase();
+
+  // Configure multer for file uploads
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      // Allow images and common document types
+      const allowedTypes = [
+        'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
+        'application/pdf', 'text/plain',
+        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Invalid file type'));
+      }
+    }
+  });
 
   // Smart Suggestion Endpoints for Auto-complete
   app.get("/api/suggestions/medicines", authenticateToken, async (req: AuthRequest, res) => {
@@ -1452,6 +1475,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error updating organization status:', error);
       res.status(500).json({ message: 'Failed to update organization status' });
+    }
+  });
+
+  // File Upload Endpoints for Replit Storage
+  app.post('/api/upload/:category', authenticateToken, upload.single('file'), async (req: AuthRequest, res) => {
+    try {
+      const category = req.params.category as 'patients' | 'staff' | 'organizations' | 'documents';
+      const validCategories = ['patients', 'staff', 'organizations', 'documents'];
+      
+      if (!validCategories.includes(category)) {
+        return res.status(400).json({ message: 'Invalid upload category' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const fileName = await fileStorage.saveFile(req.file.buffer, req.file.originalname, category);
+      const fileUrl = fileStorage.getFileUrl(fileName, category);
+
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction('file_uploaded', {
+        category,
+        fileName: req.file.originalname,
+        fileSize: req.file.size
+      });
+
+      res.json({
+        fileName,
+        fileUrl,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to upload file' });
+    }
+  });
+
+  // File Download/Serve Endpoint
+  app.get('/api/files/:category/:fileName', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { category, fileName } = req.params;
+      const validCategories = ['patients', 'staff', 'organizations', 'documents'];
+      
+      if (!validCategories.includes(category)) {
+        return res.status(400).json({ message: 'Invalid file category' });
+      }
+
+      const fileBuffer = await fileStorage.getFile(fileName, category as any);
+      if (!fileBuffer) {
+        return res.status(404).json({ message: 'File not found' });
+      }
+
+      // Set appropriate headers
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.send(fileBuffer);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to retrieve file' });
+    }
+  });
+
+  // Delete File Endpoint
+  app.delete('/api/files/:category/:fileName', authenticateToken, requireAnyRole(['admin', 'doctor']), async (req: AuthRequest, res) => {
+    try {
+      const { category, fileName } = req.params;
+      const validCategories = ['patients', 'staff', 'organizations', 'documents'];
+      
+      if (!validCategories.includes(category)) {
+        return res.status(400).json({ message: 'Invalid file category' });
+      }
+
+      const deleted = await fileStorage.deleteFile(fileName, category as any);
+      if (!deleted) {
+        return res.status(404).json({ message: 'File not found' });
+      }
+
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction('file_deleted', {
+        category,
+        fileName
+      });
+
+      res.json({ message: 'File deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to delete file' });
     }
   });
 
