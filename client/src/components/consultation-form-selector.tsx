@@ -374,7 +374,7 @@ export default function ConsultationFormSelector({
             
             {/* Form Fields */}
             <div className="space-y-4">
-              {selectedForm.formStructure.fields.map((field) => (
+              {(selectedForm.formStructure?.fields || []).map((field) => (
                 <div key={field.id} className="space-y-2">
                   <Label className="flex items-center gap-2">
                     {field.label}
