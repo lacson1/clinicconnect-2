@@ -94,14 +94,14 @@ export default function PatientVitalSignsTracker({ patientId }: PatientVitalSign
 
   const handleAddVitals = () => {
     const vitalsData = {
-      bloodPressureSystolic: parseInt(newVitals.bloodPressureSystolic),
-      bloodPressureDiastolic: parseInt(newVitals.bloodPressureDiastolic),
-      heartRate: parseInt(newVitals.heartRate),
-      temperature: parseFloat(newVitals.temperature),
-      respiratoryRate: parseInt(newVitals.respiratoryRate),
-      oxygenSaturation: parseInt(newVitals.oxygenSaturation),
-      weight: parseFloat(newVitals.weight),
-      height: parseFloat(newVitals.height)
+      bloodPressureSystolic: newVitals.bloodPressureSystolic ? parseInt(newVitals.bloodPressureSystolic) : null,
+      bloodPressureDiastolic: newVitals.bloodPressureDiastolic ? parseInt(newVitals.bloodPressureDiastolic) : null,
+      heartRate: newVitals.heartRate ? parseInt(newVitals.heartRate) : null,
+      temperature: newVitals.temperature ? parseFloat(newVitals.temperature) : null,
+      respiratoryRate: newVitals.respiratoryRate ? parseInt(newVitals.respiratoryRate) : null,
+      oxygenSaturation: newVitals.oxygenSaturation ? parseInt(newVitals.oxygenSaturation) : null,
+      weight: newVitals.weight ? parseFloat(newVitals.weight) : null,
+      height: newVitals.height ? parseFloat(newVitals.height) : null
     };
 
     addVitalsMutation.mutate(vitalsData);
