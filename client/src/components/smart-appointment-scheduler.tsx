@@ -392,7 +392,7 @@ export default function SmartAppointmentScheduler({ patientId, defaultDate }: Sm
                   <SelectContent>
                     {doctors.map((doctor: any) => (
                       <SelectItem key={doctor.id} value={doctor.id.toString()}>
-                        Dr. {doctor.firstName} {doctor.lastName}
+                        Dr. {doctor.username}
                       </SelectItem>
                     ))}
                   </SelectContent>
