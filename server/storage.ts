@@ -316,15 +316,35 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(referrals.status, filters.status));
     }
 
+    const baseQuery = db.select({
+      id: referrals.id,
+      patientId: referrals.patientId,
+      fromUserId: referrals.fromUserId,
+      toRole: referrals.toRole,
+      reason: referrals.reason,
+      date: referrals.date,
+      status: referrals.status,
+      patient: {
+        id: patients.id,
+        firstName: patients.firstName,
+        lastName: patients.lastName,
+      },
+      fromUser: {
+        id: users.id,
+        username: users.username,
+      }
+    })
+    .from(referrals)
+    .leftJoin(patients, eq(referrals.patientId, patients.id))
+    .leftJoin(users, eq(referrals.fromUserId, users.id));
+
     if (conditions.length > 0) {
-      return await db.select()
-        .from(referrals)
+      return await baseQuery
         .where(and(...conditions))
         .orderBy(desc(referrals.date));
     }
 
-    return await db.select()
-      .from(referrals)
+    return await baseQuery
       .orderBy(desc(referrals.date));
   }
 
