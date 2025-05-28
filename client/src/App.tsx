@@ -15,6 +15,7 @@ import Pharmacy from "@/pages/pharmacy";
 import Referrals from "@/pages/referrals";
 import ProfilePage from "@/pages/profile";
 import UserManagement from "@/pages/user-management";
+import AuditLogs from "@/pages/audit-logs";
 import FormBuilder from "@/pages/form-builder";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
@@ -39,6 +40,7 @@ function AuthenticatedApp() {
               <Route path="/form-builder" component={FormBuilder} />
               <Route path="/profile" component={ProfilePage} />
               <Route path="/user-management" component={UserManagement} />
+              <Route path="/audit-logs" component={AuditLogs} />
               <Route component={NotFound} />
             </Switch>
           </div>
