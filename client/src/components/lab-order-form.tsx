@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, TestTube, Plus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Loader2, TestTube, Plus, User, ChevronDown, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
 interface LabOrderFormProps {
-  patientId: number;
+  patientId?: number;
   onOrderCreated?: () => void;
 }
 
@@ -20,8 +22,16 @@ interface LabTest {
   referenceRange?: string;
 }
 
+interface Patient {
+  id: number;
+  firstName: string;
+  lastName: string;
+}
+
 export default function LabOrderForm({ patientId, onOrderCreated }: LabOrderFormProps) {
   const [selectedTests, setSelectedTests] = useState<number[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState<number | undefined>(patientId);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(['Hematology']);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -29,12 +39,16 @@ export default function LabOrderForm({ patientId, onOrderCreated }: LabOrderForm
     queryKey: ['/api/lab-tests']
   });
 
+  const { data: patients = [] } = useQuery<Patient[]>({
+    queryKey: ['/api/patients']
+  });
+
   const createOrderMutation = useMutation({
     mutationFn: async (tests: number[]) => {
-      return apiRequest(`/api/patients/${patientId}/lab-orders`, {
-        method: 'POST',
-        body: { tests }
-      });
+      if (!selectedPatientId) {
+        throw new Error('Please select a patient');
+      }
+      return apiRequest("POST", `/api/patients/${selectedPatientId}/lab-orders`, { tests });
     },
     onSuccess: () => {
       toast({
@@ -42,7 +56,7 @@ export default function LabOrderForm({ patientId, onOrderCreated }: LabOrderForm
         description: "Laboratory tests have been ordered successfully."
       });
       setSelectedTests([]);
-      queryClient.invalidateQueries({ queryKey: ['/api/patients', patientId, 'lab-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/patients', selectedPatientId, 'lab-orders'] });
       onOrderCreated?.();
     },
     onError: (error) => {
@@ -54,12 +68,47 @@ export default function LabOrderForm({ patientId, onOrderCreated }: LabOrderForm
     }
   });
 
+  // Group tests by category
+  const categorizedTests = labTests.reduce((acc, test) => {
+    const category = test.category || 'Other';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(test);
+    return acc;
+  }, {} as Record<string, LabTest[]>);
+
   const handleTestToggle = (testId: number) => {
     setSelectedTests(prev => 
       prev.includes(testId) 
         ? prev.filter(id => id !== testId)
         : [...prev, testId]
     );
+  };
+
+  const toggleCategory = (category: string) => {
+    setExpandedCategories(prev => 
+      prev.includes(category)
+        ? prev.filter(cat => cat !== category)
+        : [...prev, category]
+    );
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'Hematology': return '🩸';
+      case 'Clinical Chemistry': return '⚗️';
+      case 'Liver Function': return '🫀';
+      case 'Electrolytes': return '⚡';
+      case 'Parasitology': case 'Serology': case 'Microbiology': return '🦠';
+      case 'Urine Analysis': return '🧪';
+      case 'Stool Analysis': return '💩';
+      case 'Radiology': return '📷';
+      case 'Coagulation': return '🩸';
+      case 'Inflammatory Markers': return '🔥';
+      case 'Endocrinology': return '🧬';
+      default: return '🔬';
+    }
   };
 
   const handleSubmit = () => {
@@ -73,14 +122,6 @@ export default function LabOrderForm({ patientId, onOrderCreated }: LabOrderForm
     }
     createOrderMutation.mutate(selectedTests);
   };
-
-  const testsByCategory = labTests.reduce((acc, test) => {
-    if (!acc[test.category]) {
-      acc[test.category] = [];
-    }
-    acc[test.category].push(test);
-    return acc;
-  }, {} as Record<string, LabTest[]>);
 
   if (testsLoading) {
     return (
@@ -96,82 +137,139 @@ export default function LabOrderForm({ patientId, onOrderCreated }: LabOrderForm
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TestTube className="h-5 w-5" />
-          Order Laboratory Tests
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {Object.entries(testsByCategory).map(([category, tests]) => (
-          <div key={category} className="space-y-2">
-            <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-              {category}
-            </h4>
-            <div className="grid gap-2">
-              {tests.map(test => (
-                <div
-                  key={test.id}
-                  className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-                >
-                  <Checkbox
-                    id={`test-${test.id}`}
-                    checked={selectedTests.includes(test.id)}
-                    onCheckedChange={() => handleTestToggle(test.id)}
-                  />
-                  <div className="flex-1">
-                    <label 
-                      htmlFor={`test-${test.id}`}
-                      className="text-sm font-medium cursor-pointer"
-                    >
-                      {test.name}
-                    </label>
-                    {test.referenceRange && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Reference: {test.referenceRange}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-
-        {selectedTests.length > 0 && (
-          <div className="pt-4 border-t">
-            <h4 className="font-medium mb-2">Selected Tests ({selectedTests.length})</h4>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {selectedTests.map(testId => {
-                const test = labTests.find(t => t.id === testId);
-                return test ? (
-                  <Badge key={testId} variant="secondary">
-                    {test.name}
-                  </Badge>
-                ) : null;
-              })}
-            </div>
-            <Button 
-              onClick={handleSubmit}
-              disabled={createOrderMutation.isPending}
-              className="w-full"
+    <div className="space-y-6">
+      {/* Patient Selection */}
+      {!patientId && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Select Patient
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Select
+              value={selectedPatientId?.toString()}
+              onValueChange={(value) => setSelectedPatientId(Number(value))}
             >
-              {createOrderMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Order...
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Lab Order
-                </>
-              )}
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose a patient..." />
+              </SelectTrigger>
+              <SelectContent>
+                {patients.map(patient => (
+                  <SelectItem key={patient.id} value={patient.id.toString()}>
+                    {patient.firstName} {patient.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Lab Tests by Category */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TestTube className="h-5 w-5" />
+            Available Laboratory Tests
+          </CardTitle>
+          {selectedTests.length > 0 && (
+            <Badge variant="secondary" className="w-fit">
+              {selectedTests.length} test{selectedTests.length > 1 ? 's' : ''} selected
+            </Badge>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {Object.entries(categorizedTests).map(([category, tests]) => (
+            <Collapsible
+              key={category}
+              open={expandedCategories.includes(category)}
+              onOpenChange={() => toggleCategory(category)}
+            >
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-between p-4 h-auto border border-gray-200 dark:border-gray-700"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg">{getCategoryIcon(category)}</span>
+                    <div className="text-left">
+                      <div className="font-medium">{category}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {tests.length} test{tests.length > 1 ? 's' : ''} available
+                      </div>
+                    </div>
+                  </div>
+                  {expandedCategories.includes(category) ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent className="mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  {tests.map(test => (
+                    <div
+                      key={test.id}
+                      className="flex items-start space-x-3 p-3 bg-white dark:bg-gray-700 rounded border"
+                    >
+                      <Checkbox
+                        id={`test-${test.id}`}
+                        checked={selectedTests.includes(test.id)}
+                        onCheckedChange={() => handleTestToggle(test.id)}
+                      />
+                      <div className="flex-1">
+                        <label
+                          htmlFor={`test-${test.id}`}
+                          className="text-sm font-medium cursor-pointer"
+                        >
+                          {test.name}
+                        </label>
+                        {test.referenceRange && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Normal: {test.referenceRange}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Submit Button */}
+      {selectedTests.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Ready to order {selectedTests.length} test{selectedTests.length > 1 ? 's' : ''}
+                {selectedPatientId && patients.find(p => p.id === selectedPatientId) && (
+                  <span> for {patients.find(p => p.id === selectedPatientId)?.firstName} {patients.find(p => p.id === selectedPatientId)?.lastName}</span>
+                )}
+              </div>
+              <Button
+                onClick={handleSubmit}
+                disabled={createOrderMutation.isPending || !selectedPatientId}
+                className="flex items-center gap-2"
+              >
+                {createOrderMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                Create Lab Order
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
