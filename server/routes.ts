@@ -844,6 +844,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get doctors for appointment scheduling
+  app.get('/api/users/doctors', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const doctors = await db.select().from(users).where(eq(users.role, 'doctor'));
+      res.json(doctors);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch doctors" });
+    }
+  });
+
   // Lab Tests endpoints
   app.get('/api/lab-tests', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
@@ -1669,12 +1679,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .insert(vitalSigns)
         .values({
           patientId,
-          bloodPressureSystolic: parseInt(bloodPressureSystolic),
-          bloodPressureDiastolic: parseInt(bloodPressureDiastolic),
-          heartRate: parseInt(heartRate),
-          temperature: parseFloat(temperature),
-          respiratoryRate: parseInt(respiratoryRate),
-          oxygenSaturation: parseInt(oxygenSaturation),
+          bloodPressureSystolic: bloodPressureSystolic ? parseInt(bloodPressureSystolic) : null,
+          bloodPressureDiastolic: bloodPressureDiastolic ? parseInt(bloodPressureDiastolic) : null,
+          heartRate: heartRate ? parseInt(heartRate) : null,
+          temperature: temperature ? parseFloat(temperature) : null,
+          respiratoryRate: respiratoryRate ? parseInt(respiratoryRate) : null,
+          oxygenSaturation: oxygenSaturation ? parseInt(oxygenSaturation) : null,
           weight: weight ? parseFloat(weight) : null,
           height: height ? parseFloat(height) : null,
           recordedAt: new Date(),
