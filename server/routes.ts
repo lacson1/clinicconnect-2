@@ -630,15 +630,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/users", authenticateToken, requireRole('admin'), async (req: AuthRequest, res) => {
     try {
-      const userData = insertUserSchema.parse(req.body);
-      userData.password = await hashPassword(userData.password);
+      const { username, password, email, phone, role, organizationId } = req.body;
+      
+      if (!username || !password || !organizationId) {
+        return res.status(400).json({ error: 'Username, password, and organization are required' });
+      }
+
+      const hashedPassword = await hashPassword(password);
+      
+      const userData = {
+        username,
+        password: hashedPassword,
+        email,
+        phone,
+        role,
+        organizationId: parseInt(organizationId)
+      };
+      
       const user = await storage.createUser(userData);
       
       // Create audit log
       const auditLogger = new AuditLogger(req);
       await auditLogger.logUserAction(AuditActions.USER_CREATED, user.id, {
         newUserRole: user.role,
-        newUserUsername: user.username
+        newUserUsername: user.username,
+        organizationId: user.organizationId
       });
       
       res.json({ ...user, password: undefined }); // Don't return password
@@ -654,9 +670,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/users/:id', authenticateToken, requireRole('admin'), async (req: AuthRequest, res) => {
     try {
       const userId = parseInt(req.params.id);
-      const { username, password, role, email, phone, photoUrl } = req.body;
+      const { username, password, role, email, phone, photoUrl, organizationId } = req.body;
       
       const updateData: Record<string, any> = { username, role, email, phone, photoUrl };
+      
+      // Include organizationId if provided
+      if (organizationId !== undefined) {
+        updateData.organizationId = parseInt(organizationId);
+      }
       
       // Hash password if provided
       if (password) {

@@ -36,12 +36,18 @@ export default function UserManagement() {
     role: "",
     email: "",
     phone: "",
-    photoUrl: ""
+    photoUrl: "",
+    organizationId: ""
   });
 
   // Fetch all users
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
+  });
+
+  // Fetch all organizations for the dropdown
+  const { data: organizations = [] } = useQuery({
+    queryKey: ["/api/organizations"],
   });
 
   // Create user mutation
@@ -119,21 +125,27 @@ export default function UserManagement() {
       role: "",
       email: "",
       phone: "",
-      photoUrl: ""
+      photoUrl: "",
+      organizationId: ""
     });
   };
 
   const handleCreateUser = () => {
-    if (!formData.username || !formData.password || !formData.role) {
+    if (!formData.username || !formData.password || !formData.role || !formData.organizationId) {
       toast({
         title: "Error",
-        description: "Username, password, and role are required",
+        description: "Username, password, role, and organization are required",
         variant: "destructive"
       });
       return;
     }
 
-    createUserMutation.mutate(formData as InsertUser);
+    const userData = {
+      ...formData,
+      organizationId: parseInt(formData.organizationId)
+    };
+    
+    createUserMutation.mutate(userData as any);
   };
 
   const handleUpdateUser = () => {
