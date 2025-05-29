@@ -46,7 +46,7 @@ export default function RecordVisitPage() {
               </Button>
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">
-                  Record Visit - {patient?.firstName} {patient?.lastName}
+                  Record Visit - {patient ? `${patient.firstName || ''} ${patient.lastName || ''}`.trim() : 'Patient'}
                 </h1>
                 <p className="text-sm text-gray-500">
                   Comprehensive patient visit documentation

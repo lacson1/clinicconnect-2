@@ -68,6 +68,8 @@ export function ModernPatientOverview({
   recentLabs = [], 
   activePrescriptions = [] 
 }: ModernPatientOverviewProps) {
+  const [, navigate] = useLocation();
+  
   const getPatientAge = (dateOfBirth: string) => {
     const birth = new Date(dateOfBirth);
     const today = new Date();
@@ -372,7 +374,7 @@ export function ModernPatientOverview({
                     Document a new visit for {patient.firstName} {patient.lastName}
                   </p>
                   <Button 
-                    onClick={() => window.location.href = `/patients/${patient.id}/record-visit`}
+                    onClick={() => navigate(`/patients/${patient.id}/record-visit`)}
                     className="w-full"
                   >
                     <Stethoscope className="h-4 w-4 mr-2" />

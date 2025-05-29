@@ -136,6 +136,9 @@ export function EnhancedVisitRecording({ patientId, onSave }: EnhancedVisitRecor
     enabled: !!patientId,
   });
 
+  // Get patient name safely
+  const patientName = patient ? `${patient.firstName || ''} ${patient.lastName || ''}`.trim() : 'Patient';
+
   // Submit visit record
   const submitVisit = useMutation({
     mutationFn: async (data: VisitFormData) => {
@@ -245,7 +248,7 @@ export function EnhancedVisitRecording({ patientId, onSave }: EnhancedVisitRecor
             Record Patient Visit
           </CardTitle>
           <CardDescription>
-            Comprehensive patient visit documentation for {patient?.firstName} {patient?.lastName}
+            Comprehensive patient visit documentation for {patientName}
           </CardDescription>
         </CardHeader>
         <CardContent>
