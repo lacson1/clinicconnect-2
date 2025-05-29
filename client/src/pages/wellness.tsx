@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useQuery } from '@tanstack/react-query';
 import WellnessRecommendationEngine from '@/components/wellness-recommendation-engine';
+import EnhancedWellnessDashboard from '@/components/enhanced-wellness-dashboard';
 import { 
   Heart, 
   Search,
@@ -60,21 +61,53 @@ export default function WellnessPage() {
 
   return (
     <div className="flex-1 space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Wellness Center</h1>
-          <p className="text-gray-600">Personalized health recommendations and wellness tracking</p>
+      {/* Enhanced Header with Animations */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 p-8 text-white mb-8">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-4 left-8 w-16 h-16 bg-white rounded-full animate-bounce"></div>
+          <div className="absolute top-20 right-12 w-12 h-12 bg-yellow-300 rounded-full animate-pulse delay-300"></div>
+          <div className="absolute bottom-8 left-20 w-10 h-10 bg-green-300 rounded-full animate-ping delay-500"></div>
+          <div className="absolute bottom-4 right-8 w-20 h-20 bg-blue-300 rounded-full animate-pulse delay-700"></div>
         </div>
-        <div className="flex items-center gap-3">
-          <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
-            <Heart className="w-4 h-4 mr-2" />
-            Wellness Hub
-          </Badge>
-          <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
-            <Lightbulb className="w-4 h-4 mr-2" />
-            AI-Powered Recommendations
-          </Badge>
+        
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-5xl font-bold mb-4 flex items-center gap-4">
+                <div className="p-3 bg-white/20 rounded-full animate-pulse">
+                  <Heart className="w-12 h-12" />
+                </div>
+                Wellness Universe
+              </h1>
+              <p className="text-xl opacity-90 mb-4">Your personalized journey to optimal health, happiness & mental wellness</p>
+              <div className="flex gap-3">
+                <Badge className="bg-white/20 text-white border-white/30 text-sm px-4 py-2">
+                  <Target className="w-4 h-4 mr-2" />
+                  Holistic Health
+                </Badge>
+                <Badge className="bg-white/20 text-white border-white/30 text-sm px-4 py-2">
+                  <Activity className="w-4 h-4 mr-2" />
+                  Mental Wellness
+                </Badge>
+                <Badge className="bg-white/20 text-white border-white/30 text-sm px-4 py-2">
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Progress Tracking
+                </Badge>
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="relative">
+                <div className="w-32 h-32 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 animate-pulse">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold">{wellnessStats.avgWellnessScore}</div>
+                    <div className="text-sm opacity-80">Wellness Score</div>
+                  </div>
+                </div>
+                <div className="absolute -inset-2 bg-gradient-to-r from-yellow-400 to-pink-400 rounded-full opacity-30 animate-spin"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -275,10 +308,22 @@ export default function WellnessPage() {
           </DialogHeader>
           
           {selectedPatient && currentUser && (
-            <WellnessRecommendationEngine 
-              patientId={selectedPatient.id}
-              currentUser={currentUser}
-            />
+            <div className="space-y-6">
+              {/* Enhanced Wellness Dashboard */}
+              <EnhancedWellnessDashboard 
+                wellnessScore={selectedPatient.dateOfBirth ? 
+                  Math.max(85 - (new Date().getFullYear() - new Date(selectedPatient.dateOfBirth).getFullYear() > 50 ? 15 : 0), 60) : 
+                  78
+                }
+                patientData={selectedPatient}
+              />
+              
+              {/* Original Recommendation Engine */}
+              <WellnessRecommendationEngine 
+                patientId={selectedPatient.id}
+                currentUser={currentUser}
+              />
+            </div>
           )}
         </DialogContent>
       </Dialog>
