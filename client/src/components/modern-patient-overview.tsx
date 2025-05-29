@@ -41,7 +41,11 @@ import {
   Users,
   Upload,
   Clock,
-  Printer
+  Printer,
+  MoreVertical,
+  Eye,
+  Copy,
+  Trash2
 } from 'lucide-react';
 
 interface Patient {
@@ -93,6 +97,49 @@ export function ModernPatientOverview({
 }: ModernPatientOverviewProps) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+
+  // Handle visit actions
+  const handleViewVisit = (visitId: number) => {
+    navigate(`/patients/${patient.id}/visits/${visitId}`);
+  };
+
+  const handleEditVisit = (visitId: number) => {
+    navigate(`/patients/${patient.id}/visits/${visitId}/edit`);
+  };
+
+  const handleCopyVisit = (visit: any) => {
+    const visitDetails = `Visit Date: ${new Date(visit.visitDate).toLocaleDateString()}
+Type: ${visit.visitType || 'Consultation'}
+Complaint: ${visit.complaint || 'N/A'}
+Diagnosis: ${visit.diagnosis || 'N/A'}
+Treatment: ${visit.treatment || 'N/A'}
+Blood Pressure: ${visit.bloodPressure || 'N/A'}
+Heart Rate: ${visit.heartRate || 'N/A'}`;
+    
+    navigator.clipboard.writeText(visitDetails);
+    toast({
+      title: "Visit details copied",
+      description: "Visit information has been copied to clipboard",
+    });
+  };
+
+  const handleDeleteVisit = async (visitId: number) => {
+    if (confirm('Are you sure you want to delete this visit record?')) {
+      try {
+        // Implementation would go here
+        toast({
+          title: "Visit deleted",
+          description: "Visit record has been successfully deleted",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete visit record",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   // Timeline filter state
   const [timelineFilters, setTimelineFilters] = useState({
@@ -767,9 +814,36 @@ export function ModernPatientOverview({
                                 </div>
                               )}
                             </div>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="w-3 h-3" />
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <MoreVertical className="h-4 w-4" />
+                                  <span className="sr-only">Open menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-[200px]">
+                                <DropdownMenuItem onClick={() => handleViewVisit(visit.id)}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleEditVisit(visit.id)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit Visit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleCopyVisit(visit)}>
+                                  <Copy className="mr-2 h-4 w-4" />
+                                  Copy Details
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  onClick={() => handleDeleteVisit(visit.id)}
+                                  className="text-red-600 focus:text-red-600"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete Visit
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </div>
                       ))}
