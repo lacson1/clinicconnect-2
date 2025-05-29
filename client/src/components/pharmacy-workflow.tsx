@@ -91,25 +91,7 @@ export function PharmacyWorkflow({ medicines }: PharmacyWorkflowProps) {
     },
   });
 
-  // Mock data for demonstration
-  const pendingPrescriptions = [
-    {
-      id: "RX001",
-      patientName: "Abike Jare",
-      medicines: ["Paracetamol 500mg", "Vitamin C"],
-      prescribedBy: "Dr. Ade",
-      status: "pending",
-      priority: "normal"
-    },
-    {
-      id: "RX002", 
-      patientName: "Bola Adebayo",
-      medicines: ["Amoxicillin 250mg"],
-      prescribedBy: "Dr. Smith",
-      status: "urgent",
-      priority: "urgent"
-    }
-  ];
+  // No mock data - using real data from API
 
   const recentDispensing = [
     {

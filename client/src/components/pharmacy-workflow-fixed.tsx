@@ -144,18 +144,12 @@ export function PharmacyWorkflow({ medicines }: PharmacyWorkflowProps) {
   });
 
   // Mock data for demonstration
-  const pendingPrescriptions = [
-    { id: "RX001", patient: "Abike Jare", medicine: "Amoxicillin 500mg", quantity: 10, urgency: "Normal" },
-    { id: "RX002", patient: "Kemi Adebayo", medicine: "Paracetamol 500mg", quantity: 20, urgency: "Urgent" }
-  ];
+  const pendingPrescriptions = [];
 
   const lowStockMedicines = medicines?.filter(m => m.quantity <= 10) || [];
   const outOfStockMedicines = medicines?.filter(m => m.quantity === 0) || [];
 
-  const dispensingHistory = [
-    { id: 1, prescriptionId: "RX001", patientName: "Abike Jare", medicine: "Amoxicillin 500mg", quantity: 10, dispensedAt: "2025-05-28 14:30", dispensedBy: "Akin Pharmacist" },
-    { id: 2, prescriptionId: "RX002", patientName: "Kemi Adebayo", medicine: "Paracetamol 500mg", quantity: 20, dispensedAt: "2025-05-28 13:15", dispensedBy: "Akin Pharmacist" }
-  ];
+  const dispensingHistory = [];
 
   return (
     <div className="space-y-6">
@@ -203,7 +197,7 @@ export function PharmacyWorkflow({ medicines }: PharmacyWorkflowProps) {
               <ShoppingCart className="h-8 w-8 text-green-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Today's Dispensed</p>
-                <p className="text-2xl font-bold">{dispensingHistory.length}</p>
+                <p className="text-2xl font-bold">0</p>
               </div>
             </div>
           </CardContent>
@@ -258,7 +252,7 @@ export function PharmacyWorkflow({ medicines }: PharmacyWorkflowProps) {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={dispensingForm.control}
                         name="medicineId"
@@ -336,27 +330,14 @@ export function PharmacyWorkflow({ medicines }: PharmacyWorkflowProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {pendingPrescriptions.map((prescription) => (
-                  <div key={prescription.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${prescription.urgency === 'Urgent' ? 'bg-red-500' : 'bg-green-500'}`}></div>
-                      <div>
-                        <div className="font-medium">{prescription.id} - {prescription.patient}</div>
-                        <div className="text-sm text-gray-600">{prescription.medicine} × {prescription.quantity}</div>
-                      </div>
+                    <div className="text-center py-8">
+                      <Pill className="mx-auto h-12 w-12 text-slate-400" />
+                      <h3 className="mt-4 text-lg font-medium text-slate-900">No pending prescriptions</h3>
+                      <p className="mt-2 text-sm text-slate-500">
+                        Prescriptions will appear here when doctors create them.
+                      </p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant={prescription.urgency === 'Urgent' ? 'destructive' : 'secondary'}>
-                        {prescription.urgency}
-                      </Badge>
-                      <Button size="sm" onClick={() => setShowDispensingDialog(true)}>
-                        Dispense
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
+          </CardContent>
           </Card>
 
           {/* Recent Dispensing History */}
@@ -366,20 +347,15 @@ export function PharmacyWorkflow({ medicines }: PharmacyWorkflowProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {dispensingHistory.map((record) => (
-                  <div key={record.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                    <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
-                      <Check className="w-4 h-4 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium">{record.prescriptionId} - {record.patientName}</div>
-                      <div className="text-sm text-gray-600">{record.medicine} × {record.quantity}</div>
-                      <div className="text-xs text-gray-500">{record.dispensedAt} by {record.dispensedBy}</div>
-                    </div>
+                  <h4 className="font-medium text-slate-900">Recent Dispensing History</h4>
+                  <div className="text-center py-8">
+                    <Clock className="mx-auto h-12 w-12 text-slate-400" />
+                    <h3 className="mt-4 text-lg font-medium text-slate-900">No dispensing history</h3>
+                    <p className="mt-2 text-sm text-slate-500">
+                      Dispensed medications will appear here.
+                    </p>
                   </div>
-                ))}
-              </div>
-            </CardContent>
+          </CardContent>
           </Card>
         </TabsContent>
 
@@ -521,7 +497,7 @@ export function PharmacyWorkflow({ medicines }: PharmacyWorkflowProps) {
           </div>
         </TabsContent>
       </Tabs>
-      
+
       {/* Medication Selection Guide */}
       <MedicationSelectionGuide 
         isOpen={showMedicationGuide} 
