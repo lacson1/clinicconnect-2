@@ -49,6 +49,7 @@ function AuthenticatedApp() {
               <Route path="/dashboard" component={Dashboard} />
               <Route path="/patients" component={Patients} />
               <Route path="/patients/:id" component={PatientProfile} />
+              <Route path="/patients/:patientId/record-visit" component={RecordVisitPage} />
               <Route path="/visits" component={Visits} />
               <Route path="/lab-results" component={LabResults} />
               <Route path="/pharmacy" component={Pharmacy} />
