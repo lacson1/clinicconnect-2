@@ -154,11 +154,11 @@ export default function EnhancedPatientManagement({ user, onPatientSelect }: Enh
     return `${patient.firstName[0]}${patient.lastName[0]}`.toUpperCase();
   };
 
-  const getRiskBadgeColor = (riskLevel: string) => {
+  const getRiskIndicatorColor = (riskLevel: string) => {
     switch (riskLevel) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-green-100 text-green-800 border-green-200';
+      case 'high': return 'bg-red-400';
+      case 'medium': return 'bg-yellow-400';
+      default: return 'bg-green-400';
     }
   };
 
@@ -418,9 +418,8 @@ export default function EnhancedPatientManagement({ user, onPatientSelect }: Enh
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Badge className={`text-xs ${getRiskBadgeColor(patient.riskLevel || 'low')}`}>
-                              {patient.riskLevel?.toUpperCase()}
-                            </Badge>
+                            <div className={`w-2 h-2 ${getRiskIndicatorColor(patient.riskLevel || 'low')} rounded-full opacity-70`} 
+                                 title={`Risk Level: ${patient.riskLevel?.toUpperCase() || 'LOW'}`}></div>
                             {patient.isPriority && (
                               <div className="w-2 h-2 bg-purple-400 rounded-full opacity-60" title="Priority Patient"></div>
                             )}
@@ -495,9 +494,8 @@ export default function EnhancedPatientManagement({ user, onPatientSelect }: Enh
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
-                              <Badge className={`text-xs ${getRiskBadgeColor(patient.riskLevel || 'low')}`}>
-                                {patient.riskLevel?.toUpperCase()}
-                              </Badge>
+                              <div className={`w-2 h-2 ${getRiskIndicatorColor(patient.riskLevel || 'low')} rounded-full opacity-70`} 
+                                   title={`Risk Level: ${patient.riskLevel?.toUpperCase() || 'LOW'}`}></div>
                               {patient.isPriority && (
                                 <div className="w-2 h-2 bg-purple-400 rounded-full opacity-60" title="Priority Patient"></div>
                               )}
