@@ -32,6 +32,7 @@ import {
   Zap
 } from "lucide-react";
 import PhysiotherapyAssessment from "@/components/physiotherapy-assessment";
+import EnhancedPhysiotherapyDashboard from "@/components/enhanced-physiotherapy-dashboard";
 import { format } from "date-fns";
 
 export default function PhysiotherapyPage() {
