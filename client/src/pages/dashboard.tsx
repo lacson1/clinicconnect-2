@@ -124,7 +124,7 @@ export default function Dashboard() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div>
                 <p className="text-sm font-medium text-white/80 uppercase tracking-wide">LOW STOCK ITEMS</p>
-                <div className="text-3xl font-bold text-white">{stats?.lowStockItems || 1}</div>
+                <div className="text-3xl font-bold text-white">{stats?.lowStockItems || 0}</div>
                 <p className="text-xs text-white/70">Click to view inventory</p>
               </div>
               <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
@@ -196,7 +196,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Low Stock:</span>
-                      <span className="font-medium">{stats?.lowStockItems || 1}</span>
+                      <span className="font-medium">{stats?.lowStockItems || 0}</span>
                     </div>
                   </div>
                 </CardContent>
