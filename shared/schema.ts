@@ -329,6 +329,73 @@ export const comments = pgTable('comments', {
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
 
+// Pharmacy Activity Logs
+export const pharmacyActivities = pgTable('pharmacy_activities', {
+  id: serial('id').primaryKey(),
+  pharmacistId: integer('pharmacist_id').references(() => users.id).notNull(),
+  activityType: varchar('activity_type', { length: 50 }).notNull(), // dispensing, restocking, review, consultation, inventory_check
+  patientId: integer('patient_id').references(() => patients.id), // Optional for patient-specific activities
+  medicineId: integer('medicine_id').references(() => medicines.id), // Optional for medicine-specific activities
+  prescriptionId: integer('prescription_id').references(() => prescriptions.id), // Optional for prescription-related activities
+  title: varchar('title', { length: 200 }).notNull(),
+  description: text('description').notNull(),
+  quantity: integer('quantity'), // For dispensing/restocking activities
+  comments: text('comments'),
+  status: varchar('status', { length: 20 }).default('completed').notNull(), // pending, completed, cancelled
+  priority: varchar('priority', { length: 20 }).default('normal').notNull(), // low, normal, high, urgent
+  organizationId: integer('organization_id').references(() => organizations.id),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
+// Enhanced Medication Reviews
+export const medicationReviews = pgTable('medication_reviews', {
+  id: serial('id').primaryKey(),
+  patientId: integer('patient_id').references(() => patients.id).notNull(),
+  pharmacistId: integer('pharmacist_id').references(() => users.id).notNull(),
+  visitId: integer('visit_id').references(() => visits.id),
+  reviewType: varchar('review_type', { length: 50 }).default('comprehensive').notNull(), // comprehensive, drug_interaction, allergy_check, adherence
+  
+  // Clinical Assessment Fields
+  drugInteractions: text('drug_interactions'),
+  allergyCheck: text('allergy_check'),
+  dosageReview: text('dosage_review'),
+  contraindications: text('contraindications'),
+  sideEffectsMonitoring: text('side_effects_monitoring'),
+  
+  // Patient Counseling Fields
+  patientCounseling: text('patient_counseling'),
+  medicationReconciliation: text('medication_reconciliation'),
+  adherenceAssessment: text('adherence_assessment'),
+  dispensingInstructions: text('dispensing_instructions'),
+  
+  // Professional Assessment
+  pharmacistRecommendations: text('pharmacist_recommendations'),
+  clinicalNotes: text('clinical_notes'),
+  followUpRequired: text('follow_up_required'),
+  costConsiderations: text('cost_considerations'),
+  therapeuticAlternatives: text('therapeutic_alternatives'),
+  
+  // Review Metadata
+  prescriptionsReviewed: integer('prescriptions_reviewed').default(0),
+  reviewDuration: integer('review_duration'), // in minutes
+  status: varchar('status', { length: 20 }).default('completed').notNull(), // draft, completed, reviewed, approved
+  priority: varchar('priority', { length: 20 }).default('normal').notNull(),
+  organizationId: integer('organization_id').references(() => organizations.id),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
+// Type definitions for new tables
+export type PharmacyActivity = typeof pharmacyActivities.$inferSelect;
+export type InsertPharmacyActivity = typeof pharmacyActivities.$inferInsert;
+export type MedicationReview = typeof medicationReviews.$inferSelect;
+export type InsertMedicationReview = typeof medicationReviews.$inferInsert;
+
+// Insert schemas for forms
+export const insertPharmacyActivitySchema = createInsertSchema(pharmacyActivities);
+export const insertMedicationReviewSchema = createInsertSchema(medicationReviews);
+
 // Relations
 export const patientsRelations = relations(patients, ({ many }) => ({
   visits: many(visits),
@@ -338,6 +405,8 @@ export const patientsRelations = relations(patients, ({ many }) => ({
   comments: many(comments),
   consultationRecords: many(consultationRecords),
   appointments: many(appointments),
+  pharmacyActivities: many(pharmacyActivities),
+  medicationReviews: many(medicationReviews),
 }));
 
 export const visitsRelations = relations(visits, ({ one, many }) => ({

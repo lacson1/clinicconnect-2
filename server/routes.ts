@@ -2925,5 +2925,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Pharmacy Activity Logging endpoints
+  app.get("/api/pharmacy/activities", authenticateToken, requireAnyRole(['pharmacist', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const { pharmacistId, activityType, startDate, endDate } = req.query;
+      let query = db.select().from(pharmacyActivities);
+      
+      const conditions = [eq(pharmacyActivities.organizationId, req.user!.organizationId)];
+      
+      if (pharmacistId) {
+        conditions.push(eq(pharmacyActivities.pharmacistId, parseInt(pharmacistId as string)));
+      }
+      if (activityType) {
+        conditions.push(eq(pharmacyActivities.activityType, activityType as string));
+      }
+      
+      const activities = await query
+        .where(and(...conditions))
+        .orderBy(desc(pharmacyActivities.createdAt))
+        .limit(100);
+
+      res.json(activities);
+    } catch (error) {
+      console.error('Error fetching pharmacy activities:', error);
+      res.status(500).json({ error: 'Failed to fetch pharmacy activities' });
+    }
+  });
+
+  app.post("/api/pharmacy/activities", authenticateToken, requireAnyRole(['pharmacist', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const activityData = {
+        ...req.body,
+        pharmacistId: req.user!.id,
+        organizationId: req.user!.organizationId,
+        createdAt: new Date()
+      };
+
+      const [newActivity] = await db
+        .insert(pharmacyActivities)
+        .values(activityData)
+        .returning();
+
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction('PHARMACY_ACTIVITY_LOGGED', {
+        activityId: newActivity.id,
+        activityType: newActivity.activityType
+      });
+
+      res.status(201).json(newActivity);
+    } catch (error) {
+      console.error('Error creating pharmacy activity:', error);
+      res.status(500).json({ error: 'Failed to create pharmacy activity' });
+    }
+  });
+
+  // Medication Review endpoints
+  app.get("/api/patients/:patientId/medication-reviews", authenticateToken, requireAnyRole(['pharmacist', 'doctor', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.patientId);
+      
+      const reviews = await db
+        .select()
+        .from(medicationReviews)
+        .where(and(
+          eq(medicationReviews.patientId, patientId),
+          eq(medicationReviews.organizationId, req.user!.organizationId)
+        ))
+        .orderBy(desc(medicationReviews.createdAt));
+
+      res.json(reviews);
+    } catch (error) {
+      console.error('Error fetching medication reviews:', error);
+      res.status(500).json({ error: 'Failed to fetch medication reviews' });
+    }
+  });
+
+  app.post("/api/patients/:patientId/medication-reviews", authenticateToken, requireAnyRole(['pharmacist', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.patientId);
+      const reviewData = {
+        ...req.body,
+        patientId,
+        pharmacistId: req.user!.id,
+        organizationId: req.user!.organizationId,
+        createdAt: new Date()
+      };
+
+      const [newReview] = await db
+        .insert(medicationReviews)
+        .values(reviewData)
+        .returning();
+
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logPatientAction('MEDICATION_REVIEW_CREATED', patientId, {
+        reviewId: newReview.id,
+        reviewType: newReview.reviewType
+      });
+
+      res.status(201).json(newReview);
+    } catch (error) {
+      console.error('Error creating medication review:', error);
+      res.status(500).json({ error: 'Failed to create medication review' });
+    }
+  });
+
   return httpServer;
 }
