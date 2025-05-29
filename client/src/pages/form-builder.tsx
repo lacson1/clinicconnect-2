@@ -137,10 +137,13 @@ export default function FormBuilder() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/consultation-forms'] });
     },
-    onError: () => {
+    onError: (error: any) => {
+      const isDataIntegrityError = error.message?.includes("associated patient records");
       toast({
-        title: "Error",
-        description: "Failed to delete consultation form.",
+        title: isDataIntegrityError ? "Cannot Delete Form" : "Error",
+        description: isDataIntegrityError 
+          ? "This form has associated patient records. Use 'Deactivate' instead to preserve data integrity."
+          : "Failed to delete consultation form.",
         variant: "destructive",
       });
     },
