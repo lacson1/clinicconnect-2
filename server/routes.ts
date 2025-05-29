@@ -594,7 +594,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: patients.createdAt
       })
         .from(patients)
-        .where(patients.organizationId.eq(req.user.organizationId))
         .orderBy(desc(patients.createdAt))
         .limit(5);
       
