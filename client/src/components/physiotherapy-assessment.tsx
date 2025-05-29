@@ -9,7 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { Activity, Target, Zap, Clock } from 'lucide-react';
+import { Activity, Target, Zap, Clock, Download, ExternalLink, Printer, BookOpen, FileText, Heart } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface PhysiotherapyAssessmentProps {
   patientId: number;
@@ -322,6 +324,253 @@ export default function PhysiotherapyAssessment({ patientId, visitId }: Physioth
                   className="text-sm"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Exercise Leaflets & Resources */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Exercise Leaflets & Resources
+            </h3>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Exercise Leaflet Generator */}
+              <Card className="border-blue-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Exercise Prescription Leaflet
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium">Exercise Category</Label>
+                      <Select>
+                        <SelectTrigger className="text-xs">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="back-pain">Back Pain Relief</SelectItem>
+                          <SelectItem value="neck-shoulder">Neck & Shoulder</SelectItem>
+                          <SelectItem value="knee-rehab">Knee Rehabilitation</SelectItem>
+                          <SelectItem value="post-surgical">Post-Surgical Recovery</SelectItem>
+                          <SelectItem value="balance-training">Balance Training</SelectItem>
+                          <SelectItem value="strength-building">Strength Building</SelectItem>
+                          <SelectItem value="flexibility">Flexibility & Mobility</SelectItem>
+                          <SelectItem value="sports-injury">Sports Injury Recovery</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium">Difficulty Level</Label>
+                      <Select>
+                        <SelectTrigger className="text-xs">
+                          <SelectValue placeholder="Select level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="beginner">Beginner</SelectItem>
+                          <SelectItem value="intermediate">Intermediate</SelectItem>
+                          <SelectItem value="advanced">Advanced</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium">Specific Exercises</Label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {[
+                        'Cat-Cow Stretches', 'Wall Push-ups', 'Heel-to-Toe Walking',
+                        'Seated Spinal Twist', 'Ankle Pumps', 'Hip Bridges',
+                        'Shoulder Blade Squeezes', 'Hamstring Stretches'
+                      ].map((exercise) => (
+                        <div key={exercise} className="flex items-center space-x-2">
+                          <Checkbox id={exercise} />
+                          <Label htmlFor={exercise} className="text-xs">{exercise}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size="sm" variant="outline" className="flex-1">
+                          <Printer className="w-3 h-3 mr-1" />
+                          Preview Leaflet
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Exercise Prescription Leaflet</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 p-4 bg-white">
+                          <div className="text-center border-b pb-4">
+                            <h2 className="text-xl font-bold text-blue-600">Home Exercise Program</h2>
+                            <p className="text-sm text-gray-600">Personalized for your recovery</p>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <strong>Patient:</strong> [Patient Name]
+                            </div>
+                            <div>
+                              <strong>Date:</strong> {new Date().toLocaleDateString()}
+                            </div>
+                            <div>
+                              <strong>Condition:</strong> [Primary Condition]
+                            </div>
+                            <div>
+                              <strong>Physiotherapist:</strong> [Your Name]
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            <h3 className="font-semibold text-blue-600">Prescribed Exercises</h3>
+                            {[
+                              { name: 'Cat-Cow Stretches', sets: '2-3 sets', reps: '10-15 reps', frequency: 'Daily' },
+                              { name: 'Wall Push-ups', sets: '2 sets', reps: '8-12 reps', frequency: '3x/week' },
+                              { name: 'Heel-to-Toe Walking', sets: '1 set', reps: '20 steps', frequency: 'Daily' }
+                            ].map((exercise, index) => (
+                              <div key={index} className="border-l-4 border-blue-300 pl-3 py-2 bg-blue-50">
+                                <h4 className="font-medium">{exercise.name}</h4>
+                                <p className="text-sm text-gray-600">
+                                  {exercise.sets} • {exercise.reps} • {exercise.frequency}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <div className="bg-yellow-50 border border-yellow-200 p-3 rounded">
+                            <h4 className="font-medium text-yellow-800">Important Notes</h4>
+                            <ul className="text-sm text-yellow-700 mt-1 space-y-1">
+                              <li>• Stop if you experience pain</li>
+                              <li>• Progress gradually</li>
+                              <li>• Perform exercises as instructed</li>
+                              <li>• Contact clinic if concerns arise</li>
+                            </ul>
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button variant="outline" onClick={() => window.print()}>
+                            <Printer className="w-4 h-4 mr-2" />
+                            Print Leaflet
+                          </Button>
+                          <Button>
+                            <Download className="w-4 h-4 mr-2" />
+                            Download PDF
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    
+                    <Button size="sm" className="flex-1">
+                      <Download className="w-3 h-3 mr-1" />
+                      Generate PDF
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* External Resources */}
+              <Card className="border-green-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <ExternalLink className="w-4 h-4" />
+                    External Resources & Links
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700">Professional Resources</h4>
+                    <div className="space-y-1">
+                      {[
+                        { name: 'Chartered Society of Physiotherapy', url: 'https://www.csp.org.uk/', category: 'Professional Body' },
+                        { name: 'Physiopedia', url: 'https://www.physio-pedia.com/', category: 'Clinical Reference' },
+                        { name: 'World Physiotherapy', url: 'https://world.physio/', category: 'Global Standards' }
+                      ].map((resource, index) => (
+                        <a 
+                          key={index}
+                          href={resource.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between p-2 rounded border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors group"
+                        >
+                          <div>
+                            <div className="text-xs font-medium text-gray-900">{resource.name}</div>
+                            <div className="text-xs text-gray-500">{resource.category}</div>
+                          </div>
+                          <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-green-600" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700">Exercise Databases</h4>
+                    <div className="space-y-1">
+                      {[
+                        { name: 'Exercise Prescription Tool', url: 'https://www.exerciseprescription.com/', category: 'Exercise Library' },
+                        { name: 'NHS Exercise Library', url: 'https://www.nhs.uk/live-well/exercise/', category: 'Patient Resources' },
+                        { name: 'RehabGuru', url: 'https://www.rehabguru.com/', category: 'Digital Platform' }
+                      ].map((resource, index) => (
+                        <a 
+                          key={index}
+                          href={resource.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between p-2 rounded border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors group"
+                        >
+                          <div>
+                            <div className="text-xs font-medium text-gray-900">{resource.name}</div>
+                            <div className="text-xs text-gray-500">{resource.category}</div>
+                          </div>
+                          <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-green-600" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700">Nigerian Resources</h4>
+                    <div className="space-y-1">
+                      {[
+                        { name: 'Nigeria Society of Physiotherapy', url: 'https://www.nsp.org.ng/', category: 'National Body' },
+                        { name: 'Medical Rehabilitation Therapists Board', url: 'https://www.mrtbn.gov.ng/', category: 'Regulatory Body' }
+                      ].map((resource, index) => (
+                        <a 
+                          key={index}
+                          href={resource.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between p-2 rounded border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors group"
+                        >
+                          <div>
+                            <div className="text-xs font-medium text-gray-900">{resource.name}</div>
+                            <div className="text-xs text-gray-500">{resource.category}</div>
+                          </div>
+                          <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-green-600" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <Heart className="w-4 h-4 text-blue-600 mt-0.5" />
+                      <div>
+                        <h5 className="text-xs font-medium text-blue-800">Quick Access</h5>
+                        <p className="text-xs text-blue-600 mt-1">
+                          Bookmark these resources for quick reference during patient consultations and treatment planning.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
 
