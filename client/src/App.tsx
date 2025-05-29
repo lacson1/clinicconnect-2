@@ -25,6 +25,9 @@ import { MedicalToolsPage } from "@/pages/medical-tools";
 import PatientPortal from "@/pages/patient-portal";
 import RecordVisitPage from "@/pages/record-visit";
 import EditVisit from "@/pages/edit-visit";
+import AppointmentsPage from "@/pages/appointments";
+import LabOrdersPage from "@/pages/lab-orders";
+import DocumentsPage from "@/pages/documents";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 
@@ -57,6 +60,9 @@ function AuthenticatedApp() {
                 <Route path="/lab-results" component={LabResults} />
                 <Route path="/pharmacy" component={Pharmacy} />
                 <Route path="/referrals" component={Referrals} />
+                <Route path="/appointments" component={AppointmentsPage} />
+                <Route path="/lab-orders" component={LabOrdersPage} />
+                <Route path="/documents" component={DocumentsPage} />
                 <Route path="/form-builder" component={FormBuilder} />
                 <Route path="/medical-tools" component={MedicalToolsPage} />
                 <Route path="/clinical-performance" component={ClinicalPerformance} />

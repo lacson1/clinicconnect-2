@@ -75,20 +75,20 @@ export function PatientDropdownMenu({
           <Pill className="mr-2 h-4 w-4" />
           Add Prescription
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/lab-orders')}>
+        <DropdownMenuItem onClick={() => navigate(`/lab-orders?patientId=${patient.id}`)}>
           <FlaskRound className="mr-2 h-4 w-4" />
           Order Lab Tests
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/consultation-forms')}>
+        <DropdownMenuItem onClick={() => navigate(`/form-builder?patientId=${patient.id}`)}>
           <FileText className="mr-2 h-4 w-4" />
           Create Consultation Form
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/appointments')}>
+        <DropdownMenuItem onClick={() => navigate(`/appointments?patientId=${patient.id}`)}>
           <CalendarDays className="mr-2 h-4 w-4" />
           Schedule Appointment
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate('/referrals')}>
+        <DropdownMenuItem onClick={() => navigate(`/referrals?patientId=${patient.id}`)}>
           <Users className="mr-2 h-4 w-4" />
           Create Referral
         </DropdownMenuItem>
@@ -100,7 +100,7 @@ export function PatientDropdownMenu({
           <Monitor className="mr-2 h-4 w-4" />
           Record Vital Signs
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/documents')}>
+        <DropdownMenuItem onClick={() => navigate(`/documents?patientId=${patient.id}`)}>
           <Upload className="mr-2 h-4 w-4" />
           Upload Documents
         </DropdownMenuItem>
