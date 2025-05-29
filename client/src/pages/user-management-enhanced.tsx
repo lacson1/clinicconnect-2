@@ -586,7 +586,7 @@ export default function UserManagementEnhanced() {
                     return (
                       <Tooltip key={user.id}>
                         <TooltipTrigger asChild>
-                          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow cursor-pointer">
+                          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 card-selection-feedback">
                             <div className="flex items-center space-x-3 mb-4">
                               <div className="relative">
                                 {user.photoUrl ? (
@@ -650,7 +650,7 @@ export default function UserManagementEnhanced() {
                     );
                   } else {
                     return (
-                      <div key={user.id} className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+                      <div key={user.id} className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 card-selection-feedback">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
                             <div className="relative">

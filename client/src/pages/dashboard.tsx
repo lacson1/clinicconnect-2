@@ -68,7 +68,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="stat-card stat-card-patients text-white">
+            <Card className="stat-card stat-card-patients text-white card-selection-feedback">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div>
                   <p className="text-sm font-medium text-white/80 uppercase tracking-wide">TOTAL PATIENTS</p>
@@ -81,7 +81,7 @@ export default function Dashboard() {
               </CardHeader>
           </Card>
 
-          <Card className="stat-card stat-card-visits text-white">
+          <Card className="stat-card stat-card-visits text-white card-selection-feedback">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div>
                 <p className="text-sm font-medium text-white/80 uppercase tracking-wide">TODAY'S VISITS</p>

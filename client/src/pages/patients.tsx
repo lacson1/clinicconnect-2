@@ -38,7 +38,7 @@ export default function Patients() {
 
       {/* Tab Navigation and Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <div className="bg-white border-b border-slate-200 px-6 flex-shrink-0">
+        <div className="bg-white border-b border-slate-200 px-6 flex-shrink-0 hover:bg-slate-50 transition-colors duration-200">
           <TabsList className="grid w-full grid-cols-3 bg-slate-100">
             <TabsTrigger value="patients" className="flex items-center gap-2 text-slate-700 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm">
               <Users className="w-4 h-4" />

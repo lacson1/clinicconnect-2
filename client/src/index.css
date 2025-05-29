@@ -183,6 +183,52 @@
   @apply bg-red-100 text-red-800 border border-red-200;
 }
 
+/* Interactive Selection Feedback Classes */
+.selection-feedback {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.selection-feedback:hover {
+  @apply bg-slate-50 shadow-sm transform scale-[1.01];
+}
+
+.selection-feedback.active {
+  @apply bg-blue-50 border-blue-200 shadow-md;
+}
+
+.selection-feedback.selected {
+  @apply bg-blue-100 border-blue-300 ring-2 ring-blue-200;
+}
+
+.card-selection-feedback {
+  @apply transition-all duration-200 ease-in-out cursor-pointer;
+}
+
+.card-selection-feedback:hover {
+  @apply shadow-lg transform translate-y-[-2px] border-blue-200;
+}
+
+.card-selection-feedback.selected {
+  @apply border-blue-400 shadow-xl ring-2 ring-blue-100 bg-blue-50;
+}
+
+.tab-selection-feedback {
+  @apply transition-all duration-200 ease-in-out relative overflow-hidden;
+}
+
+.tab-selection-feedback::before {
+  @apply absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 transition-opacity duration-200;
+  content: '';
+}
+
+.tab-selection-feedback:hover::before {
+  @apply opacity-100;
+}
+
+.tab-selection-feedback.active::before {
+  @apply opacity-100 from-blue-100 to-blue-50;
+}
+
 /* Responsive Enhancements */
 @media (max-width: 768px) {
   .mobile-stack {
