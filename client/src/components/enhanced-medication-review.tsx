@@ -65,6 +65,7 @@ export function EnhancedMedicationReview({ selectedPatientId, onReviewCompleted 
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [searchPatientId, setSearchPatientId] = useState<string>("");
   const [activePatientId, setActivePatientId] = useState<number | undefined>(selectedPatientId);
+  const [selectedReview, setSelectedReview] = useState<any>(null);
 
   // Fetch patients for selection
   const { data: patients = [] } = useQuery({
@@ -775,7 +776,8 @@ export function EnhancedMedicationReview({ selectedPatientId, onReviewCompleted 
             </div>
           ) : (
             reviews.map((review: any) => (
-              <div key={review.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div key={review.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                   onClick={() => setSelectedReview(review)}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -795,16 +797,20 @@ export function EnhancedMedicationReview({ selectedPatientId, onReviewCompleted 
                     {review.pharmacistRecommendations && (
                       <div className="mb-2">
                         <span className="font-medium text-sm">Recommendations:</span>
-                        <p className="text-sm text-gray-700">{review.pharmacistRecommendations}</p>
+                        <p className="text-sm text-gray-700 line-clamp-2">{review.pharmacistRecommendations}</p>
                       </div>
                     )}
                     
                     {review.followUpRequired && (
                       <div className="mb-2">
                         <span className="font-medium text-sm">Follow-up:</span>
-                        <p className="text-sm text-gray-700">{review.followUpRequired}</p>
+                        <p className="text-sm text-gray-700 line-clamp-1">{review.followUpRequired}</p>
                       </div>
                     )}
+                    
+                    <div className="text-xs text-blue-600 hover:text-blue-800 mt-2">
+                      Click to view full review details →
+                    </div>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
@@ -826,6 +832,143 @@ export function EnhancedMedicationReview({ selectedPatientId, onReviewCompleted 
           )}
         </div>
       </CardContent>
+
+      {/* Review Details Dialog */}
+      <Dialog open={!!selectedReview} onOpenChange={() => setSelectedReview(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Medication Review Details</DialogTitle>
+            {selectedReview && (
+              <p className="text-sm text-gray-600">
+                Review conducted on {format(new Date(selectedReview.createdAt), 'MMMM dd, yyyy')} at {format(new Date(selectedReview.createdAt), 'hh:mm a')}
+              </p>
+            )}
+          </DialogHeader>
+          
+          {selectedReview && (
+            <div className="space-y-6">
+              {/* Review Header */}
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <Badge className={getReviewTypeColor(selectedReview.reviewType)}>
+                      {selectedReview.reviewType ? selectedReview.reviewType.replace('_', ' ') : 'Review'}
+                    </Badge>
+                    <Badge variant={getPriorityColor(selectedReview.priority)}>
+                      {selectedReview.priority}
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Duration: {selectedReview.reviewDuration || 'N/A'} minutes
+                  </div>
+                </div>
+                
+                {selectedReview.prescriptionsReviewed > 0 && (
+                  <div className="text-sm">
+                    <strong className="text-blue-800">{selectedReview.prescriptionsReviewed}</strong> prescriptions were reviewed
+                  </div>
+                )}
+              </div>
+
+              {/* Clinical Assessment */}
+              {selectedReview.clinicalAssessment && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Clinical Assessment
+                  </h4>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedReview.clinicalAssessment}</p>
+                </div>
+              )}
+
+              {/* Medication Reconciliation */}
+              {selectedReview.medicationReconciliation && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                    <Pill className="w-4 h-4" />
+                    Medication Reconciliation
+                  </h4>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedReview.medicationReconciliation}</p>
+                </div>
+              )}
+
+              {/* Drug Interactions */}
+              {selectedReview.drugInteractions && (
+                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                  <h4 className="font-semibold text-red-800 mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    Drug Interactions
+                  </h4>
+                  <p className="text-sm text-red-700 whitespace-pre-wrap">{selectedReview.drugInteractions}</p>
+                </div>
+              )}
+
+              {/* Contraindications */}
+              {selectedReview.contraindications && (
+                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                  <h4 className="font-semibold text-orange-800 mb-2 flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    Contraindications
+                  </h4>
+                  <p className="text-sm text-orange-700 whitespace-pre-wrap">{selectedReview.contraindications}</p>
+                </div>
+              )}
+
+              {/* Pharmacist Recommendations */}
+              {selectedReview.pharmacistRecommendations && (
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Pharmacist Recommendations
+                  </h4>
+                  <p className="text-sm text-green-700 whitespace-pre-wrap">{selectedReview.pharmacistRecommendations}</p>
+                </div>
+              )}
+
+              {/* Patient Counseling */}
+              {selectedReview.patientCounseling && (
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Patient Counseling Notes
+                  </h4>
+                  <p className="text-sm text-blue-700 whitespace-pre-wrap">{selectedReview.patientCounseling}</p>
+                </div>
+              )}
+
+              {/* Follow-up Required */}
+              {selectedReview.followUpRequired && (
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <h4 className="font-semibold text-yellow-800 mb-2 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Follow-up Required
+                  </h4>
+                  <p className="text-sm text-yellow-700 whitespace-pre-wrap">{selectedReview.followUpRequired}</p>
+                </div>
+              )}
+
+              {/* Professional Notes */}
+              {selectedReview.professionalNotes && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Professional Notes
+                  </h4>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedReview.professionalNotes}</p>
+                </div>
+              )}
+
+              {/* Review Summary */}
+              {selectedReview.reviewSummary && (
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold text-gray-800 mb-2">Review Summary</h4>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedReview.reviewSummary}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
