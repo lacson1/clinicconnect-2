@@ -151,40 +151,135 @@ export function ModernPatientOverview({
 
       {/* Enhanced Tabbed Interface - Full Width */}
       <Tabs defaultValue="overview" className="w-full h-full">
-        <TabsList className="grid w-full grid-cols-8 mb-2 h-9">
-          <TabsTrigger value="overview" className="flex items-center gap-1 text-xs">
-            <User className="w-3 h-3" />
+        <TabsList className="grid w-full grid-cols-9 mb-4 h-12 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-1 shadow-sm">
+          <TabsTrigger value="overview" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
+            <User className="w-4 h-4" />
             Overview
           </TabsTrigger>
-          <TabsTrigger value="timeline" className="flex items-center gap-1 text-xs">
-            <Activity className="w-3 h-3" />
+          <TabsTrigger value="medications" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
+            <Pill className="w-4 h-4" />
+            Medications
+          </TabsTrigger>
+          <TabsTrigger value="timeline" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
+            <Activity className="w-4 h-4" />
             Timeline
           </TabsTrigger>
-          <TabsTrigger value="safety" className="flex items-center gap-1 text-xs">
-            <Heart className="w-3 h-3" />
+          <TabsTrigger value="safety" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
+            <Heart className="w-4 h-4" />
             Safety
           </TabsTrigger>
-          <TabsTrigger value="vitals" className="flex items-center gap-1 text-xs">
-            <Monitor className="w-3 h-3" />
+          <TabsTrigger value="vitals" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
+            <Monitor className="w-4 h-4" />
             Vitals
           </TabsTrigger>
-          <TabsTrigger value="record-visit" className="flex items-center gap-1 text-xs">
-            <Calendar className="w-3 h-3" />
+          <TabsTrigger value="record-visit" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
+            <Calendar className="w-4 h-4" />
             Visit
           </TabsTrigger>
-          <TabsTrigger value="consultation" className="flex items-center gap-1 text-xs">
-            <FileText className="w-3 h-3" />
+          <TabsTrigger value="consultation" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
+            <FileText className="w-4 h-4" />
             Forms
           </TabsTrigger>
-          <TabsTrigger value="appointments" className="flex items-center gap-1 text-xs">
-            <CalendarDays className="w-3 h-3" />
+          <TabsTrigger value="appointments" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
+            <CalendarDays className="w-4 h-4" />
             Schedule
           </TabsTrigger>
-          <TabsTrigger value="communication" className="flex items-center gap-1 text-xs">
-            <MessageSquare className="w-3 h-3" />
+          <TabsTrigger value="communication" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
+            <MessageSquare className="w-4 h-4" />
             Chat
           </TabsTrigger>
         </TabsList>
+
+        {/* Medications Tab */}
+        <TabsContent value="medications" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Pill className="h-5 w-5 text-purple-500" />
+                  Medications & Prescriptions
+                </span>
+                <Button size="sm" onClick={() => setShowPrescriptionModal?.(true)} className="bg-purple-600 hover:bg-purple-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Prescription
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {activePrescriptions.length > 0 ? (
+                  <div className="grid gap-4">
+                    {activePrescriptions.map((prescription: any) => (
+                      <div key={prescription.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-slate-800 text-lg">
+                              {prescription.medicationName}
+                            </h4>
+                            {prescription.medicationId && (
+                              <p className="text-xs text-green-600 mb-2">✓ From database</p>
+                            )}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm text-slate-600">
+                              <div>
+                                <span className="font-medium text-slate-700">Dosage:</span>
+                                <p className="text-slate-800">{prescription.dosage}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium text-slate-700">Frequency:</span>
+                                <p className="text-slate-800">{prescription.frequency}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium text-slate-700">Duration:</span>
+                                <p className="text-slate-800">{prescription.duration}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium text-slate-700">Prescribed by:</span>
+                                <p className="text-slate-800">{prescription.prescribedBy}</p>
+                              </div>
+                            </div>
+                            {prescription.instructions && (
+                              <div className="mt-3 p-3 bg-blue-50 rounded-md">
+                                <span className="font-medium text-slate-700">Instructions:</span>
+                                <p className="text-slate-800 mt-1">{prescription.instructions}</p>
+                              </div>
+                            )}
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+                              <div className="flex items-center space-x-4 text-xs text-slate-500">
+                                <span>Started: {new Date(prescription.startDate).toLocaleDateString()}</span>
+                                {prescription.endDate && (
+                                  <span>Ends: {new Date(prescription.endDate).toLocaleDateString()}</span>
+                                )}
+                              </div>
+                              <Badge className={
+                                prescription.status === "active" 
+                                  ? "bg-green-100 text-green-800 border-green-200" 
+                                  : prescription.status === "completed"
+                                  ? "bg-blue-100 text-blue-800 border-blue-200"
+                                  : "bg-gray-100 text-gray-800 border-gray-200"
+                              }>
+                                {prescription.status}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    <Pill className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-700 mb-2">No Active Prescriptions</h3>
+                    <p className="text-sm text-gray-500 mb-4">Start by adding the first prescription for this patient</p>
+                    <Button onClick={() => setShowPrescriptionModal?.(true)} className="bg-purple-600 hover:bg-purple-700">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add First Prescription
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Safety Alerts Tab */}
         <TabsContent value="safety" className="space-y-4">
