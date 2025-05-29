@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Clock, User } from "lucide-react";
+import { FileText, Clock, User, Activity, Pill, Calendar } from "lucide-react";
 
 interface ConsultationHistoryDisplayProps {
   patientId: number;
@@ -108,8 +108,8 @@ export default function ConsultationHistoryDisplay({ patientId }: ConsultationHi
                       </div>
                       
                       {/* Consultation details */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-4 text-sm">
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-4 text-xs">
                           <span className="text-gray-600">
                             <strong>Date:</strong> {new Date(consultation.createdAt).toLocaleDateString('en-US', { 
                               weekday: 'long', 
@@ -126,8 +126,154 @@ export default function ConsultationHistoryDisplay({ patientId }: ConsultationHi
                           </span>
                         </div>
                         
+                        {/* Vital Signs Section */}
+                        {consultation.vitalSigns && (
+                          <div className="bg-red-50 p-3 rounded-lg border border-red-200">
+                            <h5 className="text-xs font-semibold text-red-800 mb-2 flex items-center gap-2">
+                              <Activity className="w-3 h-3" />
+                              Vital Signs
+                            </h5>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              {consultation.vitalSigns.bloodPressure && (
+                                <span className="text-gray-700">
+                                  <strong>BP:</strong> {consultation.vitalSigns.bloodPressure}
+                                </span>
+                              )}
+                              {consultation.vitalSigns.heartRate && (
+                                <span className="text-gray-700">
+                                  <strong>HR:</strong> {consultation.vitalSigns.heartRate} bpm
+                                </span>
+                              )}
+                              {consultation.vitalSigns.temperature && (
+                                <span className="text-gray-700">
+                                  <strong>Temp:</strong> {consultation.vitalSigns.temperature}°C
+                                </span>
+                              )}
+                              {consultation.vitalSigns.weight && (
+                                <span className="text-gray-700">
+                                  <strong>Weight:</strong> {consultation.vitalSigns.weight} kg
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Nursing Notes Section */}
+                        {consultation.nursingNotes && (
+                          <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                            <h5 className="text-xs font-semibold text-green-800 mb-2 flex items-center gap-2">
+                              <User className="w-3 h-3" />
+                              Nursing Assessment
+                            </h5>
+                            <div className="space-y-1 text-xs">
+                              {consultation.nursingNotes.assessment && (
+                                <div>
+                                  <strong className="text-green-700">Assessment:</strong>
+                                  <p className="text-gray-700 ml-2">{consultation.nursingNotes.assessment}</p>
+                                </div>
+                              )}
+                              {consultation.nursingNotes.medications && (
+                                <div>
+                                  <strong className="text-green-700">Medications Administered:</strong>
+                                  <p className="text-gray-700 ml-2">{consultation.nursingNotes.medications}</p>
+                                </div>
+                              )}
+                              {consultation.nursingNotes.notes && (
+                                <div>
+                                  <strong className="text-green-700">Notes:</strong>
+                                  <p className="text-gray-700 ml-2">{consultation.nursingNotes.notes}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Physiotherapy Section */}
+                        {consultation.physiotherapyNotes && (
+                          <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                            <h5 className="text-xs font-semibold text-purple-800 mb-2 flex items-center gap-2">
+                              <Activity className="w-3 h-3" />
+                              Physiotherapy Assessment
+                            </h5>
+                            <div className="space-y-1 text-xs">
+                              {consultation.physiotherapyNotes.mobility && (
+                                <div>
+                                  <strong className="text-purple-700">Mobility:</strong>
+                                  <p className="text-gray-700 ml-2">{consultation.physiotherapyNotes.mobility}</p>
+                                </div>
+                              )}
+                              {consultation.physiotherapyNotes.exercises && (
+                                <div>
+                                  <strong className="text-purple-700">Prescribed Exercises:</strong>
+                                  <p className="text-gray-700 ml-2">{consultation.physiotherapyNotes.exercises}</p>
+                                </div>
+                              )}
+                              {consultation.physiotherapyNotes.progress && (
+                                <div>
+                                  <strong className="text-purple-700">Progress:</strong>
+                                  <p className="text-gray-700 ml-2">{consultation.physiotherapyNotes.progress}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Pharmacy Section */}
+                        {consultation.pharmacyNotes && (
+                          <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
+                            <h5 className="text-xs font-semibold text-orange-800 mb-2 flex items-center gap-2">
+                              <Pill className="w-3 h-3" />
+                              Pharmacy Review
+                            </h5>
+                            <div className="space-y-1 text-xs">
+                              {consultation.pharmacyNotes.interactions && (
+                                <div>
+                                  <strong className="text-orange-700">Drug Interactions:</strong>
+                                  <p className="text-gray-700 ml-2">{consultation.pharmacyNotes.interactions}</p>
+                                </div>
+                              )}
+                              {consultation.pharmacyNotes.counseling && (
+                                <div>
+                                  <strong className="text-orange-700">Patient Counseling:</strong>
+                                  <p className="text-gray-700 ml-2">{consultation.pharmacyNotes.counseling}</p>
+                                </div>
+                              )}
+                              {consultation.pharmacyNotes.recommendations && (
+                                <div>
+                                  <strong className="text-orange-700">Recommendations:</strong>
+                                  <p className="text-gray-700 ml-2">{consultation.pharmacyNotes.recommendations}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Continuity of Care */}
+                        {consultation.followUp && (
+                          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                            <h5 className="text-xs font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                              <Calendar className="w-3 h-3" />
+                              Follow-up & Continuity
+                            </h5>
+                            <div className="space-y-1 text-xs">
+                              {consultation.followUp.nextAppointment && (
+                                <div>
+                                  <strong className="text-blue-700">Next Appointment:</strong>
+                                  <p className="text-gray-700 ml-2">{consultation.followUp.nextAppointment}</p>
+                                </div>
+                              )}
+                              {consultation.followUp.instructions && (
+                                <div>
+                                  <strong className="text-blue-700">Care Instructions:</strong>
+                                  <p className="text-gray-700 ml-2">{consultation.followUp.instructions}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
                         {consultation.formDescription && (
-                          <div className="text-sm text-gray-600">
+                          <div className="text-xs text-gray-600">
                             <strong>Type:</strong> {consultation.formDescription}
                           </div>
                         )}

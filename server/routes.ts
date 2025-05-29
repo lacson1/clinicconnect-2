@@ -1595,6 +1595,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Nursing Assessment endpoints
+  app.post("/api/patients/:patientId/nursing-assessment", authenticateToken, requireAnyRole(['nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.patientId);
+      const auditLogger = new AuditLogger(req);
+      
+      const assessmentData = {
+        patientId,
+        nurseId: req.user!.id,
+        ...req.body,
+        createdAt: new Date(),
+        organizationId: req.user!.organizationId
+      };
+
+      // For now, store as consultation record until we add specific tables
+      const consultationData = {
+        patientId,
+        formId: 1, // Placeholder form ID for nursing assessments
+        filledBy: req.user!.id,
+        formData: {
+          type: 'nursing_assessment',
+          ...assessmentData
+        }
+      };
+
+      const record = await storage.createConsultationRecord(consultationData);
+      
+      await auditLogger.logPatientAction('CREATE_NURSING_ASSESSMENT', patientId, {
+        recordId: record.id,
+        assessmentType: 'nursing_assessment'
+      });
+
+      res.status(201).json(record);
+    } catch (error) {
+      console.error('Error creating nursing assessment:', error);
+      res.status(500).json({ error: 'Failed to create nursing assessment' });
+    }
+  });
+
+  // Physiotherapy Assessment endpoints
+  app.post("/api/patients/:patientId/physiotherapy-assessment", authenticateToken, requireAnyRole(['physiotherapist', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.patientId);
+      const auditLogger = new AuditLogger(req);
+      
+      const assessmentData = {
+        patientId,
+        physiotherapistId: req.user!.id,
+        ...req.body,
+        createdAt: new Date(),
+        organizationId: req.user!.organizationId
+      };
+
+      // For now, store as consultation record until we add specific tables
+      const consultationData = {
+        patientId,
+        formId: 2, // Placeholder form ID for physiotherapy assessments
+        filledBy: req.user!.id,
+        formData: {
+          type: 'physiotherapy_assessment',
+          ...assessmentData
+        }
+      };
+
+      const record = await storage.createConsultationRecord(consultationData);
+      
+      await auditLogger.logPatientAction('CREATE_PHYSIOTHERAPY_ASSESSMENT', patientId, {
+        recordId: record.id,
+        assessmentType: 'physiotherapy_assessment'
+      });
+
+      res.status(201).json(record);
+    } catch (error) {
+      console.error('Error creating physiotherapy assessment:', error);
+      res.status(500).json({ error: 'Failed to create physiotherapy assessment' });
+    }
+  });
+
+  // Pharmacy Review endpoints
+  app.post("/api/patients/:patientId/pharmacy-review", authenticateToken, requireAnyRole(['pharmacist', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.patientId);
+      const auditLogger = new AuditLogger(req);
+      
+      const reviewData = {
+        patientId,
+        pharmacistId: req.user!.id,
+        ...req.body,
+        createdAt: new Date(),
+        organizationId: req.user!.organizationId
+      };
+
+      // For now, store as consultation record until we add specific tables
+      const consultationData = {
+        patientId,
+        formId: 3, // Placeholder form ID for pharmacy reviews
+        filledBy: req.user!.id,
+        formData: {
+          type: 'pharmacy_review',
+          ...reviewData
+        }
+      };
+
+      const record = await storage.createConsultationRecord(consultationData);
+      
+      await auditLogger.logPatientAction('CREATE_PHARMACY_REVIEW', patientId, {
+        recordId: record.id,
+        assessmentType: 'pharmacy_review'
+      });
+
+      res.status(201).json(record);
+    } catch (error) {
+      console.error('Error creating pharmacy review:', error);
+      res.status(500).json({ error: 'Failed to create pharmacy review' });
+    }
+  });
+
   // Unified Patient Activity Trail - Consultations + Visits + Vital Signs
   app.get("/api/patients/:patientId/activity-trail", authenticateToken, async (req: AuthRequest, res) => {
     try {
