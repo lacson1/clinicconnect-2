@@ -303,7 +303,41 @@ export default function FormBuilder() {
     if (window.confirm(`Are you sure you want to delete "${form.name}"? This action cannot be undone.`)) {
       deleteFormMutation.mutate(form.id);
     }
-  };
+  }
+
+  const deactivateForm = (form: ConsultationForm) => {
+    if (window.confirm(`Are you sure you want to deactivate "${form.name}"? It will no longer be available for new consultations but existing records will be preserved.`)) {
+      deactivateFormMutation.mutate(form.id);
+    }
+  }
+
+  // Add deactivate mutation
+  const deactivateFormMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest(`/api/consultation-forms/${id}/deactivate`, {
+        method: 'PATCH'
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to deactivate form');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/consultation-forms'] });
+      toast({
+        title: "Success",
+        description: "Consultation form deactivated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });;
 
   const renderFieldPreview = (field: FormField) => {
     switch (field.type) {

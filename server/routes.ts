@@ -1341,9 +1341,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/consultation-forms/:id/deactivate", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const [updatedForm] = await db.update(consultationForms)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(eq(consultationForms.id, id))
+        .returning();
+      
+      if (!updatedForm) {
+        return res.status(404).json({ message: "Consultation form not found" });
+      }
+      
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction('consultation_form_deactivated', {
+        formId: id,
+        formName: updatedForm.name
+      });
+      
+      res.json({ message: "Consultation form deactivated successfully", form: updatedForm });
+    } catch (error) {
+      console.error('Error deactivating consultation form:', error);
+      res.status(500).json({ message: "Failed to deactivate consultation form" });
+    }
+  });
+
   app.delete("/api/consultation-forms/:id", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Check if there are any consultation records using this form
+      const recordsUsingForm = await db.select()
+        .from(consultationRecords)
+        .where(eq(consultationRecords.formId, id))
+        .limit(1);
+      
+      if (recordsUsingForm.length > 0) {
+        return res.status(400).json({ 
+          message: "Cannot delete consultation form because it has associated patient records. Consider deactivating it instead." 
+        });
+      }
       
       const deletedForm = await db.delete(consultationForms)
         .where(eq(consultationForms.id, id))
