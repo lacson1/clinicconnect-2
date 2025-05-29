@@ -69,6 +69,7 @@ function AuthenticatedApp() {
                   <Route path="/visits" component={Visits} />
                   <Route path="/lab-results" component={LabResults} />
                   <Route path="/pharmacy" component={EnhancedPharmacy} />
+                  <Route path="/pharmacy-enhanced" component={EnhancedPharmacy} />
                   <Route path="/referrals" component={Referrals} />
                   <Route path="/appointments" component={AppointmentsPage} />
                   <Route path="/lab-orders" component={LabOrdersPage} />
