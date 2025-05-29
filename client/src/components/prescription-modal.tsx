@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertPrescriptionSchema, type InsertPrescription, type Patient, type Medicine, type Medication } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import MedicationAutocomplete from "@/components/medication-autocomplete";
+import { QuickMedicationSearch } from "@/components/quick-medication-search";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -296,22 +297,24 @@ export default function PrescriptionModal({
               />
             )}
 
-            {/* Smart Medication Selection with Auto-Fill */}
+            {/* Enhanced Quick Medication Search */}
             <FormItem>
               <FormLabel className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-blue-500" />
-                Medication (Smart Auto-Fill Enabled)
+                Medication (Enhanced Quick Search)
               </FormLabel>
-              <MedicationAutocomplete
-                value={selectedMedicine}
-                onSelect={handleMedicationSelect}
-                onAutoFill={handleMedicationSelect}
-                onManualEntry={handleManualMedicationEntry}
-                placeholder="Start typing medication name (e.g., Paracetamol, Amoxicillin)..."
+              <QuickMedicationSearch
+                onSelect={(medication) => {
+                  setSelectedMedicine(medication);
+                  setManualMedicationName("");
+                  handleMedicationSelect(medication);
+                }}
+                placeholder="Search medications by name, category, or description..."
+                showDetails={false}
                 className="w-full"
               />
               <p className="text-xs text-slate-500 mt-1">
-                ✨ Select a medication to automatically fill dosage, frequency, and instructions from comprehensive database.
+                Search from comprehensive medication database with instant results and smart auto-fill.
                 {!selectedMedicine && manualMedicationName && " Or add any medication manually if not found in database."}
               </p>
               

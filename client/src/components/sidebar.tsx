@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRole, RoleGuard } from "@/components/role-guard";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { GlobalQuickSearch } from "@/components/global-quick-search";
 
 const getNavigationGroupsForRole = (role: string) => {
   const navigationGroups = [
@@ -165,6 +166,13 @@ export default function Sidebar({ onStartTour }: SidebarProps = {}) {
               <p className="text-sm text-slate-500 whitespace-nowrap">Clinic Management</p>
             </div>
           </div>
+          
+          {/* Quick Search - Only show when not collapsed */}
+          {!isCollapsed && (
+            <div className="mt-4">
+              <GlobalQuickSearch />
+            </div>
+          )}
         </div>
 
         {/* Navigation Menu */}
