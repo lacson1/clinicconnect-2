@@ -53,7 +53,7 @@ export default function ConsultationHistoryDisplay({ patientId }: ConsultationHi
   }
 
   return (
-    <Card>
+    <Card data-testid="consultation-history">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />
@@ -67,7 +67,7 @@ export default function ConsultationHistoryDisplay({ patientId }: ConsultationHi
           
           <div className="space-y-6">
             {(consultationHistory as any[]).map((consultation: any, index: number) => (
-              <div key={consultation.id} className="relative flex items-start">
+              <div key={consultation.id} className="relative flex items-start" data-testid="consultation-record">
                 {/* Timeline dot */}
                 <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
                   <FileText className="w-5 h-5 text-white" />

@@ -319,7 +319,7 @@ export default function ConsultationFormSelector({
 
       {/* Selected Form */}
       {selectedForm && (
-        <Card>
+        <Card data-testid="selected-form">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -331,7 +331,7 @@ export default function ConsultationFormSelector({
               </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6" data-testid="consultation-form">
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
               <p className="text-blue-800 text-sm">{selectedForm.description}</p>
             </div>
@@ -363,6 +363,7 @@ export default function ConsultationFormSelector({
                 onClick={handleSubmit}
                 disabled={createConsultationMutation.isPending}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                data-testid="submit-consultation"
               >
                 {createConsultationMutation.isPending ? (
                   <>
