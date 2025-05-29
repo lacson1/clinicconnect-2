@@ -36,7 +36,9 @@ import {
   UserCheck,
   Archive,
   Users,
-  Upload
+  Upload,
+  Clock,
+  Printer
 } from 'lucide-react';
 
 interface Patient {
@@ -248,65 +250,105 @@ export function ModernPatientOverview({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {activePrescriptions.length > 0 ? (
-                  <div className="grid gap-4">
-                    {activePrescriptions.map((prescription: any) => (
-                      <div key={prescription.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-slate-800 text-lg">
-                              {prescription.medicationName}
-                            </h4>
-                            {prescription.medicationId && (
-                              <p className="text-xs text-green-600 mb-2">✓ From database</p>
-                            )}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm text-slate-600">
-                              <div>
-                                <span className="font-medium text-slate-700">Dosage:</span>
-                                <p className="text-slate-800">{prescription.dosage}</p>
-                              </div>
-                              <div>
-                                <span className="font-medium text-slate-700">Frequency:</span>
-                                <p className="text-slate-800">{prescription.frequency}</p>
-                              </div>
-                              <div>
-                                <span className="font-medium text-slate-700">Duration:</span>
-                                <p className="text-slate-800">{prescription.duration}</p>
-                              </div>
-                              <div>
-                                <span className="font-medium text-slate-700">Prescribed by:</span>
-                                <p className="text-slate-800">{prescription.prescribedBy}</p>
-                              </div>
-                            </div>
-                            {prescription.instructions && (
-                              <div className="mt-3 p-3 bg-blue-50 rounded-md">
-                                <span className="font-medium text-slate-700">Instructions:</span>
-                                <p className="text-slate-800 mt-1">{prescription.instructions}</p>
-                              </div>
-                            )}
-                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-                              <div className="flex items-center space-x-4 text-xs text-slate-500">
-                                <span>Started: {new Date(prescription.startDate).toLocaleDateString()}</span>
-                                {prescription.endDate && (
-                                  <span>Ends: {new Date(prescription.endDate).toLocaleDateString()}</span>
+              <div className="space-y-6">
+                {/* Current Active Medications */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-slate-800">Current Medications</h3>
+                    <Button 
+                      onClick={onAddPrescription} 
+                      size="sm" 
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Medication
+                    </Button>
+                  </div>
+                  
+                  {activePrescriptions.length > 0 ? (
+                    <div className="grid gap-4">
+                      {activePrescriptions.map((prescription: any) => (
+                        <div key={prescription.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <h4 className="font-semibold text-slate-800 text-lg">
+                                  {prescription.medicationName}
+                                </h4>
+                                {prescription.medicationId && (
+                                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                    ✓ Verified
+                                  </Badge>
                                 )}
+                                <Badge className={
+                                  prescription.status === "active" 
+                                    ? "bg-green-100 text-green-800 border-green-200" 
+                                    : prescription.status === "completed"
+                                    ? "bg-blue-100 text-blue-800 border-blue-200"
+                                    : "bg-gray-100 text-gray-800 border-gray-200"
+                                }>
+                                  {prescription.status}
+                                </Badge>
                               </div>
-                              <Badge className={
-                                prescription.status === "active" 
-                                  ? "bg-green-100 text-green-800 border-green-200" 
-                                  : prescription.status === "completed"
-                                  ? "bg-blue-100 text-blue-800 border-blue-200"
-                                  : "bg-gray-100 text-gray-800 border-gray-200"
-                              }>
-                                {prescription.status}
-                              </Badge>
+                              
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
+                                <div className="bg-slate-50 p-3 rounded-md">
+                                  <span className="font-medium text-slate-700 block">Dosage</span>
+                                  <p className="text-slate-800 mt-1">{prescription.dosage}</p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-md">
+                                  <span className="font-medium text-slate-700 block">Frequency</span>
+                                  <p className="text-slate-800 mt-1">{prescription.frequency}</p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-md">
+                                  <span className="font-medium text-slate-700 block">Duration</span>
+                                  <p className="text-slate-800 mt-1">{prescription.duration}</p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-md">
+                                  <span className="font-medium text-slate-700 block">Prescribed by</span>
+                                  <p className="text-slate-800 mt-1">{prescription.prescribedBy}</p>
+                                </div>
+                              </div>
+                              
+                              {prescription.instructions && (
+                                <div className="mt-4 p-3 bg-blue-50 rounded-md border border-blue-100">
+                                  <span className="font-medium text-slate-700 flex items-center gap-2">
+                                    <FileText className="w-4 h-4" />
+                                    Special Instructions
+                                  </span>
+                                  <p className="text-slate-800 mt-2">{prescription.instructions}</p>
+                                </div>
+                              )}
+                              
+                              <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+                                <div className="flex items-center space-x-4 text-xs text-slate-500">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    <span>Started: {new Date(prescription.startDate).toLocaleDateString()}</span>
+                                  </div>
+                                  {prescription.endDate && (
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      <span>Ends: {new Date(prescription.endDate).toLocaleDateString()}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
+                                    <Edit className="w-3 h-3 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
+                                    <Printer className="w-3 h-3 mr-1" />
+                                    Print
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
                 ) : (
                   <div className="text-center py-12 text-gray-500">
                     <Pill className="mx-auto h-16 w-16 text-gray-300 mb-4" />
@@ -318,6 +360,18 @@ export function ModernPatientOverview({
                     </Button>
                   </div>
                 )}
+                </div>
+                
+                {/* Medication History Section */}
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Recent Medication History</h3>
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <p className="text-sm text-slate-600 mb-2">Previous prescriptions and completed medications will appear here.</p>
+                    <div className="text-xs text-slate-500">
+                      Track medication adherence, side effects, and treatment outcomes for better patient care.
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
