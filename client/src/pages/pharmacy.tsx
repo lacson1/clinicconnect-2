@@ -540,7 +540,7 @@ export default function Pharmacy() {
                       <SelectContent>
                         <SelectItem value="all">All Suppliers</SelectItem>
                         {uniqueSuppliers.map(supplier => (
-                          <SelectItem key={supplier} value={supplier}>{supplier}</SelectItem>
+                          <SelectItem key={supplier} value={supplier!}>{supplier}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -624,9 +624,9 @@ export default function Pharmacy() {
                   </div>
                 ))}
               </div>
-            ) : medicines && medicines.length > 0 ? (
+            ) : filteredAndSortedMedicines && filteredAndSortedMedicines.length > 0 ? (
               <div className="space-y-4">
-                {medicines.map((medicine) => (
+                {filteredAndSortedMedicines.map((medicine) => (
                   <div
                     key={medicine.id}
                     className={`p-4 rounded-lg border-2 ${
