@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,7 @@ export default function EnhancedPatientManagement({ user, onPatientSelect }: Enh
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
 
   // Fetch patients with enhanced data
   const { data: patients = [], isLoading } = useQuery<PatientWithStats[]>({
@@ -149,50 +150,27 @@ export default function EnhancedPatientManagement({ user, onPatientSelect }: Enh
   };
 
   const handlePatientAction = (action: string, patient: PatientWithStats) => {
-    const fullName = `${patient.title ? patient.title + ' ' : ''}${patient.firstName} ${patient.lastName}`;
-    
     switch (action) {
       case 'consultation':
-        toast({
-          title: "New Consultation",
-          description: `Starting consultation for ${fullName}`,
-        });
+        navigate(`/form-builder?patientId=${patient.id}`);
         break;
       case 'vitals':
-        toast({
-          title: "Record Vitals", 
-          description: `Recording vitals for ${fullName}`,
-        });
+        navigate(`/patients/${patient.id}`);
         break;
       case 'lab-tests':
-        toast({
-          title: "Lab Tests",
-          description: `Ordering lab tests for ${fullName}`,
-        });
+        navigate(`/lab-orders?patientId=${patient.id}`);
         break;
       case 'prescription':
-        toast({
-          title: "Prescription",
-          description: `Prescribing medication for ${fullName}`,
-        });
+        navigate(`/patients/${patient.id}`);
         break;
       case 'history':
-        toast({
-          title: "Medical History",
-          description: `Viewing history for ${fullName}`,
-        });
+        navigate(`/patients/${patient.id}`);
         break;
       case 'appointment':
-        toast({
-          title: "Schedule Appointment",
-          description: `Scheduling appointment for ${fullName}`,
-        });
+        navigate(`/appointments?patientId=${patient.id}`);
         break;
       case 'report':
-        toast({
-          title: "Generate Report",
-          description: `Generating report for ${fullName}`,
-        });
+        navigate(`/patients/${patient.id}`);
         break;
     }
   };

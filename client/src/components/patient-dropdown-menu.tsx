@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation } from "wouter";
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -51,6 +52,7 @@ export function PatientDropdownMenu({
   align = "start"
 }: PatientDropdownMenuProps) {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
 
   return (
     <DropdownMenu>
@@ -118,7 +120,18 @@ export function PatientDropdownMenu({
           Send Message
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-red-600" onClick={() => console.log('Archive patient functionality')}>
+        <DropdownMenuItem 
+          className="text-red-600" 
+          onClick={() => {
+            if (confirm(`Are you sure you want to archive ${patient.firstName} ${patient.lastName}? This will hide the patient from active lists but preserve all medical records.`)) {
+              // TODO: Implement patient archiving API call
+              toast({
+                title: 'Archive Patient',
+                description: 'Patient archiving functionality will be implemented in the next update.',
+              });
+            }
+          }}
+        >
           <Archive className="mr-2 h-4 w-4" />
           Archive Patient
         </DropdownMenuItem>

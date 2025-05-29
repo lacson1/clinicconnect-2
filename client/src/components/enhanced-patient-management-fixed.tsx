@@ -102,27 +102,27 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
     switch (action) {
       case 'consultation':
         // Navigate to form builder for consultations
-        setLocation(`/form-builder`);
+        setLocation(`/form-builder?patientId=${patient.id}`);
         break;
       case 'vitals':
         // Navigate to patient detail page to record vitals
         setLocation(`/patients/${patient.id}`);
         break;
       case 'lab-tests':
-        // Navigate to lab results page
-        setLocation(`/lab-results`);
+        // Navigate to lab orders page with patient pre-filled
+        setLocation(`/lab-orders?patientId=${patient.id}`);
         break;
       case 'prescription':
-        // Navigate to pharmacy page for prescriptions
-        setLocation(`/pharmacy`);
+        // Navigate to patient profile where prescriptions can be managed
+        setLocation(`/patients/${patient.id}`);
         break;
       case 'history':
         // Navigate to patient detail page to view history
         setLocation(`/patients/${patient.id}`);
         break;
       case 'appointment':
-        // Navigate to visits page for appointments
-        setLocation(`/visits`);
+        // Navigate to appointments page with patient pre-filled
+        setLocation(`/appointments?patientId=${patient.id}`);
         break;
       case 'report':
         // Navigate to patient detail page for reports
