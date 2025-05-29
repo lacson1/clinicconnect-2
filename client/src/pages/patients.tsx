@@ -17,46 +17,52 @@ export default function Patients() {
   const { user } = useRole();
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Fixed Top Bar */}
-      <header className="bg-white shadow-sm border-b border-slate-200 px-6 py-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Patient Management</h1>
-            <p className="text-slate-600 mt-1">Comprehensive patient records and healthcare management</p>
-          </div>
-          <div className="flex items-center space-x-3">
-            {(user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse') && (
-              <Button onClick={() => setShowPatientModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add New Patient
-              </Button>
-            )}
+    <div className="fixed-layout-container">
+      {/* Fixed Header Section */}
+      <div className="fixed-header-section">
+        <div className="fixed-header-content">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Patient Management</h1>
+              <p className="text-slate-600 mt-1">Comprehensive patient records and healthcare management</p>
+            </div>
+            <div className="flex items-center space-x-3">
+              {(user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse') && (
+                <Button onClick={() => setShowPatientModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add New Patient
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Tab Navigation and Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <div className="bg-white border-b border-slate-200 px-6 flex-shrink-0 hover:bg-slate-50 transition-colors duration-200">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-100">
-            <TabsTrigger value="patients" className="flex items-center gap-2 text-slate-700 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm">
-              <Users className="w-4 h-4" />
-              Patient Records
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2 text-slate-700 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm">
-              <BarChart3 className="w-4 h-4" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="appointments" className="flex items-center gap-2 text-slate-700 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm">
-              <Calendar className="w-4 h-4" />
-              Appointments
-            </TabsTrigger>
-          </TabsList>
+      {/* Fixed Tab Navigation */}
+      <div className="fixed-tabs-container">
+        <div className="px-6 py-2">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-100">
+              <TabsTrigger value="patients" className="flex items-center gap-2 text-slate-700 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm">
+                <Users className="w-4 h-4" />
+                Patient Records
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2 text-slate-700 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm">
+                <BarChart3 className="w-4 h-4" />
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger value="appointments" className="flex items-center gap-2 text-slate-700 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm">
+                <Calendar className="w-4 h-4" />
+                Appointments
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
+      </div>
 
-        {/* Scrollable Content Area */}
-        <main className="flex-1 overflow-y-auto p-6 bg-slate-50">
+      {/* Scrollable Content Area */}
+      <div className="scrollable-content bg-slate-50">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="w-full max-w-7xl mx-auto">
             <TabsContent value="patients" className="mt-0">
               <EnhancedPatientManagementFixed user={user} />
@@ -70,8 +76,8 @@ export default function Patients() {
               <SmartAppointmentScheduler />
             </TabsContent>
           </div>
-        </main>
-      </Tabs>
+        </Tabs>
+      </div>
 
       {/* Patient Registration Modal */}
       <PatientRegistrationModal 
