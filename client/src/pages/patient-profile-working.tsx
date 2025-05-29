@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { EnhancedVisitRecording } from "@/components/enhanced-visit-recording";
 import LabResultModal from "@/components/lab-result-modal";
 import PrescriptionModal from "@/components/prescription-modal";
+import { EditPatientModal } from "@/components/edit-patient-modal";
 import { PrintExportToolbar } from "@/components/print-export-toolbar";
 import { PatientSummaryPrintable } from "@/components/patient-summary-printable";
 import { ModernPatientOverview } from "@/components/modern-patient-overview";
@@ -29,6 +30,7 @@ export default function PatientProfile() {
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [showLabModal, setShowLabModal] = useState(false);
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [showEditPatientModal, setShowEditPatientModal] = useState(false);
 
   const { data: patient, isLoading: patientLoading } = useQuery<Patient>({
     queryKey: [`/api/patients/${patientId}`],
@@ -128,10 +130,7 @@ export default function PatientProfile() {
             activePrescriptions={prescriptions || []}
             onAddPrescription={() => setShowPrescriptionModal(true)}
             onRecordVisit={() => setShowVisitModal(true)}
-            onEditPatient={() => {
-              // Handle edit patient functionality
-              console.log('Edit patient clicked');
-            }}
+            onEditPatient={() => setShowEditPatientModal(true)}
             onPrintRecord={() => {
               // Handle print/export functionality
               console.log('Print record clicked');
@@ -163,6 +162,19 @@ export default function PatientProfile() {
         onOpenChange={setShowPrescriptionModal}
         patientId={patientId}
       />
+
+      {/* Edit Patient Modal */}
+      {patient && (
+        <EditPatientModal
+          open={showEditPatientModal}
+          onOpenChange={setShowEditPatientModal}
+          patient={patient as any}
+          onPatientUpdated={() => {
+            // Refresh patient data after update
+            window.location.reload();
+          }}
+        />
+      )}
 
       <div className="hidden">
         <PatientSummaryPrintable
