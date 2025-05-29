@@ -15,7 +15,7 @@ import Patients from "@/pages/patients";
 import PatientProfile from "@/pages/patient-profile-clean";
 import Visits from "@/pages/visits";
 import LabResults from "@/pages/lab-results";
-import Pharmacy from "@/pages/pharmacy";
+import EnhancedPharmacy from "@/pages/pharmacy-enhanced";
 import Referrals from "@/pages/referrals";
 import ProfilePage from "@/pages/profile";
 import UserManagementEnhanced from "@/pages/user-management-enhanced";
@@ -68,7 +68,7 @@ function AuthenticatedApp() {
                   <Route path="/patients/:patientId/visits/:visitId/edit" component={EditVisit} />
                   <Route path="/visits" component={Visits} />
                   <Route path="/lab-results" component={LabResults} />
-                  <Route path="/pharmacy" component={Pharmacy} />
+                  <Route path="/pharmacy" component={EnhancedPharmacy} />
                   <Route path="/referrals" component={Referrals} />
                   <Route path="/appointments" component={AppointmentsPage} />
                   <Route path="/lab-orders" component={LabOrdersPage} />

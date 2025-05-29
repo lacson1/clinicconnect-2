@@ -570,11 +570,10 @@ export default function Pharmacy() {
               </Form>
             </DialogContent>
           </Dialog>
-        </div>
-      </header>
+              </div>
 
-      {/* Fixed Summary Cards */}
-      <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex-shrink-0">
+              {/* Summary Cards */}
+              <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex-shrink-0">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardContent className="p-6">
