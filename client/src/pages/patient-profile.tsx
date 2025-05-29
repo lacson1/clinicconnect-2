@@ -595,7 +595,10 @@ export default function PatientProfile() {
                           <div key={prescription.id} className="border border-slate-200 rounded-lg p-4">
                             <div className="flex justify-between items-start">
                               <div>
-                                <h4 className="font-medium text-slate-800">Medicine ID: {prescription.medicineId}</h4>
+                                <h4 className="font-medium text-slate-800">{prescription.medicationName}</h4>
+                                {prescription.medicationId && (
+                                  <p className="text-xs text-slate-500">From database</p>
+                                )}
                                 <div className="grid grid-cols-2 gap-4 mt-2 text-sm text-slate-600">
                                   <div>
                                     <strong>Dosage:</strong> {prescription.dosage}
