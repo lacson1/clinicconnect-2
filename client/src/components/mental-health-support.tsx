@@ -505,6 +505,227 @@ export default function MentalHealthSupport({ patientId }: MentalHealthSupportPr
           )}
         </TabsContent>
 
+        {/* Psychologist Referrals */}
+        <TabsContent value="referrals" className="space-y-6">
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Professional Mental Health Referrals</h3>
+            <p className="text-gray-600">Connect patients with qualified psychologists and mental health specialists in Nigeria</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Referral Form */}
+            <div className="lg:col-span-1">
+              <Card className="border-blue-200">
+                <CardHeader className="bg-blue-50">
+                  <CardTitle className="text-blue-800">New Referral</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-4">
+                  <div>
+                    <Label htmlFor="patient-select">Patient</Label>
+                    <select className="w-full p-2 border rounded-md bg-white">
+                      <option>Select Patient</option>
+                      <option>Abike Jare (ID: 6)</option>
+                      <option>Fatimah Ibrahim (ID: 5)</option>
+                      <option>Ade Bola (ID: 3)</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="specialty">Specialty Needed</Label>
+                    <select className="w-full p-2 border rounded-md bg-white">
+                      <option>Clinical Psychology</option>
+                      <option>Counseling Psychology</option>
+                      <option>Child Psychology</option>
+                      <option>Neuropsychology</option>
+                      <option>Trauma Specialist</option>
+                      <option>Addiction Counselor</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="urgency">Urgency Level</Label>
+                    <select className="w-full p-2 border rounded-md bg-white">
+                      <option>Routine (2-4 weeks)</option>
+                      <option>Priority (1-2 weeks)</option>
+                      <option>Urgent (Within 1 week)</option>
+                      <option>Emergency (Within 24 hours)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="reason">Reason for Referral</Label>
+                    <Textarea 
+                      placeholder="Please provide clinical justification and relevant assessment scores..."
+                      className="min-h-20"
+                    />
+                  </div>
+
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                    Submit Referral
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Psychologist Directory */}
+            <div className="lg:col-span-2">
+              <Card className="border-green-200">
+                <CardHeader className="bg-green-50">
+                  <CardTitle className="text-green-800">Available Psychologists</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {[
+                      {
+                        name: "Dr. Adebayo Oladele",
+                        qualification: "Ph.D. Clinical Psychology",
+                        specialties: ["Depression", "Anxiety", "Trauma"],
+                        location: "Lagos University Teaching Hospital",
+                        availability: "Mon-Fri 9AM-5PM",
+                        waitTime: "2-3 weeks",
+                        phone: "+234-803-123-4567",
+                        email: "a.oladele@luth.gov.ng"
+                      },
+                      {
+                        name: "Dr. Fatima Mohammed",
+                        qualification: "Ph.D. Counseling Psychology",
+                        specialties: ["Child Psychology", "Family Therapy", "PTSD"],
+                        location: "Federal Neuropsychiatric Hospital, Yaba",
+                        availability: "Tue-Sat 8AM-4PM",
+                        waitTime: "1-2 weeks",
+                        phone: "+234-807-987-6543",
+                        email: "f.mohammed@fnphy.gov.ng"
+                      },
+                      {
+                        name: "Dr. Chinyere Okwu",
+                        qualification: "Ph.D. Clinical Psychology",
+                        specialties: ["Addiction", "Bipolar Disorder", "Schizophrenia"],
+                        location: "University College Hospital, Ibadan",
+                        availability: "Mon-Thu 10AM-6PM",
+                        waitTime: "3-4 weeks",
+                        phone: "+234-805-456-7890",
+                        email: "c.okwu@uch-ibadan.org.ng"
+                      },
+                      {
+                        name: "Dr. Ibrahim Suleiman",
+                        qualification: "Ph.D. Neuropsychology",
+                        specialties: ["Cognitive Assessment", "Dementia", "Brain Injury"],
+                        location: "Ahmadu Bello University Teaching Hospital",
+                        availability: "Wed-Sat 9AM-3PM",
+                        waitTime: "4-5 weeks",
+                        phone: "+234-806-234-5678",
+                        email: "i.suleiman@abuth.gov.ng"
+                      }
+                    ].map((psychologist, index) => (
+                      <div key={index} className="p-4 border rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-semibold text-gray-800">{psychologist.name}</h4>
+                            <p className="text-sm text-gray-600">{psychologist.qualification}</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800">
+                            {psychologist.waitTime}
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 mb-1">SPECIALTIES</p>
+                            <div className="flex flex-wrap gap-1">
+                              {psychologist.specialties.map((specialty, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs">
+                                  {specialty}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 mb-1">LOCATION</p>
+                            <p className="text-sm text-gray-700">{psychologist.location}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 mb-1">AVAILABILITY</p>
+                            <p className="text-sm text-gray-700">{psychologist.availability}</p>
+                          </div>
+                          
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 mb-1">CONTACT</p>
+                            <p className="text-sm text-gray-700">{psychologist.phone}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700">
+                            <Phone className="w-3 h-3 mr-1" />
+                            Call
+                          </Button>
+                          <Button size="sm" variant="outline" className="flex-1">
+                            <MessageCircle className="w-3 h-3 mr-1" />
+                            Message
+                          </Button>
+                          <Button size="sm" variant="outline" className="flex-1">
+                            Refer Patient
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Active Referrals */}
+          <Card className="border-purple-200">
+            <CardHeader className="bg-purple-50">
+              <CardTitle className="text-purple-800">Active Referrals</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-3">
+                {[
+                  {
+                    patient: "Abike Jare",
+                    psychologist: "Dr. Fatima Mohammed",
+                    date: "2025-01-28",
+                    status: "Confirmed",
+                    urgency: "Priority"
+                  },
+                  {
+                    patient: "Fatimah Ibrahim", 
+                    psychologist: "Dr. Adebayo Oladele",
+                    date: "2025-02-05",
+                    status: "Pending",
+                    urgency: "Routine"
+                  }
+                ].map((referral, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <p className="font-medium text-gray-800">{referral.patient}</p>
+                        <p className="text-sm text-gray-600">→ {referral.psychologist}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <Badge variant={referral.urgency === 'Priority' ? 'destructive' : 'secondary'}>
+                        {referral.urgency}
+                      </Badge>
+                      <Badge variant={referral.status === 'Confirmed' ? 'default' : 'outline'}>
+                        {referral.status}
+                      </Badge>
+                      <span className="text-sm text-gray-600">{referral.date}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Crisis Support */}
         <TabsContent value="crisis" className="space-y-6">
           <Alert className="border-red-200 bg-red-50">
