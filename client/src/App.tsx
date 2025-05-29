@@ -23,6 +23,7 @@ import ClinicalPerformance from "@/pages/clinical-performance";
 import OrganizationManagement from "@/pages/organization-management";
 import { MedicalToolsPage } from "@/pages/medical-tools";
 import PatientPortal from "@/pages/patient-portal";
+import RecordVisitPage from "@/pages/record-visit";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 

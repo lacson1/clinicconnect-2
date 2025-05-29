@@ -7,7 +7,7 @@ import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMe
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { db } from "./db";
-import { eq, desc, or, ilike, gte, and, isNotNull, inArray } from "drizzle-orm";
+import { eq, desc, or, ilike, gte, and, isNotNull, inArray, sql } from "drizzle-orm";
 import { authenticateToken, requireRole, requireAnyRole, hashPassword, comparePassword, generateToken, type AuthRequest } from "./middleware/auth";
 import { checkPermission, getUserPermissions } from "./middleware/permissions";
 import { initializeFirebase, sendNotificationToRole, sendUrgentNotification, NotificationTypes } from "./notifications";
@@ -1496,49 +1496,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const patientId = parseInt(req.params.patientId);
       
-      // Get consultation records
-      const consultations = await db
-        .select({
-          id: consultationRecords.id,
-          type: sql<string>`'consultation'`,
-          date: consultationRecords.createdAt,
-          title: consultationForms.name,
-          description: consultationForms.description,
-          conductedBy: users.firstName,
-          conductedByRole: users.role,
-          data: consultationRecords.formData
-        })
-        .from(consultationRecords)
-        .leftJoin(users, eq(consultationRecords.filledBy, users.id))
-        .leftJoin(consultationForms, eq(consultationRecords.formId, consultationForms.id))
-        .where(eq(consultationRecords.patientId, patientId));
-
-      // Get visit records
+      // Get visit records only for now to avoid complex join issues
       const visitsData = await db
         .select({
           id: visits.id,
           type: sql<string>`'visit'`,
           date: visits.visitDate,
           title: sql<string>`'Medical Visit'`,
-          description: visits.chiefComplaint,
-          conductedBy: users.firstName,
-          conductedByRole: users.role,
+          description: visits.complaint,
+          conductedBy: sql<string>`COALESCE(${users.firstName}, 'Unknown')`,
+          conductedByRole: sql<string>`COALESCE(${users.role}, 'staff')`,
           data: sql<any>`json_build_object(
             'visitType', ${visits.visitType},
-            'chiefComplaint', ${visits.chiefComplaint},
+            'chiefComplaint', ${visits.complaint},
             'diagnosis', ${visits.diagnosis},
-            'treatment', ${visits.treatment}
+            'treatment', ${visits.treatment},
+            'bloodPressure', ${visits.bloodPressure},
+            'heartRate', ${visits.heartRate},
+            'temperature', ${visits.temperature},
+            'weight', ${visits.weight}
           )`
         })
         .from(visits)
         .leftJoin(users, eq(visits.doctorId, users.id))
-        .where(eq(visits.patientId, patientId));
+        .where(eq(visits.patientId, patientId))
+        .orderBy(sql`${visits.visitDate} DESC`);
 
-      // Combine and sort by date
-      const activities = [...consultations, ...visitsData]
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-      res.json(activities);
+      res.json(visitsData);
     } catch (error) {
       console.error('Error fetching patient activity trail:', error);
       res.status(500).json({ message: "Failed to fetch patient activity trail" });
