@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { fileStorage } from "./storage-service";
 import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, users, auditLogs, labTests, medications, labOrders, labOrderItems, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, appointments } from "@shared/schema";
 import { z } from "zod";
+import jwt from "jsonwebtoken";
 import { db } from "./db";
 import { eq, desc, or, ilike, gte, and, isNotNull, inArray } from "drizzle-orm";
 import { authenticateToken, requireRole, requireAnyRole, hashPassword, comparePassword, generateToken, type AuthRequest } from "./middleware/auth";
@@ -334,7 +335,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/patients", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
       const search = req.query.search as string | undefined;
-      const patients = await storage.getPatients(search);
+      const organizationId = req.user!.organizationId!;
+      const patients = await storage.getPatients(search, organizationId);
       
       // Prevent caching to ensure fresh data
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -594,6 +596,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: patients.createdAt
       })
         .from(patients)
+        .where(eq(patients.organizationId, req.user!.organizationId!))
         .orderBy(desc(patients.createdAt))
         .limit(5);
       
@@ -683,25 +686,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Simple hardcoded login for immediate access
       if (username === 'admin' && password === 'admin123') {
-        const token = generateToken({ id: 1, username: 'admin', role: 'admin' });
+        const token = generateToken({ id: 1, username: 'admin', role: 'admin', organizationId: 1 });
         return res.json({
           token,
           user: {
             id: 1,
             username: 'admin',
-            role: 'admin'
+            role: 'admin',
+            organizationId: 1
           }
         });
       }
       
       if (username === 'ade' && password === 'doctor123') {
-        const token = generateToken({ id: 10, username: 'ade', role: 'doctor' });
+        const token = generateToken({ id: 10, username: 'ade', role: 'doctor', organizationId: 1 });
         return res.json({
           token,
           user: {
             id: 10,
             username: 'ade',
-            role: 'doctor'
+            role: 'doctor',
+            organizationId: 1
           }
         });
       }

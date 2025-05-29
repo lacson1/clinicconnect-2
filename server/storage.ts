@@ -28,7 +28,13 @@ import {
   type ConsultationForm,
   type InsertConsultationForm,
   type ConsultationRecord,
-  type InsertConsultationRecord
+  type InsertConsultationRecord,
+  type Vaccination,
+  type InsertVaccination,
+  type Allergy,
+  type InsertAllergy,
+  type MedicalHistory,
+  type InsertMedicalHistory
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, gte, lte, and, ilike, or } from "drizzle-orm";
@@ -36,29 +42,29 @@ import { eq, desc, gte, lte, and, ilike, or } from "drizzle-orm";
 export interface IStorage {
   // Patients
   getPatient(id: number): Promise<Patient | undefined>;
-  getPatients(search?: string): Promise<Patient[]>;
+  getPatients(search?: string, organizationId?: number): Promise<Patient[]>;
   createPatient(patient: InsertPatient): Promise<Patient>;
   updatePatient(id: number, data: Partial<InsertPatient>): Promise<Patient | undefined>;
-  
+
   // Visits
   getVisit(id: number): Promise<Visit | undefined>;
   getVisitsByPatient(patientId: number): Promise<Visit[]>;
   createVisit(visit: InsertVisit): Promise<Visit>;
   getTodaysVisits(): Promise<Visit[]>;
-  
+
   // Lab Results
   getLabResult(id: number): Promise<LabResult | undefined>;
   getLabResultsByPatient(patientId: number): Promise<LabResult[]>;
   createLabResult(labResult: InsertLabResult): Promise<LabResult>;
   getPendingLabResults(): Promise<LabResult[]>;
-  
+
   // Medicines
   getMedicine(id: number): Promise<Medicine | undefined>;
   getMedicines(): Promise<Medicine[]>;
   createMedicine(medicine: InsertMedicine): Promise<Medicine>;
   updateMedicineQuantity(id: number, quantity: number): Promise<Medicine>;
   getLowStockMedicines(): Promise<Medicine[]>;
-  
+
   // Prescriptions
   getPrescription(id: number): Promise<Prescription | undefined>;
   getPrescriptionsByPatient(patientId: number): Promise<Prescription[]>;
@@ -66,42 +72,42 @@ export interface IStorage {
   createPrescription(prescription: InsertPrescription): Promise<Prescription>;
   updatePrescriptionStatus(id: number, status: string): Promise<Prescription>;
   getActivePrescriptionsByPatient(patientId: number): Promise<Prescription[]>;
-  
+
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Referrals
   getReferral(id: number): Promise<Referral | undefined>;
   getReferrals(filters?: { toRole?: string; fromUserId?: number; status?: string }): Promise<Referral[]>;
   createReferral(referral: InsertReferral): Promise<Referral>;
   updateReferralStatus(id: number, status: string): Promise<Referral>;
-  
+
   // Consultation Forms
   getConsultationForm(id: number): Promise<ConsultationForm | undefined>;
   getConsultationForms(filters?: { specialistRole?: string; isActive?: boolean }): Promise<ConsultationForm[]>;
   createConsultationForm(form: InsertConsultationForm): Promise<ConsultationForm>;
   updateConsultationForm(id: number, updates: Partial<InsertConsultationForm>): Promise<ConsultationForm>;
-  
+
   // Consultation Records
   getConsultationRecord(id: number): Promise<ConsultationRecord | undefined>;
   getConsultationRecordsByPatient(patientId: number): Promise<ConsultationRecord[]>;
   createConsultationRecord(record: InsertConsultationRecord): Promise<ConsultationRecord>;
-  
+
   // Medical Records
   getVaccinationsByPatient(patientId: number): Promise<Vaccination[]>;
   createVaccination(vaccination: InsertVaccination): Promise<Vaccination>;
   deleteVaccination(id: number): Promise<void>;
-  
+
   getAllergiesByPatient(patientId: number): Promise<Allergy[]>;
   createAllergy(allergy: InsertAllergy): Promise<Allergy>;
   deleteAllergy(id: number): Promise<void>;
-  
+
   getMedicalHistoryByPatient(patientId: number): Promise<MedicalHistory[]>;
   createMedicalHistory(history: InsertMedicalHistory): Promise<MedicalHistory>;
   deleteMedicalHistory(id: number): Promise<void>;
-  
+
   // Dashboard stats
   getDashboardStats(): Promise<{
     totalPatients: number;
@@ -118,19 +124,34 @@ export class DatabaseStorage implements IStorage {
     return patient || undefined;
   }
 
-  async getPatients(search?: string): Promise<Patient[]> {
-    if (search) {
-      return await db.select().from(patients)
-        .where(
-          or(
-            ilike(patients.firstName, `%${search}%`),
-            ilike(patients.lastName, `%${search}%`),
-            ilike(patients.phone, `%${search}%`)
-          )
-        )
-        .orderBy(desc(patients.createdAt));
+  async getPatients(search?: string, organizationId?: number): Promise<Patient[]> {
+    let query = db.select().from(patients);
+
+    if (organizationId) {
+      query = query.where(eq(patients.organizationId, organizationId));
     }
-    return await db.select().from(patients).orderBy(desc(patients.createdAt));
+
+    if (search) {
+      const conditions = [
+        ilike(patients.firstName, `%${search}%`),
+        ilike(patients.lastName, `%${search}%`),
+        ilike(patients.phone, `%${search}%`)
+      ];
+
+      if (organizationId) {
+        query = query.where(
+          and(
+            eq(patients.organizationId, organizationId),
+            or(...conditions)
+          )
+        );
+      } else {
+        query = query.where(or(...conditions));
+      }
+    }
+
+    const result = await query.orderBy(desc(patients.createdAt)).all();
+    return result;
   }
 
   async createPatient(insertPatient: InsertPatient): Promise<Patient> {
@@ -390,11 +411,11 @@ export class DatabaseStorage implements IStorage {
 
   async getConsultationForms(filters?: { specialistRole?: string; isActive?: boolean }): Promise<ConsultationForm[]> {
     const conditions = [];
-    
+
     if (filters?.specialistRole) {
       conditions.push(eq(consultationForms.specialistRole, filters.specialistRole));
     }
-    
+
     if (filters?.isActive !== undefined) {
       conditions.push(eq(consultationForms.isActive, filters.isActive));
     }
