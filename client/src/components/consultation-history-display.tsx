@@ -120,9 +120,20 @@ export default function ConsultationHistoryDisplay({ patientId }: ConsultationHi
                       <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-3">
-                            <h4 className="font-semibold text-lg text-gray-900">
-                              {consultation.formName || 'Consultation'}
-                            </h4>
+                            <div className="flex flex-col gap-1">
+                              <h4 className="font-semibold text-lg text-gray-900">
+                                {consultation.formName || 'Consultation'}
+                              </h4>
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-gray-600">Created by:</span>
+                                <span className="font-medium text-blue-800">
+                                  {consultation.conductedByFullName || consultation.conductedByFirstName || consultation.conductedByUsername || 'Healthcare Staff'}
+                                </span>
+                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
+                                  {consultation.roleDisplayName || consultation.conductedByRole || 'Staff'}
+                                </Badge>
+                              </div>
+                            </div>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                                 #{consultation.id}
