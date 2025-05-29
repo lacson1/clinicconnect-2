@@ -15,9 +15,11 @@ import {
   Trash2, 
   Download,
   Share2,
-  FileText
+  FileText,
+  Printer
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { printConsultation } from "@/services/print-utils";
 
 interface ConsultationDropdownMenuProps {
   consultation: any;
