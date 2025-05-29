@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -54,7 +54,6 @@ export default function ConsultationFormSelector({
 }: ConsultationFormSelectorProps) {
   const [selectedFormId, setSelectedFormId] = useState<number | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>({});
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -63,103 +62,56 @@ export default function ConsultationFormSelector({
     queryKey: ['/api/consultation-forms'],
   });
 
-  // Remove the broken consultation history query since we'll use the separate component
-
   // Get selected form details
   const selectedForm = forms.find(form => form.id === selectedFormId);
 
-  // Submit consultation record mutation
-  const submitConsultationMutation = useMutation({
-    mutationFn: async (data: any) => {
-      return apiRequest('POST', '/api/consultation-records', {
-        patientId,
-        visitId,
-        formId: selectedFormId,
-        formData: data,
-        consultationDate: new Date().toISOString(),
-      });
-    },
+  // Create consultation record mutation
+  const createConsultationMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', '/api/consultation-records', data),
     onSuccess: () => {
       toast({
-        title: "Consultation Recorded",
-        description: "Patient consultation has been successfully recorded.",
+        title: "Success",
+        description: "Consultation record created successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/patients', patientId, 'consultation-records'] });
       setFormData({});
       setSelectedFormId(null);
-      onFormSubmit?.(formData);
+      queryClient.invalidateQueries({ queryKey: ['/api/patients', patientId, 'consultation-records'] });
+      if (onFormSubmit) onFormSubmit(formData);
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Failed to save consultation record.",
+        description: error.message || "Failed to create consultation record",
         variant: "destructive",
       });
     },
   });
 
-  // Validate form data
-  const validateFormData = (): boolean => {
-    const errors: Record<string, string> = {};
-    
-    if (!selectedForm) return false;
-
-    (selectedForm.formStructure?.fields || []).forEach(field => {
-      const value = formData[field.id];
-      
-      if (field.required && (!value || value.toString().trim() === '')) {
-        errors[field.id] = `${field.label} is required`;
-      }
-      
-      if (field.validation) {
-        if (field.validation.minLength && value && value.length < field.validation.minLength) {
-          errors[field.id] = `${field.label} must be at least ${field.validation.minLength} characters`;
-        }
-        if (field.validation.maxLength && value && value.length > field.validation.maxLength) {
-          errors[field.id] = `${field.label} must be no more than ${field.validation.maxLength} characters`;
-        }
-        if (field.validation.min && value && parseFloat(value) < field.validation.min) {
-          errors[field.id] = `${field.label} must be at least ${field.validation.min}`;
-        }
-        if (field.validation.max && value && parseFloat(value) > field.validation.max) {
-          errors[field.id] = `${field.label} must be no more than ${field.validation.max}`;
-        }
-      }
-    });
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
+  const handleInputChange = (fieldId: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldId]: value
+    }));
   };
 
-  // Handle form submission
   const handleSubmit = () => {
-    if (!validateFormData()) {
-      toast({
-        title: "Validation Error",
-        description: "Please fix the form errors before submitting.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!selectedForm) return;
 
-    submitConsultationMutation.mutate(formData);
+    const consultationData = {
+      patientId,
+      visitId,
+      formId: selectedForm.id,
+      formName: selectedForm.name,
+      formDescription: selectedForm.description,
+      specialistRole: selectedForm.specialistRole,
+      formData: formData,
+    };
+
+    createConsultationMutation.mutate(consultationData);
   };
 
-  // Render form field based on type
   const renderFormField = (field: FormField) => {
-    const value = formData[field.id] || '';
-    const hasError = validationErrors[field.id];
-
-    const updateValue = (newValue: any) => {
-      setFormData(prev => ({ ...prev, [field.id]: newValue }));
-      if (hasError) {
-        setValidationErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors[field.id];
-          return newErrors;
-        });
-      }
-    };
+    const fieldValue = formData[field.id] || '';
 
     switch (field.type) {
       case 'text':
@@ -168,386 +120,266 @@ export default function ConsultationFormSelector({
         return (
           <Input
             type={field.type}
-            value={value}
-            onChange={(e) => updateValue(e.target.value)}
             placeholder={field.placeholder}
-            className={hasError ? 'border-red-500' : ''}
+            value={fieldValue}
+            onChange={(e) => handleInputChange(field.id, e.target.value)}
+            required={field.required}
           />
         );
-      
+
       case 'number':
         return (
           <Input
             type="number"
-            value={value}
-            onChange={(e) => updateValue(e.target.value)}
             placeholder={field.placeholder}
+            value={fieldValue}
+            onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value) || '')}
+            required={field.required}
             min={field.validation?.min}
             max={field.validation?.max}
-            className={hasError ? 'border-red-500' : ''}
           />
         );
-      
-      case 'date':
-        return (
-          <Input
-            type="date"
-            value={value}
-            onChange={(e) => updateValue(e.target.value)}
-            className={hasError ? 'border-red-500' : ''}
-          />
-        );
-      
-      case 'time':
-        return (
-          <Input
-            type="time"
-            value={value}
-            onChange={(e) => updateValue(e.target.value)}
-            className={hasError ? 'border-red-500' : ''}
-          />
-        );
-      
+
       case 'textarea':
         return (
           <Textarea
-            value={value}
-            onChange={(e) => updateValue(e.target.value)}
             placeholder={field.placeholder}
-            rows={3}
-            className={hasError ? 'border-red-500' : ''}
+            value={fieldValue}
+            onChange={(e) => handleInputChange(field.id, e.target.value)}
+            required={field.required}
+            rows={4}
           />
         );
-      
+
       case 'select':
         return (
-          <Select value={value} onValueChange={updateValue}>
-            <SelectTrigger className={hasError ? 'border-red-500' : ''}>
-              <SelectValue placeholder={field.placeholder || "Select an option"} />
+          <Select
+            value={fieldValue}
+            onValueChange={(value) => handleInputChange(field.id, value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={field.placeholder || 'Select an option'} />
             </SelectTrigger>
             <SelectContent>
-              {field.options?.map((option, index) => (
-                <SelectItem key={index} value={option}>
+              {field.options?.map((option) => (
+                <SelectItem key={option} value={option}>
                   {option}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         );
-      
+
       case 'radio':
         return (
           <div className="space-y-2">
-            {field.options?.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
+            {field.options?.map((option) => (
+              <label key={option} className="flex items-center space-x-2">
                 <input
                   type="radio"
-                  id={`${field.id}_${index}`}
                   name={field.id}
                   value={option}
-                  checked={value === option}
-                  onChange={(e) => updateValue(e.target.value)}
-                  className="text-blue-600"
+                  checked={fieldValue === option}
+                  onChange={(e) => handleInputChange(field.id, e.target.value)}
+                  className="radio"
                 />
-                <label htmlFor={`${field.id}_${index}`} className="text-sm">
-                  {option}
-                </label>
-              </div>
+                <span>{option}</span>
+              </label>
             ))}
           </div>
         );
-      
+
       case 'checkbox':
         return (
           <div className="space-y-2">
-            {field.options?.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
+            {field.options?.map((option) => (
+              <label key={option} className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  id={`${field.id}_${index}`}
                   value={option}
-                  checked={Array.isArray(value) ? value.includes(option) : false}
+                  checked={Array.isArray(fieldValue) ? fieldValue.includes(option) : false}
                   onChange={(e) => {
-                    const currentValues = Array.isArray(value) ? value : [];
+                    const currentValues = Array.isArray(fieldValue) ? fieldValue : [];
                     if (e.target.checked) {
-                      updateValue([...currentValues, option]);
+                      handleInputChange(field.id, [...currentValues, option]);
                     } else {
-                      updateValue(currentValues.filter((v: string) => v !== option));
+                      handleInputChange(field.id, currentValues.filter((v: any) => v !== option));
                     }
                   }}
-                  className="text-blue-600"
+                  className="checkbox"
                 />
-                <label htmlFor={`${field.id}_${index}`} className="text-sm">
-                  {option}
-                </label>
-              </div>
+                <span>{option}</span>
+              </label>
             ))}
           </div>
         );
-      
+
+      case 'date':
+        return (
+          <Input
+            type="date"
+            value={fieldValue}
+            onChange={(e) => handleInputChange(field.id, e.target.value)}
+            required={field.required}
+          />
+        );
+
+      case 'time':
+        return (
+          <Input
+            type="time"
+            value={fieldValue}
+            onChange={(e) => handleInputChange(field.id, e.target.value)}
+            required={field.required}
+          />
+        );
+
       default:
-        return null;
+        return (
+          <Input
+            type="text"
+            placeholder={field.placeholder}
+            value={fieldValue}
+            onChange={(e) => handleInputChange(field.id, e.target.value)}
+            required={field.required}
+          />
+        );
     }
   };
 
+  // Group fields by section if sections exist
+  const groupedFields = selectedForm?.formStructure.fields.reduce((acc, field) => {
+    const section = field.section || 'General';
+    if (!acc[section]) acc[section] = [];
+    acc[section].push(field);
+    return acc;
+  }, {} as Record<string, FormField[]>) || {};
+
   if (formsLoading) {
     return (
-      <div className="flex items-center justify-center p-6">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-        <span className="ml-2">Loading consultation forms...</span>
-      </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+            Loading consultation forms...
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Form Selection - Create New Consultation */}
-      {!selectedFormId && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Create New Consultation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3">
-              {forms.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">
-                  No consultation forms available. Create forms in the Form Builder first.
-                </p>
-              ) : (
-                forms.filter(form => form.isActive).map((form) => (
-                  <Card key={form.id} className="cursor-pointer hover:bg-gray-50 transition-colors"
-                        onClick={() => setSelectedFormId(form.id)}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium">{form.name}</h4>
-                          <p className="text-sm text-gray-600">{form.description}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline">{form.specialistRole}</Badge>
-                            <span className="text-xs text-gray-500">
-                              {form.formStructure?.fields?.length || (form.formStructure?.sections?.reduce((total: number, section: any) => total + (section.fields?.length || 0), 0)) || 0} fields
-                            </span>
-                          </div>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          Use Form
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Selected Form Display */}
-      {selectedForm && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                {selectedForm.name}
-              </CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSelectedFormId(null);
-                  setFormData({});
-                  setValidationErrors({});
-                }}
-              >
-                Change Form
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-gray-600">{selectedForm.description}</p>
-            
-            {/* Form Fields */}
-            <div className="space-y-4">
-              {(selectedForm.formStructure?.fields || []).map((field) => (
-                <div key={field.id} className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    {field.label}
-                    {field.required && <span className="text-red-500">*</span>}
-                    {field.medicalCategory && (
-                      <Badge variant="secondary" className="text-xs">
-                        {field.medicalCategory}
-                      </Badge>
-                    )}
-                  </Label>
-                  {renderFormField(field)}
-                  {validationErrors[field.id] && (
-                    <p className="text-sm text-red-600">{validationErrors[field.id]}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex gap-2 pt-4">
-              <Button
-                onClick={handleSubmit}
-                disabled={submitConsultationMutation.isPending}
-                className="flex-1"
-              >
-                <Send className="h-4 w-4 mr-2" />
-                {submitConsultationMutation.isPending ? 'Saving...' : 'Save Consultation'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Consultation History - Continuous Timeline */}
+      {/* Form Selection */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Consultation History
+            <FileText className="h-5 w-5" />
+            Select Consultation Form
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          {historyLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-              Loading consultation history...
-            </div>
-          ) : (consultationHistory as any[]).length === 0 ? (
+        <CardContent className="space-y-4">
+          {forms.length === 0 ? (
             <p className="text-gray-500 text-center py-4">
-              No consultations recorded yet for this patient.
+              No consultation forms available. Please create forms first.
             </p>
           ) : (
-            <div className="max-h-[70vh] overflow-y-auto pr-2">
-              <div className="relative">
-                {/* Timeline line */}
-                <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500"></div>
+            <div className="grid gap-3">
+              {forms.map((form) => (
+                <div
+                  key={form.id}
+                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                    selectedFormId === form.id
+                      ? 'border-blue-500 bg-blue-50 shadow-md'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedFormId(form.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{form.name}</h3>
+                      <p className="text-sm text-gray-600 mt-1">{form.description}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        {form.specialistRole}
+                      </Badge>
+                      <Badge variant="outline">
+                        {form.formStructure.fields.length} fields
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           )}
         </CardContent>
       </Card>
-                <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500"></div>
-                
-                <div className="space-y-6">
-                  {(consultationHistory as any[]).map((consultation: any, index: number) => (
-                    <div key={consultation.id} className="relative flex items-start">
-                      {/* Timeline dot */}
-                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                        <FileText className="w-5 h-5 text-white" />
-                      </div>
-                      
-                      {/* Consultation content */}
-                      <div className="ml-4 flex-1">
-                        <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between mb-3">
-                              <h4 className="font-semibold text-lg text-gray-900">
-                                {consultation.formName || 'Consultation'}
-                              </h4>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                  #{consultation.id}
-                                </Badge>
-                                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                                  {consultation.specialistRole || 'General'}
-                                </Badge>
-                                <Badge variant="secondary">
-                                  {new Date(consultation.createdAt).toLocaleDateString()}
-                                </Badge>
-                              </div>
-                            </div>
-                            
-                            {/* Conducted by information */}
-                            <div className="flex items-center gap-2 mb-3 p-2 bg-blue-50 rounded-lg">
-                              <User className="w-4 h-4 text-blue-600" />
-                              <span className="text-sm text-blue-800">
-                                <strong>Conducted by:</strong> {consultation.conductedByName || consultation.conductedByUsername || 'Healthcare Staff'}
-                              </span>
-                              {consultation.conductedByRole && (
-                                <Badge variant="outline" className="bg-white text-blue-700 border-blue-200 text-xs">
-                                  {consultation.conductedByRole}
-                                </Badge>
-                              )}
-                            </div>
-                            
-                            {/* Consultation details */}
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-4 text-sm">
-                                <span className="text-gray-600">
-                                  <strong>Date:</strong> {new Date(consultation.createdAt).toLocaleDateString('en-US', { 
-                                    weekday: 'long', 
-                                    year: 'numeric', 
-                                    month: 'long', 
-                                    day: 'numeric' 
-                                  })}
-                                </span>
-                                <span className="text-gray-600">
-                                  <strong>Time:</strong> {new Date(consultation.createdAt).toLocaleTimeString('en-US', { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit' 
-                                  })}
-                                </span>
-                              </div>
-                              
-                              {consultation.formDescription && (
-                                <div className="text-sm text-gray-600">
-                                  <strong>Type:</strong> {consultation.formDescription}
-                                </div>
-                              )}
-                              
-                              {/* Complete Consultation Data Display */}
-                              {consultation.formData && Object.keys(consultation.formData).length > 0 && (
-                                <div className="mt-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                                  <p className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                                    <FileText className="w-4 h-4" />
-                                    Complete Consultation Details
-                                  </p>
-                                  <div className="space-y-3">
-                                    {Object.entries(consultation.formData).map(([key, value]: [string, any]) => (
-                                      <div key={key} className="bg-white p-3 rounded-md shadow-sm">
-                                        <div className="flex flex-col gap-1">
-                                          <span className="font-medium text-gray-700 text-sm">
-                                            {key.includes('field_') ? 'Clinical Notes' : key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
-                                          </span>
-                                          <div className="text-gray-900 text-sm">
-                                            <span className="whitespace-pre-wrap">{String(value)}</span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
+
+      {/* Selected Form */}
+      {selectedForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                {selectedForm.name}
+              </div>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                {selectedForm.specialistRole}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <p className="text-blue-800 text-sm">{selectedForm.description}</p>
+            </div>
+
+            {/* Render form fields by section */}
+            {Object.entries(groupedFields).map(([sectionName, fields]) => (
+              <div key={sectionName} className="space-y-4">
+                {sectionName !== 'General' && (
+                  <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
+                    {sectionName}
+                  </h3>
+                )}
+                <div className="grid gap-4">
+                  {fields.map((field) => (
+                    <div key={field.id} className="space-y-2">
+                      <Label htmlFor={field.id} className="text-sm font-medium text-gray-700">
+                        {field.label}
+                        {field.required && <span className="text-red-500 ml-1">*</span>}
+                      </Label>
+                      {renderFormField(field)}
                     </div>
                   ))}
-                
-                {/* End of timeline indicator */}
-                <div className="relative flex items-center mt-6">
-                  <div className="flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                    <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-                  </div>
-                  <div className="ml-4 text-sm text-gray-500">
-                    Start of consultation history
-                  </div>
                 </div>
               </div>
+            ))}
+
+            <div className="flex justify-end pt-4 border-t border-gray-200">
+              <Button
+                onClick={handleSubmit}
+                disabled={createConsultationMutation.isPending}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                {createConsultationMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Save Consultation
+                  </>
+                )}
+              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Consultation History */}
       <ConsultationHistoryDisplay patientId={patientId} />
     </div>
