@@ -33,6 +33,8 @@ import {
 } from "lucide-react";
 import PhysiotherapyAssessment from "@/components/physiotherapy-assessment";
 import EnhancedPhysiotherapyDashboard from "@/components/enhanced-physiotherapy-dashboard";
+import PhysiotherapyCareCoordination from "@/components/physiotherapy-care-coordination";
+import PhysiotherapyTreatmentIntegration from "@/components/physiotherapy-treatment-integration";
 import { format } from "date-fns";
 
 export default function PhysiotherapyPage() {
