@@ -8,6 +8,7 @@ import { useRole } from "@/components/role-guard";
 
 export default function LabResults() {
   const { user } = useRole();
+  const [activeTab, setActiveTab] = useState("order");
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
@@ -26,7 +27,7 @@ export default function LabResults() {
         </div>
 
         {user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse' ? (
-          <Tabs defaultValue="order" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="order" className="flex items-center gap-2">
                 <Plus className="w-4 h-4" />
@@ -44,19 +45,8 @@ export default function LabResults() {
       {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto p-6">
         {user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse' ? (
-          <Tabs defaultValue="order" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="order" className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Order Lab Tests
-              </TabsTrigger>
-              <TabsTrigger value="results" className="flex items-center gap-2">
-                <TestTube className="w-4 h-4" />
-                Add Results
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="order" className="mt-6">
+          <div className="w-full">
+            {activeTab === "order" && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -68,12 +58,12 @@ export default function LabResults() {
                   <LabOrderForm patientId={0} />
                 </CardContent>
               </Card>
-            </TabsContent>
+            )}
             
-            <TabsContent value="results" className="mt-6">
+            {activeTab === "results" && (
               <LabResultEntry />
-            </TabsContent>
-          </Tabs>
+            )}
+          </div>
         ) : (
           <Card>
             <CardHeader>
@@ -90,7 +80,7 @@ export default function LabResults() {
             </CardContent>
           </Card>
         )}
-      </main>
+      </div>
     </div>
   );
 }
