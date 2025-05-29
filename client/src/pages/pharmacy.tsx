@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Pill, Plus, Package, AlertTriangle, Search, Filter, X, SortAsc, SortDesc } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Pill, Plus, Package, AlertTriangle, Search, Filter, X, SortAsc, SortDesc, Calendar, TrendingUp, BarChart3, Grid3X3, List, RefreshCw, Download, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useRole } from "@/components/role-guard";
@@ -38,9 +40,23 @@ export default function Pharmacy() {
   const [stockFilter, setStockFilter] = useState<string>("all");
   const [unitFilter, setUnitFilter] = useState<string>("all");
   const [supplierFilter, setSupplierFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [expiryFilter, setExpiryFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [selectedMedicines, setSelectedMedicines] = useState<Set<number>>(new Set());
+
+  // Debounced search to improve performance
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const form = useForm<AddMedicineForm>({
     resolver: zodResolver(addMedicineFormSchema),
@@ -150,16 +166,58 @@ export default function Pharmacy() {
     return suppliers.filter((supplier, index) => suppliers.indexOf(supplier) === index).sort();
   }, [medicines]);
 
+  const uniqueCategories = useMemo(() => {
+    if (!medicines) return [];
+    // Extract categories from medicine names (e.g., "Paracetamol" -> "Analgesic")
+    const categories = medicines.map(m => {
+      const name = m.name.toLowerCase();
+      if (name.includes('paracetamol') || name.includes('ibuprofen') || name.includes('aspirin')) return 'Analgesics';
+      if (name.includes('amoxicillin') || name.includes('ciprofloxacin') || name.includes('azithromycin')) return 'Antibiotics';
+      if (name.includes('vitamin') || name.includes('calcium') || name.includes('iron')) return 'Supplements';
+      if (name.includes('losartan') || name.includes('amlodipine') || name.includes('atenolol')) return 'Cardiovascular';
+      if (name.includes('insulin') || name.includes('metformin') || name.includes('glibenclamide')) return 'Diabetes';
+      return 'Other';
+    });
+    return categories.filter((category, index) => categories.indexOf(category) === index).sort();
+  }, [medicines]);
+
+  // Helper function to check if medicine is expiring soon
+  const isExpiringSoon = useCallback((medicine: Medicine) => {
+    if (!medicine.expiryDate) return false;
+    const today = new Date();
+    const expiryDate = new Date(medicine.expiryDate);
+    const daysToExpiry = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return daysToExpiry <= 30 && daysToExpiry > 0;
+  }, []);
+
+  const isExpired = useCallback((medicine: Medicine) => {
+    if (!medicine.expiryDate) return false;
+    const today = new Date();
+    const expiryDate = new Date(medicine.expiryDate);
+    return expiryDate < today;
+  }, []);
+
+  // Get category for a medicine
+  const getMedicineCategory = useCallback((medicine: Medicine) => {
+    const name = medicine.name.toLowerCase();
+    if (name.includes('paracetamol') || name.includes('ibuprofen') || name.includes('aspirin')) return 'Analgesics';
+    if (name.includes('amoxicillin') || name.includes('ciprofloxacin') || name.includes('azithromycin')) return 'Antibiotics';
+    if (name.includes('vitamin') || name.includes('calcium') || name.includes('iron')) return 'Supplements';
+    if (name.includes('losartan') || name.includes('amlodipine') || name.includes('atenolol')) return 'Cardiovascular';
+    if (name.includes('insulin') || name.includes('metformin') || name.includes('glibenclamide')) return 'Diabetes';
+    return 'Other';
+  }, []);
+
   // Advanced filtering and search logic
   const filteredAndSortedMedicines = useMemo(() => {
     if (!medicines) return [];
 
     let filtered = medicines.filter(medicine => {
-      // Search term filter
-      const matchesSearch = searchTerm === "" || 
-        medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        medicine.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        medicine.supplier?.toLowerCase().includes(searchTerm.toLowerCase());
+      // Search term filter (using debounced search)
+      const matchesSearch = debouncedSearchTerm === "" || 
+        medicine.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        medicine.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        medicine.supplier?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
 
       // Stock status filter
       const matchesStock = stockFilter === "all" || 
@@ -173,7 +231,16 @@ export default function Pharmacy() {
       // Supplier filter
       const matchesSupplier = supplierFilter === "all" || medicine.supplier === supplierFilter;
 
-      return matchesSearch && matchesStock && matchesUnit && matchesSupplier;
+      // Category filter
+      const matchesCategory = categoryFilter === "all" || getMedicineCategory(medicine) === categoryFilter;
+
+      // Expiry filter
+      const matchesExpiry = expiryFilter === "all" || 
+        (expiryFilter === "expiring-soon" && isExpiringSoon(medicine)) ||
+        (expiryFilter === "expired" && isExpired(medicine)) ||
+        (expiryFilter === "valid" && !isExpired(medicine) && !isExpiringSoon(medicine));
+
+      return matchesSearch && matchesStock && matchesUnit && matchesSupplier && matchesCategory && matchesExpiry;
     });
 
     // Sorting
@@ -497,7 +564,7 @@ export default function Pharmacy() {
             {showFilters && (
               <>
                 <Separator />
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
                   {/* Stock Status Filter */}
                   <div>
                     <label className="text-sm font-medium text-slate-700 mb-2 block">Stock Status</label>
@@ -510,6 +577,38 @@ export default function Pharmacy() {
                         <SelectItem value="in-stock">In Stock</SelectItem>
                         <SelectItem value="low-stock">Low Stock</SelectItem>
                         <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Category Filter */}
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 mb-2 block">Category</label>
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {uniqueCategories.map(category => (
+                          <SelectItem key={category} value={category}>{category}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Expiry Filter */}
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 mb-2 block">Expiry Status</label>
+                    <Select value={expiryFilter} onValueChange={setExpiryFilter}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Items</SelectItem>
+                        <SelectItem value="valid">Valid (more than 30 days)</SelectItem>
+                        <SelectItem value="expiring-soon">Expiring Soon (30 days or less)</SelectItem>
+                        <SelectItem value="expired">Expired</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -560,6 +659,7 @@ export default function Pharmacy() {
                           <SelectItem value="unit">Unit</SelectItem>
                           <SelectItem value="supplier">Supplier</SelectItem>
                           <SelectItem value="lowStockThreshold">Low Stock Threshold</SelectItem>
+                          <SelectItem value="expiryDate">Expiry Date</SelectItem>
                         </SelectContent>
                       </Select>
                       <Button
