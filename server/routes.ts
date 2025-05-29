@@ -835,8 +835,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password } = req.body;
       
-      console.log('Login attempt:', { username, password });
-      
       if (!username || !password) {
         return res.status(400).json({ message: "Username and password required" });
       }
@@ -880,25 +878,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      if (username === 'pharm' && password === 'pharm123') {
-        const token = generateToken({ id: 12, username: 'pharm', role: 'pharmacist' });
+      if (username === 'akin' && password === 'pharmacist123') {
+        const token = generateToken({ id: 12, username: 'akin', role: 'pharmacist' });
         return res.json({
           token,
           user: {
             id: 12,
-            username: 'pharm',
+            username: 'akin',
             role: 'pharmacist'
           }
         });
       }
       
-      if ((username === 'Mr Seye' || username === 'seye') && password === 'physio123') {
-        const token = generateToken({ id: 13, username: 'Mr Seye', role: 'physiotherapist' });
+      if (username === 'seye' && password === 'physio123') {
+        const token = generateToken({ id: 13, username: 'seye', role: 'physiotherapist' });
         return res.json({
           token,
           user: {
             id: 13,
-            username: 'Mr Seye',
+            username: 'seye',
             role: 'physiotherapist'
           }
         });

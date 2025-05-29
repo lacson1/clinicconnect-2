@@ -53,36 +53,40 @@ function AuthenticatedApp() {
       <Sidebar onStartTour={startTour} />
       <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
         <TopBar />
-        <main className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-4 lg:p-8 transition-all duration-300 ease-in-out">
-            <div className="animate-in fade-in-0 duration-300">
-              <Switch>
-                <Route path="/" component={Dashboard} />
-                <Route path="/dashboard" component={Dashboard} />
-                <Route path="/patients" component={Patients} />
-                <Route path="/patients/:id" component={PatientProfile} />
-                <Route path="/patients/:patientId/record-visit" component={RecordVisitPage} />
-                <Route path="/patients/:patientId/visits/:visitId/edit" component={EditVisit} />
-                <Route path="/visits" component={Visits} />
-                <Route path="/lab-results" component={LabResults} />
-                <Route path="/pharmacy" component={Pharmacy} />
-                <Route path="/referrals" component={Referrals} />
-                <Route path="/appointments" component={AppointmentsPage} />
-                <Route path="/lab-orders" component={LabOrdersPage} />
-                <Route path="/documents" component={DocumentsPage} />
-                <Route path="/analytics" component={RevenueAnalytics} />
-                <Route path="/telemedicine" component={TelemedicinePage} />
-                <Route path="/protocols" component={ClinicalProtocols} />
-                <Route path="/compliance" component={ExportCompliance} />
-                <Route path="/form-builder" component={FormBuilder} />
-                <Route path="/medical-tools" component={MedicalToolsPage} />
-                <Route path="/clinical-performance" component={ClinicalPerformance} />
-                <Route path="/profile" component={ProfilePage} />
-                <Route path="/user-management" component={UserManagementEnhanced} />
-                <Route path="/audit-logs" component={AuditLogs} />
-                <Route path="/organization-management" component={OrganizationManagement} />
-                <Route component={NotFound} />
-              </Switch>
+        <main className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-slate-50/50 via-white to-blue-50/30">
+          {/* Enhanced Container with Better Responsive Design */}
+          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6 max-w-7xl">
+              {/* Page Content with Smooth Transitions */}
+              <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-500 ease-out">
+                <Switch>
+                  <Route path="/" component={Dashboard} />
+                  <Route path="/dashboard" component={Dashboard} />
+                  <Route path="/patients" component={Patients} />
+                  <Route path="/patients/:id" component={PatientProfile} />
+                  <Route path="/patients/:patientId/record-visit" component={RecordVisitPage} />
+                  <Route path="/patients/:patientId/visits/:visitId/edit" component={EditVisit} />
+                  <Route path="/visits" component={Visits} />
+                  <Route path="/lab-results" component={LabResults} />
+                  <Route path="/pharmacy" component={Pharmacy} />
+                  <Route path="/referrals" component={Referrals} />
+                  <Route path="/appointments" component={AppointmentsPage} />
+                  <Route path="/lab-orders" component={LabOrdersPage} />
+                  <Route path="/documents" component={DocumentsPage} />
+                  <Route path="/analytics" component={RevenueAnalytics} />
+                  <Route path="/telemedicine" component={TelemedicinePage} />
+                  <Route path="/protocols" component={ClinicalProtocols} />
+                  <Route path="/compliance" component={ExportCompliance} />
+                  <Route path="/form-builder" component={FormBuilder} />
+                  <Route path="/medical-tools" component={MedicalToolsPage} />
+                  <Route path="/clinical-performance" component={ClinicalPerformance} />
+                  <Route path="/profile" component={ProfilePage} />
+                  <Route path="/user-management" component={UserManagementEnhanced} />
+                  <Route path="/audit-logs" component={AuditLogs} />
+                  <Route path="/organization-management" component={OrganizationManagement} />
+                  <Route component={NotFound} />
+                </Switch>
+              </div>
             </div>
           </div>
         </main>
@@ -114,11 +118,33 @@ function Router() {
         {() => {
           if (isLoading) {
             return (
-              <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-50">
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                  <div className="text-lg font-medium text-gray-700">Loading ClinicConnect...</div>
-                  <div className="text-sm text-gray-500">Preparing your healthcare workspace</div>
+              <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-50 relative overflow-hidden">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-5">
+                  <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500 rounded-full blur-3xl"></div>
+                  <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500 rounded-full blur-3xl"></div>
+                </div>
+                
+                <div className="flex flex-col items-center space-y-6 z-10">
+                  {/* Enhanced Loading Animation */}
+                  <div className="relative">
+                    <div className="w-16 h-16 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+                    <div className="absolute inset-2 w-8 h-8 border-2 border-blue-200 border-b-blue-500 rounded-full animate-spin animate-reverse"></div>
+                  </div>
+                  
+                  {/* Brand and Status */}
+                  <div className="text-center space-y-2">
+                    <div className="text-2xl font-bold text-gray-800 tracking-tight">ClinicConnect</div>
+                    <div className="text-lg font-medium text-gray-600">Loading your workspace...</div>
+                    <div className="text-sm text-gray-500">Preparing healthcare tools and patient data</div>
+                  </div>
+                  
+                  {/* Progress Dots */}
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-75"></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-150"></div>
+                  </div>
                 </div>
               </div>
             );
