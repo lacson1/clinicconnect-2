@@ -32,6 +32,8 @@ import LabOrdersPage from "@/pages/lab-orders";
 import DocumentsPage from "@/pages/documents";
 import RevenueAnalytics from "@/pages/revenue-analytics";
 import TelemedicinePage from "@/pages/telemedicine";
+import ClinicalProtocols from "@/components/clinical-protocols";
+import ExportCompliance from "@/components/export-compliance";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 
@@ -68,6 +70,10 @@ function AuthenticatedApp() {
                 <Route path="/appointments" component={AppointmentsPage} />
                 <Route path="/lab-orders" component={LabOrdersPage} />
                 <Route path="/documents" component={DocumentsPage} />
+                <Route path="/analytics" component={RevenueAnalytics} />
+                <Route path="/telemedicine" component={TelemedicinePage} />
+                <Route path="/protocols" component={ClinicalProtocols} />
+                <Route path="/compliance" component={ExportCompliance} />
                 <Route path="/form-builder" component={FormBuilder} />
                 <Route path="/medical-tools" component={MedicalToolsPage} />
                 <Route path="/clinical-performance" component={ClinicalPerformance} />
