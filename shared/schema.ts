@@ -632,3 +632,28 @@ export const insertMedicationSchema = createInsertSchema(medications).omit({
 
 export type Medication = typeof medications.$inferSelect;
 export type InsertMedication = z.infer<typeof insertMedicationSchema>;
+
+// Patient Safety Alerts
+export const safetyAlerts = pgTable('safety_alerts', {
+  id: serial('id').primaryKey(),
+  patientId: integer('patient_id').references(() => patients.id).notNull(),
+  type: varchar('type', { length: 20 }).notNull(), // 'critical', 'warning', 'info'
+  category: varchar('category', { length: 50 }).notNull(), // 'allergy', 'condition', 'medication', 'vitals'
+  title: varchar('title', { length: 100 }).notNull(),
+  description: text('description').notNull(),
+  priority: varchar('priority', { length: 20 }).default('medium'), // 'high', 'medium', 'low'
+  isActive: boolean('is_active').default(true),
+  createdBy: integer('created_by').references(() => users.id).notNull(),
+  dateAdded: timestamp('date_added').defaultNow(),
+  dateResolved: timestamp('date_resolved'),
+  resolvedBy: integer('resolved_by').references(() => users.id),
+  metadata: json('metadata'), // Additional data like vital readings, lab values, etc.
+});
+
+export const insertSafetyAlertSchema = createInsertSchema(safetyAlerts).omit({
+  id: true,
+  dateAdded: true,
+});
+
+export type SafetyAlert = typeof safetyAlerts.$inferSelect;
+export type InsertSafetyAlert = z.infer<typeof insertSafetyAlertSchema>;
