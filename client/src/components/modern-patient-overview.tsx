@@ -148,34 +148,38 @@ export function ModernPatientOverview({
 
       {/* Enhanced Tabbed Interface - Full Width */}
       <Tabs defaultValue="overview" className="w-full h-full">
-        <TabsList className="grid w-full grid-cols-7 mb-2 h-9">
+        <TabsList className="grid w-full grid-cols-8 mb-2 h-9">
           <TabsTrigger value="overview" className="flex items-center gap-1 text-xs">
             <User className="w-3 h-3" />
             Overview
           </TabsTrigger>
+          <TabsTrigger value="timeline" className="flex items-center gap-1 text-xs">
+            <Activity className="w-3 h-3" />
+            Timeline
+          </TabsTrigger>
           <TabsTrigger value="safety" className="flex items-center gap-1 text-xs">
             <Heart className="w-3 h-3" />
-            Safety Alerts
+            Safety
           </TabsTrigger>
           <TabsTrigger value="vitals" className="flex items-center gap-1 text-xs">
             <Monitor className="w-3 h-3" />
-            Vital Signs
+            Vitals
           </TabsTrigger>
           <TabsTrigger value="record-visit" className="flex items-center gap-1 text-xs">
             <Calendar className="w-3 h-3" />
-            Record Visit
+            Visit
           </TabsTrigger>
           <TabsTrigger value="consultation" className="flex items-center gap-1 text-xs">
             <FileText className="w-3 h-3" />
-            Consultation
+            Forms
           </TabsTrigger>
           <TabsTrigger value="appointments" className="flex items-center gap-1 text-xs">
             <CalendarDays className="w-3 h-3" />
-            Appointments
+            Schedule
           </TabsTrigger>
           <TabsTrigger value="communication" className="flex items-center gap-1 text-xs">
             <MessageSquare className="w-3 h-3" />
-            Communication
+            Chat
           </TabsTrigger>
         </TabsList>
 
@@ -198,109 +202,154 @@ export function ModernPatientOverview({
           </Card>
         </TabsContent>
 
-        {/* Overview Tab - Compact Layout */}
-        <TabsContent value="overview" className="space-y-3">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-            {/* Left Panel - Patient Info & Alerts */}
-            <div className="space-y-3">
-        {/* Patient Card */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3 mb-3">
-              <Avatar className="w-12 h-12">
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                  {getPatientInitials(patient.firstName, patient.lastName)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-lg font-bold text-gray-900 whitespace-nowrap">
-                  {patient.firstName} {patient.lastName}
-                </h2>
-                <p className="text-xs text-gray-500">
-                  ID: HC{patient.id?.toString().padStart(6, "0")}
-                </p>
-                <Badge variant="outline" className="mt-0.5 text-xs">
-                  Active Patient
-                </Badge>
-              </div>
-            </div>
-
-            <div className="space-y-1 text-xs">
-              <div className="flex items-center space-x-2">
-                <Calendar className="w-3 h-3 text-gray-400" />
-                <span>{getPatientAge(patient.dateOfBirth)} years old</span>
-                <span className="text-gray-400">•</span>
-                <span className="capitalize">{patient.gender}</span>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Phone className="w-3 h-3 text-gray-400" />
-                <span>{patient.phone}</span>
-              </div>
-
-              {patient.email && (
-                <div className="flex items-center space-x-2">
-                  <Mail className="w-3 h-3 text-gray-400" />
-                  <span>{patient.email}</span>
+        {/* Overview Tab - Optimized Layout */}
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Patient Card - Enhanced */}
+            <Card className="lg:col-span-2">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-4 mb-4">
+                  <Avatar className="w-16 h-16">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
+                      {getPatientInitials(patient.firstName, patient.lastName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold text-gray-900">
+                      {patient.firstName} {patient.lastName}
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      ID: HC{patient.id?.toString().padStart(6, "0")}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="outline" className="text-xs">
+                        Active Patient
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {getPatientAge(patient.dateOfBirth)} years • {patient.gender}
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
-              )}
 
-              {patient.address && (
-                <div className="flex items-center space-x-2">
-                  <MapPin className="w-3 h-3 text-gray-400" />
-                  <span>{patient.address}</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <Phone className="w-4 h-4 text-gray-400" />
+                    <span>{patient.phone}</span>
+                  </div>
+                  
+                  {patient.email && (
+                    <div className="flex items-center space-x-2">
+                      <Mail className="w-4 h-4 text-gray-400" />
+                      <span className="truncate">{patient.email}</span>
+                    </div>
+                  )}
+
+                  {patient.address && (
+                    <div className="flex items-center space-x-2 md:col-span-2">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <span className="truncate">{patient.address}</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        {/* Patient Alerts */}
-        <PatientAlertsPanel
-          patient={patient}
-          upcomingAppointments={[]}
-          criticalMedications={activePrescriptions}
-        />
+            {/* Quick Stats - Enhanced */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Medical Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Activity className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm">Total Visits</span>
+                  </div>
+                  <Badge variant="secondary">{visits.length}</Badge>
+                </div>
 
-        {/* Quick Stats */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Quick Stats</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Activity className="w-4 h-4 text-blue-500" />
-                <span className="text-sm">Total Visits</span>
-              </div>
-              <Badge variant="secondary">{visits.length}</Badge>
-            </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <FlaskRound className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">Lab Results</span>
+                  </div>
+                  <Badge variant="secondary">{recentLabs.length}</Badge>
+                </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <FlaskRound className="w-4 h-4 text-green-500" />
-                <span className="text-sm">Lab Results</span>
-              </div>
-              <Badge variant="secondary">{recentLabs.length}</Badge>
-            </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Pill className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm">Active Meds</span>
+                  </div>
+                  <Badge variant="secondary">{activePrescriptions.length}</Badge>
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Pill className="w-4 h-4 text-purple-500" />
-                <span className="text-sm">Active Meds</span>
-              </div>
-              <Badge variant="secondary">{activePrescriptions.length}</Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            {/* Patient Safety Indicator */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-red-500" />
+                  Safety Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <QuickSafetyIndicator patient={patient} />
+              </CardContent>
+            </Card>
+          </div>
 
-              {/* Middle Panel - Timeline & Main Content */}
-              <div className="lg:col-span-2">
-                <PatientTimeline events={activityTrail} />
-              </div>
+          {/* Patient Alerts - Full Width */}
+          <PatientAlertsPanel
+            patient={patient}
+            upcomingAppointments={[]}
+            criticalMedications={activePrescriptions}
+          />
+        </TabsContent>
+
+        {/* Dedicated Timeline Tab */}
+        <TabsContent value="timeline" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            {/* Timeline Filters/Controls */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Filter Timeline</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-700">Event Types</label>
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Activity className="w-2 h-2 text-blue-600" />
+                      </div>
+                      <span className="text-xs">Visits</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-green-100 rounded-full flex items-center justify-center">
+                        <FlaskRound className="w-2 h-2 text-green-600" />
+                      </div>
+                      <span className="text-xs">Lab Results</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-orange-100 rounded-full flex items-center justify-center">
+                        <FileText className="w-2 h-2 text-orange-600" />
+                      </div>
+                      <span className="text-xs">Consultations</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Timeline Content - Main Area */}
+            <div className="lg:col-span-3">
+              <PatientTimeline events={activityTrail} />
             </div>
-          </TabsContent>
+          </div>
+        </TabsContent>
 
           {/* Vital Signs Tab */}
           <TabsContent value="vitals" className="space-y-6">
