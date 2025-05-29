@@ -8,9 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Send, Clock, User, Calendar, Activity, Pill } from "lucide-react";
+import { FileText, Send, Clock, User, Calendar, Activity, Pill, Search, ChevronDown, ChevronUp, Filter } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import ConsultationHistoryDisplay from "./consultation-history-display";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface ConsultationForm {
   id: number;
@@ -56,6 +57,9 @@ export default function ConsultationFormSelector({
 }: ConsultationFormSelectorProps) {
   const [selectedFormId, setSelectedFormId] = useState<number | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterByRole, setFilterByRole] = useState("");
+  const [isFormSelectorOpen, setIsFormSelectorOpen] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -63,6 +67,17 @@ export default function ConsultationFormSelector({
   const { data: forms = [], isLoading: formsLoading } = useQuery<ConsultationForm[]>({
     queryKey: ['/api/consultation-forms'],
   });
+
+  // Filter forms based on search and role filter
+  const filteredForms = forms.filter(form => {
+    const matchesSearch = form.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         form.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRole = !filterByRole || form.specialistRole.toLowerCase().includes(filterByRole.toLowerCase());
+    return matchesSearch && matchesRole;
+  });
+
+  // Get unique specialist roles for filter dropdown
+  const uniqueRoles = Array.from(new Set(forms.map(form => form.specialistRole))).sort();
 
   // Get selected form details
   const selectedForm = forms.find(form => form.id === selectedFormId);
@@ -273,51 +288,124 @@ export default function ConsultationFormSelector({
   return (
     <div className="space-y-6" data-testid="consultation-forms">
       {/* Form Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Select Consultation Form
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {forms.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">
-              No consultation forms available. Please create forms first.
-            </p>
-          ) : (
-            <div className="grid gap-3">
-              {forms.map((form) => (
-                <div
-                  key={form.id}
-                  data-testid="form-card"
-                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                    selectedFormId === form.id
-                      ? 'border-blue-500 bg-blue-50 shadow-md'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedFormId(form.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{form.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{form.description}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-800" data-testid="specialist-role">
-                        {form.specialistRole}
-                      </Badge>
-                      <Badge variant="outline">
-                        {form.formStructure?.fields?.length || 0} fields
-                      </Badge>
-                    </div>
+      <Collapsible open={isFormSelectorOpen} onOpenChange={setIsFormSelectorOpen}>
+        <Card>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Select Consultation Form
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    {filteredForms.length} available
+                  </Badge>
+                </div>
+                {isFormSelectorOpen ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </CardTitle>
+            </CardHeader>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent>
+            <CardContent className="space-y-4">
+              {/* Search and Filter Controls */}
+              {forms.length > 0 && (
+                <div className="flex flex-col sm:flex-row gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Search forms by name or description..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-gray-400" />
+                    <Select value={filterByRole} onValueChange={setFilterByRole}>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Filter by specialist role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Roles</SelectItem>
+                        {uniqueRoles.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {role}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              )}
+
+              {/* Form List */}
+              {filteredForms.length === 0 ? (
+                <div className="text-center py-8">
+                  {forms.length === 0 ? (
+                    <div>
+                      <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p className="text-gray-500">No consultation forms available. Please create forms first.</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <Search className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p className="text-gray-500">No forms match your search criteria.</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-2"
+                        onClick={() => {
+                          setSearchQuery("");
+                          setFilterByRole("");
+                        }}
+                      >
+                        Clear Filters
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="grid gap-3 max-h-80 overflow-y-auto">
+                  {filteredForms.map((form) => (
+                    <div
+                      key={form.id}
+                      data-testid="form-card"
+                      className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                        selectedFormId === form.id
+                          ? 'border-blue-500 bg-blue-50 shadow-md'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                      onClick={() => {
+                        setSelectedFormId(form.id);
+                        setIsFormSelectorOpen(false); // Collapse after selection
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900">{form.name}</h3>
+                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{form.description}</p>
+                        </div>
+                        <div className="flex items-center gap-2 ml-4">
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-800" data-testid="specialist-role">
+                            {form.specialistRole}
+                          </Badge>
+                          <Badge variant="outline">
+                            {form.formStructure?.fields?.length || 0} fields
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Selected Form */}
       {selectedForm && (
