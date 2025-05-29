@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import PatientRegistrationModal from "@/components/patient-registration-modal";
 import SmartAppointmentScheduler from "@/components/smart-appointment-scheduler";
-import EnhancedPatientManagement from "@/components/enhanced-patient-management";
+import EnhancedPatientManagementFixed from "@/components/enhanced-patient-management-fixed";
 import PatientAnalyticsDashboard from "@/components/patient-analytics-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRole } from "@/components/role-guard";
@@ -49,7 +49,7 @@ export default function Patients() {
         </TabsList>
 
         <TabsContent value="patients" className="mt-6">
-          <EnhancedPatientManagement user={user} />
+          <EnhancedPatientManagementFixed user={user} />
         </TabsContent>
 
         <TabsContent value="analytics" className="mt-6">
