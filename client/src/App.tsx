@@ -34,6 +34,7 @@ import RevenueAnalytics from "@/pages/revenue-analytics";
 import TelemedicinePage from "@/pages/telemedicine";
 import PhysiotherapyPage from "@/pages/physiotherapy";
 import ExerciseLeafletsPage from "@/pages/exercise-leaflets";
+import WellnessPage from "@/pages/wellness";
 import ClinicalProtocols from "@/components/clinical-protocols";
 import ExportCompliance from "@/components/export-compliance";
 import Login from "@/pages/login";
@@ -80,6 +81,7 @@ function AuthenticatedApp() {
                   <Route path="/telemedicine" component={TelemedicinePage} />
                   <Route path="/physiotherapy" component={PhysiotherapyPage} />
                   <Route path="/exercise-leaflets" component={ExerciseLeafletsPage} />
+                  <Route path="/wellness" component={WellnessPage} />
                   <Route path="/protocols" component={ClinicalProtocols} />
                   <Route path="/compliance" component={ExportCompliance} />
                   <Route path="/form-builder" component={FormBuilder} />

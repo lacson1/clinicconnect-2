@@ -33,6 +33,7 @@ const getNavigationGroupsForRole = (role: string) => {
         { name: "Pharmacy", href: "/pharmacy", icon: Pill, roles: ["admin", "pharmacist"] },
         { name: "Physiotherapy", href: "/physiotherapy", icon: Heart, roles: ["admin", "physiotherapist"] },
         { name: "Exercise Leaflets", href: "/exercise-leaflets", icon: FileText, roles: ["admin", "doctor", "physiotherapist"] },
+        { name: "Wellness Center", href: "/wellness", icon: Heart, roles: ["admin", "doctor", "nurse", "physiotherapist"] },
         { name: "Medical Tools", href: "/medical-tools", icon: Calculator, roles: ["admin", "doctor", "nurse", "pharmacist", "physiotherapist"] },
       ]
     },
