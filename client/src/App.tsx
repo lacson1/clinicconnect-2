@@ -36,6 +36,7 @@ import PhysiotherapyPage from "@/pages/physiotherapy";
 import ExerciseLeafletsPage from "@/pages/exercise-leaflets";
 import WellnessPage from "@/pages/wellness";
 import WellnessPlansPage from "@/pages/wellness-plans";
+import WellnessAnalyticsPage from "@/pages/wellness-analytics";
 import MentalHealthPage from "@/pages/mental-health";
 import ClinicalProtocols from "@/components/clinical-protocols";
 import ExportCompliance from "@/components/export-compliance";
@@ -85,6 +86,7 @@ function AuthenticatedApp() {
                   <Route path="/exercise-leaflets" component={ExerciseLeafletsPage} />
                   <Route path="/wellness" component={WellnessPage} />
                   <Route path="/wellness/plans" component={WellnessPlansPage} />
+                  <Route path="/wellness/analytics" component={WellnessAnalyticsPage} />
                   <Route path="/mental-health" component={MentalHealthPage} />
                   <Route path="/protocols" component={ClinicalProtocols} />
                   <Route path="/compliance" component={ExportCompliance} />
