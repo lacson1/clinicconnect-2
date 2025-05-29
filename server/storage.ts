@@ -3,6 +3,7 @@ import {
   visits, 
   labResults, 
   medicines,
+  medications,
   prescriptions,
   users,
   referrals,
@@ -37,7 +38,7 @@ import {
   type InsertMedicalHistory
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, gte, lte, and, ilike, or } from "drizzle-orm";
+import { eq, desc, gte, lte, and, ilike, or, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Patients
@@ -266,9 +267,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPrescriptionsByPatient(patientId: number): Promise<Prescription[]> {
-    return await db.select().from(prescriptions)
-      .where(eq(prescriptions.patientId, patientId))
-      .orderBy(desc(prescriptions.createdAt));
+    return await db.select({
+      id: prescriptions.id,
+      patientId: prescriptions.patientId,
+      visitId: prescriptions.visitId,
+      medicationId: prescriptions.medicationId,
+      medicationName: sql<string>`COALESCE(${prescriptions.medicationName}, ${medications.name})`.as('medicationName'),
+      dosage: prescriptions.dosage,
+      frequency: prescriptions.frequency,
+      duration: prescriptions.duration,
+      instructions: prescriptions.instructions,
+      prescribedBy: prescriptions.prescribedBy,
+      status: prescriptions.status,
+      startDate: prescriptions.startDate,
+      endDate: prescriptions.endDate,
+      organizationId: prescriptions.organizationId,
+      createdAt: prescriptions.createdAt
+    })
+    .from(prescriptions)
+    .leftJoin(medications, eq(prescriptions.medicationId, medications.id))
+    .where(eq(prescriptions.patientId, patientId))
+    .orderBy(desc(prescriptions.createdAt));
   }
 
   async getPrescriptionsByVisit(visitId: number): Promise<Prescription[]> {
