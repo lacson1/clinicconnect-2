@@ -252,41 +252,41 @@ export function ModernPatientOverview({
 
       {/* Enhanced Tabbed Interface - Full Width */}
       <Tabs defaultValue="overview" className="w-full h-full">
-        <TabsList className="grid w-full grid-cols-9 mb-4 h-12 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-1 shadow-sm">
-          <TabsTrigger value="overview" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
-            <User className="w-4 h-4" />
+        <TabsList className="grid w-full grid-cols-9 mb-6 h-16 bg-gradient-to-r from-blue-100 to-indigo-100 border-2 border-blue-300 rounded-xl p-2 shadow-lg backdrop-blur-sm">
+          <TabsTrigger value="overview" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
+            <User className="w-5 h-5" />
             Overview
           </TabsTrigger>
-          <TabsTrigger value="medications" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
-            <Pill className="w-4 h-4" />
+          <TabsTrigger value="medications" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
+            <Pill className="w-5 h-5" />
             Medications
           </TabsTrigger>
-          <TabsTrigger value="timeline" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
-            <Activity className="w-4 h-4" />
+          <TabsTrigger value="timeline" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
+            <Activity className="w-5 h-5" />
             Timeline
           </TabsTrigger>
-          <TabsTrigger value="safety" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
-            <Heart className="w-4 h-4" />
+          <TabsTrigger value="safety" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
+            <Heart className="w-5 h-5" />
             Safety
           </TabsTrigger>
-          <TabsTrigger value="vitals" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
-            <Monitor className="w-4 h-4" />
+          <TabsTrigger value="vitals" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
+            <Monitor className="w-5 h-5" />
             Vitals
           </TabsTrigger>
-          <TabsTrigger value="record-visit" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
-            <Calendar className="w-4 h-4" />
+          <TabsTrigger value="record-visit" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
+            <Calendar className="w-5 h-5" />
             Visit
           </TabsTrigger>
-          <TabsTrigger value="consultation" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
-            <FileText className="w-4 h-4" />
+          <TabsTrigger value="consultation" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
+            <FileText className="w-5 h-5" />
             Forms
           </TabsTrigger>
-          <TabsTrigger value="appointments" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
-            <CalendarDays className="w-4 h-4" />
+          <TabsTrigger value="appointments" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
+            <CalendarDays className="w-5 h-5" />
             Schedule
           </TabsTrigger>
-          <TabsTrigger value="communication" className="flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 hover:bg-white/60">
-            <MessageSquare className="w-4 h-4" />
+          <TabsTrigger value="communication" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
+            <MessageSquare className="w-5 h-5" />
             Chat
           </TabsTrigger>
         </TabsList>
