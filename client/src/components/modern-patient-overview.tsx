@@ -98,6 +98,34 @@ export function ModernPatientOverview({
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
+  // Fetch consultation records for this patient
+  const { data: consultationRecords = [] } = useQuery({
+    queryKey: ['/api/patients', patient.id, 'consultation-records'],
+    enabled: !!patient.id,
+  });
+
+  // Combine visits and consultation records
+  const combinedVisits = React.useMemo(() => {
+    const allVisits = [
+      ...visits.map(visit => ({
+        ...visit,
+        type: 'visit',
+        date: visit.visitDate,
+        title: visit.visitType || 'Consultation',
+        description: visit.complaint || visit.diagnosis || 'No details recorded'
+      })),
+      ...(consultationRecords || []).map((record: any) => ({
+        ...record,
+        type: 'consultation',
+        date: record.recordedAt,
+        title: record.formName || 'Consultation Form',
+        description: record.responses ? Object.values(record.responses).slice(0, 2).join(', ') : 'Consultation completed'
+      }))
+    ];
+    
+    return allVisits.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [visits, consultationRecords]);
+
   // Handle visit actions
   const handleViewVisit = (visitId: number) => {
     navigate(`/patients/${patient.id}/visits/${visitId}`);
@@ -105,6 +133,14 @@ export function ModernPatientOverview({
 
   const handleEditVisit = (visitId: number) => {
     navigate(`/patients/${patient.id}/visits/${visitId}/edit`);
+  };
+
+  const handleViewConsultation = (consultationId: number) => {
+    // Navigate to consultation details or show in modal
+    toast({
+      title: "Consultation Record",
+      description: "Consultation details viewed",
+    });
   };
 
   const handleCopyVisit = (visit: any) => {
@@ -787,30 +823,38 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
                   </Button>
                 </div>
 
-                {/* Recent Visits Summary */}
+                {/* Recent Visits & Consultations Summary */}
                 <div className="space-y-3">
-                  <h4 className="font-medium text-gray-900">Recent Visits</h4>
-                  {visits.length > 0 ? (
+                  <h4 className="font-medium text-gray-900">Recent Visits & Consultations</h4>
+                  {combinedVisits.length > 0 ? (
                     <div className="space-y-2">
-                      {visits.slice(0, 5).map((visit: any) => (
-                        <div key={visit.id} className="border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow">
+                      {combinedVisits.slice(0, 5).map((item: any) => (
+                        <div key={`${item.type}-${item.id}`} className="border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <Badge variant="outline" className="text-xs">
-                                  {visit.visitType || 'Consultation'}
+                                <Badge 
+                                  variant="outline" 
+                                  className={`text-xs ${item.type === 'consultation' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}
+                                >
+                                  {item.title}
                                 </Badge>
                                 <span className="text-xs text-gray-500">
-                                  {new Date(visit.visitDate).toLocaleDateString()}
+                                  {new Date(item.date).toLocaleDateString()}
                                 </span>
                               </div>
                               <p className="text-sm text-gray-700 mb-1">
-                                {visit.complaint || visit.diagnosis || 'No details recorded'}
+                                {item.description}
                               </p>
-                              {visit.bloodPressure && (
+                              {item.type === 'visit' && item.bloodPressure && (
                                 <div className="text-xs text-gray-500">
-                                  BP: {visit.bloodPressure}
-                                  {visit.heartRate && ` • HR: ${visit.heartRate}`}
+                                  BP: {item.bloodPressure}
+                                  {item.heartRate && ` • HR: ${item.heartRate}`}
+                                </div>
+                              )}
+                              {item.type === 'consultation' && (
+                                <div className="text-xs text-gray-500">
+                                  Recorded by: {item.recordedBy}
                                 </div>
                               )}
                             </div>
@@ -822,26 +866,41 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-[200px]">
-                                <DropdownMenuItem onClick={() => handleViewVisit(visit.id)}>
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleEditVisit(visit.id)}>
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Edit Visit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleCopyVisit(visit)}>
-                                  <Copy className="mr-2 h-4 w-4" />
-                                  Copy Details
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                  onClick={() => handleDeleteVisit(visit.id)}
-                                  className="text-red-600 focus:text-red-600"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete Visit
-                                </DropdownMenuItem>
+                                {item.type === 'visit' ? (
+                                  <>
+                                    <DropdownMenuItem onClick={() => handleViewVisit(item.id)}>
+                                      <Eye className="mr-2 h-4 w-4" />
+                                      View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleEditVisit(item.id)}>
+                                      <Edit className="mr-2 h-4 w-4" />
+                                      Edit Visit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleCopyVisit(item)}>
+                                      <Copy className="mr-2 h-4 w-4" />
+                                      Copy Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem 
+                                      onClick={() => handleDeleteVisit(item.id)}
+                                      className="text-red-600 focus:text-red-600"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Delete Visit
+                                    </DropdownMenuItem>
+                                  </>
+                                ) : (
+                                  <>
+                                    <DropdownMenuItem onClick={() => handleViewConsultation(item.id)}>
+                                      <Eye className="mr-2 h-4 w-4" />
+                                      View Consultation
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => navigator.clipboard.writeText(JSON.stringify(item.responses, null, 2))}>
+                                      <Copy className="mr-2 h-4 w-4" />
+                                      Copy Responses
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
@@ -851,7 +910,7 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
                   ) : (
                     <div className="text-center py-6 text-gray-500">
                       <Stethoscope className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm">No visits recorded yet</p>
+                      <p className="text-sm">No visits or consultations recorded yet</p>
                     </div>
                   )}
                 </div>
