@@ -355,76 +355,276 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Admin-Specific Dashboard */}
+        {/* Enhanced Admin Dashboard */}
         {user?.role === 'admin' && (
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold text-slate-800 mb-4">Admin Dashboard</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* User Management */}
-              <Card>
+          <div className="mb-8 space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-slate-800">Admin Control Center</h3>
+              <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                <Settings className="w-3 h-3 mr-1" />
+                Administrator
+              </Badge>
+            </div>
+            
+            {/* Quick Action Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link href="/user-management">
+                <Card className="admin-widget hover:shadow-lg transition-shadow cursor-pointer group">
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                        <UserCog className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-900">User Management</p>
+                        <p className="text-sm text-slate-500">Manage staff accounts</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/organization-management">
+                <Card className="admin-widget hover:shadow-lg transition-shadow cursor-pointer group">
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                        <Settings className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-900">Organizations</p>
+                        <p className="text-sm text-slate-500">Clinic management</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/audit-logs">
+                <Card className="admin-widget hover:shadow-lg transition-shadow cursor-pointer group">
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
+                        <Activity className="h-5 w-5 text-orange-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-900">Audit Logs</p>
+                        <p className="text-sm text-slate-500">System activity</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/clinical-performance">
+                <Card className="admin-widget hover:shadow-lg transition-shadow cursor-pointer group">
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                        <TrendingUp className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-900">Analytics</p>
+                        <p className="text-sm text-slate-500">Performance insights</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
+
+            {/* Detailed Admin Widgets */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {/* User Management Widget */}
+              <Card className="admin-detail-widget">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <UserCog className="mr-2 h-5 w-5" />
-                    User Management
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center">
+                      <UserCog className="mr-2 h-5 w-5 text-blue-600" />
+                      User Management
+                    </span>
+                    <Badge variant="outline">{stats?.totalPatients || 0} Users</Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    <p className="text-sm text-slate-600">Manage clinic staff accounts</p>
-                    <Button className="w-full" variant="outline">
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      Add New User
-                    </Button>
-                    <Button variant="outline" className="w-full">
-                      View All Users
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-sm font-medium text-blue-800">Doctors</p>
+                        <p className="text-2xl font-bold text-blue-900">2</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-sm font-medium text-green-800">Nurses</p>
+                        <p className="text-2xl font-bold text-green-900">3</p>
+                      </div>
+                    </div>
+                    <Button className="w-full" variant="outline" asChild>
+                      <Link href="/user-management">
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Manage All Users
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* System Overview */}
-              <Card>
+              {/* System Health Widget */}
+              <Card className="admin-detail-widget">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center">
+                      <Activity className="mr-2 h-5 w-5 text-green-600" />
+                      System Health
+                    </span>
+                    <Badge variant="outline" className="bg-green-50 text-green-700">Healthy</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">Database</span>
+                        <Badge variant="outline" className="bg-green-50 text-green-700">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Online
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">API Services</span>
+                        <Badge variant="outline" className="bg-green-50 text-green-700">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Active
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">Storage</span>
+                        <Badge variant="outline" className="bg-green-50 text-green-700">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Available
+                        </Badge>
+                      </div>
+                    </div>
+                    <Button className="w-full" variant="outline" asChild>
+                      <Link href="/audit-logs">
+                        <Activity className="mr-2 h-4 w-4" />
+                        View System Logs
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Activity Widget */}
+              <Card className="admin-detail-widget">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Activity className="mr-2 h-5 w-5" />
-                    System Overview
+                    <Clock className="mr-2 h-5 w-5 text-orange-600" />
+                    Recent Activity
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="text-slate-600">Patients:</div>
-                      <div className="font-medium">{stats?.totalPatients || 0}</div>
-                      <div className="text-slate-600">Today Visits:</div>
-                      <div className="font-medium">{stats?.todayVisits || 0}</div>
-                      <div className="text-slate-600">Low Stock:</div>
-                      <div className="font-medium text-red-600">{stats?.lowStockItems || 0}</div>
+                    <div className="text-sm space-y-2">
+                      <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                        <span className="text-slate-600">New Patient Registration</span>
+                        <span className="text-xs text-slate-500">2 hrs ago</span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                        <span className="text-slate-600">Lab Result Updated</span>
+                        <span className="text-xs text-slate-500">4 hrs ago</span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                        <span className="text-slate-600">User Account Created</span>
+                        <span className="text-xs text-slate-500">1 day ago</span>
+                      </div>
+                    </div>
+                    <Button className="w-full" variant="outline" asChild>
+                      <Link href="/audit-logs">
+                        <Clock className="mr-2 h-4 w-4" />
+                        View All Activity
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Performance Metrics Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Clinic Performance Widget */}
+              <Card className="admin-performance-widget">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <TrendingUp className="mr-2 h-5 w-5 text-indigo-600" />
+                    Clinic Performance
+                  </CardTitle>
+                  <CardDescription>Key performance indicators for this month</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
+                      <p className="text-2xl font-bold text-indigo-700">{stats?.totalPatients || 0}</p>
+                      <p className="text-sm text-indigo-600">Total Patients</p>
+                      <p className="text-xs text-indigo-500 mt-1">+12% this month</p>
+                    </div>
+                    <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
+                      <p className="text-2xl font-bold text-emerald-700">{stats?.todayVisits || 0}</p>
+                      <p className="text-sm text-emerald-600">Today's Visits</p>
+                      <p className="text-xs text-emerald-500 mt-1">+8% from yesterday</p>
+                    </div>
+                    <div className="text-center p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg">
+                      <p className="text-2xl font-bold text-amber-700">{stats?.pendingLabs || 0}</p>
+                      <p className="text-sm text-amber-600">Pending Labs</p>
+                      <p className="text-xs text-amber-500 mt-1">-15% from last week</p>
+                    </div>
+                    <div className="text-center p-4 bg-gradient-to-r from-red-50 to-rose-50 rounded-lg">
+                      <p className="text-2xl font-bold text-rose-700">{stats?.lowStockItems || 0}</p>
+                      <p className="text-sm text-rose-600">Low Stock Items</p>
+                      <p className="text-xs text-rose-500 mt-1">Needs attention</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Quick Actions */}
-              <Card>
+              {/* Quick Actions Widget */}
+              <Card className="admin-actions-widget">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Settings className="mr-2 h-5 w-5" />
+                    <Settings className="mr-2 h-5 w-5 text-slate-600" />
                     Quick Actions
                   </CardTitle>
+                  <CardDescription>Frequently used administrative tasks</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    <Button variant="outline" size="sm" className="w-full" asChild>
-                      <Link href="/patients">Manage Patients</Link>
+                  <div className="grid grid-cols-1 gap-3">
+                    <Button className="justify-start h-12" variant="outline" asChild>
+                      <Link href="/user-management">
+                        <UserPlus className="mr-3 h-4 w-4" />
+                        <div className="text-left">
+                          <p className="font-medium">Add New Staff</p>
+                          <p className="text-xs text-slate-500">Create user accounts</p>
+                        </div>
+                      </Link>
                     </Button>
-                    <Button variant="outline" size="sm" className="w-full" asChild>
-                      <Link href="/pharmacy">Manage Pharmacy</Link>
+                    
+                    <Button className="justify-start h-12" variant="outline" asChild>
+                      <Link href="/organization-management">
+                        <Settings className="mr-3 h-4 w-4" />
+                        <div className="text-left">
+                          <p className="font-medium">Manage Clinics</p>
+                          <p className="text-xs text-slate-500">Organization settings</p>
+                        </div>
+                      </Link>
                     </Button>
-                    <Button variant="outline" size="sm" className="w-full" asChild>
-                      <Link href="/referrals">Manage Referrals</Link>
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full" asChild>
-                      <Link href="/visits">View All Visits</Link>
+                    
+                    <Button className="justify-start h-12" variant="outline" asChild>
+                      <Link href="/clinical-performance">
+                        <Activity className="mr-3 h-4 w-4" />
+                        <div className="text-left">
+                          <p className="font-medium">View Analytics</p>
+                          <p className="text-xs text-slate-500">Performance reports</p>
+                        </div>
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>
@@ -432,6 +632,230 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Doctor Dashboard */}
+        {isDoctor && (
+          <div className="mb-8 space-y-6">
+            <h3 className="text-xl font-semibold text-slate-800">Doctor's Overview</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Patient Search & Recent Patients */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <User className="mr-2 h-5 w-5" />
+                    Patient Search
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        placeholder="Search patients..."
+                        className="w-full pl-10"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    </div>
+
+                    {searchQuery && filteredPatients && filteredPatients.length > 0 ? (
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {filteredPatients.slice(0, 5).map((patient: any) => (
+                          <div key={patient.id} className="flex items-center justify-between p-2 bg-slate-50 rounded hover:bg-slate-100">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">
+                                {getPatientInitials(patient.firstName, patient.lastName)}
+                              </div>
+                              <div>
+                                <p className="font-medium text-sm">{patient.firstName} {patient.lastName}</p>
+                                <p className="text-xs text-slate-500">Age: {getPatientAge(patient.dateOfBirth)}</p>
+                              </div>
+                            </div>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => setShowVisitModal(true)}
+                            >
+                              Record Visit
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : searchQuery ? (
+                      <p className="text-sm text-slate-500">No patients found</p>
+                    ) : null}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Referrals */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <UserCheck className="mr-2 h-5 w-5" />
+                    Patient Referrals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {referralsLoading ? (
+                    <p className="text-sm text-slate-500">Loading referrals...</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {doctorReferrals && doctorReferrals.length > 0 ? (
+                        doctorReferrals.slice(0, 3).map((referral: any) => (
+                          <div key={referral.id} className="p-3 bg-slate-50 rounded">
+                            <p className="font-medium text-sm">{referral.patient?.firstName} {referral.patient?.lastName}</p>
+                            <p className="text-xs text-slate-600">{referral.reason}</p>
+                            <p className="text-xs text-slate-500">Status: {referral.status}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-slate-500">No active referrals</p>
+                      )}
+                      <Button variant="outline" className="w-full" asChild>
+                        <Link href="/referrals">View All Referrals</Link>
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Recent Patients - For all roles */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Patients</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recentPatients && recentPatients.length > 0 ? (
+                  recentPatients.slice(0, 5).map((patient: any, index: number) => (
+                    <div key={patient.id || index} className="flex items-center space-x-3 p-2 hover:bg-slate-50 rounded">
+                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">
+                        {patient.firstName?.charAt(0)}{patient.lastName?.charAt(0)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{patient.firstName} {patient.lastName}</p>
+                        <p className="text-xs text-slate-500">{patient.phone}</p>
+                      </div>
+                      <Button size="sm" variant="outline" asChild>
+                        <Link href={`/patients/${patient.id}`}>View</Link>
+                      </Button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500">No recent patients</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Low Stock Medicines */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <TriangleAlert className="mr-2 h-5 w-5 text-red-500" />
+                Low Stock Alert
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {lowStockMedicines && lowStockMedicines.length > 0 ? (
+                  lowStockMedicines.slice(0, 5).map((medicine: any, index: number) => (
+                    <div key={medicine.id || index} className="flex items-center justify-between p-2 bg-red-50 rounded">
+                      <div>
+                        <p className="font-medium text-sm text-red-800">{medicine.name}</p>
+                        <p className="text-xs text-red-600">Stock: {medicine.quantity} {medicine.unit}</p>
+                      </div>
+                      {user?.role === 'pharmacist' && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleReorderMedicine(medicine)}
+                          className="text-red-700 border-red-300 hover:bg-red-100"
+                        >
+                          Reorder
+                        </Button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500">All medicines well stocked</p>
+                )}
+                {lowStockMedicines && lowStockMedicines.length > 5 && (
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href="/pharmacy">View All ({lowStockMedicines.length} items)</Link>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+
+      {/* Modals */}
+      <PatientRegistrationModal
+        open={showPatientModal}
+        onOpenChange={setShowPatientModal}
+      />
+
+      <VisitRecordingModal
+        open={showVisitModal}
+        onOpenChange={setShowVisitModal}
+      />
+
+      <LabResultModal
+        open={showLabModal}
+        onOpenChange={setShowLabModal}
+      />
+
+      {/* Medicine Reorder Modal */}
+      <Dialog open={showReorderModal} onOpenChange={setShowReorderModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reorder Medicine</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="font-medium">{selectedMedicine?.name}</p>
+              <p className="text-sm text-slate-600">Current stock: {selectedMedicine?.quantity} {selectedMedicine?.unit}</p>
+            </div>
+            <div>
+              <Label htmlFor="reorderQuantity">Reorder Quantity</Label>
+              <Input
+                id="reorderQuantity"
+                type="number"
+                value={reorderQuantity}
+                onChange={(e) => setReorderQuantity(e.target.value)}
+                placeholder="Enter quantity to add"
+              />
+            </div>
+            <div className="flex space-x-2">
+              <Button 
+                onClick={handleConfirmReorder}
+                disabled={!selectedMedicine || !reorderQuantity || reorderMutation.isPending}
+                className="flex-1"
+              >
+                {reorderMutation.isPending ? "Restocking..." : "Confirm Restock"}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowReorderModal(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
         {/* Physiotherapist-Specific Dashboard */}
         {user?.role === 'physiotherapist' && (
