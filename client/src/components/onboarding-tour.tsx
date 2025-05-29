@@ -371,7 +371,7 @@ export default function OnboardingTour({
 
             <div className="flex items-center gap-2">
               <Button variant="ghost" onClick={handleSkip}>
-                Skip Tour
+                Don't show again
               </Button>
               <Button onClick={handleNext} className="flex items-center gap-2">
                 {currentStep === tourSteps.length - 1 ? (

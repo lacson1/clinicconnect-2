@@ -4,6 +4,8 @@ interface OnboardingState {
   hasCompletedTour: boolean;
   lastLoginDate: string | null;
   tourVersion: string;
+  hasSeenTour: boolean;
+  skipTourPermanently: boolean;
 }
 
 export function useOnboarding(userId: number, userRole: string) {
@@ -28,19 +30,16 @@ export function useOnboarding(userId: number, userRole: string) {
 
         const onboardingData: OnboardingState = JSON.parse(stored);
         
-        // Show tour if:
-        // 1. User hasn't completed tour
-        // 2. Tour version has been updated
-        // 3. User hasn't logged in for more than 30 days (refresher)
+        // Show tour only if:
+        // 1. User hasn't seen tour AND hasn't permanently skipped it
+        // 2. Tour version has been updated (only if they haven't permanently skipped)
         const shouldShowTour = 
-          !onboardingData.hasCompletedTour ||
-          onboardingData.tourVersion !== CURRENT_TOUR_VERSION ||
-          (onboardingData.lastLoginDate && 
-           isMoreThan30DaysAgo(onboardingData.lastLoginDate));
+          (!onboardingData.hasSeenTour && !onboardingData.skipTourPermanently) ||
+          (!onboardingData.skipTourPermanently && onboardingData.tourVersion !== CURRENT_TOUR_VERSION);
 
         if (shouldShowTour) {
           setShowTour(true);
-          if (!onboardingData.hasCompletedTour) {
+          if (!onboardingData.hasSeenTour) {
             setIsNewUser(true);
           }
         }
@@ -67,8 +66,13 @@ export function useOnboarding(userId: number, userRole: string) {
 
   const updateLastLogin = () => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    const existing = stored ? JSON.parse(stored) : {};
-    const updated = {
+    const existing = stored ? JSON.parse(stored) : {
+      hasCompletedTour: false,
+      hasSeenTour: false,
+      tourVersion: CURRENT_TOUR_VERSION,
+      skipTourPermanently: false
+    };
+    const updated: OnboardingState = {
       ...existing,
       lastLoginDate: new Date().toDateString()
     };
@@ -78,8 +82,10 @@ export function useOnboarding(userId: number, userRole: string) {
   const completeTour = () => {
     const onboardingData: OnboardingState = {
       hasCompletedTour: true,
+      hasSeenTour: true,
       lastLoginDate: new Date().toDateString(),
-      tourVersion: CURRENT_TOUR_VERSION
+      tourVersion: CURRENT_TOUR_VERSION,
+      skipTourPermanently: false
     };
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(onboardingData));
@@ -92,7 +98,33 @@ export function useOnboarding(userId: number, userRole: string) {
   };
 
   const skipTour = () => {
+    // When user clicks "Don't show again", permanently skip the tour
+    const onboardingData: OnboardingState = {
+      hasCompletedTour: false,
+      hasSeenTour: true,
+      lastLoginDate: new Date().toDateString(),
+      tourVersion: CURRENT_TOUR_VERSION,
+      skipTourPermanently: true
+    };
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(onboardingData));
     setShowTour(false);
+    setIsNewUser(false);
+  };
+
+  const restartTour = () => {
+    // Allow users to restart the tour manually
+    const onboardingData: OnboardingState = {
+      hasCompletedTour: false,
+      hasSeenTour: false,
+      lastLoginDate: new Date().toDateString(),
+      tourVersion: CURRENT_TOUR_VERSION,
+      skipTourPermanently: false
+    };
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(onboardingData));
+    setShowTour(true);
+    setIsNewUser(false);
   };
 
   return {
@@ -100,6 +132,7 @@ export function useOnboarding(userId: number, userRole: string) {
     isNewUser,
     completeTour,
     startTour,
-    skipTour
+    skipTour,
+    restartTour
   };
 }
