@@ -1279,20 +1279,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  app.get("/api/users/:username", authenticateToken, requireAnyRole(['admin', 'doctor']), async (req, res) => {
-    try {
-      const username = req.params.username;
-      const user = await storage.getUserByUsername(username);
-      if (!user) {
-        res.status(404).json({ message: "User not found" });
-        return;
-      }
-      res.json({ ...user, password: undefined }); // Don't return password
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
-
   // Get current user info
   app.get("/api/me", authenticateToken, async (req: AuthRequest, res) => {
     try {
@@ -2108,6 +2094,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching staff performance:", error);
       res.status(500).json({ message: "Failed to fetch staff performance" });
+    }
+  });
+
+  // Get user by username - this must come after all specific routes
+  app.get("/api/users/:username", authenticateToken, requireAnyRole(['admin', 'doctor']), async (req, res) => {
+    try {
+      const username = req.params.username;
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+      res.json({ ...user, password: undefined }); // Don't return password
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 

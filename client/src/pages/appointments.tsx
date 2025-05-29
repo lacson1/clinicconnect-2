@@ -116,14 +116,14 @@ export default function AppointmentsPage() {
     setSelectedDate(undefined);
     setSelectedTime('');
     setSelectedPatient(null);
-    setSelectedDoctor(null);
+    setSelectedStaff(null);
     setAppointmentType('');
     setDuration('30');
     setNotes('');
   };
 
   const handleCreateAppointment = () => {
-    if (!selectedDate || !selectedTime || !selectedPatient || !selectedDoctor || !appointmentType) {
+    if (!selectedDate || !selectedTime || !selectedPatient || !selectedStaff || !appointmentType) {
       toast({
         title: 'Validation Error',
         description: 'Please fill in all required fields',
@@ -137,7 +137,7 @@ export default function AppointmentsPage() {
 
     createAppointmentMutation.mutate({
       patientId: selectedPatient,
-      doctorId: selectedDoctor,
+      doctorId: selectedStaff,
       appointmentDate: appointmentDate,
       appointmentTime: selectedTime,
       duration: parseInt(duration),
@@ -232,15 +232,15 @@ export default function AppointmentsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="doctor">Doctor *</Label>
-                <Select value={selectedDoctor?.toString() || ''} onValueChange={(value) => setSelectedDoctor(parseInt(value))}>
+                <Label htmlFor="staff">Healthcare Provider *</Label>
+                <Select value={selectedStaff?.toString() || ''} onValueChange={(value) => setSelectedStaff(parseInt(value))}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select doctor" />
+                    <SelectValue placeholder="Select healthcare provider" />
                   </SelectTrigger>
                   <SelectContent>
-                    {doctors.map((doctor: Doctor) => (
-                      <SelectItem key={doctor.id} value={doctor.id.toString()}>
-                        Dr. {doctor.firstName || doctor.username} {doctor.lastName || ''}
+                    {healthcareStaff.map((staff: HealthcareStaff) => (
+                      <SelectItem key={staff.id} value={staff.id.toString()}>
+                        {staff.role === 'doctor' ? 'Dr.' : ''} {staff.firstName || staff.username} {staff.lastName || ''} ({staff.role})
                       </SelectItem>
                     ))}
                   </SelectContent>
