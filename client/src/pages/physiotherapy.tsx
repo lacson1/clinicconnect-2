@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Activity, 
   Users, 
@@ -15,7 +17,19 @@ import {
   Clock,
   Target,
   TrendingUp,
-  User
+  User,
+  BarChart3,
+  Award,
+  BookOpen,
+  Stethoscope,
+  AlertTriangle,
+  CheckCircle,
+  ArrowUp,
+  ArrowDown,
+  Minus,
+  Heart,
+  Brain,
+  Zap
 } from "lucide-react";
 import PhysiotherapyAssessment from "@/components/physiotherapy-assessment";
 import { format } from "date-fns";
@@ -59,13 +73,19 @@ export default function PhysiotherapyPage() {
     <div className="flex-1 space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Physiotherapy</h1>
-          <p className="text-gray-600">Manage patient assessments and treatment plans</p>
+          <h1 className="text-3xl font-bold text-gray-900">Advanced Physiotherapy Center</h1>
+          <p className="text-gray-600">Comprehensive assessment, treatment protocols & outcome tracking</p>
         </div>
-        <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300">
-          <Activity className="w-4 h-4 mr-2" />
-          Physiotherapy Department
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300">
+            <Activity className="w-4 h-4 mr-2" />
+            Physiotherapy Department
+          </Badge>
+          <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
+            <Target className="w-4 h-4 mr-2" />
+            Evidence-Based Practice
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
