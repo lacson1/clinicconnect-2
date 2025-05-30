@@ -145,55 +145,145 @@ export default function LabResultEntry({ className }: LabResultEntryProps) {
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Lab Order #${order.id}</title>
+      <title>Lab Results Report - Order #${order.id}</title>
       <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-        .patient-info { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
-        .test-list { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .test-list th, .test-list td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .test-list th { background-color: #f2f2f2; }
-        .footer { margin-top: 30px; text-align: center; color: #666; }
-        @media print { body { margin: 0; } }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .letterhead { border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+        .org-logo { float: left; width: 80px; height: 80px; background: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 24px; }
+        .org-info { margin-left: 100px; }
+        .org-name { font-size: 24px; font-weight: bold; color: #1e40af; margin-bottom: 5px; }
+        .org-details { color: #64748b; line-height: 1.4; }
+        .document-title { text-align: center; font-size: 20px; font-weight: bold; color: #1e40af; margin: 30px 0; padding: 10px; border: 2px solid #e2e8f0; background: #f8fafc; }
+        .section { margin: 25px 0; }
+        .section-title { font-weight: bold; color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; margin-bottom: 15px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .info-item { margin-bottom: 8px; }
+        .label { font-weight: bold; color: #4b5563; }
+        .value { color: #1f2937; }
+        .test-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        .test-table th, .test-table td { border: 1px solid #d1d5db; padding: 12px; text-align: left; }
+        .test-table th { background: #f3f4f6; font-weight: bold; }
+        .status-pending { color: #d97706; font-weight: bold; }
+        .status-completed { color: #059669; font-weight: bold; }
+        .result-value { font-weight: bold; color: #1f2937; }
+        .result-normal { color: #059669; }
+        .result-abnormal { color: #dc2626; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; }
+        .signature-area { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .signature-box { border-top: 1px solid #9ca3af; padding-top: 10px; text-align: center; }
+        .critical-note { background: #fef2f2; border: 1px solid #fecaca; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        @media print {
+            body { print-color-adjust: exact; }
+            .letterhead { page-break-inside: avoid; }
+        }
       </style>
     </head>
     <body>
-      <div class="header">
-        <h1>Laboratory Order</h1>
-        <p>Order #${order.id} | Date: ${format(new Date(order.createdAt), 'PPP')}</p>
-      </div>
-      
-      <div class="patient-info">
-        <h3>Patient Information</h3>
-        <p><strong>Name:</strong> ${order.patient?.firstName} ${order.patient?.lastName}</p>
-        <p><strong>Patient ID:</strong> ${order.patientId}</p>
-        <p><strong>Date of Birth:</strong> ${order.patient?.dateOfBirth ? format(new Date(order.patient.dateOfBirth), 'PPP') : 'Not specified'}</p>
+      <div class="letterhead">
+        <div class="org-logo">HC</div>
+        <div class="org-info">
+          <div class="org-name">HealthCare Connect</div>
+          <div class="org-details">
+            Advanced Digital Health Solutions<br>
+            Lagos State Medical Complex, Ikeja<br>
+            Phone: +234-1-234-5678 | Fax: +234-1-234-5679<br>
+            Email: lab@healthcareconnect.ng | Emergency: +234-803-555-0123<br>
+            Medical License: NG-MED-2024-001 | CAP Accredited Lab
+          </div>
+        </div>
+        <div style="clear: both;"></div>
       </div>
 
-      <h3>Ordered Tests</h3>
-      <table class="test-list">
-        <thead>
-          <tr>
-            <th>Test Name</th>
-            <th>Category</th>
-            <th>Reference Range</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${items.map(item => `
+      <div class="document-title">LABORATORY RESULTS REPORT</div>
+
+      <div class="section">
+        <div class="section-title">PATIENT INFORMATION</div>
+        <div class="info-grid">
+          <div>
+            <div class="info-item">
+              <span class="label">Patient Name:</span> 
+              <span class="value">${order.patient?.firstName} ${order.patient?.lastName}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Date of Birth:</span> 
+              <span class="value">${order.patient?.dateOfBirth ? format(new Date(order.patient.dateOfBirth), 'PPP') : 'Not specified'}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Report Date:</span> 
+              <span class="value">${format(new Date(), 'PPP')}</span>
+            </div>
+          </div>
+          <div>
+            <div class="info-item">
+              <span class="label">Patient ID:</span> 
+              <span class="value">P${String(order.patientId).padStart(6, '0')}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Order Date:</span> 
+              <span class="value">${format(new Date(order.createdAt), 'PPP')}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Report ID:</span> 
+              <span class="value">LAB-${String(order.id).padStart(3, '0')}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">LABORATORY RESULTS</div>
+        <table class="test-table">
+          <thead>
             <tr>
-              <td>${item.testName}</td>
-              <td>${item.testCategory || 'General'}</td>
-              <td>${item.referenceRange || 'See lab standards'}</td>
-              <td>${item.status}</td>
+              <th>Test Name</th>
+              <th>Result</th>
+              <th>Reference Range</th>
+              <th>Units</th>
+              <th>Status</th>
+              <th>Remarks</th>
             </tr>
-          `).join('')}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            ${items.map(item => `
+              <tr>
+                <td><strong>${item.testName}</strong><br><small style="color: #6b7280;">${item.testCategory || 'General'}</small></td>
+                <td class="result-value ${item.result ? 'result-normal' : ''}">${item.result || 'Pending'}</td>
+                <td>${item.referenceRange || 'See lab standards'}</td>
+                <td>${item.units || '-'}</td>
+                <td><span class="status-${item.status || 'pending'}">${(item.status || 'pending').charAt(0).toUpperCase() + (item.status || 'pending').slice(1)}</span></td>
+                <td>${item.remarks || '-'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="critical-note">
+        <strong>Important Notes:</strong><br>
+        • Critical values have been immediately communicated to the ordering physician<br>
+        • Results should be interpreted in conjunction with clinical findings<br>
+        • Reference ranges may vary based on methodology and patient demographics<br>
+        • For questions about results, please contact our laboratory at lab@healthcareconnect.ng
+      </div>
+
+      <div class="signature-area">
+        <div class="signature-box">
+          <strong>Laboratory Director</strong><br>
+          Dr. Medical Director<br>
+          Date: ${format(new Date(), 'PPP')}
+        </div>
+        <div class="signature-box">
+          <strong>Quality Assurance</strong><br>
+          Reviewed and Verified<br>
+          Date: ${format(new Date(), 'PPP')}
+        </div>
+      </div>
 
       <div class="footer">
-        <p>Generated on ${format(new Date(), 'PPP')} | Total Tests: ${items.length}</p>
+        <strong>Report ID:</strong> LAB-${String(order.id).padStart(3, '0')} | 
+        <strong>Generated:</strong> ${format(new Date(), 'PPP p')} | 
+        <strong>System:</strong> HealthCare Connect v2.0<br>
+        <em>This is an official medical laboratory report. Results are confidential and should only be shared with authorized healthcare providers.</em>
       </div>
     </body>
     </html>`;
