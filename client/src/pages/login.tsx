@@ -130,8 +130,8 @@ export default function Login() {
               <div className="w-12 h-12 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Shield className="w-6 h-6 text-white drop-shadow-lg" />
               </div>
-              <h3 className="font-bold text-green-200 mb-2">Quantum Shield</h3>
-              <p className="text-sm text-green-300/80">Military-grade data protection</p>
+              <h3 className="font-bold text-green-200 mb-2">Secure Vault</h3>
+              <p className="text-sm text-green-300/80">HIPAA-compliant data protection</p>
             </div>
           </div>
         </div>
