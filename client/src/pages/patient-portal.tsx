@@ -85,6 +85,171 @@ export default function PatientPortal() {
     setLoginData({ patientId: '', phone: '', dateOfBirth: '' });
   };
 
+  const handleDownloadReport = (visit: any) => {
+    const reportContent = generateMedicalReport(visit, patientSession);
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(reportContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const generateMedicalReport = (visit: any, patient: PatientSession | null): string => {
+    const formatDate = (date: string | Date) => {
+      return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    };
+
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Medical Visit Report - ${patient?.firstName} ${patient?.lastName}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .letterhead { border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+        .org-logo { float: left; width: 80px; height: 80px; background: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 24px; }
+        .org-info { margin-left: 100px; }
+        .org-name { font-size: 24px; font-weight: bold; color: #1e40af; margin-bottom: 5px; }
+        .org-details { color: #64748b; line-height: 1.4; }
+        .document-title { text-align: center; font-size: 20px; font-weight: bold; color: #1e40af; margin: 30px 0; padding: 10px; border: 2px solid #e2e8f0; background: #f8fafc; }
+        .section { margin: 25px 0; }
+        .section-title { font-weight: bold; color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; margin-bottom: 15px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .info-item { margin-bottom: 8px; }
+        .label { font-weight: bold; color: #4b5563; }
+        .value { color: #1f2937; }
+        .clinical-section { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 15px; margin: 15px 0; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; }
+        .signature-area { margin-top: 40px; text-align: center; }
+        .confidentiality { background: #fef2f2; border: 1px solid #fecaca; padding: 15px; border-radius: 6px; margin: 20px 0; font-size: 12px; }
+        @media print {
+            body { print-color-adjust: exact; }
+            .letterhead { page-break-inside: avoid; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="letterhead">
+        <div class="org-logo">HC</div>
+        <div class="org-info">
+          <div class="org-name">HealthCare Connect</div>
+          <div class="org-details">
+            Advanced Digital Health Solutions<br>
+            Lagos State Medical Complex, Ikeja<br>
+            Phone: +234-1-234-5678 | Fax: +234-1-234-5679<br>
+            Email: info@healthcareconnect.ng | Emergency: +234-803-555-0123<br>
+            Medical License: NG-MED-2024-001 | CAP Accredited
+          </div>
+        </div>
+        <div style="clear: both;"></div>
+      </div>
+
+      <div class="document-title">MEDICAL VISIT REPORT</div>
+
+      <div class="section">
+        <div class="section-title">PATIENT INFORMATION</div>
+        <div class="info-grid">
+          <div>
+            <div class="info-item">
+              <span class="label">Patient Name:</span> 
+              <span class="value">${patient?.firstName} ${patient?.lastName}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Date of Birth:</span> 
+              <span class="value">${formatDate(patient?.dateOfBirth || '')}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Gender:</span> 
+              <span class="value">${patient?.gender}</span>
+            </div>
+          </div>
+          <div>
+            <div class="info-item">
+              <span class="label">Patient ID:</span> 
+              <span class="value">P${String(patient?.id).padStart(6, '0')}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Phone:</span> 
+              <span class="value">${patient?.phone}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Visit Date:</span> 
+              <span class="value">${formatDate(visit.visitDate)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">VISIT DETAILS</div>
+        <div class="info-item">
+          <span class="label">Visit Type:</span> 
+          <span class="value">${visit.visitType || 'General Consultation'}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Visit ID:</span> 
+          <span class="value">VIS-${String(visit.id).padStart(3, '0')}</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">CLINICAL ASSESSMENT</div>
+        
+        <div class="clinical-section">
+          <h4 style="margin-top: 0; color: #374151;">Chief Complaint</h4>
+          <p style="margin-bottom: 0;">${visit.complaint || 'Not specified'}</p>
+        </div>
+
+        ${visit.diagnosis ? `
+        <div class="clinical-section">
+          <h4 style="margin-top: 0; color: #374151;">Diagnosis</h4>
+          <p style="margin-bottom: 0;">${visit.diagnosis}</p>
+        </div>
+        ` : ''}
+
+        ${visit.treatment ? `
+        <div class="clinical-section">
+          <h4 style="margin-top: 0; color: #374151;">Treatment Plan</h4>
+          <p style="margin-bottom: 0;">${visit.treatment}</p>
+        </div>
+        ` : ''}
+
+        ${visit.followUpDate ? `
+        <div class="clinical-section">
+          <h4 style="margin-top: 0; color: #374151;">Follow-up Instructions</h4>
+          <p style="margin-bottom: 0;">Follow-up appointment scheduled for: ${formatDate(visit.followUpDate)}</p>
+        </div>
+        ` : ''}
+      </div>
+
+      <div class="confidentiality">
+        <strong>CONFIDENTIALITY NOTICE:</strong><br>
+        This medical report contains confidential patient information protected by medical privacy laws. 
+        This information is intended solely for the use of the patient and authorized healthcare providers. 
+        Any unauthorized disclosure is strictly prohibited.
+      </div>
+
+      <div class="signature-area">
+        <p><strong>Generated for Patient Portal Access</strong></p>
+        <p>Report Generated: ${formatDate(new Date())}</p>
+        <p>This is an official medical document from HealthCare Connect</p>
+      </div>
+
+      <div class="footer">
+        <strong>Visit ID:</strong> VIS-${String(visit.id).padStart(3, '0')} | 
+        <strong>Patient ID:</strong> P${String(patient?.id).padStart(6, '0')} | 
+        <strong>Generated:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}<br>
+        <em>HealthCare Connect - Advanced Digital Health Solutions | www.healthcareconnect.ng</em>
+      </div>
+    </body>
+    </html>`;
+  };
+
   // Patient visits data
   const { data: visits = [] } = useQuery({
     queryKey: ['/api/patient-portal/visits'],
@@ -440,7 +605,12 @@ export default function PatientPortal() {
                           {visit.diagnosis && <p><strong>Diagnosis:</strong> {visit.diagnosis}</p>}
                           {visit.treatment && <p><strong>Treatment:</strong> {visit.treatment}</p>}
                         </div>
-                        <Button variant="outline" size="sm" className="mt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2"
+                          onClick={() => handleDownloadReport(visit)}
+                        >
                           <Download className="w-4 h-4 mr-2" />
                           Download Report
                         </Button>
