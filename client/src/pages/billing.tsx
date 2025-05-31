@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, FileText, DollarSign, CreditCard, Receipt, Search, Filter, Download, Eye } from "lucide-react";
@@ -200,6 +200,9 @@ export default function BillingPage() {
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create New Invoice</DialogTitle>
+                <DialogDescription>
+                  Create a new invoice for patient billing with multiple service items and automatic calculations.
+                </DialogDescription>
               </DialogHeader>
               
               <Form {...invoiceForm}>
@@ -524,6 +527,9 @@ export default function BillingPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Record Payment</DialogTitle>
+            <DialogDescription>
+              Record a payment for invoice {selectedInvoice?.invoiceNumber} with details and transaction information.
+            </DialogDescription>
           </DialogHeader>
           
           {selectedInvoice && (
