@@ -4519,6 +4519,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
+  // Staff messaging endpoints
+  app.get('/api/staff/messages', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const staffId = req.user?.id;
+      const organizationId = req.user?.organizationId;
+      
+      if (!staffId || !organizationId) {
+        return res.status(401).json({ error: 'Staff authentication required' });
+      }
+
+      // Fetch messages for staff member's organization
+      const staffMessages = await db.select({
+        id: messages.id,
+        subject: messages.subject,
+        message: messages.message,
+        messageType: messages.messageType,
+        priority: messages.priority,
+        status: messages.status,
+        sentAt: messages.sentAt,
+        readAt: messages.readAt,
+        repliedAt: messages.repliedAt,
+        recipientType: messages.recipientType,
+        recipientRole: messages.recipientRole,
+        routingReason: messages.routingReason,
+        patientId: messages.patientId,
+        patientName: sql`${patients.firstName} || ' ' || ${patients.lastName}`.as('patientName'),
+        patientPhone: patients.phone
+      })
+      .from(messages)
+      .leftJoin(patients, eq(messages.patientId, patients.id))
+      .where(
+        and(
+          eq(messages.organizationId, organizationId),
+          or(
+            eq(messages.assignedTo, staffId),
+            isNull(messages.assignedTo),
+            eq(messages.recipientRole, req.user?.role)
+          )
+        )
+      )
+      .orderBy(desc(messages.sentAt));
+
+      res.json(staffMessages);
+    } catch (error) {
+      console.error('Error fetching staff messages:', error);
+      res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+  });
+
+  app.patch('/api/staff/messages/:messageId/read', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const messageId = parseInt(req.params.messageId);
+      const staffId = req.user?.id;
+      
+      if (!staffId) {
+        return res.status(401).json({ error: 'Staff authentication required' });
+      }
+
+      // Mark message as read
+      const [updatedMessage] = await db.update(messages)
+        .set({ 
+          status: 'read', 
+          readAt: new Date() 
+        })
+        .where(eq(messages.id, messageId))
+        .returning();
+
+      if (!updatedMessage) {
+        return res.status(404).json({ error: 'Message not found' });
+      }
+
+      res.json(updatedMessage);
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+      res.status(500).json({ error: 'Failed to mark message as read' });
+    }
+  });
+
+  app.post('/api/staff/messages/:messageId/reply', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const messageId = parseInt(req.params.messageId);
+      const staffId = req.user?.id;
+      const { reply } = req.body;
+      
+      if (!staffId) {
+        return res.status(401).json({ error: 'Staff authentication required' });
+      }
+
+      if (!reply || !reply.trim()) {
+        return res.status(400).json({ error: 'Reply message is required' });
+      }
+
+      // Get original message details
+      const [originalMessage] = await db.select()
+        .from(messages)
+        .where(eq(messages.id, messageId));
+
+      if (!originalMessage) {
+        return res.status(404).json({ error: 'Original message not found' });
+      }
+
+      // Create reply message
+      const [replyMessage] = await db.insert(messages).values({
+        patientId: originalMessage.patientId,
+        staffId: staffId,
+        subject: `Re: ${originalMessage.subject}`,
+        message: reply.trim(),
+        messageType: 'general',
+        priority: 'normal',
+        status: 'sent',
+        recipientType: 'Patient',
+        recipientRole: 'patient',
+        organizationId: originalMessage.organizationId
+      }).returning();
+
+      // Mark original message as replied
+      await db.update(messages)
+        .set({ 
+          status: 'replied', 
+          repliedAt: new Date() 
+        })
+        .where(eq(messages.id, messageId));
+
+      res.status(201).json(replyMessage);
+    } catch (error) {
+      console.error('Error sending reply:', error);
+      res.status(500).json({ error: 'Failed to send reply' });
+    }
+  });
+
   // Patient portal appointment endpoints
   app.get('/api/patient-portal/appointments', authenticatePatient, async (req: PatientAuthRequest, res) => {
     try {

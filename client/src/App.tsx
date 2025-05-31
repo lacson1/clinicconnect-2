@@ -48,6 +48,7 @@ import SuperAdminAnalytics from "@/pages/superadmin-analytics";
 import SuperAdminControlPanel from "@/pages/super-admin-control-panel";
 import ProceduralReports from "@/pages/procedural-reports";
 import ConsentManagement from "@/pages/consent-management";
+import StaffMessages from "@/pages/staff-messages";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import ConsultationRecordDetails from "@/pages/consultation-record-details";
@@ -112,6 +113,7 @@ function AuthenticatedApp() {
                   <Route path="/patient-access-cards" component={PatientAccessCards} />
                   <Route path="/procedural-reports" component={ProceduralReports} />
                   <Route path="/consent-management" component={ConsentManagement} />
+                  <Route path="/staff-messages" component={StaffMessages} />
                   <Route path="/global-analytics" component={SuperAdminAnalytics} />
                   <Route path="/super-admin-control" component={SuperAdminControlPanel} />
                   <Route component={NotFound} />
