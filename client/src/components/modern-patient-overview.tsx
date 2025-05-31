@@ -319,24 +319,30 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
 
   const handleGenerateQRCode = async (prescription: any) => {
     try {
-      // Create comprehensive data for the QR code
-      const qrData = {
-        prescriptionId: prescription.id,
-        patientId: prescription.patientId,
-        patientName: patient.firstName + ' ' + patient.lastName,
-        medication: prescription.medicationName,
-        dosage: prescription.dosage,
-        frequency: prescription.frequency,
-        duration: prescription.duration,
-        instructions: prescription.instructions,
-        prescribedBy: prescription.prescribedBy,
-        date: prescription.startDate || prescription.createdAt,
-        status: prescription.status,
-        organizationId: prescription.organizationId
-      };
+      // Create a human-readable prescription summary that displays properly when scanned
+      const prescriptionText = `PRESCRIPTION DETAILS
       
-      const dataString = JSON.stringify(qrData);
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(dataString)}`;
+Patient: ${patient.firstName} ${patient.lastName}
+Prescription ID: ${prescription.id}
+
+MEDICATION: ${prescription.medicationName}
+Dosage: ${prescription.dosage}
+Frequency: ${prescription.frequency}
+Duration: ${prescription.duration}
+Instructions: ${prescription.instructions}
+
+Prescribed by: Dr. ${prescription.prescribedBy}
+Date: ${new Date(prescription.startDate || prescription.createdAt).toLocaleDateString()}
+Status: ${prescription.status}
+
+Organization: Lagos Island Hospital
+Phone: +234 802 123 4567
+Address: 123 Healthcare Avenue, Lagos, Nigeria
+
+This prescription can be filled at any licensed pharmacy.
+Present this QR code for medication dispensing.`;
+      
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(prescriptionText)}`;
       
       // Open QR code in new window for patient to scan
       const qrWindow = window.open('', '_blank', 'width=300,height=350');
