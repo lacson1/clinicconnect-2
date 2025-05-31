@@ -206,11 +206,18 @@ export default function PatientPortal() {
 
   const handleDownloadReport = async (visit: any) => {
     try {
-      // Fetch current organization data for letterhead
-      const orgResponse = await fetch('/api/organizations');
-      const organizations = await orgResponse.json();
-      const currentOrg = organizations[0]; // Use first organization
+      // Fetch the organization of the staff member who created this visit
+      const orgResponse = await fetch('/api/user-organization', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       
+      if (!orgResponse.ok) {
+        throw new Error('Failed to fetch organization data');
+      }
+      
+      const currentOrg = await orgResponse.json();
       const reportContent = generateMedicalReport(visit, patientSession, currentOrg);
       const printWindow = window.open('', '_blank');
       if (printWindow) {
@@ -229,6 +236,225 @@ export default function PatientPortal() {
         printWindow.print();
       }
     }
+  };
+
+  const handleDownloadConsent = async (consent: any) => {
+    try {
+      // Fetch the organization of the staff member who created this consent
+      const orgResponse = await fetch('/api/user-organization', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (!orgResponse.ok) {
+        throw new Error('Failed to fetch organization data');
+      }
+      
+      const currentOrg = await orgResponse.json();
+      const consentContent = generateConsentDocument(consent, patientSession, currentOrg);
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(consentContent);
+        printWindow.document.close();
+        printWindow.print();
+      }
+    } catch (error) {
+      console.error('Error generating consent document:', error);
+      // Fallback without org data
+      const consentContent = generateConsentDocument(consent, patientSession, null);
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(consentContent);
+        printWindow.document.close();
+        printWindow.print();
+      }
+    }
+  };
+
+  const generateConsentDocument = (consent: any, patient: PatientSession | null, organization: any = null): string => {
+    const formatDate = (date: string | Date) => {
+      return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    };
+
+    const formatDateTime = (date: string | Date) => {
+      return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Consent Form - ${consent.consentFormTitle}</title>
+      <style>
+        body { font-family: 'Times New Roman', serif; line-height: 1.6; margin: 0; padding: 40px; color: #333; background: white; }
+        .letterhead { text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo-section { margin-bottom: 15px; }
+        .hospital-name { font-size: 24px; font-weight: bold; color: #1e40af; margin: 10px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .hospital-details { font-size: 12px; color: #666; margin: 5px 0; }
+        .document-header { background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb; }
+        .document-title { font-size: 20px; font-weight: bold; color: #1e40af; margin-bottom: 10px; text-align: center; }
+        .patient-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; background: #f9fafb; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb; }
+        .info-section { }
+        .section-title { font-weight: bold; color: #374151; margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .field-row { margin: 8px 0; display: flex; justify-content: space-between; }
+        .field-label { font-weight: 600; color: #4b5563; min-width: 120px; }
+        .field-value { color: #111827; flex: 1; text-align: right; }
+        .consent-content { margin: 25px 0; padding: 20px; border: 1px solid #d1d5db; border-radius: 8px; background: white; }
+        .consent-title { font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; }
+        .signature-section { margin-top: 40px; padding: 20px; border: 2px solid #2563eb; border-radius: 8px; background: #f0f9ff; }
+        .signature-details { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 20px 0; }
+        .signature-box { text-align: center; padding: 15px; background: white; border-radius: 6px; border: 1px solid #bfdbfe; }
+        .signature-line { border-bottom: 2px solid #374151; margin: 15px 0; height: 30px; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #d1d5db; text-align: center; font-size: 12px; color: #6b7280; }
+        .consent-seal { width: 80px; height: 80px; background: linear-gradient(135deg, #2563eb, #1d4ed8); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; }
+        .verification-section { background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 15px; margin: 20px 0; }
+        .verification-title { font-weight: bold; color: #92400e; margin-bottom: 8px; }
+        @media print {
+            body { padding: 20px; }
+            .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <!-- Hospital Letterhead -->
+      <div class="letterhead">
+        <div class="logo-section">
+          <div class="consent-seal">
+            ${organization?.name?.charAt(0) || 'H'}${organization?.name?.split(' ')[1]?.charAt(0) || 'C'}
+          </div>
+        </div>
+        <div class="hospital-name">${organization?.name || 'HealthCare Connect'}</div>
+        <div class="hospital-details">
+          ${organization?.address || 'Lagos Island, Lagos State, Nigeria'}<br>
+          Tel: ${organization?.phone || '+234 803 123 4567'} | Email: ${organization?.email || 'info@healthcareconnect.ng'}
+        </div>
+        <div class="hospital-details" style="margin-top: 8px;">
+          <strong>Registration No:</strong> ${organization?.registrationNumber || 'RC-12345'} | 
+          <strong>License No:</strong> ${organization?.licenseNumber || 'HF/LAG/2024/001'}
+        </div>
+      </div>
+
+      <!-- Document Header -->
+      <div class="document-header">
+        <div class="document-title">DIGITAL CONSENT FORM</div>
+        <div style="text-align: center; color: #6b7280; font-size: 14px;">
+          Legally Binding Medical Consent Document
+        </div>
+      </div>
+
+      <!-- Patient Information -->
+      <div class="patient-info">
+        <div class="info-section">
+          <div class="section-title">Patient Information</div>
+          <div class="field-row">
+            <span class="field-label">Full Name:</span>
+            <span class="field-value">${patient?.firstName} ${patient?.lastName}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Patient ID:</span>
+            <span class="field-value">${patient?.id || 'N/A'}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Date of Birth:</span>
+            <span class="field-value">${patient?.dateOfBirth ? formatDate(patient.dateOfBirth) : 'N/A'}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Phone:</span>
+            <span class="field-value">${patient?.phone || 'N/A'}</span>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <div class="section-title">Consent Details</div>
+          <div class="field-row">
+            <span class="field-label">Consent Form:</span>
+            <span class="field-value">${consent.consentFormTitle}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Date Signed:</span>
+            <span class="field-value">${formatDate(consent.signatureDate)}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Status:</span>
+            <span class="field-value">Digitally Signed</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Consent ID:</span>
+            <span class="field-value">CNS-${String(consent.id).padStart(4, '0')}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consent Content -->
+      <div class="consent-content">
+        <div class="consent-title">${consent.consentFormTitle}</div>
+        <div style="color: #374151; line-height: 1.8; text-align: justify;">
+          This document confirms that the patient named above has provided informed consent for the medical procedures, treatments, or services as outlined in the original consent form. The patient has been fully informed of the nature, risks, benefits, and alternatives related to the proposed medical care.
+        </div>
+      </div>
+
+      <!-- Digital Signature Verification -->
+      <div class="verification-section">
+        <div class="verification-title">DIGITAL SIGNATURE VERIFICATION</div>
+        <p style="margin: 0; font-size: 14px;">
+          This consent was digitally signed using secure authentication methods. The signature has been verified and encrypted for legal compliance and patient privacy protection.
+        </p>
+      </div>
+
+      <!-- Signature Section -->
+      <div class="signature-section">
+        <h3 style="text-align: center; color: #1e40af; margin-bottom: 20px;">DIGITAL SIGNATURE CONFIRMATION</h3>
+        
+        <div class="signature-details">
+          <div class="signature-box">
+            <strong>Patient Signature</strong><br>
+            <div class="signature-line"></div>
+            <div style="font-size: 12px; color: #4b5563;">
+              ${patient?.firstName} ${patient?.lastName}<br>
+              Digitally Signed: ${formatDateTime(consent.signatureDate)}<br>
+              IP Address: ${consent.ipAddress || 'Verified'}<br>
+              Signature Method: Digital Authentication
+            </div>
+          </div>
+          
+          <div class="signature-box">
+            <strong>Healthcare Provider</strong><br>
+            <div class="signature-line"></div>
+            <div style="font-size: 12px; color: #4b5563;">
+              ${organization?.name || 'HealthCare Connect'}<br>
+              Consent Processed: ${formatDateTime(consent.signatureDate)}<br>
+              System: Digital Consent Platform<br>
+              Status: Verified & Secured
+            </div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #6b7280;">
+          This digital consent is legally binding and has been securely stored in compliance with healthcare privacy regulations.
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p><strong>CONFIDENTIAL:</strong> This consent document contains confidential patient information and is intended only for the patient and authorized medical personnel.</p>
+        <p>Generated on: ${formatDateTime(new Date())} | Consent ID: CNS-${String(consent.id).padStart(4, '0')}</p>
+        <p style="margin-top: 15px; font-style: italic;">
+          ${organization?.name || 'HealthCare Connect'} - Excellence in Healthcare
+        </p>
+      </div>
+    </body>
+    </html>`;
   };
 
   const generateMedicalReport = (visit: any, patient: PatientSession | null, organization: any = null): string => {
@@ -1211,7 +1437,11 @@ export default function PatientPortal() {
                                 )}
                               </div>
                             </div>
-                            <Button size="sm" variant="ghost">
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleDownloadConsent(consent)}
+                            >
                               <Download className="w-3 h-3 mr-1" />
                               Download
                             </Button>

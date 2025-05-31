@@ -4634,6 +4634,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current user's organization for letterhead generation
+  app.get("/api/user-organization", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      const [userOrg] = await db.select({
+        organizationId: users.organizationId,
+        name: organizations.name,
+        type: organizations.type,
+        address: organizations.address,
+        phone: organizations.phone,
+        email: organizations.email,
+        website: organizations.website,
+        registrationNumber: organizations.registrationNumber,
+        licenseNumber: organizations.licenseNumber,
+        description: organizations.description,
+        themeColor: organizations.themeColor,
+        logoUrl: organizations.logoUrl
+      })
+      .from(users)
+      .leftJoin(organizations, eq(users.organizationId, organizations.id))
+      .where(eq(users.id, userId));
+
+      if (!userOrg || !userOrg.organizationId) {
+        return res.status(404).json({ error: "No organization found for user" });
+      }
+
+      res.json(userOrg);
+    } catch (error) {
+      console.error('Error fetching user organization:', error);
+      res.status(500).json({ error: "Failed to fetch organization data" });
+    }
+  });
+
   // Update user profile
   app.put("/api/profile", authenticateToken, async (req: AuthRequest, res) => {
     try {
