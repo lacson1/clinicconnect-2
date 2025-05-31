@@ -14,6 +14,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { getDisplayName, getInitials, hasPersonalInfo } from '@/utils/name-utils';
 import { 
   User, 
   Edit3, 
@@ -147,14 +148,21 @@ export default function Profile() {
             <div className="flex justify-center mb-4">
               <Avatar className="h-20 w-20">
                 <AvatarFallback className="text-lg font-semibold bg-blue-100 text-blue-700">
-                  {getInitials(user?.username || '', '')}
+                  {getInitials({ 
+                    firstName: (profileData as any)?.firstName,
+                    lastName: (profileData as any)?.lastName,
+                    username: user?.username 
+                  })}
                 </AvatarFallback>
               </Avatar>
             </div>
             <CardTitle className="text-xl">
-              {(profileData as any)?.title && (profileData as any)?.title !== 'none' ? 
-                `${(profileData as any)?.title} ${(profileData as any)?.firstName || ''} ${(profileData as any)?.lastName || ''}`.trim() : 
-                `${(profileData as any)?.firstName || ''} ${(profileData as any)?.lastName || ''}`.trim() || user?.username || 'User'}
+              {getDisplayName({
+                title: (profileData as any)?.title,
+                firstName: (profileData as any)?.firstName,
+                lastName: (profileData as any)?.lastName,
+                username: user?.username
+              })}
             </CardTitle>
             <CardDescription>
               <Badge variant="secondary" className="capitalize">

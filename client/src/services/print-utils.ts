@@ -49,9 +49,16 @@ export function formatPatientInfo(patient: any) {
   };
 }
 
+import { getDisplayName } from '../utils/name-utils';
+
 export function formatStaffInfo(user: any) {
   return {
-    fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
+    fullName: getDisplayName({
+      title: user.title,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username
+    }),
     title: user.title,
     role: user.role.charAt(0).toUpperCase() + user.role.slice(1),
     username: user.username,
