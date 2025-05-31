@@ -1693,7 +1693,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .where(eq(availabilitySlots.organizationId, req.user!.organizationId!));
 
       if (doctorId) {
-        query = query.where(eq(availabilitySlots.doctorId, parseInt(doctorId as string)));
+        query = query.where(and(
+          eq(availabilitySlots.organizationId, req.user!.organizationId!),
+          eq(availabilitySlots.doctorId, parseInt(doctorId as string))
+        ));
       }
 
       const slots = await query;

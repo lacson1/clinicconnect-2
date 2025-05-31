@@ -441,11 +441,16 @@ export default function AppointmentsPage() {
         </Card>
       )}
 
+      {/* Enhanced Calendar View */}
+      <div className="mb-6">
+        <EnhancedAppointmentCalendar />
+      </div>
+
       {/* Appointments Display */}
       <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'calendar')}>
-        <TabsList className="hidden">
-          <TabsTrigger value="list">List</TabsTrigger>
-          <TabsTrigger value="calendar">Calendar</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="list">List View</TabsTrigger>
+          <TabsTrigger value="calendar">Traditional Calendar</TabsTrigger>
         </TabsList>
 
         <TabsContent value="list">
