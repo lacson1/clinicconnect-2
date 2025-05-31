@@ -40,6 +40,7 @@ import {
 export default function RevenueAnalytics() {
   const [timeRange, setTimeRange] = useState('30');
   const [reportType, setReportType] = useState('summary');
+  const [isExporting, setIsExporting] = useState(false);
 
   const { data: comprehensiveData, isLoading } = useQuery({
     queryKey: ['/api/analytics/comprehensive', timeRange],
