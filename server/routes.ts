@@ -2861,6 +2861,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get organization by ID (for letterhead generation)
+  app.get('/api/organizations/:id', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const organizationId = parseInt(req.params.id);
+      
+      const [organization] = await db.select()
+        .from(organizations)
+        .where(eq(organizations.id, organizationId))
+        .limit(1);
+
+      if (!organization) {
+        return res.status(404).json({ error: 'Organization not found' });
+      }
+
+      res.json(organization);
+    } catch (error) {
+      console.error('Error fetching organization:', error);
+      res.status(500).json({ error: 'Failed to fetch organization' });
+    }
+  });
+
   app.post('/api/organizations', authenticateToken, requireRole('admin'), async (req: AuthRequest, res) => {
     try {
       const { name, type, logoUrl, themeColor, address, phone, email, website } = req.body;

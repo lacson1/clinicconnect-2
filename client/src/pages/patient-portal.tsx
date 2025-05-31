@@ -206,19 +206,22 @@ export default function PatientPortal() {
 
   const handleDownloadReport = async (visit: any) => {
     try {
-      // Fetch the organization of the staff member who created this visit
-      const orgResponse = await fetch('/api/user-organization', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      // Fetch organization data based on the visit's organization ID
+      let organizationData = null;
       
-      if (!orgResponse.ok) {
-        throw new Error('Failed to fetch organization data');
+      if (visit.organizationId) {
+        const orgResponse = await fetch(`/api/organizations/${visit.organizationId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (orgResponse.ok) {
+          organizationData = await orgResponse.json();
+        }
       }
       
-      const currentOrg = await orgResponse.json();
-      const reportContent = generateMedicalReport(visit, patientSession, currentOrg);
+      const reportContent = generateMedicalReport(visit, patientSession, organizationData);
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.write(reportContent);
@@ -240,19 +243,22 @@ export default function PatientPortal() {
 
   const handleDownloadConsent = async (consent: any) => {
     try {
-      // Fetch the organization of the staff member who created this consent
-      const orgResponse = await fetch('/api/user-organization', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      // Fetch organization data based on the consent's organization ID
+      let organizationData = null;
       
-      if (!orgResponse.ok) {
-        throw new Error('Failed to fetch organization data');
+      if (consent.organizationId) {
+        const orgResponse = await fetch(`/api/organizations/${consent.organizationId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (orgResponse.ok) {
+          organizationData = await orgResponse.json();
+        }
       }
       
-      const currentOrg = await orgResponse.json();
-      const consentContent = generateConsentDocument(consent, patientSession, currentOrg);
+      const consentContent = generateConsentDocument(consent, patientSession, organizationData);
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.write(consentContent);
