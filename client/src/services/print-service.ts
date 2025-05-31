@@ -346,6 +346,13 @@ export class PrintService {
     const orgPhone = organization?.phone || '+234 802 123 4567';
     const orgEmail = organization?.email || 'grace@clinic.com';
     
+    // Support both single prescription and JSON-structured prescription data
+    const isStructuredPrescription = prescription.doctor || prescription.patient || prescription.medications;
+    
+    if (isStructuredPrescription) {
+      return this.generateStructuredPrescriptionContent(prescription);
+    }
+    
     return `
     <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #2563eb;">
         <div style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 8px;">${orgName.toUpperCase()}</div>
@@ -393,6 +400,254 @@ export class PrintService {
                 <div style="border-bottom: 2px solid #000; width: 200px; height: 40px; margin-bottom: 5px;"></div>
                 <div>Date: ________________</div>
             </div>
+        </div>
+    </div>
+    `;
+  }
+
+  private static generateStructuredPrescriptionContent(data: any): string {
+    const { prescription } = data;
+    const doctor = prescription?.doctor || {};
+    const clinic = doctor?.clinic || {};
+    const patient = prescription?.patient || {};
+    const medications = prescription?.medications || [];
+    const specialInstructions = prescription?.specialInstructions || [];
+    const futureNeeds = prescription?.futureNeeds || {};
+    
+    return `
+    <style>
+        @media print {
+            body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+            .no-print { display: none; }
+        }
+        .prescription-header {
+            text-align: center;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .clinic-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+        .clinic-details {
+            font-size: 14px;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+        .prescription-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            color: #1e40af;
+            margin: 30px 0;
+            text-decoration: underline;
+        }
+        .section {
+            margin: 25px 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #f9fafb;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #374151;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #d1d5db;
+            padding-bottom: 5px;
+        }
+        .info-row {
+            display: flex;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        .info-label {
+            font-weight: bold;
+            min-width: 140px;
+            color: #374151;
+        }
+        .info-value {
+            color: #1f2937;
+        }
+        .medication-item {
+            background: white;
+            border: 2px solid #2563eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .medication-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+        .medication-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .med-detail {
+            display: flex;
+            align-items: center;
+        }
+        .med-label {
+            font-weight: bold;
+            min-width: 80px;
+            color: #374151;
+        }
+        .special-instructions {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .special-instructions h4 {
+            color: #92400e;
+            margin: 0 0 10px 0;
+        }
+        .signature-section {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+        }
+        .signature-box {
+            text-align: center;
+        }
+        .signature-line {
+            border-bottom: 2px solid #000;
+            width: 250px;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+        .date-section {
+            text-align: right;
+        }
+    </style>
+    
+    <div class="prescription-header">
+        <div class="clinic-name">${clinic.name || 'Medical Centre'}</div>
+        <div class="clinic-details">
+            ${clinic.address || 'N/A'}<br>
+            Tel: ${clinic.phone || 'N/A'}
+        </div>
+    </div>
+    
+    <div class="prescription-title">PRESCRIPTION</div>
+    
+    <div class="section">
+        <div class="section-title">Doctor Information</div>
+        <div class="info-row">
+            <span class="info-label">Doctor Name:</span>
+            <span class="info-value">${doctor.name || 'N/A'}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Qualification:</span>
+            <span class="info-value">${doctor.qualification || 'N/A'}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Registration No:</span>
+            <span class="info-value">${doctor.registrationNo || 'N/A'}</span>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">Patient Information</div>
+        <div class="info-row">
+            <span class="info-label">Patient Name:</span>
+            <span class="info-value">${patient.name || 'N/A'}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Age:</span>
+            <span class="info-value">${patient.age ? patient.age + ' years' : 'N/A'}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Gender:</span>
+            <span class="info-value">${patient.gender || 'N/A'}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Address:</span>
+            <span class="info-value">${patient.address || 'N/A'}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Phone:</span>
+            <span class="info-value">${patient.phone || 'N/A'}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date:</span>
+            <span class="info-value">${prescription.date || new Date().toLocaleDateString()}</span>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">Prescribed Medications</div>
+        ${medications.map((med: any, index: number) => `
+            <div class="medication-item">
+                <div class="medication-name">Rx ${index + 1}: ${med.name || 'Medication'}</div>
+                <div class="medication-details">
+                    <div class="med-detail">
+                        <span class="med-label">Dosage:</span>
+                        <span>${med.dosage || 'As prescribed'}</span>
+                    </div>
+                    <div class="med-detail">
+                        <span class="med-label">Frequency:</span>
+                        <span>${med.frequency || 'As directed'}</span>
+                    </div>
+                    <div class="med-detail">
+                        <span class="med-label">Duration:</span>
+                        <span>${med.duration || 'As needed'}</span>
+                    </div>
+                    <div class="med-detail">
+                        <span class="med-label">Instructions:</span>
+                        <span>${med.instructions || 'Take as directed'}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('')}
+        ${medications.length === 0 ? '<div style="text-align: center; color: #6b7280; font-style: italic;">No medications prescribed</div>' : ''}
+    </div>
+    
+    ${specialInstructions.length > 0 ? `
+        <div class="special-instructions">
+            <h4>Special Instructions</h4>
+            <ul style="margin: 0; padding-left: 20px;">
+                ${specialInstructions.map((instruction: string) => `<li>${instruction}</li>`).join('')}
+            </ul>
+        </div>
+    ` : ''}
+    
+    ${futureNeeds.nextReviewDate || futureNeeds.additionalTests ? `
+        <div class="section">
+            <div class="section-title">Future Care</div>
+            ${futureNeeds.nextReviewDate ? `
+                <div class="info-row">
+                    <span class="info-label">Next Review:</span>
+                    <span class="info-value">${futureNeeds.nextReviewDate}</span>
+                </div>
+            ` : ''}
+            ${futureNeeds.additionalTests ? `
+                <div class="info-row">
+                    <span class="info-label">Additional Tests:</span>
+                    <span class="info-value">${futureNeeds.additionalTests}</span>
+                </div>
+            ` : ''}
+        </div>
+    ` : ''}
+    
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <div style="font-weight: bold;">Doctor's Signature</div>
+        </div>
+        <div class="date-section">
+            <div>Date: ${prescription.date || new Date().toLocaleDateString()}</div>
+            <div style="margin-top: 10px;">Time: ${new Date().toLocaleTimeString()}</div>
         </div>
     </div>
     `;
