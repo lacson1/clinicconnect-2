@@ -1334,7 +1334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prescriptionId = parseInt(req.params.id);
       const { status } = req.body;
 
-      if (!status || !['active', 'completed', 'discontinued', 'stopped'].includes(status)) {
+      if (!status || !['active', 'completed', 'discontinued', 'stopped', 'dispensed', 'pending'].includes(status)) {
         return res.status(400).json({ message: "Invalid status provided" });
       }
 
@@ -1371,22 +1371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/prescriptions/:id/status", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const { status } = req.body;
-      
-      if (!status || typeof status !== "string") {
-        res.status(400).json({ message: "Invalid status" });
-        return;
-      }
-      
-      const prescription = await storage.updatePrescriptionStatus(id, status);
-      res.json(prescription);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to update prescription status" });
-    }
-  });
+
 
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
