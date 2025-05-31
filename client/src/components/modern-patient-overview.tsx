@@ -589,6 +589,8 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
                     <div>Error: {prescriptionsError ? (prescriptionsError as any).message || 'Unknown error' : 'None'}</div>
                     <div>Prescriptions count: {patientPrescriptions.length}</div>
                     <div>Active medications: {activeMedications.length}</div>
+                    <div>First prescription: {JSON.stringify(patientPrescriptions[0])}</div>
+                    <div>First active med: {JSON.stringify(activeMedications[0])}</div>
                   </div>
                   
                   {prescriptionsLoading ? (
