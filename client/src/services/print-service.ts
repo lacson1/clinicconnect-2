@@ -46,14 +46,15 @@ export class PrintService {
     <style>
         @media print {
             @page {
-                size: A4;
-                margin: 1in 0.75in;
+                size: A5;
+                margin: 0.5in 0.4in;
             }
             body { 
                 margin: 0; 
                 padding: 0;
                 background: white !important; 
-                font-size: 12pt;
+                font-size: 10pt;
+                line-height: 1.3;
             }
             .print-container {
                 margin: 0;
@@ -65,17 +66,42 @@ export class PrintService {
                 min-height: auto;
             }
             .header {
-                margin-bottom: 0.4in;
-                padding: 20px 0;
+                margin-bottom: 0.2in;
+                padding: 10px 0;
             }
-            .info-section {
-                margin: 0.25in 0;
-                padding: 15px;
-                page-break-inside: avoid;
+            .org-name {
+                font-size: 18pt !important;
+                margin-bottom: 4px !important;
+            }
+            .org-type {
+                font-size: 10pt !important;
+                margin-bottom: 6px !important;
+            }
+            .org-details {
+                font-size: 8pt !important;
+                padding: 6px 0 !important;
             }
             .document-title {
-                margin: 0.3in 0;
-                padding: 12px;
+                margin: 0.15in 0;
+                padding: 8px;
+                font-size: 14pt !important;
+            }
+            .info-section {
+                margin: 0.1in 0;
+                padding: 8px;
+                page-break-inside: avoid;
+            }
+            .info-title {
+                font-size: 11pt !important;
+                margin-bottom: 6px !important;
+            }
+            .info-grid {
+                gap: 8px !important;
+                font-size: 9pt !important;
+            }
+            .label {
+                min-width: 70px !important;
+                font-size: 9pt !important;
             }
             .no-print { display: none; }
         }
@@ -405,26 +431,25 @@ export class PrintService {
     <style>
         .prescription-medication {
             border: 2px solid #1e40af;
-            padding: 25px;
+            padding: 15px;
             background: white;
-            border-radius: 8px;
-            margin: 25px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            margin: 15px 0;
         }
         .rx-header {
-            font-size: 22px;
+            font-size: 16px;
             font-weight: bold;
             color: #1e40af;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             text-align: center;
             border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 10px;
+            padding-bottom: 6px;
         }
         .med-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
         .med-item {
             display: flex;
@@ -433,12 +458,34 @@ export class PrintService {
         .med-label {
             font-weight: bold;
             color: #374151;
-            font-size: 13px;
-            margin-bottom: 3px;
+            font-size: 10px;
+            margin-bottom: 2px;
         }
         .med-value {
             color: #1f2937;
-            font-size: 15px;
+            font-size: 11px;
+        }
+        @media print {
+            .prescription-medication {
+                padding: 10px !important;
+                margin: 0.1in 0 !important;
+            }
+            .rx-header {
+                font-size: 12pt !important;
+                margin-bottom: 6px !important;
+                padding-bottom: 4px !important;
+            }
+            .med-details {
+                gap: 6px !important;
+                margin-bottom: 6px !important;
+            }
+            .med-label {
+                font-size: 8pt !important;
+                margin-bottom: 1px !important;
+            }
+            .med-value {
+                font-size: 9pt !important;
+            }
         }
     </style>
     
@@ -465,7 +512,7 @@ export class PrintService {
             </div>
         </div>
         ${prescription.instructions ? `
-        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
             <span class="med-label">Special Instructions:</span><br>
             <span class="med-value">${prescription.instructions}</span>
         </div>
