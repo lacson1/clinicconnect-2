@@ -41,6 +41,7 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState<"name" | "age" | "lastVisit" | "riskLevel">("name");
   const [filterBy, setFilterBy] = useState<"all" | "priority" | "recent" | "highrisk">("all");
+  const [organizationFilter, setOrganizationFilter] = useState<string>("all");
   const [selectedPatients, setSelectedPatients] = useState<Set<number>>(new Set());
   const [isStatsOpen, setIsStatsOpen] = useState(true);
   const [isFiltersOpen, setIsFiltersOpen] = useState(true);
@@ -63,6 +64,13 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
         lastVisit: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       }));
     }
+  });
+
+  // Fetch organizations for filtering
+  const { data: organizations = [] } = useQuery({
+    queryKey: ['/api/organizations'],
+    queryFn: () => fetch('/api/organizations').then(res => res.json()),
+    enabled: user?.role === 'admin' || user?.role === 'superadmin'
   });
 
   // Bulk actions
@@ -164,16 +172,24 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
                            patient.phone.includes(searchQuery) ||
                            (patient.email && patient.email.toLowerCase().includes(searchLower));
 
+      // Apply organization filter
+      const matchesOrganization = organizationFilter === "all" || 
+                                 (organizationFilter === "current" && patient.organizationId === user?.organizationId) ||
+                                 (organizationFilter === "unassigned" && !patient.organizationId) ||
+                                 patient.organizationId?.toString() === organizationFilter;
+
+      const baseMatch = matchesSearch && matchesOrganization;
+
       switch (filterBy) {
         case 'priority':
-          return matchesSearch && patient.isPriority;
+          return baseMatch && patient.isPriority;
         case 'recent':
-          return matchesSearch && patient.lastVisit && 
+          return baseMatch && patient.lastVisit && 
                  new Date(patient.lastVisit) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         case 'highrisk':
-          return matchesSearch && patient.riskLevel === 'high';
+          return baseMatch && patient.riskLevel === 'high';
         default:
-          return matchesSearch;
+          return baseMatch;
       }
     });
 
@@ -333,6 +349,20 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
                       <SelectItem value="priority">Priority Only</SelectItem>
                       <SelectItem value="recent">Recent Visits</SelectItem>
                       <SelectItem value="highrisk">High Risk</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={organizationFilter} onValueChange={(value: string) => setOrganizationFilter(value)}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Organization..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Organizations</SelectItem>
+                      <SelectItem value="current">My Organization</SelectItem>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
+                      <SelectItem value="2">Lagos Island Hospital</SelectItem>
+                      <SelectItem value="4">Enugu</SelectItem>
+                      <SelectItem value="1">Grace Clinic</SelectItem>
                     </SelectContent>
                   </Select>
 
