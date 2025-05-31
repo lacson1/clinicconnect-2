@@ -1,401 +1,353 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-import { useRole } from "@/components/role-guard";
-import { updateProfileSchema, type UpdateProfile } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
-import { User, Settings, Camera, Save, Key, Shield, Bell } from "lucide-react";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { queryClient } from '@/lib/queryClient';
+import { User, Mail, Phone, Calendar, MapPin, Briefcase, Shield, Edit, Save, X } from 'lucide-react';
 
-export default function ProfilePage() {
-  const { user } = useRole();
+const profileSchema = z.object({
+  username: z.string().min(3, 'Username must be at least 3 characters'),
+  email: z.string().email('Invalid email address').optional(),
+  phone: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
+  department: z.string().optional(),
+  specialty: z.string().optional(),
+});
+
+type ProfileForm = z.infer<typeof profileSchema>;
+
+export function Profile() {
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications'>('profile');
 
-  const form = useForm<UpdateProfile>({
-    resolver: zodResolver(updateProfileSchema),
+  // Fetch current user data
+  const { data: user, isLoading } = useQuery({
+    queryKey: ['/api/auth/user'],
+  });
+
+  // Fetch extended profile data
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ['/api/profile'],
+  });
+
+  const form = useForm<ProfileForm>({
+    resolver: zodResolver(profileSchema),
     defaultValues: {
-      role: user?.role || '',
-      email: user?.email || '',
-      phone: user?.phone || '',
-      photoUrl: user?.photoUrl || '',
+      username: user?.username || '',
+      email: profile?.email || '',
+      phone: profile?.phone || '',
+      firstName: profile?.firstName || '',
+      lastName: profile?.lastName || '',
+      bio: profile?.bio || '',
+      department: profile?.department || '',
+      specialty: profile?.specialty || '',
     },
   });
 
+  // Update profile mutation
   const updateProfileMutation = useMutation({
-    mutationFn: async (data: UpdateProfile) => {
-      const response = await apiRequest(`/api/users/${user?.id}/profile`, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
+    mutationFn: async (data: ProfileForm) => {
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(data)
       });
+      
       if (!response.ok) {
         throw new Error('Failed to update profile');
       }
+      
       return response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      setIsEditing(false);
       toast({
         title: "Profile Updated",
-        description: "Your profile information has been successfully updated.",
+        description: "Your profile has been successfully updated."
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Update Failed",
-        description: error.message,
-        variant: "destructive",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive"
       });
-    },
+    }
   });
 
-  const onSubmit = (data: UpdateProfile) => {
+  const onSubmit = (data: ProfileForm) => {
     updateProfileMutation.mutate(data);
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const handleCancel = () => {
+    form.reset();
+    setIsEditing(false);
   };
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'doctor':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'nurse':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'pharmacist':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'physiotherapist':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
-      default:
-        return 'bg-slate-100 text-slate-800 border-slate-200';
-    }
-  };
+  if (isLoading || profileLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
-  const tabs = [
-    { id: 'profile', label: 'Profile Information', icon: User },
-    { id: 'security', label: 'Security', icon: Shield },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-  ] as const;
+  const userInitials = user?.username ? user.username.substring(0, 2).toUpperCase() : 'U';
+  const fullName = profile?.firstName && profile?.lastName 
+    ? `${profile.firstName} ${profile.lastName}` 
+    : user?.username || 'User';
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center space-x-4">
-          <Settings className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">User Profile & Settings</h1>
-            <p className="text-slate-600">Manage your account information and preferences</p>
-          </div>
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
+          <p className="text-gray-600">Manage your account information and preferences</p>
         </div>
+        {!isEditing && (
+          <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
+            <Edit className="h-4 w-4" />
+            Edit Profile
+          </Button>
+        )}
+      </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Overview Card */}
-        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-          <CardHeader>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Avatar className="h-20 w-20 border-4 border-white shadow-lg">
-                  <AvatarImage src={user?.photoUrl || undefined} alt={user?.username} />
-                  <AvatarFallback className="text-xl font-bold bg-primary text-white">
-                    {getInitials(user?.username || 'U')}
-                  </AvatarFallback>
-                </Avatar>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0 bg-white shadow-lg hover:bg-slate-50"
-                >
-                  <Camera className="h-4 w-4" />
-                </Button>
+        <Card className="lg:col-span-1">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Avatar className="h-24 w-24">
+                <AvatarFallback className="text-lg font-semibold bg-blue-100 text-blue-800">
+                  {userInitials}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <CardTitle className="text-xl">{fullName}</CardTitle>
+            <CardDescription className="flex items-center justify-center gap-2">
+              <Shield className="h-4 w-4" />
+              <Badge variant="secondary" className="capitalize">
+                {user?.role}
+              </Badge>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {profile?.bio && (
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Bio</Label>
+                <p className="text-sm text-gray-600 mt-1">{profile.bio}</p>
               </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-slate-900">{user?.username}</h2>
-                <div className="flex items-center space-x-2 mt-2">
-                  <span 
-                    className={`px-3 py-1 rounded-full text-sm font-medium border ${getRoleBadgeColor(user?.role || '')}`}
-                  >
-                    {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)}
-                  </span>
+            )}
+            
+            <Separator />
+            
+            <div className="space-y-3">
+              {profile?.email && (
+                <div className="flex items-center gap-3 text-sm">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span>{profile.email}</span>
                 </div>
-                <p className="text-slate-600 mt-1">
-                  Member since {new Date(user?.createdAt || '').toLocaleDateString()}
-                </p>
+              )}
+              
+              {profile?.phone && (
+                <div className="flex items-center gap-3 text-sm">
+                  <Phone className="h-4 w-4 text-gray-500" />
+                  <span>{profile.phone}</span>
+                </div>
+              )}
+              
+              {profile?.department && (
+                <div className="flex items-center gap-3 text-sm">
+                  <Briefcase className="h-4 w-4 text-gray-500" />
+                  <span>{profile.department}</span>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-3 text-sm">
+                <Calendar className="h-4 w-4 text-gray-500" />
+                <span>Member since {new Date(user?.createdAt || Date.now()).toLocaleDateString()}</span>
               </div>
             </div>
-          </CardHeader>
+          </CardContent>
         </Card>
 
-        {/* Navigation Tabs */}
-        <div className="flex space-x-1 bg-slate-100 p-1 rounded-lg">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-md font-medium transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-white text-primary shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Tab Content */}
-        {activeTab === 'profile' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <User className="h-5 w-5" />
-                <span>Profile Information</span>
-              </CardTitle>
-              <CardDescription>
-                Update your personal information and contact details
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Username (Read-only) */}
-                    <div className="space-y-2">
-                      <Label htmlFor="username">Username</Label>
-                      <Input
-                        id="username"
-                        value={user?.username || ''}
-                        disabled
-                        className="bg-slate-50"
-                      />
-                      <p className="text-sm text-slate-500">Username cannot be changed</p>
-                    </div>
-
-                    {/* Role (Read-only) */}
-                    <div className="space-y-2">
-                      <Label htmlFor="role">Role</Label>
-                      <Input
-                        id="role"
-                        value={user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1) || ''}
-                        disabled
-                        className="bg-slate-50"
-                      />
-                      <p className="text-sm text-slate-500">Role is managed by administrators</p>
-                    </div>
-
-                    {/* Email */}
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email Address</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="email"
-                              placeholder="your.email@clinic.com"
-                              {...field}
-                              value={field.value || ''}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Phone */}
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="tel"
-                              placeholder="+234 xxx xxx xxxx"
-                              {...field}
-                              value={field.value || ''}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Photo URL */}
+        {/* Profile Edit Form */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Profile Information</CardTitle>
+            <CardDescription>
+              Update your personal information and professional details
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="photoUrl"
+                    name="firstName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Profile Photo URL</FormLabel>
+                        <FormLabel>First Name</FormLabel>
                         <FormControl>
-                          <Input
-                            type="url"
-                            placeholder="https://example.com/photo.jpg"
-                            {...field}
-                            value={field.value || ''}
-                          />
+                          <Input {...field} disabled={!isEditing} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <Separator />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={!isEditing} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                  <div className="flex justify-end space-x-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => form.reset()}
-                    >
-                      Reset Changes
-                    </Button>
-                    <Button
-                      type="submit"
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={!isEditing} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="email" disabled={!isEditing} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone</FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={!isEditing} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="department"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Department</FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={!isEditing} placeholder="e.g., Emergency Medicine" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="specialty"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Specialty</FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={!isEditing} placeholder="e.g., Cardiology" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="bio"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bio</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          disabled={!isEditing} 
+                          placeholder="Tell us about yourself..."
+                          rows={4}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {isEditing && (
+                  <div className="flex gap-3">
+                    <Button 
+                      type="submit" 
                       disabled={updateProfileMutation.isPending}
-                      className="min-w-[120px]"
+                      className="flex items-center gap-2"
                     >
-                      {updateProfileMutation.isPending ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                      ) : (
-                        <>
-                          <Save className="h-4 w-4 mr-2" />
-                          Save Changes
-                        </>
-                      )}
+                      <Save className="h-4 w-4" />
+                      {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleCancel}
+                      className="flex items-center gap-2"
+                    >
+                      <X className="h-4 w-4" />
+                      Cancel
                     </Button>
                   </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'security' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Shield className="h-5 w-5" />
-                <span>Security Settings</span>
-              </CardTitle>
-              <CardDescription>
-                Manage your password and security preferences
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-1">
-                    <h3 className="font-medium">Password</h3>
-                    <p className="text-sm text-slate-600">
-                      Last updated: {new Date().toLocaleDateString()}
-                    </p>
-                  </div>
-                  <Button variant="outline">
-                    <Key className="h-4 w-4 mr-2" />
-                    Change Password
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-1">
-                    <h3 className="font-medium">Two-Factor Authentication</h3>
-                    <p className="text-sm text-slate-600">
-                      Add an extra layer of security to your account
-                    </p>
-                  </div>
-                  <Button variant="outline">
-                    Enable 2FA
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-1">
-                    <h3 className="font-medium">Active Sessions</h3>
-                    <p className="text-sm text-slate-600">
-                      Manage devices where you're currently logged in
-                    </p>
-                  </div>
-                  <Button variant="outline">
-                    View Sessions
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'notifications' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Bell className="h-5 w-5" />
-                <span>Notification Preferences</span>
-              </CardTitle>
-              <CardDescription>
-                Choose how you want to receive notifications
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-1">
-                    <h3 className="font-medium">Email Notifications</h3>
-                    <p className="text-sm text-slate-600">
-                      Receive updates about patients and clinic activities
-                    </p>
-                  </div>
-                  <Button variant="outline">Configure</Button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-1">
-                    <h3 className="font-medium">Push Notifications</h3>
-                    <p className="text-sm text-slate-600">
-                      Get instant alerts for urgent matters
-                    </p>
-                  </div>
-                  <Button variant="outline">Configure</Button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-1">
-                    <h3 className="font-medium">SMS Alerts</h3>
-                    <p className="text-sm text-slate-600">
-                      Emergency notifications via text message
-                    </p>
-                  </div>
-                  <Button variant="outline">Configure</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                )}
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

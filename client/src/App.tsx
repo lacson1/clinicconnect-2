@@ -42,6 +42,8 @@ import MentalHealthPage from "@/pages/mental-health";
 import ClinicalProtocols from "@/components/clinical-protocols";
 import ExportCompliance from "@/components/export-compliance";
 import PatientAccessCards from "@/pages/patient-access-cards";
+import { Settings } from "@/pages/settings";
+import { Profile } from "@/pages/profile";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 
@@ -96,6 +98,8 @@ function AuthenticatedApp() {
                   <Route path="/medical-tools" component={MedicalToolsPage} />
                   <Route path="/clinical-performance" component={ClinicalPerformance} />
                   <Route path="/profile" component={ProfilePage} />
+                  <Route path="/my-profile" component={Profile} />
+                  <Route path="/settings" component={Settings} />
                   <Route path="/user-management" component={UserManagementEnhanced} />
                   <Route path="/audit-logs" component={AuditLogs} />
                   <Route path="/organization-management" component={OrganizationManagement} />
