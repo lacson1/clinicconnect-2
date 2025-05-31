@@ -48,6 +48,7 @@ import SuperAdminAnalytics from "@/pages/superadmin-analytics";
 import SuperAdminControlPanel from "@/pages/super-admin-control-panel";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
+import ConsultationRecordDetails from "@/pages/consultation-record-details";
 
 function AuthenticatedApp() {
   const { user } = useAuth();
@@ -78,6 +79,7 @@ function AuthenticatedApp() {
                   <Route path="/patients/:id" component={PatientProfile} />
                   <Route path="/patients/:patientId/record-visit" component={RecordVisitPage} />
                   <Route path="/patients/:patientId/visits/:visitId/edit" component={EditVisit} />
+                  <Route path="/consultation-records/:id" component={ConsultationRecordDetails} />
                   <Route path="/visits" component={Visits} />
                   <Route path="/lab-results" component={LabResults} />
                   <Route path="/pharmacy" component={Pharmacy} />

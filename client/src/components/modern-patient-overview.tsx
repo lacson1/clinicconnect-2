@@ -147,11 +147,8 @@ export function ModernPatientOverview({
   };
 
   const handleViewConsultation = (consultationId: number) => {
-    // Navigate to consultation details or show in modal
-    toast({
-      title: "Consultation Record",
-      description: "Consultation details viewed",
-    });
+    // Navigate to consultation details page
+    navigate(`/consultation-records/${consultationId}`);
   };
 
   const handleCopyVisit = (visit: any) => {
