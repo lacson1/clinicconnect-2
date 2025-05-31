@@ -466,23 +466,6 @@ export class PrintService {
             margin: 20px 0;
             min-height: 240px;
             flex-grow: 1;
-            position: relative;
-        }
-        .qr-code-section {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            text-align: center;
-            background: white;
-            padding: 8px;
-            border-radius: 6px;
-            border: 2px solid #22c55e;
-        }
-        .qr-code-title {
-            font-size: 8px;
-            color: #166534;
-            margin-bottom: 5px;
-            font-weight: bold;
         }
         .rx-header {
             font-size: 20px;
@@ -540,7 +523,6 @@ export class PrintService {
     </style>
     
     <div class="prescription-medication">
-        ${this.generateQRCode(prescription)}
         <div class="rx-header">
             ℞ ${prescription.medicationName || prescription.name || 'Prescribed Medication'}
         </div>

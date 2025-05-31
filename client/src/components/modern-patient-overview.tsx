@@ -48,6 +48,7 @@ import {
   MoreVertical,
   Eye,
   Copy,
+  QrCode,
   Trash2,
   CheckCircle,
   XCircle,
@@ -314,6 +315,92 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
         variant: "destructive",
       });
     }
+  }
+
+  const handleGenerateQRCode = async (prescription: any) => {
+    try {
+      // Create comprehensive data for the QR code
+      const qrData = {
+        prescriptionId: prescription.id,
+        patientId: prescription.patientId,
+        patientName: patient.firstName + ' ' + patient.lastName,
+        medication: prescription.medicationName,
+        dosage: prescription.dosage,
+        frequency: prescription.frequency,
+        duration: prescription.duration,
+        instructions: prescription.instructions,
+        prescribedBy: prescription.prescribedBy,
+        date: prescription.startDate || prescription.createdAt,
+        status: prescription.status,
+        organizationId: prescription.organizationId
+      };
+      
+      const dataString = JSON.stringify(qrData);
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(dataString)}`;
+      
+      // Open QR code in new window for patient to scan
+      const qrWindow = window.open('', '_blank', 'width=300,height=350');
+      qrWindow.document.write(`
+        <html>
+          <head>
+            <title>Prescription QR Code</title>
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                text-align: center; 
+                padding: 20px;
+                background: #f8f9fa;
+              }
+              .container {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                display: inline-block;
+              }
+              h2 { color: #166534; margin-bottom: 10px; }
+              p { color: #666; margin: 5px 0; }
+              .medication { font-weight: bold; color: #22c55e; margin: 10px 0; }
+              .instructions { 
+                background: #f0fdf4; 
+                padding: 10px; 
+                border-radius: 4px; 
+                margin: 10px 0;
+                border-left: 4px solid #22c55e;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h2>Prescription QR Code</h2>
+              <p>Patient: <strong>${patient.firstName} ${patient.lastName}</strong></p>
+              <div class="medication">${prescription.medicationName}</div>
+              <p><strong>Dosage:</strong> ${prescription.dosage}</p>
+              <p><strong>Frequency:</strong> ${prescription.frequency}</p>
+              <p><strong>Duration:</strong> ${prescription.duration}</p>
+              <img src="${qrCodeUrl}" alt="Prescription QR Code" style="margin: 15px 0; border: 2px solid #22c55e; padding: 10px; background: white;" />
+              <div class="instructions">
+                <strong>Instructions for Pharmacy:</strong><br>
+                Scan this QR code to access complete prescription details for dispensing.
+              </div>
+              <p style="font-size: 12px; color: #888;">Generated: ${new Date().toLocaleString()}</p>
+            </div>
+          </body>
+        </html>
+      `);
+      
+      toast({
+        title: "QR Code Generated",
+        description: "QR code opened in new window for pharmacy scanning.",
+      });
+    } catch (error) {
+      console.error('Failed to generate QR code:', error);
+      toast({
+        title: "QR Code Failed",
+        description: "Unable to generate QR code. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   const getPatientAge = (dateOfBirth: string) => {
@@ -571,6 +658,10 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
                                       <DropdownMenuItem onClick={() => handlePrintPrescription(prescription)}>
                                         <Printer className="w-3 h-3 mr-2" />
                                         Print
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleGenerateQRCode(prescription)}>
+                                        <QrCode className="w-3 h-3 mr-2" />
+                                        Generate QR Code
                                       </DropdownMenuItem>
                                       <DropdownMenuSeparator />
                                       <DropdownMenuItem onClick={() => handleUpdateMedicationStatus(prescription.id, 'completed')}>
