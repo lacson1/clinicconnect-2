@@ -20,23 +20,24 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-      // Fallback for immediate access mode
+      // Fallback for immediate access mode - use Ade instead of admin for testing
       req.user = {
-        id: 1,
-        username: 'admin',
-        role: 'admin'
+        id: 10,
+        username: 'Ade',
+        role: 'doctor',
+        organizationId: 2
       };
       return next();
     }
 
     jwt.verify(token, JWT_SECRET, async (err: any, user: any) => {
       if (err) {
-        // Fallback for immediate access mode
+        // Fallback for immediate access mode - use Ade instead of admin for testing
         req.user = {
-          id: 1,
-          username: 'admin',
-          role: 'admin',
-          organizationId: 1
+          id: 10,
+          username: 'Ade',
+          role: 'doctor',
+          organizationId: 2
         };
         return next();
       }
@@ -56,11 +57,12 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
       next();
     });
   } catch (error) {
-    // Fallback for immediate access mode
+    // Fallback for immediate access mode - use Ade instead of admin for testing
     req.user = {
-      id: 1,
-      username: 'admin',
-      role: 'admin'
+      id: 10,
+      username: 'Ade',
+      role: 'doctor',
+      organizationId: 2
     };
     next();
   }
