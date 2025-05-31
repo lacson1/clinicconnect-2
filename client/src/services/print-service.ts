@@ -282,7 +282,7 @@ export class PrintService {
         </div>
     </div>
     
-    ${this.generateContentSection(type, data)}
+    ${this.generateContentSection(type, data, organizationInfo)}
     
     <div class="signature-section">
         <div class="signature-box">

@@ -5,7 +5,7 @@ export async function fetchPrintData() {
   const userResponse = await fetch('/api/profile');
   const currentUser = await userResponse.json();
   
-  // Try to get organization data from the system
+  // Fetch organization data from dedicated print endpoint
   let organization = {
     name: 'Grace',
     type: 'clinic',
@@ -15,24 +15,21 @@ export async function fetchPrintData() {
     website: 'www.grace-clinic.com'
   };
   
-  // If user has organizationId, try to fetch specific organization
-  if (currentUser.organizationId) {
-    try {
-      const orgResponse = await fetch(`/api/organizations/${currentUser.organizationId}`);
-      if (orgResponse.ok) {
-        const orgData = await orgResponse.json();
-        organization = {
-          name: orgData.name,
-          type: orgData.type,
-          address: orgData.address || '123 Healthcare Avenue, Lagos, Nigeria',
-          phone: orgData.phone || '+234 802 123 4567',
-          email: orgData.email,
-          website: orgData.website || `www.${orgData.name.toLowerCase().replace(/\s+/g, '-')}.com`
-        };
-      }
-    } catch (error) {
-      console.warn('Could not fetch specific organization, using default');
+  try {
+    const orgResponse = await fetch('/api/print/organization');
+    if (orgResponse.ok) {
+      const orgData = await orgResponse.json();
+      organization = {
+        name: orgData.name,
+        type: orgData.type,
+        address: orgData.address,
+        phone: orgData.phone,
+        email: orgData.email,
+        website: orgData.website
+      };
     }
+  } catch (error) {
+    console.warn('Could not fetch organization data for print, using default');
   }
   
   return {

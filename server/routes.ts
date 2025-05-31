@@ -3742,6 +3742,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Organization data for print documents
+  app.get("/api/print/organization", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      // Since users may not have organizationId set, fetch the first active organization as default
+      const [organization] = await db
+        .select()
+        .from(organizations)
+        .where(eq(organizations.isActive, true))
+        .orderBy(organizations.id)
+        .limit(1);
+
+      if (!organization) {
+        return res.status(404).json({ error: 'No active organization found' });
+      }
+
+      res.json({
+        id: organization.id,
+        name: organization.name,
+        type: organization.type,
+        address: organization.address || '123 Healthcare Avenue, Lagos, Nigeria',
+        phone: organization.phone || '+234 802 123 4567',
+        email: organization.email,
+        website: organization.website
+      });
+    } catch (error) {
+      console.error('Error fetching organization for print:', error);
+      res.status(500).json({ error: 'Failed to fetch organization data' });
+    }
+  });
+
   // Patient authentication middleware
   const authenticatePatient = async (req: PatientAuthRequest, res: any, next: any) => {
     try {
