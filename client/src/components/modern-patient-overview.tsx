@@ -484,6 +484,7 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
     try {
       console.log('🔄 Step 1: Starting reorder');
       console.log('🔄 Step 2: User check passed');
+      console.log('🔄 Step 3: Creating reorder data...');
       
       // Create a new prescription based on the previous one
       const reorderData = {
@@ -493,14 +494,14 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
         dosage: prescription.dosage,
         frequency: prescription.frequency,
         duration: prescription.duration,
-        instructions: prescription.instructions,
+        instructions: prescription.instructions || '',
         prescribedBy: user?.username || 'System',
         status: 'active',
         startDate: new Date().toISOString(),
         organizationId: user?.organizationId || 2
       };
 
-      console.log('🔄 Step 3: Data prepared, making request...');
+      console.log('🔄 Step 4: Data prepared, making request...');
       
       const response = await fetch(`/api/patients/${prescription.patientId}/prescriptions`, {
         method: 'POST',
