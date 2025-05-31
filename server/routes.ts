@@ -1475,13 +1475,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return org;
       };
       
-      // Super Admin - Global access across all organizations
+      // Try to find user in database first
+      const [user] = await db.select()
+        .from(users)
+        .where(eq(users.username, username))
+        .limit(1);
+
+      if (user) {
+        // For demo purposes, accept simple passwords
+        const validPasswords = ['admin123', 'doctor123', 'super123', 'nurse123', 'receptionist123'];
+        if (validPasswords.includes(password)) {
+          const org = user.organizationId ? await getOrganizationDetails(user.organizationId) : null;
+          const token = generateToken({ 
+            id: user.id, 
+            username: user.username, 
+            role: user.role, 
+            organizationId: user.organizationId 
+          });
+          
+          return res.json({
+            token,
+            user: {
+              id: user.id,
+              username: user.username,
+              role: user.role,
+              organizationId: user.organizationId,
+              organization: org ? {
+                id: org.id,
+                name: org.name,
+                type: org.type || 'clinic',
+                themeColor: org.themeColor || '#3B82F6'
+              } : null
+            }
+          });
+        }
+      }
+
+      // Fallback Super Admin - Global access across all organizations
       if (username === 'superadmin' && password === 'super123') {
-        const token = generateToken({ id: 1, username: 'superadmin', role: 'superadmin', organizationId: null });
+        const token = generateToken({ id: 999, username: 'superadmin', role: 'superadmin', organizationId: null });
         return res.json({
           token,
           user: {
-            id: 1,
+            id: 999,
             username: 'superadmin',
             role: 'superadmin',
             organizationId: null,
@@ -1491,27 +1527,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               type: 'system',
               themeColor: '#DC2626'
             }
-          }
-        });
-      }
-
-      // Organization Admin - Limited to specific organization
-      if (username === 'admin' && password === 'admin123') {
-        const org = await getOrganizationDetails(1);
-        const token = generateToken({ id: 2, username: 'admin', role: 'admin', organizationId: 1 });
-        return res.json({
-          token,
-          user: {
-            id: 2,
-            username: 'admin',
-            role: 'admin',
-            organizationId: 1,
-            organization: org ? {
-              id: org.id,
-              name: org.name,
-              type: org.type || 'clinic',
-              themeColor: org.themeColor || '#3B82F6'
-            } : null
           }
         });
       }
@@ -5012,13 +5027,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userProfile = await db.select({
         id: users.id,
         username: users.username,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        phone: users.phone,
         role: users.role,
         organizationId: users.organizationId,
-        createdAt: users.createdAt,
         organization: {
           id: organizations.id,
           name: organizations.name,
