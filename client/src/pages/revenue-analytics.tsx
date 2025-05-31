@@ -42,12 +42,12 @@ export default function RevenueAnalytics() {
   const [reportType, setReportType] = useState('summary');
   const [isExporting, setIsExporting] = useState(false);
 
-  const { data: comprehensiveData, isLoading } = useQuery({
+  const { data: comprehensiveData, isLoading, error: comprehensiveError, refetch: refetchComprehensive } = useQuery({
     queryKey: ['/api/analytics/comprehensive', timeRange],
     enabled: true
   });
 
-  const { data: revenueData, isLoading: revenueLoading } = useQuery({
+  const { data: revenueData, isLoading: revenueLoading, error: revenueError, refetch } = useQuery({
     queryKey: ['/api/revenue-analytics'],
     enabled: true
   });
@@ -128,7 +128,7 @@ export default function RevenueAnalytics() {
     );
   }
 
-  if (error || comprehensiveError) {
+  if (revenueError || comprehensiveError) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -136,7 +136,7 @@ export default function RevenueAnalytics() {
         </div>
         <ErrorDisplay
           title="Failed to Load Analytics"
-          message={error?.message || comprehensiveError?.message || "Unable to fetch revenue data"}
+          message={revenueError?.message || comprehensiveError?.message || "Unable to fetch revenue data"}
           onRetry={() => {
             refetch();
             refetchComprehensive();
