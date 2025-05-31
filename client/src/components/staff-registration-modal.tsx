@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -21,7 +21,8 @@ const staffRegistrationSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
   phone: z.string().optional(),
-  title: z.string().optional()
+  title: z.string().optional(),
+  organizationId: z.number().min(1, "Organization is required")
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"]
@@ -50,6 +51,11 @@ export function StaffRegistrationModal({ open, onOpenChange }: StaffRegistration
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch organizations for selection
+  const { data: organizations = [] } = useQuery({
+    queryKey: ["/api/organizations"],
+  });
+
   const form = useForm<StaffRegistrationData>({
     resolver: zodResolver(staffRegistrationSchema),
     defaultValues: {
@@ -61,19 +67,15 @@ export function StaffRegistrationModal({ open, onOpenChange }: StaffRegistration
       lastName: "",
       email: "",
       phone: "",
-      title: ""
+      title: "",
+      organizationId: undefined
     }
   });
 
   const registerStaffMutation = useMutation({
     mutationFn: async (data: StaffRegistrationData) => {
       const { confirmPassword, ...submitData } = data;
-      // Add organization ID - for now using organizationId: 1 (Grace clinic)
-      const staffData = {
-        ...submitData,
-        organizationId: 1
-      };
-      return apiRequest("POST", "/api/users", staffData);
+      return apiRequest("POST", "/api/users", submitData);
     },
     onSuccess: () => {
       toast({
@@ -161,6 +163,34 @@ export function StaffRegistrationModal({ open, onOpenChange }: StaffRegistration
                               <div>
                                 <div className="font-medium">{role.label}</div>
                                 <div className="text-sm text-muted-foreground">{role.description}</div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="organizationId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Organization *</FormLabel>
+                      <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select organization" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {organizations.map((org: any) => (
+                            <SelectItem key={org.id} value={org.id.toString()}>
+                              <div>
+                                <div className="font-medium">{org.name}</div>
+                                <div className="text-sm text-muted-foreground">{org.type}</div>
                               </div>
                             </SelectItem>
                           ))}
