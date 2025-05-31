@@ -60,6 +60,15 @@ export class PrintService {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f0f8f0;
+            min-height: 100vh;
+        }
+        
+        .print-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .header {
@@ -206,9 +215,10 @@ export class PrintService {
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="org-name">${organizationInfo.name}</div>
-        <div class="org-type">${organizationInfo.type.toUpperCase()}</div>
+    <div class="print-container">
+        <div class="header">
+            <div class="org-name">${organizationInfo.name}</div>
+            <div class="org-type">${organizationInfo.type.toUpperCase()}</div>
         <div class="org-details">
             ${organizationInfo.address ? organizationInfo.address + '<br>' : ''}
             ${organizationInfo.phone ? 'Tel: ' + organizationInfo.phone : ''}
@@ -281,6 +291,8 @@ export class PrintService {
         <div>Printed on: ${currentDate} at ${currentTime}</div>
         <div style="margin-top: 5px;">This document was generated electronically by ${organizationInfo.name} clinic management system.</div>
     </div>
+    
+    </div><!-- Close print-container -->
     
     <script>
         window.onload = function() {
