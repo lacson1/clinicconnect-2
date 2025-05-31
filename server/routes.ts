@@ -20,6 +20,7 @@ import { AuditLogger, AuditActions } from "./audit";
 import { format } from 'date-fns';
 import { setupOrganizationStaffRoutes } from "./organization-staff";
 import { setupTenantRoutes } from "./tenant-routes";
+import { setupSuperAdminRoutes } from "./super-admin-routes";
 
 // Helper function to generate lab order HTML for printing
 function generateLabOrderHTML(orderResult: any, orderItems: any[]): string {
@@ -3820,6 +3821,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup organization staff and patient registration routes
   setupOrganizationStaffRoutes(app);
+  
+  // Setup super admin control routes
+  setupSuperAdminRoutes(app);
 
   return httpServer;
 }
