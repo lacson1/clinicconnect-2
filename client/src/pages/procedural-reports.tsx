@@ -373,39 +373,170 @@ export default function ProceduralReports() {
                   />
                 </div>
 
-                {/* Procedure Details */}
-                <FormField
-                  control={form.control}
-                  name="procedureDetails"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Procedure Details</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Detailed description of the procedure performed..." 
-                          className="min-h-[100px]"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Theatre/Procedure Documentation Section */}
+                <div className="space-y-4">
+                  <div className="border-t pt-4">
+                    <h3 className="text-lg font-semibold mb-4">Theatre/Procedure Documentation</h3>
+                    
+                    {/* Procedure Details */}
+                    <FormField
+                      control={form.control}
+                      name="procedureDetails"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Detailed Procedure Description</FormLabel>
+                          <FormDescription>
+                            Document exactly what was performed step-by-step during the procedure
+                          </FormDescription>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Step-by-step description of the procedure:
+- Patient positioning and preparation
+- Surgical approach taken
+- Key steps performed
+- Techniques used
+- Equipment utilized
+- Any modifications to standard technique..." 
+                              className="min-h-[120px]"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                {/* Findings */}
-                <FormField
-                  control={form.control}
-                  name="findings"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Findings</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="What was found during the procedure..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    {/* Operative Findings */}
+                    <FormField
+                      control={form.control}
+                      name="findings"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Operative Findings</FormLabel>
+                          <FormDescription>
+                            What was observed during the procedure - anatomy, pathology, unexpected findings
+                          </FormDescription>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Document what was found during the procedure:
+- Normal anatomy observed
+- Pathological findings
+- Unexpected discoveries
+- Anatomical variations
+- Condition of tissues
+- Size, location, and appearance of lesions..." 
+                              className="min-h-[100px]"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Intraoperative Events */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="bloodLoss"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Estimated Blood Loss (ml)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="e.g., 50" 
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="duration"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Procedure Duration (minutes)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="e.g., 45" 
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Complications */}
+                    <FormField
+                      control={form.control}
+                      name="complications"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Intraoperative Complications</FormLabel>
+                          <FormDescription>
+                            Document any complications or adverse events during the procedure
+                          </FormDescription>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Record any complications that occurred:
+- Bleeding complications
+- Technical difficulties
+- Equipment malfunctions
+- Anesthetic complications
+- Unexpected anatomical findings requiring modification
+- How complications were managed
+
+If no complications occurred, state 'No intraoperative complications'" 
+                              className="min-h-[100px]"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Specimens */}
+                    <FormField
+                      control={form.control}
+                      name="specimens"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Specimens Collected</FormLabel>
+                          <FormDescription>
+                            Detail any tissue samples, biopsies, or specimens sent for analysis
+                          </FormDescription>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Document specimens taken:
+- Type of specimen (biopsy, excision, etc.)
+- Location/site of collection
+- Size and description
+- Container type and preservation method
+- Laboratory destination
+- Requisition numbers
+- Special handling instructions..." 
+                              className="min-h-[80px]"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+
 
                 {/* Complications & Specimens */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
