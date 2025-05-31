@@ -189,8 +189,8 @@ export default function Sidebar({ onStartTour }: SidebarProps = {}) {
               <Heart className="text-white h-6 w-6" />
             </div>
             <div className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
-              <h1 className="text-xl font-bold text-slate-800 whitespace-nowrap">HealthCore</h1>
-              <p className="text-sm text-slate-500 whitespace-nowrap">Clinic Management</p>
+              <h1 className="text-xl font-bold text-slate-800 whitespace-nowrap">Bluequee Healthcare</h1>
+              <p className="text-sm text-slate-500 whitespace-nowrap">Clinical Management</p>
             </div>
           </div>
           

@@ -78,10 +78,10 @@ export default function Login() {
             
             <div className="space-y-6">
               <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
-                Advanced Healthcare Platform
+                Bluequee Healthcare
               </h2>
               <p className="text-cyan-100/80 leading-relaxed text-lg">
-                Comprehensive healthcare management with intelligent analytics, real-time monitoring, and streamlined patient care workflows.
+                Clinical Management - Comprehensive healthcare with intelligent analytics, real-time monitoring, and streamlined patient care workflows.
               </p>
               <div className="flex flex-wrap gap-4 text-sm">
                 <span className="flex items-center bg-cyan-500/20 backdrop-blur-sm px-3 py-2 rounded-full border border-cyan-400/30">
