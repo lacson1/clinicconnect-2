@@ -44,6 +44,7 @@ import ExportCompliance from "@/components/export-compliance";
 import PatientAccessCards from "@/pages/patient-access-cards";
 import Settings from "@/pages/settings";
 import Profile from "@/pages/profile";
+import SuperAdminAnalytics from "@/pages/superadmin-analytics";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 
@@ -104,6 +105,7 @@ function AuthenticatedApp() {
                   <Route path="/audit-logs" component={AuditLogs} />
                   <Route path="/organization-management" component={OrganizationManagement} />
                   <Route path="/patient-access-cards" component={PatientAccessCards} />
+                  <Route path="/global-analytics" component={SuperAdminAnalytics} />
                   <Route component={NotFound} />
                 </Switch>
               </div>
