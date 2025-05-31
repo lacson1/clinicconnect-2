@@ -236,6 +236,13 @@ export default function Login() {
                   Demo Accounts
                 </p>
                 <div className="space-y-3 text-xs">
+                  <div className="flex justify-between items-center bg-gradient-to-r from-red-900/40 to-orange-900/40 p-3 rounded-lg backdrop-blur-sm border border-red-400/20">
+                    <span className="text-red-300 font-medium flex items-center">
+                      <Shield className="w-3 h-3 mr-2" />
+                      Super Admin
+                    </span>
+                    <span className="text-red-100 font-mono">superadmin / super123</span>
+                  </div>
                   <div className="flex justify-between items-center bg-slate-700/40 p-3 rounded-lg backdrop-blur-sm">
                     <span className="text-cyan-300 font-medium">Administrator</span>
                     <span className="text-cyan-100 font-mono">admin / admin123</span>
