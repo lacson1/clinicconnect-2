@@ -55,6 +55,11 @@ export function PrescriptionQueue() {
     queryKey: ["/api/medicines"],
   });
 
+  // Fetch pharmacy activities for recently dispensed
+  const { data: pharmacyActivities = [] } = useQuery({
+    queryKey: ["/api/pharmacy/activities"],
+  });
+
   const dispensePrescriptionMutation = useMutation({
     mutationFn: async ({ prescriptionId, data }: { prescriptionId: number; data: DispensingForm }) => {
       const response = await apiRequest("PATCH", `/api/prescriptions/${prescriptionId}/status`, { 
@@ -171,7 +176,9 @@ export function PrescriptionQueue() {
   };
 
   const pendingPrescriptions = (prescriptions as any[]).filter((p: any) => p.status === "active" || p.status === "pending");
-  const recentlyDispensed = (prescriptions as any[]).filter((p: any) => p.status === "dispensed").slice(0, 5);
+  const recentlyDispensed = (pharmacyActivities as any[])
+    .filter((activity: any) => activity.activityType === "dispensing")
+    .slice(0, 5);
 
   if (isLoading) {
     return (
@@ -407,18 +414,19 @@ export function PrescriptionQueue() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {recentlyDispensed.map((prescription: any) => (
-                    <div key={prescription.id} className="border rounded-lg p-3 bg-green-50 border-green-200">
+                  {recentlyDispensed.map((activity: any) => (
+                    <div key={activity.id} className="border rounded-lg p-3 bg-green-50 border-green-200">
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-green-700">RX#{prescription.id}</span>
-                            {getStatusBadge(prescription.status)}
+                            <span className="font-semibold text-green-700">Activity #{activity.id}</span>
+                            <Badge className="bg-green-100 text-green-800">Dispensed</Badge>
                           </div>
                           <div className="text-sm text-gray-600">
-                            <div><strong>Patient:</strong> {getPatientName(prescription.patientId)}</div>
-                            <div><strong>Medication:</strong> {prescription.medicationName}</div>
-                            <div><strong>Dispensed:</strong> {new Date(prescription.startDate).toLocaleDateString()}</div>
+                            <div><strong>Patient:</strong> {activity.patientFirstName} {activity.patientLastName}</div>
+                            <div><strong>Medication:</strong> {activity.medicationName || activity.title}</div>
+                            <div><strong>Quantity:</strong> {activity.quantity}</div>
+                            <div><strong>Dispensed:</strong> {new Date(activity.createdAt).toLocaleDateString()}</div>
                           </div>
                         </div>
                         <CheckCircle className="w-6 h-6 text-green-600" />
