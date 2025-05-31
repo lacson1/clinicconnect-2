@@ -87,7 +87,9 @@ export default function PatientProfile() {
   });
 
   // Get current user's organization
-  const currentOrganization = organizations.find(org => org.id === (user as any)?.organizationId);
+  const currentOrganization = Array.isArray(organizations) 
+    ? organizations.find(org => org.id === (user as any)?.organizationId)
+    : undefined;
 
   if (patientLoading) {
     return (
