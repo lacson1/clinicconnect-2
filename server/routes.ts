@@ -3742,6 +3742,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simple Medication Reviews endpoint (for quick scheduling)
+  app.post("/api/medication-reviews", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { patientId, prescriptionId, reviewType, notes, scheduledDate } = req.body;
+      
+      if (!patientId || !prescriptionId) {
+        return res.status(400).json({ message: "Patient ID and Prescription ID are required" });
+      }
+
+      // Create mock review response
+      const reviewData = {
+        id: Math.floor(Math.random() * 1000) + 1000,
+        patientId,
+        prescriptionId,
+        reviewType: reviewType || 'scheduled',
+        notes: notes || '',
+        scheduledDate: scheduledDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'pending',
+        assignedTo: req.user?.username || 'system',
+        organizationId: req.user?.organizationId || 1,
+        createdAt: new Date().toISOString()
+      };
+
+      console.log(`📋 MEDICATION REVIEW SCHEDULED: Review #${reviewData.id} for patient ${patientId}`);
+
+      res.json(reviewData);
+    } catch (error) {
+      console.error('Error creating medication review:', error);
+      res.status(500).json({ message: "Failed to create medication review" });
+    }
+  });
+
   // Staff Notification endpoint
   app.post("/api/notifications/staff", authenticateToken, async (req: AuthRequest, res) => {
     try {
