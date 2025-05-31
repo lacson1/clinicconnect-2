@@ -128,14 +128,21 @@ export function PrescriptionQueue() {
   };
 
   const getMedicationName = (prescription: any) => {
+    // First check if medicationName is already provided
     if (prescription.medicationName) {
       return prescription.medicationName;
     }
-    if (prescription.medicationId) {
-      const medicine = (medicines as any[]).find((m: any) => m.id === prescription.medicationId);
-      return medicine ? medicine.name : `Medication #${prescription.medicationId}`;
+    
+    // Then look up by medicationId in the medicines database
+    if (prescription.medicationId && medicines && Array.isArray(medicines) && medicines.length > 0) {
+      const medicine = medicines.find((m: any) => m.id === prescription.medicationId);
+      if (medicine && medicine.name) {
+        return medicine.name;
+      }
     }
-    return "Unknown Medication";
+    
+    // Fallback to medication ID reference
+    return prescription.medicationId ? `Medication ID #${prescription.medicationId}` : "Unknown Medication";
   };
 
   const getStatusBadge = (status: string) => {
