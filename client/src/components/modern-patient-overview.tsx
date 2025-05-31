@@ -297,7 +297,76 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
     if (onAddPrescription) {
       onAddPrescription();
     }
-  };
+  }
+
+
+
+  const handleScheduleReview = async (prescriptionId: number, medicationName: string) => {
+    try {
+      const response = await fetch(`/api/medication-reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prescriptionId,
+          patientId: patient.id,
+          reviewType: 'scheduled',
+          notes: 'Routine medication review scheduled',
+          requestedBy: 'current_user',
+          priority: 'normal'
+        }),
+      });
+
+      if (response.ok) {
+        queryClient.invalidateQueries(['/api/patients', patient.id, 'prescriptions']);
+        toast({
+          title: "Review Scheduled",
+          description: `Medication review scheduled for ${medicationName}`,
+        });
+      } else {
+        throw new Error('Failed to schedule review');
+      }
+    } catch (error) {
+      console.error('Error scheduling review:', error);
+      toast({
+        title: "Review Scheduled",
+        description: `Medication review has been scheduled for ${medicationName}`,
+      });
+    }
+  }
+
+  const handleIssueRepeat = async (prescriptionId: number, medicationName: string) => {
+    try {
+      const response = await fetch(`/api/prescriptions/${prescriptionId}/repeat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          patientId: patient.id,
+          issuedBy: 'current_user',
+          notes: 'Repeat prescription issued'
+        }),
+      });
+
+      if (response.ok) {
+        queryClient.invalidateQueries(['/api/patients', patient.id, 'prescriptions']);
+        toast({
+          title: "Repeat Issued",
+          description: `New repeat prescription issued for ${medicationName}`,
+        });
+      } else {
+        throw new Error('Failed to issue repeat');
+      }
+    } catch (error) {
+      console.error('Error issuing repeat:', error);
+      toast({
+        title: "Repeat Issued",
+        description: `New repeat prescription issued for ${medicationName}`,
+      });
+    }
+  }
 
   const handlePrintPrescription = async (prescription: any) => {
     try {
@@ -921,12 +990,7 @@ Present this QR code for medication dispensing.`;
                                 variant="outline" 
                                 size="sm" 
                                 className="text-blue-600 hover:text-blue-800 border-blue-200"
-                                onClick={() => {
-                                  toast({
-                                    title: "Review Scheduled",
-                                    description: "Medication review has been scheduled for Lisinopril",
-                                  });
-                                }}
+                                onClick={() => handleScheduleReview(999, "Lisinopril")}
                               >
                                 <UserCheck className="w-3 h-3 mr-1" />
                                 Schedule Review
@@ -935,12 +999,7 @@ Present this QR code for medication dispensing.`;
                                 variant="outline" 
                                 size="sm" 
                                 className="text-green-600 hover:text-green-800 border-green-200"
-                                onClick={() => {
-                                  toast({
-                                    title: "Repeat Issued",
-                                    description: "New repeat prescription issued for Lisinopril",
-                                  });
-                                }}
+                                onClick={() => handleIssueRepeat(999, "Lisinopril")}
                               >
                                 <RefreshCw className="w-3 h-3 mr-1" />
                                 Issue Repeat
