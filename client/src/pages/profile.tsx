@@ -14,50 +14,65 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { queryClient } from '@/lib/queryClient';
-import { User, Mail, Phone, Calendar, MapPin, Briefcase, Shield, Edit, Save, X } from 'lucide-react';
+import { 
+  User, 
+  Edit3, 
+  Save, 
+  X, 
+  Mail, 
+  Phone, 
+  Calendar, 
+  MapPin, 
+  Shield,
+  Building
+} from 'lucide-react';
 
 const profileSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  email: z.string().email('Invalid email address').optional(),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
   phone: z.string().optional(),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
+  bio: z.string().optional(),
   department: z.string().optional(),
   specialty: z.string().optional(),
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
 
-export function Profile() {
+export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
   // Fetch current user data
   const { data: user, isLoading } = useQuery({
-    queryKey: ['/api/auth/user'],
-  });
-
-  // Fetch extended profile data
-  const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['/api/profile'],
   });
 
   const form = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      username: user?.username || '',
-      email: profile?.email || '',
-      phone: profile?.phone || '',
-      firstName: profile?.firstName || '',
-      lastName: profile?.lastName || '',
-      bio: profile?.bio || '',
-      department: profile?.department || '',
-      specialty: profile?.specialty || '',
+      firstName: '',
+      lastName: '',
+      phone: '',
+      bio: '',
+      department: '',
+      specialty: '',
     },
   });
 
-  // Update profile mutation
+  // Update form when user data is loaded
+  useState(() => {
+    if (user) {
+      form.reset({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        phone: user.phone || '',
+        bio: user.bio || '',
+        department: user.department || '',
+        specialty: user.specialty || '',
+      });
+    }
+  });
+
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileForm) => {
       const response = await fetch('/api/profile', {
@@ -77,7 +92,6 @@ export function Profile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       setIsEditing(false);
       toast({
         title: "Profile Updated",
@@ -102,7 +116,7 @@ export function Profile() {
     setIsEditing(false);
   };
 
-  if (isLoading || profileLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -110,96 +124,110 @@ export function Profile() {
     );
   }
 
-  const userInitials = user?.username ? user.username.substring(0, 2).toUpperCase() : 'U';
-  const fullName = profile?.firstName && profile?.lastName 
-    ? `${profile.firstName} ${profile.lastName}` 
-    : user?.username || 'User';
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-          <p className="text-gray-600">Manage your account information and preferences</p>
+          <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
+          <p className="text-gray-600">Manage your personal information and settings</p>
         </div>
         {!isEditing && (
           <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
-            <Edit className="h-4 w-4" />
+            <Edit3 className="h-4 w-4" />
             Edit Profile
           </Button>
         )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Overview Card */}
-        <Card className="lg:col-span-1">
+        {/* Profile Overview */}
+        <Card>
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <Avatar className="h-24 w-24">
-                <AvatarFallback className="text-lg font-semibold bg-blue-100 text-blue-800">
-                  {userInitials}
+              <Avatar className="h-20 w-20">
+                <AvatarFallback className="text-lg font-semibold bg-blue-100 text-blue-700">
+                  {getInitials(user?.firstName || '', user?.lastName || '')}
                 </AvatarFallback>
               </Avatar>
             </div>
-            <CardTitle className="text-xl">{fullName}</CardTitle>
-            <CardDescription className="flex items-center justify-center gap-2">
-              <Shield className="h-4 w-4" />
+            <CardTitle className="text-xl">
+              {user?.firstName || ''} {user?.lastName || ''}
+            </CardTitle>
+            <CardDescription>
               <Badge variant="secondary" className="capitalize">
-                {user?.role}
+                {user?.role || 'User'}
               </Badge>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {profile?.bio && (
+            {user?.bio && (
               <div>
-                <Label className="text-sm font-medium text-gray-700">Bio</Label>
-                <p className="text-sm text-gray-600 mt-1">{profile.bio}</p>
+                <p className="text-sm text-gray-600 text-center italic">
+                  "{user.bio}"
+                </p>
               </div>
             )}
             
             <Separator />
             
-            <div className="space-y-3">
-              {profile?.email && (
-                <div className="flex items-center gap-3 text-sm">
+            <div className="space-y-2">
+              {user?.email && (
+                <div className="flex items-center gap-2 text-sm">
                   <Mail className="h-4 w-4 text-gray-500" />
-                  <span>{profile.email}</span>
+                  <span>{user.email}</span>
                 </div>
               )}
-              
-              {profile?.phone && (
-                <div className="flex items-center gap-3 text-sm">
+              {user?.phone && (
+                <div className="flex items-center gap-2 text-sm">
                   <Phone className="h-4 w-4 text-gray-500" />
-                  <span>{profile.phone}</span>
+                  <span>{user.phone}</span>
                 </div>
               )}
-              
-              {profile?.department && (
-                <div className="flex items-center gap-3 text-sm">
-                  <Briefcase className="h-4 w-4 text-gray-500" />
-                  <span>{profile.department}</span>
+              {user?.department && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Building className="h-4 w-4 text-gray-500" />
+                  <span>{user.department}</span>
                 </div>
               )}
-              
-              <div className="flex items-center gap-3 text-sm">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <span>Member since {new Date(user?.createdAt || Date.now()).toLocaleDateString()}</span>
-              </div>
             </div>
+
+            {user?.createdAt && (
+              <div className="pt-4 border-t">
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Calendar className="h-4 w-4" />
+                  <span>Joined {formatDate(user.createdAt)}</span>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Profile Edit Form */}
+        {/* Profile Details Form */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Personal Information
+            </CardTitle>
             <CardDescription>
-              Update your personal information and professional details
+              Update your personal details and professional information
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -232,10 +260,10 @@ export function Profile() {
 
                 <FormField
                   control={form.control}
-                  name="username"
+                  name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Username</FormLabel>
+                      <FormLabel>Phone Number</FormLabel>
                       <FormControl>
                         <Input {...field} disabled={!isEditing} />
                       </FormControl>
@@ -244,65 +272,33 @@ export function Profile() {
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="email" disabled={!isEditing} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="department"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Department</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={!isEditing} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={!isEditing} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="department"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Department</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={!isEditing} placeholder="e.g., Emergency Medicine" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="specialty"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Specialty</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={!isEditing} placeholder="e.g., Cardiology" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="specialty"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Specialty</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={!isEditing} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -313,9 +309,9 @@ export function Profile() {
                       <FormControl>
                         <Textarea 
                           {...field} 
-                          disabled={!isEditing} 
+                          disabled={!isEditing}
                           placeholder="Tell us about yourself..."
-                          rows={4}
+                          rows={3}
                         />
                       </FormControl>
                       <FormMessage />
@@ -324,7 +320,16 @@ export function Profile() {
                 />
 
                 {isEditing && (
-                  <div className="flex gap-3">
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleCancel}
+                      className="flex items-center gap-2"
+                    >
+                      <X className="h-4 w-4" />
+                      Cancel
+                    </Button>
                     <Button 
                       type="submit" 
                       disabled={updateProfileMutation.isPending}
@@ -332,15 +337,6 @@ export function Profile() {
                     >
                       <Save className="h-4 w-4" />
                       {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
-                    </Button>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={handleCancel}
-                      className="flex items-center gap-2"
-                    >
-                      <X className="h-4 w-4" />
-                      Cancel
                     </Button>
                   </div>
                 )}

@@ -57,7 +57,7 @@ const settingsSchema = z.object({
 
 type SettingsForm = z.infer<typeof settingsSchema>;
 
-export function Settings() {
+export default function Settings() {
   const [activeTab, setActiveTab] = useState('notifications');
   const { toast } = useToast();
 

@@ -42,8 +42,8 @@ import MentalHealthPage from "@/pages/mental-health";
 import ClinicalProtocols from "@/components/clinical-protocols";
 import ExportCompliance from "@/components/export-compliance";
 import PatientAccessCards from "@/pages/patient-access-cards";
-import { Settings } from "@/pages/settings";
-import { Profile } from "@/pages/profile";
+import Settings from "@/pages/settings";
+import Profile from "@/pages/profile";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 

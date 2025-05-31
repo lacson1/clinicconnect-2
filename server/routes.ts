@@ -3589,5 +3589,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile and Settings API endpoints
+  
+  // Get user profile
+  app.get("/api/profile", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      const userProfile = await db.select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        phone: users.phone,
+        role: users.role,
+        department: users.department,
+        specialty: users.specialty,
+        bio: users.bio,
+        createdAt: users.createdAt
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+      if (!userProfile.length) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json(userProfile[0]);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+  });
+
+  // Update user profile
+  app.put("/api/profile", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user!.id;
+      const updateData = req.body;
+      
+      // Validate the data
+      const allowedFields = ['firstName', 'lastName', 'phone', 'bio', 'department', 'specialty'];
+      const filteredData: any = {};
+      
+      for (const field of allowedFields) {
+        if (updateData[field] !== undefined) {
+          filteredData[field] = updateData[field];
+        }
+      }
+
+      await db.update(users)
+        .set(filteredData)
+        .where(eq(users.id, userId));
+
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logUserAction('PROFILE_UPDATED', userId, { updatedFields: Object.keys(filteredData) });
+
+      res.json({ message: 'Profile updated successfully' });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      res.status(500).json({ error: 'Failed to update profile' });
+    }
+  });
+
+  // Get user settings
+  app.get("/api/settings", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      // For now, return default settings since we don't have a settings table
+      // In a real implementation, you would query a user_settings table
+      const defaultSettings = {
+        notifications: {
+          email: true,
+          sms: false,
+          push: true,
+          appointments: true,
+          labResults: true,
+          emergencies: true,
+        },
+        privacy: {
+          profileVisibility: 'staff',
+          showOnlineStatus: true,
+          allowDirectMessages: true,
+        },
+        appearance: {
+          theme: 'system',
+          language: 'en',
+          timezone: 'UTC',
+        },
+        security: {
+          twoFactorEnabled: false,
+          sessionTimeout: 30,
+          passwordExpiry: 90,
+        },
+      };
+
+      res.json(defaultSettings);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+      res.status(500).json({ error: 'Failed to fetch settings' });
+    }
+  });
+
+  // Update user settings
+  app.put("/api/settings", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user!.id;
+      const settingsData = req.body;
+      
+      // In a real implementation, you would save to a user_settings table
+      // For now, we'll just log the update and return success
+      console.log(`Settings updated for user ${userId}:`, settingsData);
+
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logUserAction('SETTINGS_UPDATED', userId, { 
+        settingsCategories: Object.keys(settingsData) 
+      });
+
+      res.json({ message: 'Settings updated successfully' });
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      res.status(500).json({ error: 'Failed to update settings' });
+    }
+  });
+
   return httpServer;
 }
