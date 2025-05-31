@@ -70,12 +70,17 @@ export default function BillingPage() {
 
   // Create invoice mutation
   const createInvoiceMutation = useMutation({
-    mutationFn: (data: InvoiceFormData) => 
-      fetch('/api/invoices', {
+    mutationFn: (data: InvoiceFormData) => {
+      const token = localStorage.getItem('token');
+      return fetch('/api/invoices', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(data),
-      }).then(res => res.json()),
+      }).then(res => res.json());
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/invoices'] });
       setShowCreateInvoice(false);
@@ -95,10 +100,17 @@ export default function BillingPage() {
 
   // Record payment mutation
   const recordPaymentMutation = useMutation({
-    mutationFn: (data: PaymentFormData) => apiRequest('/api/payments', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    mutationFn: (data: PaymentFormData) => {
+      const token = localStorage.getItem('token');
+      return fetch('/api/payments', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+      }).then(res => res.json());
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/invoices'] });
       setShowRecordPayment(false);
