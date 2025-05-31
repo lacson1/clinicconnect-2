@@ -120,7 +120,7 @@ export class PrintService {
             background: linear-gradient(135deg, #f0f8f0 0%, #e8f5e8 50%, #f0f8f0 100%);
             max-width: 300px;
             margin: 0 auto;
-            padding: 15px;
+            padding: 10px;
             border-radius: 6px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             border: 2px solid #22c55e;
@@ -129,92 +129,91 @@ export class PrintService {
         
         .header {
             text-align: center;
-            border-bottom: 2px solid #22c55e;
-            padding: 8px 5px;
-            margin-bottom: 10px;
+            border-bottom: 1px solid #22c55e;
+            padding: 4px 2px;
+            margin-bottom: 5px;
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            border-radius: 4px 4px 0 0;
+            border-radius: 3px 3px 0 0;
         }
         
         .org-name {
-            font-size: 16px;
+            font-size: 10px;
             font-weight: bold;
-            margin-bottom: 3px;
+            margin-bottom: 1px;
             color: #166534;
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            letter-spacing: 0.3px;
         }
         
         .org-type {
-            font-size: 9px;
+            font-size: 6px;
             color: #15803d;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         
         .org-details {
-            font-size: 7px;
-            line-height: 1.2;
+            font-size: 5px;
+            line-height: 1.1;
             color: #374151;
-            padding: 4px 0;
+            padding: 2px 0;
             border-top: 1px solid #bbf7d0;
-            margin-top: 4px;
+            margin-top: 2px;
         }
         
         .document-title {
             text-align: center;
-            font-size: 12px;
+            font-size: 8px;
             font-weight: bold;
-            margin: 8px 0;
+            margin: 4px 0;
             text-transform: uppercase;
             border: 1px solid #22c55e;
-            padding: 4px;
+            padding: 2px;
             background: #f0fdf4;
             color: #166534;
-            letter-spacing: 0.5px;
-            border-radius: 4px;
+            letter-spacing: 0.3px;
+            border-radius: 3px;
         }
         
         .info-section {
-            margin: 6px 0;
+            margin: 3px 0;
             border: 1px solid #bbf7d0;
-            border-radius: 4px;
-            padding: 6px;
+            border-radius: 3px;
+            padding: 3px;
             background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-            box-shadow: 0 1px 2px rgba(34,197,94,0.1);
+            box-shadow: 0 1px 1px rgba(34,197,94,0.1);
         }
         
         .info-title {
             font-weight: bold;
-            font-size: 8px;
-            margin-bottom: 4px;
+            font-size: 6px;
+            margin-bottom: 2px;
             border-bottom: 1px solid #22c55e;
-            padding-bottom: 2px;
+            padding-bottom: 1px;
             color: #166534;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
         
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 4px;
-            font-size: 7px;
+            gap: 2px;
+            font-size: 5px;
         }
         
         .info-item {
-            margin-bottom: 3px;
-            padding: 2px 0;
+            margin-bottom: 1px;
+            padding: 1px 0;
         }
         
         .label {
             font-weight: bold;
             display: inline-block;
-            min-width: 30px;
+            min-width: 20px;
             color: #374151;
-            font-size: 6px;
+            font-size: 5px;
         }
         
         .content-section {
@@ -432,27 +431,28 @@ export class PrintService {
     return `
     <style>
         .prescription-medication {
-            border: 2px solid #22c55e;
-            padding: 20px;
+            border: 3px solid #22c55e;
+            padding: 25px;
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            border-radius: 6px;
-            margin: 15px 0;
-            min-height: 180px;
+            border-radius: 8px;
+            margin: 20px 0;
+            min-height: 240px;
+            flex-grow: 1;
         }
         .rx-header {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             color: #166534;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             text-align: center;
-            border-bottom: 2px solid #bbf7d0;
-            padding-bottom: 8px;
+            border-bottom: 3px solid #bbf7d0;
+            padding-bottom: 10px;
         }
         .med-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 18px;
+            margin-bottom: 18px;
         }
         .med-item {
             display: flex;
@@ -461,12 +461,13 @@ export class PrintService {
         .med-label {
             font-weight: bold;
             color: #15803d;
-            font-size: 12px;
-            margin-bottom: 4px;
+            font-size: 14px;
+            margin-bottom: 5px;
         }
         .med-value {
             color: #374151;
-            font-size: 14px;
+            font-size: 16px;
+            line-height: 1.4;
         }
         @media print {
             .prescription-medication {
