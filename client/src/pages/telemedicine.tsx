@@ -60,6 +60,11 @@ export default function TelemedicinePage() {
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   
+  // Form state for new session
+  const [selectedPatientId, setSelectedPatientId] = useState('');
+  const [sessionType, setSessionType] = useState('video');
+  const [scheduledTime, setScheduledTime] = useState('');
+  
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -79,12 +84,35 @@ export default function TelemedicinePage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/telemedicine/sessions'] });
       setNewSessionDialog(false);
+      setSelectedPatientId('');
+      setSessionType('video');
+      setScheduledTime('');
       toast({
         title: "Session Scheduled",
         description: "Telemedicine session has been scheduled successfully.",
       });
     }
   });
+
+  const handleScheduleSession = () => {
+    if (!selectedPatientId || !scheduledTime) {
+      toast({
+        title: "Missing Information",
+        description: "Please select a patient and scheduled time.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const sessionData = {
+      patientId: parseInt(selectedPatientId),
+      type: sessionType,
+      scheduledTime: scheduledTime,
+      status: 'scheduled'
+    };
+
+    createSessionMutation.mutate(sessionData);
+  };
 
   const updateSessionMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
@@ -194,12 +222,12 @@ export default function TelemedicinePage() {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium">Patient</label>
-                <Select>
+                <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select patient" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockPatients.map((patient) => (
+                    {patients && patients.map((patient: any) => (
                       <SelectItem key={patient.id} value={patient.id.toString()}>
                         {patient.firstName} {patient.lastName}
                       </SelectItem>
@@ -209,7 +237,7 @@ export default function TelemedicinePage() {
               </div>
               <div>
                 <label className="text-sm font-medium">Session Type</label>
-                <Select defaultValue="video">
+                <Select value={sessionType} onValueChange={setSessionType}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -222,13 +250,22 @@ export default function TelemedicinePage() {
               </div>
               <div>
                 <label className="text-sm font-medium">Scheduled Time</label>
-                <Input type="datetime-local" />
+                <Input 
+                  type="datetime-local" 
+                  value={scheduledTime}
+                  onChange={(e) => setScheduledTime(e.target.value)}
+                />
               </div>
               <div className="flex gap-2">
                 <Button onClick={() => setNewSessionDialog(false)} variant="outline">
                   Cancel
                 </Button>
-                <Button>Schedule Session</Button>
+                <Button 
+                  onClick={handleScheduleSession}
+                  disabled={createSessionMutation.isPending}
+                >
+                  {createSessionMutation.isPending ? 'Scheduling...' : 'Schedule Session'}
+                </Button>
               </div>
             </div>
           </DialogContent>
