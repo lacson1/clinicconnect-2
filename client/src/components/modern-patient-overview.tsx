@@ -48,7 +48,10 @@ import {
   MoreVertical,
   Eye,
   Copy,
-  Trash2
+  Trash2,
+  CheckCircle,
+  XCircle,
+  RefreshCw
 } from 'lucide-react';
 
 interface Patient {
@@ -208,20 +211,30 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
     enabled: !!patient.id
   });
 
-  // Use fetched prescriptions with proper fallback logic
-  // Always prefer API data when available, fall back to passed props only when API fails
+  // Use fetched prescriptions with proper fallback logic and status filtering
   const displayPrescriptions = React.useMemo(() => {
     if (prescriptionsLoading && !patientPrescriptions.length) {
-      // Show passed prescriptions during initial load only
       return activePrescriptions;
     }
     if (prescriptionsError && !patientPrescriptions.length) {
-      // Show passed prescriptions if API fails
       return activePrescriptions;
     }
-    // Always prefer API data when available
+    // Always prefer API data when available and return all prescriptions
     return patientPrescriptions;
   }, [patientPrescriptions, activePrescriptions, prescriptionsLoading, prescriptionsError]);
+
+  // Filter prescriptions by status for better organization
+  const activeMedications = React.useMemo(() => {
+    return displayPrescriptions.filter((p: any) => 
+      p.status === 'active' || p.status === 'pending' || !p.status
+    );
+  }, [displayPrescriptions]);
+
+  const discontinuedMedications = React.useMemo(() => {
+    return displayPrescriptions.filter((p: any) => 
+      p.status === 'completed' || p.status === 'discontinued' || p.status === 'stopped'
+    );
+  }, [displayPrescriptions]);
 
   // Toggle filter function
   const toggleFilter = (filterType: keyof typeof timelineFilters) => {
@@ -501,9 +514,9 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
                     <div className="flex items-center justify-center py-8">
                       <div className="text-slate-500">Loading prescriptions...</div>
                     </div>
-                  ) : displayPrescriptions.length > 0 ? (
+                  ) : activeMedications.length > 0 ? (
                     <div className="grid gap-4">
-                      {displayPrescriptions.map((prescription: any) => (
+                      {activeMedications.map((prescription: any) => (
                         <div key={prescription.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
@@ -570,24 +583,36 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
                                   )}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="text-slate-600 hover:text-slate-800"
-                                    onClick={() => handleEditPrescription(prescription)}
-                                  >
-                                    <Edit className="w-3 h-3 mr-1" />
-                                    Edit
-                                  </Button>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="text-slate-600 hover:text-slate-800"
-                                    onClick={() => handlePrintPrescription(prescription)}
-                                  >
-                                    <Printer className="w-3 h-3 mr-1" />
-                                    Print
-                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
+                                        <MoreVertical className="w-3 h-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-[180px]">
+                                      <DropdownMenuItem onClick={() => handleEditPrescription(prescription)}>
+                                        <Edit className="w-3 h-3 mr-2" />
+                                        Edit Details
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handlePrintPrescription(prescription)}>
+                                        <Printer className="w-3 h-3 mr-2" />
+                                        Print
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => handleUpdateMedicationStatus(prescription.id, 'completed')}>
+                                        <CheckCircle className="w-3 h-3 mr-2 text-blue-600" />
+                                        Mark Completed
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleUpdateMedicationStatus(prescription.id, 'discontinued')}>
+                                        <XCircle className="w-3 h-3 mr-2 text-orange-600" />
+                                        Discontinue
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleUpdateMedicationStatus(prescription.id, 'active')}>
+                                        <RefreshCw className="w-3 h-3 mr-2 text-green-600" />
+                                        Reactivate
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </div>
                               </div>
                             </div>
@@ -608,16 +633,96 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
                 )}
                 </div>
                 
-                {/* Medication History Section */}
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Recent Medication History</h3>
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <p className="text-sm text-slate-600 mb-2">Previous prescriptions and completed medications will appear here.</p>
-                    <div className="text-xs text-slate-500">
-                      Track medication adherence, side effects, and treatment outcomes for better patient care.
+                {/* Discontinued/Historical Medications Section */}
+                {discontinuedMedications.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-gray-500" />
+                      Medication History ({discontinuedMedications.length})
+                    </h3>
+                    <div className="grid gap-3">
+                      {discontinuedMedications.map((prescription: any) => (
+                        <div key={prescription.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50 hover:shadow-sm transition-shadow">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <h4 className="font-medium text-gray-700 text-base">
+                                  {prescription.medicationName}
+                                </h4>
+                                <Badge className={
+                                  prescription.status === "completed" 
+                                    ? "bg-blue-100 text-blue-700 border-blue-200" 
+                                    : prescription.status === "discontinued"
+                                    ? "bg-orange-100 text-orange-700 border-orange-200"
+                                    : "bg-gray-100 text-gray-700 border-gray-200"
+                                }>
+                                  {prescription.status}
+                                </Badge>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2 text-sm">
+                                <div className="bg-white p-2 rounded border">
+                                  <span className="font-medium text-gray-600 block text-xs">Dosage</span>
+                                  <p className="text-gray-800 mt-1">{prescription.dosage}</p>
+                                </div>
+                                <div className="bg-white p-2 rounded border">
+                                  <span className="font-medium text-gray-600 block text-xs">Duration</span>
+                                  <p className="text-gray-800 mt-1">{prescription.duration}</p>
+                                </div>
+                                <div className="bg-white p-2 rounded border">
+                                  <span className="font-medium text-gray-600 block text-xs">Prescribed by</span>
+                                  <p className="text-gray-800 mt-1">{prescription.prescribedBy}</p>
+                                </div>
+                                <div className="bg-white p-2 rounded border">
+                                  <span className="font-medium text-gray-600 block text-xs">End Date</span>
+                                  <p className="text-gray-800 mt-1">
+                                    {prescription.endDate ? new Date(prescription.endDate).toLocaleDateString() : 'Not specified'}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
+                                <div className="text-xs text-gray-500">
+                                  Started: {new Date(prescription.startDate).toLocaleDateString()}
+                                </div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-gray-600 hover:text-gray-800"
+                                  onClick={() => handlePrintPrescription(prescription)}
+                                >
+                                  <Printer className="w-3 h-3 mr-1" />
+                                  Print
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
+                )}
+                
+                {/* Summary Statistics */}
+                {displayPrescriptions.length > 0 && (
+                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                    <h4 className="font-medium text-purple-800 mb-2">Medication Summary</h4>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-700">{activeMedications.length}</div>
+                        <div className="text-purple-600">Active</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-700">{discontinuedMedications.length}</div>
+                        <div className="text-blue-600">Historical</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-gray-700">{displayPrescriptions.length}</div>
+                        <div className="text-gray-600">Total</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
