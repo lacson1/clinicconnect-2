@@ -7,7 +7,7 @@ import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMe
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { db } from "./db";
-import { eq, desc, or, ilike, gte, and, isNotNull, inArray, sql } from "drizzle-orm";
+import { eq, desc, or, ilike, gte, and, isNotNull, inArray, sql, notExists } from "drizzle-orm";
 import { authenticateToken, requireRole, requireAnyRole, requireSuperOrOrgAdmin, hashPassword, comparePassword, generateToken, type AuthRequest } from "./middleware/auth";
 
 // Extend AuthRequest interface to include patient authentication
@@ -3460,6 +3460,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error resolving safety alert:', error);
       res.status(500).json({ error: 'Failed to resolve safety alert' });
+    }
+  });
+
+
+
+  // Patient Portal Consent Routes
+  app.get("/api/patient-portal/pending-consents", authenticatePatient, async (req: PatientAuthRequest, res) => {
+    try {
+      const patientId = req.patient!.id;
+      
+      // Get consent forms that are available for this patient to sign
+      const result = await db
+        .select({
+          id: consentForms.id,
+          title: consentForms.title,
+          description: consentForms.description,
+          consentType: consentForms.consentType,
+          category: consentForms.category,
+          template: consentForms.template,
+          riskFactors: consentForms.riskFactors,
+          benefits: consentForms.benefits,
+          alternatives: consentForms.alternatives
+        })
+        .from(consentForms)
+        .where(
+          sql`${consentForms.id} NOT IN (
+            SELECT consent_form_id FROM patient_consents 
+            WHERE patient_id = ${patientId} AND status = 'active'
+          )`
+        )
+        .orderBy(consentForms.title);
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching pending consents:', error);
+      res.status(500).json({ message: "Failed to fetch pending consents" });
+    }
+  });
+
+  app.post("/api/patient-portal/sign-consent", authenticatePatient, async (req: PatientAuthRequest, res) => {
+    try {
+      const patientId = req.patient!.id;
+      const {
+        consentFormId,
+        consentGivenBy = 'patient',
+        guardianName,
+        guardianRelationship,
+        interpreterUsed = false,
+        interpreterName,
+        consentData,
+        digitalSignature,
+        additionalNotes
+      } = req.body;
+
+      if (!consentFormId || !digitalSignature) {
+        return res.status(400).json({ message: "Consent form and signature are required" });
+      }
+
+      // Check if consent already exists
+      const existingConsent = await db
+        .select()
+        .from(patientConsents)
+        .where(and(
+          eq(patientConsents.patientId, patientId),
+          eq(patientConsents.consentFormId, consentFormId),
+          eq(patientConsents.status, 'active')
+        ))
+        .limit(1);
+
+      if (existingConsent.length > 0) {
+        return res.status(400).json({ message: "Consent already signed for this form" });
+      }
+
+      // Create new patient consent
+      const [newConsent] = await db
+        .insert(patientConsents)
+        .values({
+          patientId,
+          consentFormId,
+          consentGivenBy,
+          guardianName,
+          guardianRelationship,
+          interpreterUsed,
+          interpreterName,
+          consentData: consentData || {},
+          digitalSignature,
+          signatureDate: new Date(),
+          status: 'active',
+          organizationId: req.patient!.organizationId || 1,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      res.json({
+        success: true,
+        message: "Consent form signed successfully",
+        consent: newConsent
+      });
+    } catch (error) {
+      console.error('Error signing consent:', error);
+      res.status(500).json({ message: "Failed to sign consent form" });
+    }
+  });
+
+  app.get("/api/patient-portal/signed-consents", authenticatePatient, async (req: PatientAuthRequest, res) => {
+    try {
+      const patientId = req.patient!.id;
+      
+      const result = await db
+        .select({
+          id: patientConsents.id,
+          consentFormTitle: consentForms.title,
+          consentType: consentForms.consentType,
+          category: consentForms.category,
+          consentGivenBy: patientConsents.consentGivenBy,
+          guardianName: patientConsents.guardianName,
+          signatureDate: patientConsents.signatureDate,
+          status: patientConsents.status,
+          expiryDate: patientConsents.expiryDate
+        })
+        .from(patientConsents)
+        .leftJoin(consentForms, eq(patientConsents.consentFormId, consentForms.id))
+        .where(eq(patientConsents.patientId, patientId))
+        .orderBy(desc(patientConsents.signatureDate));
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching signed consents:', error);
+      res.status(500).json({ message: "Failed to fetch signed consents" });
     }
   });
 

@@ -52,6 +52,8 @@ export default function PatientPortal() {
   const [newMessage, setNewMessage] = useState('');
   const [messageSubject, setMessageSubject] = useState('');
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
+  const [showConsentSigning, setShowConsentSigning] = useState(false);
+  const [selectedConsent, setSelectedConsent] = useState<any>(null);
   const [appointmentData, setAppointmentData] = useState({
     appointmentType: '',
     preferredDate: '',
@@ -61,6 +63,7 @@ export default function PatientPortal() {
     messageType: 'general',
     priority: 'normal'
   });
+  const [signatureData, setSignatureData] = useState('');
   
   const queryClient = useQueryClient();
 
