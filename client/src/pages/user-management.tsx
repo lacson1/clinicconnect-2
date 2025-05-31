@@ -69,6 +69,7 @@ export default function UserManagement() {
   const [activeTab, setActiveTab] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filterSpecialty, setFilterSpecialty] = useState("");
+  const [filterOrganization, setFilterOrganization] = useState("");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [showStaffModal, setShowStaffModal] = useState(false);
   const { toast } = useToast();
@@ -302,8 +303,12 @@ export default function UserManagement() {
       filtered = filtered.filter(user => user.role === filterSpecialty);
     }
 
+    if (filterOrganization) {
+      filtered = filtered.filter(user => user.organizationId === parseInt(filterOrganization));
+    }
+
     return filtered;
-  }, [users, activeTab, searchTerm, filterSpecialty]);
+  }, [users, activeTab, searchTerm, filterSpecialty, filterOrganization]);
 
   // Helper functions
   const getUserInitials = (user: User) => {
@@ -498,7 +503,7 @@ export default function UserManagement() {
       </div>
 
       {/* Search and filters */}
-      <div className="flex gap-4">
+      <div className="flex gap-4 flex-wrap">
         <div className="flex-1">
           <Input
             placeholder="Search users by name, role, or email..."
@@ -507,6 +512,52 @@ export default function UserManagement() {
             className="max-w-md"
           />
         </div>
+        
+        {/* Organization Filter */}
+        <Select value={filterOrganization} onValueChange={setFilterOrganization}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Filter by Organization" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Organizations</SelectItem>
+            {Array.isArray(organizations) && organizations.map((org: any) => (
+              <SelectItem key={org.id} value={org.id.toString()}>
+                {org.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Role Filter */}
+        <Select value={filterSpecialty} onValueChange={setFilterSpecialty}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Filter by Role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Roles</SelectItem>
+            {USER_ROLES.map((role) => (
+              <SelectItem key={role.value} value={role.value}>
+                {role.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Clear Filters */}
+        {(filterOrganization || filterSpecialty || searchTerm) && (
+          <Button
+            variant="outline"
+            onClick={() => {
+              setFilterOrganization("");
+              setFilterSpecialty("");
+              setSearchTerm("");
+            }}
+            className="flex items-center gap-2"
+          >
+            <X className="w-4 h-4" />
+            Clear Filters
+          </Button>
+        )}
       </div>
 
       {/* Users list */}
@@ -637,20 +688,30 @@ export default function UserManagement() {
                         </div>
                         
                         <div className="space-y-1 text-sm text-gray-600">
+                          {user.organizationId && (
+                            <div className="flex items-center">
+                              <span className="font-medium w-20">Organization:</span>
+                              <span className="text-blue-600 font-medium">
+                                {Array.isArray(organizations) 
+                                  ? organizations.find((org: any) => org.id === user.organizationId)?.name || 'Unknown Organization'
+                                  : 'Loading...'}
+                              </span>
+                            </div>
+                          )}
                           {user.email && (
                             <div className="flex items-center">
-                              <span className="font-medium w-16">Email:</span>
+                              <span className="font-medium w-20">Email:</span>
                               <span>{user.email}</span>
                             </div>
                           )}
                           {user.phone && (
                             <div className="flex items-center">
-                              <span className="font-medium w-16">Phone:</span>
+                              <span className="font-medium w-20">Phone:</span>
                               <span>{user.phone}</span>
                             </div>
                           )}
                           <div className="flex items-center">
-                            <span className="font-medium w-16">Created:</span>
+                            <span className="font-medium w-20">Created:</span>
                             <span>{new Date(user.createdAt!).toLocaleDateString()}</span>
                           </div>
                         </div>
