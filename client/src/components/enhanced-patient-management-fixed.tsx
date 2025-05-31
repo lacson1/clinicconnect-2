@@ -155,6 +155,10 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
     return `${patient.firstName[0]}${patient.lastName[0]}`.toUpperCase();
   };
 
+  const formatPatientName = (patient: Patient) => {
+    return `${patient.title ? `${patient.title} ` : ''}${patient.firstName} ${patient.lastName}`;
+  };
+
   const getRiskIndicatorColor = (riskLevel: string) => {
     switch (riskLevel) {
       case 'high': return 'bg-red-400';
