@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { fileStorage } from "./storage-service";
-import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, insertSafetyAlertSchema, insertPharmacyActivitySchema, insertMedicationReviewSchema, insertProceduralReportSchema, insertConsentFormSchema, insertPatientConsentSchema, users, auditLogs, labTests, medications, medicines, labOrders, labOrderItems, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, appointments, safetyAlerts, pharmacyActivities, medicationReviews, prescriptions, pharmacies, proceduralReports, consentForms, patientConsents } from "@shared/schema";
+import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, insertSafetyAlertSchema, insertPharmacyActivitySchema, insertMedicationReviewSchema, insertProceduralReportSchema, insertConsentFormSchema, insertPatientConsentSchema, insertMessageSchema, users, auditLogs, labTests, medications, medicines, labOrders, labOrderItems, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, appointments, safetyAlerts, pharmacyActivities, medicationReviews, prescriptions, pharmacies, proceduralReports, consentForms, patientConsents, messages } from "@shared/schema";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { db } from "./db";
@@ -4349,9 +4349,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'Patient authentication required' });
       }
 
-      // For now, return empty array as no messages table exists
-      // This will need to be implemented when messaging schema is added
-      res.json([]);
+      // Fetch messages for the authenticated patient
+      const patientMessages = await db.select({
+        id: messages.id,
+        subject: messages.subject,
+        message: messages.message,
+        messageType: messages.messageType,
+        priority: messages.priority,
+        status: messages.status,
+        sentAt: messages.sentAt,
+        readAt: messages.readAt,
+        repliedAt: messages.repliedAt,
+        recipientType: messages.recipientType,
+        recipientRole: messages.recipientRole,
+        routingReason: messages.routingReason,
+        staffName: users.username
+      })
+      .from(messages)
+      .leftJoin(users, eq(messages.staffId, users.id))
+      .where(eq(messages.patientId, patientId))
+      .orderBy(desc(messages.sentAt));
+
+      res.json(patientMessages);
     } catch (error) {
       console.error('Error fetching patient messages:', error);
       res.status(500).json({ error: 'Failed to fetch messages' });
@@ -4371,25 +4390,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Subject and message are required' });
       }
 
+      // Get patient's organization for proper routing
+      const [patient] = await db.select()
+        .from(patients)
+        .where(eq(patients.id, patientId));
+
+      if (!patient) {
+        return res.status(404).json({ error: 'Patient not found' });
+      }
+
       // Smart message routing logic
       const routingInfo = await routeMessageToProvider(messageType, priority, patientId);
 
-      const messageData = {
-        id: Date.now(),
+      // Save message to database
+      const [savedMessage] = await db.insert(messages).values({
         patientId,
+        staffId: routingInfo.assignedTo,
         subject,
         message,
         messageType,
         priority,
         status: 'sent',
-        sentAt: new Date(),
         recipientType: routingInfo.recipientType,
         recipientRole: routingInfo.recipientRole,
         assignedTo: routingInfo.assignedTo,
-        routingReason: routingInfo.reason
-      };
+        routingReason: routingInfo.reason,
+        organizationId: patient.organizationId
+      }).returning();
 
-      res.status(201).json(messageData);
+      res.status(201).json(savedMessage);
     } catch (error) {
       console.error('Error sending patient message:', error);
       res.status(500).json({ error: 'Failed to send message' });
