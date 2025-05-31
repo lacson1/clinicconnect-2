@@ -58,6 +58,7 @@ import {
 
 interface Patient {
   id: number;
+  title?: string;
   firstName: string;
   lastName: string;
   dateOfBirth: string;
@@ -330,7 +331,7 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
             body: JSON.stringify({
               type: 'medication_review_assigned',
               patientId: patient.id,
-              patientName: `${patient.firstName} ${patient.lastName}`,
+              patientName: `${patient.title ? `${patient.title} ` : ""}${patient.firstName} ${patient.lastName}`,
               medicationName: medicationName,
               reviewId: reviewData.id,
               priority: 'normal',
@@ -408,7 +409,7 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
             body: JSON.stringify({
               type: 'repeat_prescription_issued',
               patientId: patient.id,
-              patientName: `${patient.firstName} ${patient.lastName}`,
+              patientName: `${patient.title ? `${patient.title} ` : ""}${patient.firstName} ${patient.lastName}`,
               medicationName: medicationName,
               prescriptionId: repeatData.id,
               priority: 'normal',
@@ -699,7 +700,7 @@ Present this QR code for medication dispensing.`;
                     <Button variant="ghost" className="h-auto p-0 hover:bg-gray-100 rounded-md px-2 py-1">
                       <div className="text-left">
                         <h2 className="text-lg font-bold text-gray-900 whitespace-nowrap flex items-center gap-1">
-                          {patient.firstName} {patient.lastName}
+                          {patient.title ? `${patient.title} ` : ''}{patient.firstName} {patient.lastName}
                           <ChevronDown className="h-4 w-4 text-gray-400" />
                         </h2>
                         <p className="text-xs text-gray-500">
@@ -1470,7 +1471,7 @@ Present this QR code for medication dispensing.`;
             <CardContent>
               <div className="space-y-4">
                 <p className="text-sm text-blue-600">
-                  Document a new visit for {patient.firstName} {patient.lastName} including vital signs, symptoms, diagnosis, and treatment plans.
+                  Document a new visit for {patient.title ? `${patient.title} ` : ""}{patient.firstName} {patient.lastName} including vital signs, symptoms, diagnosis, and treatment plans.
                 </p>
                 <div className="flex gap-3">
                   <Button 
@@ -1521,7 +1522,7 @@ Present this QR code for medication dispensing.`;
                       showHeader={false}
                     >
                       <h2 className="text-xl font-bold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">
-                        {patient.firstName} {patient.lastName}
+                        {patient.title ? `${patient.title} ` : ''}{patient.firstName} {patient.lastName}
                       </h2>
                     </PatientDropdownMenu>
                     <p className="text-sm text-gray-500">
@@ -1995,7 +1996,7 @@ Present this QR code for medication dispensing.`;
               <CardContent>
                 <div className="space-y-4">
                   <p className="text-sm text-gray-600 mb-4">
-                    Document a new visit for {patient.firstName} {patient.lastName}
+                    Document a new visit for {patient.title ? `${patient.title} ` : ""}{patient.firstName} {patient.lastName}
                   </p>
                   <Button 
                     onClick={() => navigate(`/patients/${patient.id}/record-visit`)}
@@ -2023,7 +2024,7 @@ Present this QR code for medication dispensing.`;
           <TabsContent value="communication" className="space-y-6">
             <PatientCommunicationHub
               patientId={patient.id}
-              patientName={`${patient.firstName} ${patient.lastName}`}
+              patientName={`${patient.title ? `${patient.title} ` : ""}${patient.firstName} ${patient.lastName}`}
               patientPhone={patient.phone}
               patientEmail={patient.email}
             />

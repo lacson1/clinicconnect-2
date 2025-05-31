@@ -467,7 +467,7 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="start" className="w-56">
                                 <div className="px-2 py-1.5 text-sm font-medium text-slate-900">
-                                  {patient.firstName} {patient.lastName}
+                                  {formatPatientName(patient)}
                                 </div>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem asChild>
@@ -515,7 +515,7 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
                             </DropdownMenu>
                             <div className="ml-3">
                               <h3 className="font-medium text-slate-900">
-                                {patient.firstName} {patient.lastName}
+                                {formatPatientName(patient)}
                               </h3>
                               <p className="text-sm text-slate-500">Age: {calculateAge(patient.dateOfBirth)}</p>
                             </div>
@@ -570,7 +570,7 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="start" className="w-56">
                                 <div className="px-2 py-1.5 text-sm font-medium text-slate-900">
-                                  {patient.firstName} {patient.lastName}
+                                  {formatPatientName(patient)}
                                 </div>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem asChild>
@@ -618,7 +618,7 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
                             </DropdownMenu>
                             <div className="ml-3">
                               <h3 className="font-medium text-slate-900">
-                                {patient.firstName} {patient.lastName}
+                                {formatPatientName(patient)}
                               </h3>
                               <div className="flex items-center gap-4 text-sm text-slate-500">
                                 <span>Age: {calculateAge(patient.dateOfBirth)}</span>

@@ -251,7 +251,7 @@ export default function WellnessPage() {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <div className="font-medium text-gray-900">
-                            {patient.firstName} {patient.lastName}
+                            {patient.title ? `${patient.title} ` : ''}{patient.firstName} {patient.lastName}
                           </div>
                           <Badge 
                             variant="outline" 

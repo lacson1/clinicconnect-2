@@ -170,7 +170,7 @@ export default function PatientQRCard({ patient, baseUrl = window.location.origi
           <div className="flex items-center space-x-2">
             <User className="h-4 w-4 text-primary" />
             <span className="font-semibold text-slate-800">
-              {patient.firstName} {patient.lastName}
+              {patient.title ? `${patient.title} ` : ''}{patient.firstName} {patient.lastName}
             </span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-slate-600">
