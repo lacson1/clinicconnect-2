@@ -8,7 +8,7 @@ import { EnhancedVisitRecording } from "@/components/enhanced-visit-recording";
 import LabResultModal from "@/components/lab-result-modal";
 import PrescriptionModal from "@/components/prescription-modal";
 import { EditPatientModal } from "@/components/edit-patient-modal";
-import { PrintExportToolbar } from "@/components/print-export-toolbar";
+
 import { PatientSummaryPrintable } from "@/components/patient-summary-printable";
 import { ModernPatientOverview } from "@/components/modern-patient-overview";
 import { FloatingActionMenu } from "@/components/floating-action-menu";
@@ -101,16 +101,6 @@ export default function PatientProfile() {
           </div>
           
           <div className="flex items-center space-x-3">
-            <PrintExportToolbar 
-              patientData={{
-                patient: patient as Patient,
-                visits: visits || [],
-                labResults: labResults || [],
-                prescriptions: prescriptions || []
-              }}
-              organizationData={currentOrganization}
-            />
-            
             {(user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse') && (
               <Button variant="outline">
                 <Edit className="mr-2 h-4 w-4" />

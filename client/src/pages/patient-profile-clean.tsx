@@ -37,7 +37,7 @@ import ConsultationHistory from "@/components/consultation-history";
 import VaccinationManagement from "@/components/vaccination-management";
 import AllergyManagement from "@/components/allergy-management";
 import MedicalHistoryManagement from "@/components/medical-history-management";
-import { PrintExportToolbar } from "@/components/print-export-toolbar";
+
 import { PatientSummaryPrintable } from "@/components/patient-summary-printable";
 import { ModernPatientOverview } from "@/components/modern-patient-overview";
 import { FloatingActionMenu } from "@/components/floating-action-menu";
@@ -133,17 +133,6 @@ export default function PatientProfile() {
           </div>
           
           <div className="flex items-center space-x-3">
-            {/* Print/Export functionality */}
-            <PrintExportToolbar 
-              patientData={{
-                patient: patient as Patient,
-                visits: visits || [],
-                labResults: labResults || [],
-                prescriptions: prescriptions || []
-              }}
-              organizationData={currentOrganization}
-            />
-            
             {/* Edit patient info - available to admin, doctor, nurse */}
             {(user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse') && (
               <Button variant="outline" onClick={() => setShowEditPatientModal(true)}>
