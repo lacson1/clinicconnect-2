@@ -25,6 +25,7 @@ const availableRoutes = [
   { path: "/wellness/analytics", name: "Wellness Analytics", description: "Wellness program insights" },
   { path: "/mental-health", name: "Mental Health", description: "Mental health support and resources" },
   { path: "/protocols", name: "Clinical Protocols", description: "Medical protocols and guidelines" },
+  { path: "/staff-messages", name: "Staff Messages", description: "Patient communication and messaging" },
   { path: "/compliance", name: "Export Compliance", description: "Regulatory compliance tools" },
   { path: "/form-builder", name: "Form Builder", description: "Custom medical form creation" },
   { path: "/medical-tools", name: "Medical Tools", description: "Clinical calculation tools" },
