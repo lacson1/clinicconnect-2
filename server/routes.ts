@@ -18,6 +18,7 @@ import { checkPermission, getUserPermissions } from "./middleware/permissions";
 import { initializeFirebase, sendNotificationToRole, sendUrgentNotification, NotificationTypes } from "./notifications";
 import { AuditLogger, AuditActions } from "./audit";
 import { format } from 'date-fns';
+import { setupTenantRoutes } from "./tenant-routes";
 
 // Helper function to generate lab order HTML for printing
 function generateLabOrderHTML(orderResult: any, orderItems: any[]): string {
@@ -3712,6 +3713,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to update settings' });
     }
   });
+
+  // Setup tenant/organization management routes
+  setupTenantRoutes(app);
 
   return httpServer;
 }
