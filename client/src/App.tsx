@@ -46,6 +46,8 @@ import Settings from "@/pages/settings";
 import Profile from "@/pages/profile";
 import SuperAdminAnalytics from "@/pages/superadmin-analytics";
 import SuperAdminControlPanel from "@/pages/super-admin-control-panel";
+import ProceduralReports from "@/pages/procedural-reports";
+import ConsentManagement from "@/pages/consent-management";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import ConsultationRecordDetails from "@/pages/consultation-record-details";

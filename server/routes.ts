@@ -3831,6 +3831,221 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Procedural Reports Routes
+  app.get("/api/procedural-reports", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const result = await db
+        .select({
+          id: proceduralReports.id,
+          patientId: proceduralReports.patientId,
+          patientName: sql<string>`${patients.firstName} || ' ' || ${patients.lastName}`,
+          performedBy: proceduralReports.performedBy,
+          performerName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+          procedureType: proceduralReports.procedureType,
+          procedureName: proceduralReports.procedureName,
+          indication: proceduralReports.indication,
+          preOpDiagnosis: proceduralReports.preOpDiagnosis,
+          postOpDiagnosis: proceduralReports.postOpDiagnosis,
+          procedureDetails: proceduralReports.procedureDetails,
+          findings: proceduralReports.findings,
+          complications: proceduralReports.complications,
+          specimens: proceduralReports.specimens,
+          anesthesia: proceduralReports.anesthesia,
+          duration: proceduralReports.duration,
+          bloodLoss: proceduralReports.bloodLoss,
+          status: proceduralReports.status,
+          scheduledDate: proceduralReports.scheduledDate,
+          startTime: proceduralReports.startTime,
+          endTime: proceduralReports.endTime,
+          postOpInstructions: proceduralReports.postOpInstructions,
+          followUpRequired: proceduralReports.followUpRequired,
+          followUpDate: proceduralReports.followUpDate,
+          createdAt: proceduralReports.createdAt,
+          updatedAt: proceduralReports.updatedAt
+        })
+        .from(proceduralReports)
+        .leftJoin(patients, eq(proceduralReports.patientId, patients.id))
+        .leftJoin(users, eq(proceduralReports.performedBy, users.id))
+        .where(eq(proceduralReports.organizationId, req.user!.organizationId))
+        .orderBy(desc(proceduralReports.createdAt));
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching procedural reports:', error);
+      res.status(500).json({ message: "Failed to fetch procedural reports" });
+    }
+  });
+
+  app.post("/api/procedural-reports", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertProceduralReportSchema.parse(req.body);
+      
+      const [newReport] = await db
+        .insert(proceduralReports)
+        .values({
+          ...validatedData,
+          organizationId: req.user!.organizationId,
+        })
+        .returning();
+
+      res.json(newReport);
+    } catch (error) {
+      console.error('Error creating procedural report:', error);
+      res.status(500).json({ message: "Failed to create procedural report" });
+    }
+  });
+
+  app.get("/api/procedural-reports/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const reportId = parseInt(req.params.id);
+      
+      const result = await db
+        .select()
+        .from(proceduralReports)
+        .where(and(
+          eq(proceduralReports.id, reportId),
+          eq(proceduralReports.organizationId, req.user!.organizationId)
+        ))
+        .limit(1);
+
+      if (result.length === 0) {
+        return res.status(404).json({ message: "Procedural report not found" });
+      }
+
+      res.json(result[0]);
+    } catch (error) {
+      console.error('Error fetching procedural report:', error);
+      res.status(500).json({ message: "Failed to fetch procedural report" });
+    }
+  });
+
+  // Consent Forms Routes
+  app.get("/api/consent-forms", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const result = await db
+        .select()
+        .from(consentForms)
+        .where(eq(consentForms.organizationId, req.user!.organizationId))
+        .orderBy(desc(consentForms.createdAt));
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching consent forms:', error);
+      res.status(500).json({ message: "Failed to fetch consent forms" });
+    }
+  });
+
+  app.post("/api/consent-forms", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertConsentFormSchema.parse(req.body);
+      
+      const [newForm] = await db
+        .insert(consentForms)
+        .values({
+          ...validatedData,
+          organizationId: req.user!.organizationId,
+        })
+        .returning();
+
+      res.json(newForm);
+    } catch (error) {
+      console.error('Error creating consent form:', error);
+      res.status(500).json({ message: "Failed to create consent form" });
+    }
+  });
+
+  // Patient Consents Routes
+  app.get("/api/patient-consents", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const result = await db
+        .select({
+          id: patientConsents.id,
+          patientId: patientConsents.patientId,
+          patientName: sql<string>`${patients.firstName} || ' ' || ${patients.lastName}`,
+          consentFormId: patientConsents.consentFormId,
+          consentFormTitle: consentForms.title,
+          proceduralReportId: patientConsents.proceduralReportId,
+          consentGivenBy: patientConsents.consentGivenBy,
+          guardianName: patientConsents.guardianName,
+          guardianRelationship: patientConsents.guardianRelationship,
+          witnessId: patientConsents.witnessId,
+          witnessName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+          interpreterUsed: patientConsents.interpreterUsed,
+          interpreterName: patientConsents.interpreterName,
+          consentData: patientConsents.consentData,
+          digitalSignature: patientConsents.digitalSignature,
+          signatureDate: patientConsents.signatureDate,
+          expiryDate: patientConsents.expiryDate,
+          status: patientConsents.status,
+          withdrawnDate: patientConsents.withdrawnDate,
+          withdrawnReason: patientConsents.withdrawnReason,
+          createdAt: patientConsents.createdAt,
+          updatedAt: patientConsents.updatedAt
+        })
+        .from(patientConsents)
+        .leftJoin(patients, eq(patientConsents.patientId, patients.id))
+        .leftJoin(consentForms, eq(patientConsents.consentFormId, consentForms.id))
+        .leftJoin(users, eq(patientConsents.witnessId, users.id))
+        .where(eq(patientConsents.organizationId, req.user!.organizationId))
+        .orderBy(desc(patientConsents.createdAt));
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching patient consents:', error);
+      res.status(500).json({ message: "Failed to fetch patient consents" });
+    }
+  });
+
+  app.post("/api/patient-consents", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertPatientConsentSchema.parse(req.body);
+      
+      const [newConsent] = await db
+        .insert(patientConsents)
+        .values({
+          ...validatedData,
+          organizationId: req.user!.organizationId,
+        })
+        .returning();
+
+      res.json(newConsent);
+    } catch (error) {
+      console.error('Error capturing patient consent:', error);
+      res.status(500).json({ message: "Failed to capture patient consent" });
+    }
+  });
+
+  app.get("/api/patients/:patientId/consents", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.patientId);
+      
+      const result = await db
+        .select({
+          id: patientConsents.id,
+          consentFormTitle: consentForms.title,
+          consentType: consentForms.consentType,
+          category: consentForms.category,
+          consentGivenBy: patientConsents.consentGivenBy,
+          guardianName: patientConsents.guardianName,
+          signatureDate: patientConsents.signatureDate,
+          status: patientConsents.status,
+          expiryDate: patientConsents.expiryDate
+        })
+        .from(patientConsents)
+        .leftJoin(consentForms, eq(patientConsents.consentFormId, consentForms.id))
+        .where(and(
+          eq(patientConsents.patientId, patientId),
+          eq(patientConsents.organizationId, req.user!.organizationId)
+        ))
+        .orderBy(desc(patientConsents.signatureDate));
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching patient consents:', error);
+      res.status(500).json({ message: "Failed to fetch patient consents" });
+    }
+  });
+
   // Staff Notification endpoint
   app.post("/api/notifications/staff", authenticateToken, async (req: AuthRequest, res) => {
     try {

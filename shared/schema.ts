@@ -699,6 +699,127 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 
+// Procedural Reports
+export const proceduralReports = pgTable('procedural_reports', {
+  id: serial('id').primaryKey(),
+  patientId: integer('patient_id').references(() => patients.id).notNull(),
+  performedBy: integer('performed_by').references(() => users.id).notNull(),
+  assistedBy: json('assisted_by').$type<number[]>().default([]), // Array of user IDs
+  procedureType: varchar('procedure_type', { length: 100 }).notNull(), // Surgery, Endoscopy, Biopsy, etc.
+  procedureName: varchar('procedure_name', { length: 200 }).notNull(),
+  indication: text('indication').notNull(), // Reason for procedure
+  preOpDiagnosis: text('pre_op_diagnosis'),
+  postOpDiagnosis: text('post_op_diagnosis'),
+  procedureDetails: text('procedure_details').notNull(), // Detailed description
+  findings: text('findings'), // What was found during procedure
+  complications: text('complications'), // Any complications
+  specimens: text('specimens'), // Specimens taken
+  anesthesia: varchar('anesthesia', { length: 100 }), // Type of anesthesia
+  duration: integer('duration'), // Duration in minutes
+  bloodLoss: integer('blood_loss'), // In ml
+  status: varchar('status', { length: 20 }).default('completed'), // scheduled, in_progress, completed, cancelled
+  scheduledDate: timestamp('scheduled_date'),
+  startTime: timestamp('start_time'),
+  endTime: timestamp('end_time'),
+  postOpInstructions: text('post_op_instructions'),
+  followUpRequired: boolean('follow_up_required').default(false),
+  followUpDate: date('follow_up_date'),
+  organizationId: integer('organization_id').references(() => organizations.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+// Consent Forms
+export const consentForms = pgTable('consent_forms', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 200 }).notNull(),
+  description: text('description'),
+  category: varchar('category', { length: 50 }).notNull(), // procedure, treatment, research, photography, etc.
+  consentType: varchar('consent_type', { length: 50 }).notNull(), // informed, surgical, anesthesia, research, etc.
+  template: json('template').notNull(), // Form structure
+  riskFactors: json('risk_factors').$type<string[]>().default([]),
+  benefits: json('benefits').$type<string[]>().default([]),
+  alternatives: json('alternatives').$type<string[]>().default([]),
+  isActive: boolean('is_active').default(true),
+  organizationId: integer('organization_id').references(() => organizations.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+// Patient Consents (Signed consent records)
+export const patientConsents = pgTable('patient_consents', {
+  id: serial('id').primaryKey(),
+  patientId: integer('patient_id').references(() => patients.id).notNull(),
+  consentFormId: integer('consent_form_id').references(() => consentForms.id).notNull(),
+  proceduralReportId: integer('procedural_report_id').references(() => proceduralReports.id), // Link to procedure if applicable
+  consentGivenBy: varchar('consent_given_by', { length: 100 }).notNull(), // patient, guardian, next_of_kin
+  guardianName: varchar('guardian_name', { length: 100 }), // If consent given by guardian
+  guardianRelationship: varchar('guardian_relationship', { length: 50 }), // relationship to patient
+  witnessId: integer('witness_id').references(() => users.id), // Staff member who witnessed
+  interpreterUsed: boolean('interpreter_used').default(false),
+  interpreterName: varchar('interpreter_name', { length: 100 }),
+  consentData: json('consent_data').notNull(), // Filled form data
+  digitalSignature: text('digital_signature'), // Base64 signature
+  signatureDate: timestamp('signature_date').notNull(),
+  expiryDate: timestamp('expiry_date'), // Some consents expire
+  status: varchar('status', { length: 20 }).default('active'), // active, expired, withdrawn, superseded
+  withdrawnDate: timestamp('withdrawn_date'),
+  withdrawnReason: text('withdrawn_reason'),
+  organizationId: integer('organization_id').references(() => organizations.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+// Relations for procedural reports
+export const proceduralReportsRelations = relations(proceduralReports, ({ one, many }) => ({
+  patient: one(patients, { fields: [proceduralReports.patientId], references: [patients.id] }),
+  performer: one(users, { fields: [proceduralReports.performedBy], references: [users.id] }),
+  organization: one(organizations, { fields: [proceduralReports.organizationId], references: [organizations.id] }),
+  consents: many(patientConsents)
+}));
+
+// Relations for consent forms
+export const consentFormsRelations = relations(consentForms, ({ one, many }) => ({
+  organization: one(organizations, { fields: [consentForms.organizationId], references: [organizations.id] }),
+  patientConsents: many(patientConsents)
+}));
+
+// Relations for patient consents
+export const patientConsentsRelations = relations(patientConsents, ({ one }) => ({
+  patient: one(patients, { fields: [patientConsents.patientId], references: [patients.id] }),
+  consentForm: one(consentForms, { fields: [patientConsents.consentFormId], references: [consentForms.id] }),
+  proceduralReport: one(proceduralReports, { fields: [patientConsents.proceduralReportId], references: [proceduralReports.id] }),
+  witness: one(users, { fields: [patientConsents.witnessId], references: [users.id] }),
+  organization: one(organizations, { fields: [patientConsents.organizationId], references: [organizations.id] })
+}));
+
+// Insert schemas for new tables
+export const insertProceduralReportSchema = createInsertSchema(proceduralReports).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertConsentFormSchema = createInsertSchema(consentForms).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPatientConsentSchema = createInsertSchema(patientConsents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Types for new tables
+export type ProceduralReport = typeof proceduralReports.$inferSelect;
+export type InsertProceduralReport = z.infer<typeof insertProceduralReportSchema>;
+export type ConsentForm = typeof consentForms.$inferSelect;
+export type InsertConsentForm = z.infer<typeof insertConsentFormSchema>;
+export type PatientConsent = typeof patientConsents.$inferSelect;
+export type InsertPatientConsent = z.infer<typeof insertPatientConsentSchema>;
+
 export const insertCommentSchema = createInsertSchema(comments).omit({
   id: true,
   createdAt: true,
