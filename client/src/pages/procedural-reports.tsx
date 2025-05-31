@@ -229,7 +229,9 @@ export default function ProceduralReports() {
                           <SelectContent>
                             {staff.filter((s: any) => s.role === 'doctor' || s.role === 'admin').map((doctor: any) => (
                               <SelectItem key={doctor.id} value={doctor.id.toString()}>
-                                Dr. {doctor.firstName} {doctor.lastName}
+                                {doctor.title || 'Dr.'} {doctor.firstName && doctor.lastName 
+                                  ? `${doctor.firstName} ${doctor.lastName}` 
+                                  : doctor.username}
                               </SelectItem>
                             ))}
                           </SelectContent>
