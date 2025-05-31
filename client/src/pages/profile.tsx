@@ -39,36 +39,42 @@ export default function Profile() {
   const { toast } = useToast();
   const { user, refreshUser } = useAuth();
 
-  // Use auth context user data instead of separate API call
-  const isLoading = !user;
+  // Fetch detailed profile data
+  const { data: profileData, isLoading } = useQuery({
+    queryKey: ['/api/profile'],
+    enabled: !!user
+  });
 
   const form = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
+      title: '',
       firstName: '',
       lastName: '',
       phone: '',
     },
   });
 
-  // Update form when user data is loaded
+  // Update form when profile data is loaded
   useEffect(() => {
-    if (user) {
+    if (profileData) {
       form.reset({
-        firstName: '',  // User object doesn't contain firstName
-        lastName: '',   // User object doesn't contain lastName
-        phone: '',      // User object doesn't contain phone
+        title: (profileData as any).title || 'none',
+        firstName: (profileData as any).firstName || '',
+        lastName: (profileData as any).lastName || '',
+        phone: (profileData as any).phone || '',
       });
     }
-  }, [user, form]);
+  }, [profileData, form]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileForm) => {
       return apiRequest("PUT", "/api/profile", data);
     },
     onSuccess: () => {
-      // Refresh user session to update the auth context with new data
+      // Refresh user session and invalidate profile cache
       refreshUser();
+      queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
       setIsEditing(false);
       toast({
         title: "Profile Updated",
@@ -146,7 +152,9 @@ export default function Profile() {
               </Avatar>
             </div>
             <CardTitle className="text-xl">
-              {user?.username || 'User'}
+              {(profileData as any)?.title && (profileData as any)?.title !== 'none' ? 
+                `${(profileData as any)?.title} ${(profileData as any)?.firstName || ''} ${(profileData as any)?.lastName || ''}`.trim() : 
+                `${(profileData as any)?.firstName || ''} ${(profileData as any)?.lastName || ''}`.trim() || user?.username || 'User'}
             </CardTitle>
             <CardDescription>
               <Badge variant="secondary" className="capitalize">
