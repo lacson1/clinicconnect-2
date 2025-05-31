@@ -473,14 +473,14 @@ export default function PrescriptionModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Preferred Pharmacy</FormLabel>
-                    <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} defaultValue={field.value?.toString()}>
+                    <Select onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))} defaultValue={field.value?.toString()}>
                       <FormControl>
                         <SelectTrigger className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
                           <SelectValue placeholder="Select pharmacy for dispensing" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">No specific pharmacy</SelectItem>
+                        <SelectItem value="none">No specific pharmacy</SelectItem>
                         {pharmacies?.map((pharmacy) => (
                           <SelectItem key={pharmacy.id} value={pharmacy.id.toString()}>
                             <div className="flex flex-col">
