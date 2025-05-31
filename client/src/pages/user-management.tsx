@@ -312,7 +312,11 @@ export default function UserManagement() {
     }
 
     if (filterOrganization) {
-      filtered = filtered.filter(user => user.organizationId === parseInt(filterOrganization));
+      if (filterOrganization === "unassigned") {
+        filtered = filtered.filter(user => !user.organizationId || user.organizationId === null);
+      } else {
+        filtered = filtered.filter(user => user.organizationId === parseInt(filterOrganization));
+      }
     }
 
     return filtered;
@@ -527,14 +531,15 @@ export default function UserManagement() {
               
               {/* Organization Filter */}
               <Select value={filterOrganization} onValueChange={setFilterOrganization}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-60">
                   <SelectValue placeholder="Filter by Organization" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">All Organizations</SelectItem>
+                  <SelectItem value="unassigned">Unassigned Staff</SelectItem>
                   {Array.isArray(organizations) && organizations.map((org: any) => (
                     <SelectItem key={org.id} value={org.id.toString()}>
-                      {org.name}
+                      {org.name} ({org.type})
                     </SelectItem>
                   ))}
                 </SelectContent>
