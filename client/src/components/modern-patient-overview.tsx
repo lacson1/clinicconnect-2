@@ -485,6 +485,10 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
       console.log('🔄 Starting reorder for prescription:', prescription);
       console.log('🔄 Current user data:', user);
       
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
       // Create a new prescription based on the previous one
       const reorderData = {
         patientId: prescription.patientId,
