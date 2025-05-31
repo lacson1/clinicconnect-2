@@ -3705,21 +3705,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Patient Portal - Get Patient Visits
-  app.get('/api/patient-portal/visits', async (req, res) => {
+  app.get('/api/patient-portal/visits', authenticatePatient, async (req: PatientAuthRequest, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
-      if (!token) {
-        return res.status(401).json({ message: 'No token provided' });
-      }
-      
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret') as any;
-      if (decoded.type !== 'patient') {
-        return res.status(401).json({ message: 'Invalid token type' });
+      const patientId = req.patient?.id;
+      if (!patientId) {
+        return res.status(401).json({ error: 'Patient authentication required' });
       }
       
       const patientVisits = await db.select()
         .from(visits)
-        .where(eq(visits.patientId, decoded.patientId))
+        .where(eq(visits.patientId, patientId))
         .orderBy(desc(visits.visitDate));
       
       res.json(patientVisits);

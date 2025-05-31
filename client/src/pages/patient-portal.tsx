@@ -119,6 +119,16 @@ export default function PatientPortal() {
   // Messaging functionality
   const { data: messages = [] } = useQuery({
     queryKey: ['/api/patient-portal/messages'],
+    queryFn: async () => {
+      const token = localStorage.getItem('patientToken');
+      const response = await fetch('/api/patient-portal/messages', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch messages');
+      return response.json();
+    },
     enabled: isAuthenticated && !!patientSession,
     staleTime: 30000
   });
@@ -162,6 +172,16 @@ export default function PatientPortal() {
   // Appointment booking functionality
   const { data: appointments = [] } = useQuery({
     queryKey: ['/api/patient-portal/appointments'],
+    queryFn: async () => {
+      const token = localStorage.getItem('patientToken');
+      const response = await fetch('/api/patient-portal/appointments', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch appointments');
+      return response.json();
+    },
     enabled: isAuthenticated && !!patientSession,
     staleTime: 30000
   });
