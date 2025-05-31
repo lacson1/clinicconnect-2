@@ -123,6 +123,16 @@ export function PrescriptionQueue() {
     return "Unknown DOB";
   };
 
+  const getPatientAddress = (patientId: number) => {
+    const patient = (patientDetails as any)[patientId];
+    return patient?.address || "Address not provided";
+  };
+
+  const getPatientPhone = (patientId: number) => {
+    const patient = (patientDetails as any)[patientId];
+    return patient?.phone || "Phone not provided";
+  };
+
   const getPatientDetails = (patientId: number) => {
     return (patientDetails as any)[patientId];
   };
@@ -223,17 +233,23 @@ export function PrescriptionQueue() {
                             </div>
                             
                             <div className="space-y-2 text-sm">
-                              <div className="flex items-center gap-2">
-                                <User className="w-4 h-4 text-gray-400" />
-                                <div>
-                                  <span className="font-medium">{getPatientName(prescription.patientId)}</span>
-                                  <span className="text-gray-500 ml-2">DOB: {getPatientDateOfBirth(prescription.patientId)}</span>
+                              <div className="border-b border-gray-200 pb-2">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <User className="w-4 h-4 text-gray-400" />
+                                  <span className="font-medium text-lg">{getPatientName(prescription.patientId)}</span>
+                                </div>
+                                <div className="ml-6 space-y-1 text-gray-600">
+                                  <div>DOB: {getPatientDateOfBirth(prescription.patientId)}</div>
+                                  <div>Phone: {getPatientPhone(prescription.patientId)}</div>
+                                  <div>Address: {getPatientAddress(prescription.patientId)}</div>
                                 </div>
                               </div>
+                              
                               <div className="flex items-center gap-2">
                                 <Pill className="w-4 h-4 text-gray-400" />
-                                <span className="font-medium text-blue-600">{getMedicationName(prescription)}</span>
+                                <span className="font-medium text-blue-600 text-lg">{getMedicationName(prescription)}</span>
                               </div>
+                              
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="flex items-center gap-2">
                                   <Stethoscope className="w-4 h-4 text-gray-400" />
