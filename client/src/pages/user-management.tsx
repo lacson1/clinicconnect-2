@@ -501,79 +501,83 @@ export default function UserManagement() {
           </DialogContent>
         </Dialog>
       </div>
+        </header>
 
-      {/* Search and filters */}
-      <div className="flex gap-4 flex-wrap">
-        <div className="flex-1">
-          <Input
-            placeholder="Search users by name, role, or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-md"
-          />
-        </div>
-        
-        {/* Organization Filter */}
-        <Select value={filterOrganization} onValueChange={setFilterOrganization}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Filter by Organization" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">All Organizations</SelectItem>
-            {Array.isArray(organizations) && organizations.map((org: any) => (
-              <SelectItem key={org.id} value={org.id.toString()}>
-                {org.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Main Content */}
+        <div className="flex-1 overflow-auto">
+          <div className="p-6 space-y-6">
+            {/* Search and filters */}
+            <div className="flex gap-4 flex-wrap">
+              <div className="flex-1">
+                <Input
+                  placeholder="Search users by name, role, or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="max-w-md"
+                />
+              </div>
+              
+              {/* Organization Filter */}
+              <Select value={filterOrganization} onValueChange={setFilterOrganization}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by Organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Organizations</SelectItem>
+                  {Array.isArray(organizations) && organizations.map((org: any) => (
+                    <SelectItem key={org.id} value={org.id.toString()}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-        {/* Role Filter */}
-        <Select value={filterSpecialty} onValueChange={setFilterSpecialty}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Filter by Role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">All Roles</SelectItem>
-            {USER_ROLES.map((role) => (
-              <SelectItem key={role.value} value={role.value}>
-                {role.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              {/* Role Filter */}
+              <Select value={filterSpecialty} onValueChange={setFilterSpecialty}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Roles</SelectItem>
+                  {USER_ROLES.map((role) => (
+                    <SelectItem key={role.value} value={role.value}>
+                      {role.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-        {/* Clear Filters */}
-        {(filterOrganization || filterSpecialty || searchTerm) && (
-          <Button
-            variant="outline"
-            onClick={() => {
-              setFilterOrganization("");
-              setFilterSpecialty("");
-              setSearchTerm("");
-            }}
-            className="flex items-center gap-2"
-          >
-            <X className="w-4 h-4" />
-            Clear Filters
-          </Button>
-        )}
-      </div>
+              {/* Clear Filters */}
+              {(filterOrganization || filterSpecialty || searchTerm) && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setFilterOrganization("");
+                    setFilterSpecialty("");
+                    setSearchTerm("");
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <X className="w-4 h-4" />
+                  Clear Filters
+                </Button>
+              )}
+            </div>
 
-      {/* Users list */}
-      <div className="grid gap-4">
-        {filteredUsers.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <UserX className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
-              <p className="text-gray-600">
-                {searchTerm ? "Try adjusting your search terms" : "Get started by creating your first user"}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredUsers.map((user) => {
+            {/* Users list */}
+            <div className="grid gap-4">
+              {filteredUsers.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <UserX className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
+                    <p className="text-gray-600">
+                      {searchTerm ? "Try adjusting your search terms" : "Get started by creating your first user"}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredUsers.map((user) => {
             const roleInfo = getRoleInfo(user.role);
             return (
               <Card key={user.id}>
@@ -1099,8 +1103,8 @@ export default function UserManagement() {
                     );
                   }
                 })}
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
