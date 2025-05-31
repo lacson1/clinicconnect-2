@@ -171,7 +171,6 @@ function CompletedLabResults() {
 
 export default function LabResults() {
   const { user } = useRole();
-  const [activeTab, setActiveTab] = useState("pending");
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
@@ -188,42 +187,13 @@ export default function LabResults() {
             </p>
           </div>
         </div>
-
-        {user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse' ? (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="pending" className="flex items-center gap-2">
-                <TestTube className="w-4 h-4" />
-                Pending Orders
-              </TabsTrigger>
-              <TabsTrigger value="results" className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Enter Results
-              </TabsTrigger>
-              <TabsTrigger value="completed" className="flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                Completed Results
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        ) : null}
       </div>
 
       {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto p-6">
         {user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse' ? (
-          <div className="w-full">
-            <TabsContent value="pending">
-              <PendingLabOrders />
-            </TabsContent>
-            
-            <TabsContent value="results">
-              <LabResultEntry />
-            </TabsContent>
-            
-            <TabsContent value="completed">
-              <CompletedLabResults />
-            </TabsContent>
+          <div className="space-y-6">
+            <LabResultEntry />
           </div>
         ) : (
           <Card>
