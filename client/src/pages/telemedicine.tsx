@@ -126,6 +126,36 @@ export default function TelemedicinePage() {
     }
   });
 
+  const saveNotesMutation = useMutation({
+    mutationFn: ({ id, notes }: { id: number; notes: string }) => 
+      apiRequest('PATCH', `/api/telemedicine/sessions/${id}`, { notes }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/telemedicine/sessions'] });
+      toast({
+        title: "Notes Saved",
+        description: "Session notes have been saved successfully.",
+      });
+    }
+  });
+
+  const handleSaveNotes = () => {
+    if (!selectedSession) return;
+    
+    if (!sessionNotes.trim()) {
+      toast({
+        title: "No Notes to Save",
+        description: "Please enter some notes before saving.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    saveNotesMutation.mutate({ 
+      id: selectedSession.id, 
+      notes: sessionNotes 
+    });
+  };
+
   // Mock data for demonstration
   const mockSessions: TeleconsultationSession[] = [
     {
@@ -331,9 +361,13 @@ export default function TelemedicinePage() {
                   onChange={(e) => setSessionNotes(e.target.value)}
                   rows={8}
                 />
-                <Button className="w-full">
+                <Button 
+                  className="w-full"
+                  onClick={handleSaveNotes}
+                  disabled={saveNotesMutation.isPending}
+                >
                   <FileText className="h-4 w-4 mr-2" />
-                  Save Notes
+                  {saveNotesMutation.isPending ? 'Saving...' : 'Save Notes'}
                 </Button>
               </div>
             </div>
