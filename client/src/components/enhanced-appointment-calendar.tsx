@@ -101,10 +101,22 @@ export function EnhancedAppointmentCalendar() {
 
   // Create appointment mutation
   const createAppointmentMutation = useMutation({
-    mutationFn: (appointmentData: any) => apiRequest('/api/appointments', {
-      method: 'POST',
-      body: JSON.stringify(appointmentData)
-    }),
+    mutationFn: async (appointmentData: any) => {
+      const response = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(appointmentData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create appointment');
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/appointments'] });
       setShowNewAppointment(false);
@@ -124,11 +136,22 @@ export function EnhancedAppointmentCalendar() {
 
   // Update appointment status mutation
   const updateAppointmentMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => 
-      apiRequest(`/api/appointments/${id}/status`, {
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      const response = await fetch(`/api/appointments/${id}/status`, {
         method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify({ status })
-      }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update appointment');
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/appointments'] });
       toast({
@@ -243,7 +266,7 @@ export function EnhancedAppointmentCalendar() {
                 <SelectValue placeholder="All Doctors" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Doctors</SelectItem>
+                <SelectItem value="all">All Doctors</SelectItem>
                 {doctors.map((doctor: any) => (
                   <SelectItem key={doctor.id} value={doctor.id.toString()}>
                     {doctor.firstName} {doctor.lastName}
