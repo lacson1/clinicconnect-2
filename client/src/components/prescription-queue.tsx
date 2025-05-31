@@ -55,6 +55,11 @@ export function PrescriptionQueue() {
     queryKey: ["/api/patients"],
   });
 
+  // Fetch medicines for medication names
+  const { data: medicines = [] } = useQuery({
+    queryKey: ["/api/medicines"],
+  });
+
   const dispensePrescriptionMutation = useMutation({
     mutationFn: async ({ prescriptionId, data }: { prescriptionId: number; data: DispensingForm }) => {
       const response = await apiRequest("PATCH", `/api/prescriptions/${prescriptionId}/status`, { 
@@ -92,9 +97,22 @@ export function PrescriptionQueue() {
     return (patients as any[]).find((p: any) => p.id === patientId);
   };
 
+  const getMedicationName = (prescription: any) => {
+    if (prescription.medicationName) {
+      return prescription.medicationName;
+    }
+    if (prescription.medicationId) {
+      const medicine = (medicines as any[]).find((m: any) => m.id === prescription.medicationId);
+      return medicine ? medicine.name : `Medication #${prescription.medicationId}`;
+    }
+    return "Unknown Medication";
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
+        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+      case "active":
         return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
       case "dispensed":
         return <Badge className="bg-green-100 text-green-800">Dispensed</Badge>;
@@ -105,7 +123,7 @@ export function PrescriptionQueue() {
     }
   };
 
-  const pendingPrescriptions = (prescriptions as any[]).filter((p: any) => p.status === "pending");
+  const pendingPrescriptions = (prescriptions as any[]).filter((p: any) => p.status === "active" || p.status === "pending");
   const recentlyDispensed = (prescriptions as any[]).filter((p: any) => p.status === "dispensed").slice(0, 5);
 
   if (isLoading) {
@@ -182,7 +200,7 @@ export function PrescriptionQueue() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Pill className="w-4 h-4 text-gray-400" />
-                                <span className="font-medium">{prescription.medicationName}</span>
+                                <span className="font-medium">{getMedicationName(prescription)}</span>
                               </div>
                             </div>
 
