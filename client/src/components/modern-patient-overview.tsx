@@ -325,7 +325,6 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
       age--;
     }
     return age;
-    return age;
   };
 
   const getPatientInitials = (firstName: string, lastName: string) => {
