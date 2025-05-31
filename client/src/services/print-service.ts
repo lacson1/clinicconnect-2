@@ -406,6 +406,34 @@ export class PrintService {
     }
   }
 
+  private static generateQRCode(prescriptionData: any): string {
+    // Create a comprehensive data string for the QR code
+    const qrData = {
+      prescriptionId: prescriptionData.id,
+      patientId: prescriptionData.patientId,
+      medication: prescriptionData.medicationName,
+      dosage: prescriptionData.dosage,
+      frequency: prescriptionData.frequency,
+      duration: prescriptionData.duration,
+      instructions: prescriptionData.instructions,
+      prescribedBy: prescriptionData.prescribedBy,
+      date: prescriptionData.startDate || prescriptionData.createdAt,
+      status: prescriptionData.status
+    };
+    
+    const dataString = JSON.stringify(qrData);
+    
+    // Generate QR code using a public API
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(dataString)}`;
+    
+    return `
+      <div class="qr-code-section">
+        <div class="qr-code-title">SCAN FOR PHARMACY</div>
+        <img src="${qrCodeUrl}" alt="Prescription QR Code" style="width: 60px; height: 60px;">
+      </div>
+    `;
+  }
+
   private static generatePrescriptionContent(prescription: any, organization: any = null): string {
     console.log('Generating prescription content for:', prescription);
     console.log('Organization data:', organization);
@@ -438,6 +466,23 @@ export class PrintService {
             margin: 20px 0;
             min-height: 240px;
             flex-grow: 1;
+            position: relative;
+        }
+        .qr-code-section {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            text-align: center;
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            border: 2px solid #22c55e;
+        }
+        .qr-code-title {
+            font-size: 8px;
+            color: #166534;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
         .rx-header {
             font-size: 20px;
@@ -495,6 +540,7 @@ export class PrintService {
     </style>
     
     <div class="prescription-medication">
+        ${this.generateQRCode(prescription)}
         <div class="rx-header">
             ℞ ${prescription.medicationName || prescription.name || 'Prescribed Medication'}
         </div>
