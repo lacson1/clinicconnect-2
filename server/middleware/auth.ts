@@ -55,15 +55,12 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
 
 export const requireRole = (role: string) => (req: AuthRequest, res: Response, next: NextFunction) => {
   const user = req.user; // decoded from JWT
-  console.log('requireRole check:', { requiredRole: role, userRole: user?.role, user });
   
   // Super admin has access to everything
   if (user?.role === 'superadmin') {
-    console.log('Super admin access granted');
     return next();
   }
   if (!user || user.role !== role) {
-    console.log('Access denied:', { user: user?.username, userRole: user?.role, requiredRole: role });
     return res.status(403).json({ message: 'Forbidden: Insufficient permissions' });
   }
   next();

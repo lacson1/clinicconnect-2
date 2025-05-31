@@ -8,6 +8,17 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { GlobalQuickSearch } from "@/components/global-quick-search";
 
 const getNavigationGroupsForRole = (role: string) => {
+  // Super admin gets enhanced navigation with system-wide access
+  const superAdminExtras = role === 'superadmin' ? [
+    {
+      name: "System Overview",
+      icon: BarChart3,
+      items: [
+        { name: "Global Analytics", href: "/superadmin/analytics", icon: TrendingUp, roles: ["superadmin"] },
+      ]
+    }
+  ] : [];
+
   const navigationGroups = [
     {
       name: "Overview",
