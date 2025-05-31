@@ -2041,7 +2041,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderedBy: labOrders.orderedBy,
         createdAt: labOrders.createdAt,
         status: labOrders.status,
-        notes: labOrders.notes,
         patientFirstName: patients.firstName,
         patientLastName: patients.lastName,
         patientDateOfBirth: patients.dateOfBirth,
@@ -2062,7 +2061,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderedByRole: order.orderedByRole,
         createdAt: order.createdAt,
         status: order.status,
-        notes: order.notes,
         patient: {
           firstName: order.patientFirstName,
           lastName: order.patientLastName,
@@ -2072,6 +2070,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(transformedOrders);
     } catch (error) {
+      console.error("Error fetching pending lab orders:", error);
       res.status(500).json({ message: "Failed to fetch pending lab orders" });
     }
   });
