@@ -482,8 +482,8 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
 
   const handleReorderMedication = async (prescription: any) => {
     try {
-      console.log('🔄 Starting reorder for prescription:', prescription);
-      console.log('🔄 Current user data:', user);
+      console.log('🔄 Step 1: Starting reorder');
+      console.log('🔄 Step 2: User available?', !!user);
       
       // Create a new prescription based on the previous one
       const reorderData = {
@@ -497,10 +497,10 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
         prescribedBy: user?.username || 'System',
         status: 'active',
         startDate: new Date().toISOString(),
-        organizationId: user?.organizationId || 2 // Default to organization 2 (Lagos Island Hospital)
+        organizationId: user?.organizationId || 2
       };
 
-      console.log('🔄 Reordering medication with data:', reorderData);
+      console.log('🔄 Step 3: Data prepared, making request...');
       
       const response = await fetch(`/api/patients/${prescription.patientId}/prescriptions`, {
         method: 'POST',
