@@ -16,7 +16,7 @@ import { User, InsertUser } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { UserPlus, Edit, Trash2, Shield, UserCheck, UserX, Eye, Key, MessageSquare, Activity, Settings, Mail, Search, Grid3X3, List, Upload, Camera, Stethoscope, Pill, Heart, Filter, X } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { useMemo } from "react";
+import { StaffRegistrationModal } from "@/components/staff-registration-modal";
 
 const USER_ROLES = [
   { 
@@ -816,7 +816,7 @@ export default function UserManagement() {
                   <SelectValue placeholder="Filter by role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
+                  <SelectItem value="all">All Roles</SelectItem>
                   {USER_ROLES.map((role) => (
                     <SelectItem key={role.value} value={role.value}>
                       {role.label}

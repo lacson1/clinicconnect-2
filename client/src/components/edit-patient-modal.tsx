@@ -186,7 +186,7 @@ export function EditPatientModal({ open, onOpenChange, patient, onPatientUpdated
                     <SelectValue placeholder="Select title" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="Mr">Mr</SelectItem>
                     <SelectItem value="Mrs">Mrs</SelectItem>
                     <SelectItem value="Miss">Miss</SelectItem>
@@ -261,7 +261,7 @@ export function EditPatientModal({ open, onOpenChange, patient, onPatientUpdated
                     <SelectValue placeholder="Select organization" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No organization assigned</SelectItem>
+                    <SelectItem value="none">No organization assigned</SelectItem>
                     {Array.isArray(organizations) && organizations.map((org: Organization) => (
                       <SelectItem key={org.id} value={org.id.toString()}>
                         {org.name} ({org.type})
