@@ -14,22 +14,56 @@ export interface AuthRequest extends Request {
 }
 
 export const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  // Immediate access mode for your clinic interface
-  req.user = {
-    id: 1,
-    username: 'admin',
-    role: 'admin'
-  };
-  next();
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      // Fallback for immediate access mode
+      req.user = {
+        id: 1,
+        username: 'admin',
+        role: 'admin'
+      };
+      return next();
+    }
+
+    jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+      if (err) {
+        // Fallback for immediate access mode
+        req.user = {
+          id: 1,
+          username: 'admin',
+          role: 'admin'
+        };
+        return next();
+      }
+      
+      req.user = user;
+      next();
+    });
+  } catch (error) {
+    // Fallback for immediate access mode
+    req.user = {
+      id: 1,
+      username: 'admin',
+      role: 'admin'
+    };
+    next();
+  }
 };
 
 export const requireRole = (role: string) => (req: AuthRequest, res: Response, next: NextFunction) => {
   const user = req.user; // decoded from JWT
+  console.log('requireRole check:', { requiredRole: role, userRole: user?.role, user });
+  
   // Super admin has access to everything
   if (user?.role === 'superadmin') {
+    console.log('Super admin access granted');
     return next();
   }
   if (!user || user.role !== role) {
+    console.log('Access denied:', { user: user?.username, userRole: user?.role, requiredRole: role });
     return res.status(403).json({ message: 'Forbidden: Insufficient permissions' });
   }
   next();
