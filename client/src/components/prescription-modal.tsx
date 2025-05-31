@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertPrescriptionSchema, type InsertPrescription, type Patient, type Medicine, type Medication } from "@shared/schema";
+import { insertPrescriptionSchema, type InsertPrescription, type Patient, type Medicine, type Medication, type Pharmacy } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import MedicationAutocomplete from "@/components/medication-autocomplete";
 import { QuickMedicationSearch } from "@/components/quick-medication-search";
@@ -72,6 +72,10 @@ export default function PrescriptionModal({
   const { data: patients } = useQuery<Patient[]>({
     queryKey: ["/api/patients"],
     enabled: !patientId,
+  });
+
+  const { data: pharmacies } = useQuery<Pharmacy[]>({
+    queryKey: ["/api/pharmacies"],
   });
 
   const form = useForm<Omit<InsertPrescription, "patientId" | "medicineId">>({
@@ -457,6 +461,44 @@ export default function PrescriptionModal({
                         <SelectItem value="discontinued">Discontinued</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Pharmacy Selection */}
+              <FormField
+                control={form.control}
+                name="pharmacyId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Preferred Pharmacy</FormLabel>
+                    <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} defaultValue={field.value?.toString()}>
+                      <FormControl>
+                        <SelectTrigger className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+                          <SelectValue placeholder="Select pharmacy for dispensing" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">No specific pharmacy</SelectItem>
+                        {pharmacies?.map((pharmacy) => (
+                          <SelectItem key={pharmacy.id} value={pharmacy.id.toString()}>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{pharmacy.name}</span>
+                              <span className="text-xs text-gray-500">
+                                {pharmacy.address} • {pharmacy.phone}
+                              </span>
+                              {pharmacy.deliveryAvailable && (
+                                <span className="text-xs text-green-600">🚚 Delivery available</span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Choose a preferred pharmacy for prescription dispensing. This helps with medication tracking and patient convenience.
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

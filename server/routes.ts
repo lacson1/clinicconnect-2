@@ -680,6 +680,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Pharmacy API routes
+  app.get('/api/pharmacies', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userOrgId = req.user?.organizationId;
+      
+      const result = await db.select()
+        .from(pharmacies)
+        .where(
+          and(
+            eq(pharmacies.isActive, true),
+            userOrgId ? eq(pharmacies.organizationId, userOrgId) : isNotNull(pharmacies.organizationId)
+          )
+        )
+        .orderBy(pharmacies.name);
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching pharmacies:', error);
+      res.status(500).json({ error: "Failed to fetch pharmacies" });
+    }
+  });
+
   app.get("/api/suggestions/allergies", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { q } = req.query;
