@@ -24,8 +24,13 @@ import {
   MapPin,
   Activity,
   TestTube,
-  Pill
+  Pill,
+  FileSignature,
+  Edit3,
+  CheckCircle,
+  AlertTriangle
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface PatientSession {
   id: number;
@@ -531,7 +536,7 @@ export default function PatientPortal() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <User className="w-4 h-4" />
               Overview
@@ -547,6 +552,10 @@ export default function PatientPortal() {
             <TabsTrigger value="results" className="flex items-center gap-2">
               <TestTube className="w-4 h-4" />
               Test Results
+            </TabsTrigger>
+            <TabsTrigger value="consents" className="flex items-center gap-2">
+              <FileSignature className="w-4 h-4" />
+              Consent Forms
             </TabsTrigger>
             <TabsTrigger value="messages" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
@@ -1033,8 +1042,340 @@ export default function PatientPortal() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Consent Forms Tab */}
+          <TabsContent value="consents" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Pending Consent Forms */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileSignature className="w-5 h-5" />
+                    Pending Consent Forms
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4 bg-yellow-50 border-yellow-200">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-medium text-sm">General Treatment Consent</h4>
+                          <p className="text-xs text-gray-600 mt-1">
+                            Required for all medical treatments and procedures
+                          </p>
+                          <Badge variant="secondary" className="mt-2 text-xs">
+                            Required
+                          </Badge>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          onClick={() => {
+                            setSelectedConsent({
+                              id: 1,
+                              title: 'General Treatment Consent',
+                              category: 'General',
+                              description: 'Consent for general medical treatment and procedures',
+                              template: {
+                                sections: [
+                                  {
+                                    title: 'Treatment Authorization',
+                                    content: 'I authorize the healthcare team to provide necessary medical treatment and care.'
+                                  },
+                                  {
+                                    title: 'Risks and Benefits',
+                                    content: 'I understand that all medical treatments carry inherent risks and benefits that have been explained to me.'
+                                  }
+                                ]
+                              },
+                              riskFactors: ['Allergic reactions', 'Bleeding', 'Infection'],
+                              benefits: ['Improved health outcomes', 'Pain relief', 'Disease management'],
+                              alternatives: ['Conservative management', 'Alternative treatments']
+                            });
+                            setShowConsentSigning(true);
+                          }}
+                        >
+                          <Edit3 className="w-3 h-3 mr-1" />
+                          Sign Now
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-medium text-sm">Laboratory Testing Consent</h4>
+                          <p className="text-xs text-gray-600 mt-1">
+                            Authorization for laboratory tests and blood work
+                          </p>
+                          <Badge variant="outline" className="mt-2 text-xs">
+                            Optional
+                          </Badge>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedConsent({
+                              id: 2,
+                              title: 'Laboratory Testing Consent',
+                              category: 'Laboratory',
+                              description: 'Consent for laboratory testing and diagnostic procedures',
+                              template: {
+                                sections: [
+                                  {
+                                    title: 'Testing Authorization',
+                                    content: 'I consent to laboratory testing as recommended by my healthcare provider.'
+                                  },
+                                  {
+                                    title: 'Sample Collection',
+                                    content: 'I understand that blood, urine, or other samples may be collected for testing.'
+                                  }
+                                ]
+                              },
+                              riskFactors: ['Minor bleeding', 'Bruising', 'Discomfort'],
+                              benefits: ['Accurate diagnosis', 'Treatment monitoring', 'Health screening'],
+                              alternatives: ['Clinical assessment only', 'Alternative testing methods']
+                            });
+                            setShowConsentSigning(true);
+                          }}
+                        >
+                          <Edit3 className="w-3 h-3 mr-1" />
+                          Sign
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="text-center py-6 text-gray-500">
+                      <FileSignature className="mx-auto h-8 w-8 mb-2 opacity-50" />
+                      <p className="text-sm">All pending consent forms will appear here</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Signed Consent Forms */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    Signed Consent Forms
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-medium text-sm">Privacy Policy Consent</h4>
+                          <p className="text-xs text-gray-600 mt-1">
+                            Signed on {new Date().toLocaleDateString()}
+                          </p>
+                          <Badge className="mt-2 text-xs bg-green-100 text-green-800">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Signed
+                          </Badge>
+                        </div>
+                        <Button size="sm" variant="ghost">
+                          <Download className="w-3 h-3 mr-1" />
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="text-center py-6 text-gray-500">
+                      <CheckCircle className="mx-auto h-8 w-8 mb-2 opacity-50" />
+                      <p className="text-sm">Your signed consent forms will appear here</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Consent Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  About Digital Consent
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <FileSignature className="mx-auto h-8 w-8 text-blue-600 mb-2" />
+                    <h4 className="font-medium text-sm text-blue-900">Digital Signature</h4>
+                    <p className="text-xs text-blue-700 mt-1">
+                      Your digital signature is legally binding and secure
+                    </p>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <Shield className="mx-auto h-8 w-8 text-green-600 mb-2" />
+                    <h4 className="font-medium text-sm text-green-900">Privacy Protected</h4>
+                    <p className="text-xs text-green-700 mt-1">
+                      All consent data is encrypted and stored securely
+                    </p>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <Download className="mx-auto h-8 w-8 text-purple-600 mb-2" />
+                    <h4 className="font-medium text-sm text-purple-900">Download Copies</h4>
+                    <p className="text-xs text-purple-700 mt-1">
+                      Access and download your signed forms anytime
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
+
+      {/* Digital Consent Signing Dialog */}
+      <Dialog open={showConsentSigning} onOpenChange={setShowConsentSigning}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileSignature className="w-5 h-5" />
+              Digital Consent Signing
+            </DialogTitle>
+            <DialogDescription>
+              Please review the consent form carefully before signing
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedConsent && (
+            <div className="space-y-6">
+              {/* Consent Form Header */}
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-semibold">{selectedConsent.title}</h3>
+                <p className="text-sm text-gray-600 mt-1">{selectedConsent.description}</p>
+                <Badge variant="outline" className="mt-2">
+                  {selectedConsent.category}
+                </Badge>
+              </div>
+
+              {/* Consent Content */}
+              <div className="space-y-4">
+                {selectedConsent.template?.sections?.map((section: any, index: number) => (
+                  <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                    <h4 className="font-medium text-sm mb-2">{section.title}</h4>
+                    <p className="text-sm text-gray-700">{section.content}</p>
+                  </div>
+                ))}
+
+                {/* Risk Factors */}
+                {selectedConsent.riskFactors && selectedConsent.riskFactors.length > 0 && (
+                  <div className="border rounded-lg p-4 bg-red-50 border-red-200">
+                    <h4 className="font-medium text-sm mb-2 text-red-800 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      Risk Factors
+                    </h4>
+                    <ul className="text-sm text-red-700 space-y-1">
+                      {selectedConsent.riskFactors.map((risk: string, index: number) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                          {risk}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Benefits */}
+                {selectedConsent.benefits && selectedConsent.benefits.length > 0 && (
+                  <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+                    <h4 className="font-medium text-sm mb-2 text-green-800 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4" />
+                      Benefits
+                    </h4>
+                    <ul className="text-sm text-green-700 space-y-1">
+                      {selectedConsent.benefits.map((benefit: string, index: number) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <span className="w-1 h-1 bg-green-600 rounded-full"></span>
+                          {benefit}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Alternatives */}
+                {selectedConsent.alternatives && selectedConsent.alternatives.length > 0 && (
+                  <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                    <h4 className="font-medium text-sm mb-2 text-blue-800">Alternative Options</h4>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      {selectedConsent.alternatives.map((alternative: string, index: number) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <span className="w-1 h-1 bg-blue-600 rounded-full"></span>
+                          {alternative}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* Digital Signature Section */}
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-sm mb-4">Digital Signature</h4>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="patientSignature">Patient Full Name</Label>
+                    <Input
+                      id="patientSignature"
+                      value={`${patientSession?.firstName} ${patientSession?.lastName}`}
+                      readOnly
+                      className="bg-gray-50"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="signatureText">Digital Signature</Label>
+                    <Input
+                      id="signatureText"
+                      placeholder="Type your full name to confirm digital signature"
+                      value={signatureData}
+                      onChange={(e) => setSignatureData(e.target.value)}
+                    />
+                    <p className="text-xs text-gray-600 mt-1">
+                      By typing your full name, you confirm that you have read, understood, and agree to this consent form
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded border text-xs">
+                    <p className="font-medium">Digital Consent Agreement:</p>
+                    <p className="mt-1">
+                      I acknowledge that I have received a copy of this consent form, that I have read and understood 
+                      its contents, and that all my questions have been answered to my satisfaction. I understand that 
+                      this digital signature has the same legal effect as a handwritten signature.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex items-center justify-between">
+            <Button variant="outline" onClick={() => setShowConsentSigning(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                if (signatureData.toLowerCase().trim() === `${patientSession?.firstName} ${patientSession?.lastName}`.toLowerCase()) {
+                  setShowConsentSigning(false);
+                  setSignatureData('');
+                  // Here you would normally save the signed consent to the backend
+                  alert('Consent form signed successfully!');
+                } else {
+                  alert('Please type your full name exactly as shown to complete the digital signature');
+                }
+              }}
+              disabled={!signatureData}
+              className="flex items-center gap-2"
+            >
+              <FileSignature className="w-4 h-4" />
+              Sign Consent Form
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
