@@ -60,7 +60,7 @@ export class PrintService {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f0f8f0;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 50%, #e8f5e8 100%);
             min-height: 100vh;
         }
         
@@ -73,27 +73,34 @@ export class PrintService {
         
         .header {
             text-align: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            border: 3px solid #2563eb;
+            padding: 20px;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
+            border-radius: 8px;
         }
         
         .org-name {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             text-transform: uppercase;
+            color: #2563eb;
+            letter-spacing: 1px;
         }
         
         .org-type {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
+            font-size: 16px;
+            color: #1e40af;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
         }
         
         .org-details {
-            font-size: 12px;
-            line-height: 1.2;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #374151;
         }
         
         .document-title {
@@ -332,39 +339,51 @@ export class PrintService {
 
   private static generatePrescriptionContent(prescription: any): string {
     let content = `
-    <div class="content-section">
-        <div class="content-title">PRESCRIBED MEDICATIONS</div>
-    `;
-
-    if (prescription.medications && prescription.medications.length > 0) {
-      prescription.medications.forEach((med: any, index: number) => {
-        content += `
-        <div class="medication-item">
-            <div class="medication-name">${index + 1}. ${med.name || med.medicationName || 'Medication'}</div>
-            <div class="medication-details">
-                <div><strong>Dosage:</strong> ${med.dosage || 'As prescribed'}</div>
-                <div><strong>Frequency:</strong> ${med.frequency || 'As directed'}</div>
-                <div><strong>Duration:</strong> ${med.duration || 'As prescribed'}</div>
-                ${med.instructions ? `<div><strong>Instructions:</strong> ${med.instructions}</div>` : ''}
-                ${med.quantity ? `<div><strong>Quantity:</strong> ${med.quantity}</div>` : ''}
+    <div class="rx-symbol" style="font-size: 36px; font-weight: bold; color: #2563eb; margin: 20px 0; text-align: left;">℞</div>
+    
+    <div class="prescription-box" style="border: 2px solid #2563eb; padding: 25px; margin: 20px 0; background: #f8faff; border-radius: 8px;">
+        <div class="medication-name" style="font-size: 22px; font-weight: bold; color: #1e40af; margin-bottom: 15px; text-transform: uppercase;">
+            ${prescription.medicationName || prescription.name || 'Prescribed Medication'}
+        </div>
+        
+        <div class="medication-details" style="margin: 15px 0; line-height: 1.8;">
+            <div class="rx-line" style="margin: 10px 0; font-size: 16px;">
+                <strong>Dosage:</strong> ${prescription.dosage || 'As prescribed'}
+            </div>
+            <div class="rx-line" style="margin: 10px 0; font-size: 16px;">
+                <strong>Frequency:</strong> ${prescription.frequency || 'As directed'}
+            </div>
+            <div class="rx-line" style="margin: 10px 0; font-size: 16px;">
+                <strong>Duration:</strong> ${prescription.duration || 'As prescribed'}
+            </div>
+            ${prescription.instructions ? `
+            <div class="special-instructions" style="margin: 15px 0; padding: 12px; background: #e0f2fe; border-left: 4px solid #2563eb; font-style: italic;">
+                <strong>Special Instructions:</strong><br>
+                ${prescription.instructions}
+            </div>
+            ` : ''}
+        </div>
+        
+        <div class="prescription-footer" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #cbd5e1;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>Status:</strong> <span style="color: #059669; text-transform: uppercase;">${prescription.status || 'Active'}</span>
+                </div>
+                <div>
+                    <strong>Prescription ID:</strong> RX-${prescription.id?.toString().padStart(4, '0') || '0000'}
+                </div>
             </div>
         </div>
-        `;
-      });
-    } else {
-      content += '<div>No medications prescribed.</div>';
-    }
-
-    if (prescription.notes) {
-      content += `
-      <div style="margin-top: 20px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
-          <div class="field-label">ADDITIONAL NOTES:</div>
-          <div class="field-value">${prescription.notes}</div>
-      </div>
-      `;
-    }
-
-    content += '</div>';
+    </div>
+    
+    <div class="content-section">
+        <div class="content-title" style="margin-top: 30px;">PRESCRIBER INFORMATION</div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
+            <div><strong>Prescribed by:</strong> ${prescription.prescribedBy || 'Doctor'}</div>
+            ${prescription.startDate ? `<div><strong>Date Prescribed:</strong> ${new Date(prescription.startDate).toLocaleDateString()}</div>` : ''}
+        </div>
+    </div>
+    `;
     return content;
   }
 
