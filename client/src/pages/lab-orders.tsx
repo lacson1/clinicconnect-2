@@ -33,6 +33,7 @@ interface LabOrder {
   id: number;
   patientId: number;
   orderedBy: string;
+  orderedByRole?: string;
   status: string;
   notes?: string;
   createdAt: string;

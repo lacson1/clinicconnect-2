@@ -2041,12 +2041,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderedBy: labOrders.orderedBy,
         createdAt: labOrders.createdAt,
         status: labOrders.status,
-        firstName: patients.firstName,
-        lastName: patients.lastName,
-        dateOfBirth: patients.dateOfBirth
+        notes: labOrders.notes,
+        patientFirstName: patients.firstName,
+        patientLastName: patients.lastName,
+        patientDateOfBirth: patients.dateOfBirth,
+        orderedByUsername: users.username,
+        orderedByRole: users.role
       })
       .from(labOrders)
       .leftJoin(patients, eq(labOrders.patientId, patients.id))
+      .leftJoin(users, eq(labOrders.orderedBy, users.id))
       .where(eq(labOrders.status, 'pending'))
       .orderBy(labOrders.createdAt);
       
@@ -2054,13 +2058,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transformedOrders = pendingOrders.map(order => ({
         id: order.id,
         patientId: order.patientId,
-        orderedBy: order.orderedBy,
+        orderedBy: order.orderedByUsername || `User #${order.orderedBy}`,
+        orderedByRole: order.orderedByRole,
         createdAt: order.createdAt,
         status: order.status,
+        notes: order.notes,
         patient: {
-          firstName: order.firstName,
-          lastName: order.lastName,
-          dateOfBirth: order.dateOfBirth
+          firstName: order.patientFirstName,
+          lastName: order.patientLastName,
+          dateOfBirth: order.patientDateOfBirth
         }
       }));
       
