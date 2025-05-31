@@ -20,30 +20,16 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-      // Fallback for immediate access mode - use Ade instead of admin for testing
-      req.user = {
-        id: 10,
-        username: 'Ade',
-        role: 'doctor',
-        organizationId: 2
-      };
-      return next();
+      return res.status(401).json({ message: 'No token provided' });
     }
 
     jwt.verify(token, JWT_SECRET, async (err: any, user: any) => {
       if (err) {
-        // Fallback for immediate access mode - use Ade instead of admin for testing
-        req.user = {
-          id: 10,
-          username: 'Ade',
-          role: 'doctor',
-          organizationId: 2
-        };
-        return next();
+        return res.status(401).json({ message: 'Invalid token' });
       }
       
       try {
-        // Fetch user's organization assignment from database
+        // Fetch user's current organization assignment from database
         const userWithOrg = await storage.getUserWithOrganization(user.id);
         req.user = {
           ...user,
@@ -57,14 +43,8 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
       next();
     });
   } catch (error) {
-    // Fallback for immediate access mode - use Ade instead of admin for testing
-    req.user = {
-      id: 10,
-      username: 'Ade',
-      role: 'doctor',
-      organizationId: 2
-    };
-    next();
+    console.error('Authentication error:', error);
+    return res.status(401).json({ message: 'Authentication failed' });
   }
 };
 
