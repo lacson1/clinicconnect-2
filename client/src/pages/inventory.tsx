@@ -125,14 +125,13 @@ export default function InventoryPage() {
     }
   });
 
-  // Real-time inventory status check
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetch();
-    }, 30000); // Refresh every 30 seconds
-
-    return () => clearInterval(interval);
-  }, [refetch]);
+  // Real-time inventory status check - disabled to prevent crashes
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     refetch();
+  //   }, 30000);
+  //   return () => clearInterval(interval);
+  // }, [refetch]);
 
   const filteredMedicines = medicines
     .filter((medicine: Medicine) => {
