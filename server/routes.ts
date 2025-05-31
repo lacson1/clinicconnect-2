@@ -19,6 +19,7 @@ import { initializeFirebase, sendNotificationToRole, sendUrgentNotification, Not
 import { AuditLogger, AuditActions } from "./audit";
 import { format } from 'date-fns';
 import { setupTenantRoutes } from "./tenant-routes";
+import { setupOrganizationStaffRoutes } from "./organization-staff";
 
 // Helper function to generate lab order HTML for printing
 function generateLabOrderHTML(orderResult: any, orderItems: any[]): string {
@@ -3716,6 +3717,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup tenant/organization management routes
   setupTenantRoutes(app);
+  
+  // Setup organization staff and patient registration routes
+  setupOrganizationStaffRoutes(app);
 
   return httpServer;
 }
