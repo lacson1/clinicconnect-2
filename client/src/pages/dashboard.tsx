@@ -51,7 +51,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
-            <p className="text-slate-600 mt-1">Welcome to ClinicConnect - Your healthcare management overview</p>
+            <p className="text-slate-600 mt-1">Welcome to Bluequee Healthcare Clinical Management - Your comprehensive healthcare overview</p>
           </div>
           <div className="flex items-center space-x-3">
             {(user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse') && (
