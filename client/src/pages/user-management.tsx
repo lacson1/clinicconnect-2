@@ -329,6 +329,12 @@ export default function UserManagement() {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
+  const getOrganizationName = (organizationId: number | null) => {
+    if (!organizationId || !Array.isArray(organizations)) return "Unassigned";
+    const org = organizations.find((o: any) => o.id === organizationId);
+    return org ? `${org.name} (${org.type})` : "Unknown Organization";
+  };
+
   const getRoleConfig = (role: string) => {
     return USER_ROLES.find(r => r.value === role) || USER_ROLES[0];
   };
@@ -592,9 +598,12 @@ export default function UserManagement() {
               ) : (
                 filteredUsers.map((user) => {
             const roleInfo = getRoleInfo(user.role);
+            const organizationName = getOrganizationName(user.organizationId);
             return (
-              <Card key={user.id}>
-                <CardContent className="p-6">
+              <Tooltip key={user.id}>
+                <TooltipTrigger asChild>
+                  <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                    <CardContent className="p-6">
                   <div className="flex justify-between items-start">
                     <div className="flex items-start space-x-4">
                       <DropdownMenu>
@@ -1113,6 +1122,26 @@ export default function UserManagement() {
                           </DropdownMenu>
                         </div>
                       </div>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs">
+                  <div className="space-y-1">
+                    <p className="font-medium">{user.username}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Role: {roleInfo.label}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Organization: {organizationName}
+                    </p>
+                    {user.email && (
+                      <p className="text-sm text-muted-foreground">
+                        Email: {user.email}
+                      </p>
+                    )}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
                     );
                   }
                 })}
