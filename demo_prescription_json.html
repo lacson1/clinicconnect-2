@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demo: Enhanced Prescription Template</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .demo-button { background: #2563eb; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px 0; }
+        .demo-section { border: 1px solid #ddd; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Enhanced Prescription Template Demo</h1>
+    
+    <div class="demo-section">
+        <h2>Current Database Format (Working)</h2>
+        <p>This format uses real data from your database and works with existing prescriptions.</p>
+        <button class="demo-button" onclick="printCurrentFormat()">Print Current Format</button>
+    </div>
+    
+    <div class="demo-section">
+        <h2>Enhanced JSON Format (New Template)</h2>
+        <p>This format supports the comprehensive structure you requested with doctor info, multiple medications, etc.</p>
+        <button class="demo-button" onclick="printEnhancedFormat()">Print Enhanced Format</button>
+        
+        <details>
+            <summary>View JSON Structure</summary>
+            <pre id="jsonStructure"></pre>
+        </details>
+    </div>
+
+    <script>
+        // Enhanced JSON prescription structure
+        const enhancedPrescription = {
+            prescription: {
+                date: "2025-05-31",
+                doctor: {
+                    name: "Dr. Ade Olufemi",
+                    qualification: "MBBS, MD",
+                    registrationNo: "NIG-12345",
+                    clinic: {
+                        name: "Lagos Island Hospital",
+                        address: "123 Lagos Island, Lagos State, Nigeria",
+                        phone: "+234 802 123 4567"
+                    }
+                },
+                patient: {
+                    name: "Abike Jane",
+                    age: 54,
+                    gender: "Female",
+                    address: "456 Patient Street, Lagos, Nigeria",
+                    phone: "07838985885"
+                },
+                medications: [
+                    {
+                        name: "Amoxicillin 500mg",
+                        dosage: "1 capsule",
+                        frequency: "3 times daily",
+                        duration: "7 days",
+                        instructions: "Take with food to reduce stomach upset"
+                    },
+                    {
+                        name: "Paracetamol 500mg", 
+                        dosage: "1-2 tablets",
+                        frequency: "Every 6-8 hours as needed",
+                        duration: "5 days",
+                        instructions: "Do not exceed 8 tablets in 24 hours"
+                    }
+                ],
+                specialInstructions: [
+                    "Drink plenty of water",
+                    "Complete the full course of antibiotics",
+                    "Return for review if symptoms persist after 3 days"
+                ],
+                futureNeeds: {
+                    nextReviewDate: "2025-06-07",
+                    additionalTests: "Blood pressure check if symptoms persist"
+                }
+            }
+        };
+
+        // Display the JSON structure
+        document.getElementById('jsonStructure').textContent = JSON.stringify(enhancedPrescription, null, 2);
+
+        // Current format printer (using existing system)
+        function printCurrentFormat() {
+            alert('This would use your existing prescription printing system with real database data.');
+        }
+
+        // Enhanced format printer
+        function printEnhancedFormat() {
+            // Generate the enhanced prescription HTML
+            const htmlContent = generateEnhancedPrescriptionHTML(enhancedPrescription);
+            
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+                printWindow.print();
+            }
+        }
+
+        function generateEnhancedPrescriptionHTML(data) {
+            const { prescription } = data;
+            const doctor = prescription?.doctor || {};
+            const clinic = doctor?.clinic || {};
+            const patient = prescription?.patient || {};
+            const medications = prescription?.medications || [];
+            const specialInstructions = prescription?.specialInstructions || [];
+            const futureNeeds = prescription?.futureNeeds || {};
+            
+            return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Enhanced Prescription</title>
+                <style>
+                    @media print {
+                        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+                    }
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .prescription-header {
+                        text-align: center;
+                        border-bottom: 3px solid #2563eb;
+                        padding-bottom: 20px;
+                        margin-bottom: 30px;
+                    }
+                    .clinic-name {
+                        font-size: 28px;
+                        font-weight: bold;
+                        color: #1e40af;
+                        margin-bottom: 8px;
+                    }
+                    .clinic-details {
+                        font-size: 14px;
+                        color: #4b5563;
+                        line-height: 1.5;
+                    }
+                    .prescription-title {
+                        font-size: 24px;
+                        font-weight: bold;
+                        text-align: center;
+                        color: #1e40af;
+                        margin: 30px 0;
+                        text-decoration: underline;
+                    }
+                    .section {
+                        margin: 25px 0;
+                        border: 1px solid #e5e7eb;
+                        border-radius: 8px;
+                        padding: 20px;
+                        background-color: #f9fafb;
+                    }
+                    .section-title {
+                        font-weight: bold;
+                        font-size: 18px;
+                        color: #374151;
+                        margin-bottom: 15px;
+                        border-bottom: 1px solid #d1d5db;
+                        padding-bottom: 5px;
+                    }
+                    .info-row {
+                        display: flex;
+                        margin: 8px 0;
+                        font-size: 16px;
+                    }
+                    .info-label {
+                        font-weight: bold;
+                        min-width: 140px;
+                        color: #374151;
+                    }
+                    .info-value {
+                        color: #1f2937;
+                    }
+                    .medication-item {
+                        background: white;
+                        border: 2px solid #2563eb;
+                        border-radius: 8px;
+                        padding: 20px;
+                        margin: 15px 0;
+                    }
+                    .medication-name {
+                        font-size: 20px;
+                        font-weight: bold;
+                        color: #1e40af;
+                        margin-bottom: 15px;
+                    }
+                    .medication-details {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 15px;
+                    }
+                    .med-detail {
+                        display: flex;
+                        align-items: center;
+                    }
+                    .med-label {
+                        font-weight: bold;
+                        min-width: 80px;
+                        color: #374151;
+                    }
+                    .special-instructions {
+                        background: #fef3c7;
+                        border: 1px solid #f59e0b;
+                        border-radius: 6px;
+                        padding: 15px;
+                        margin: 20px 0;
+                    }
+                    .special-instructions h4 {
+                        color: #92400e;
+                        margin: 0 0 10px 0;
+                    }
+                    .signature-section {
+                        margin-top: 50px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: end;
+                    }
+                    .signature-box {
+                        text-align: center;
+                    }
+                    .signature-line {
+                        border-bottom: 2px solid #000;
+                        width: 250px;
+                        height: 50px;
+                        margin-bottom: 10px;
+                    }
+                    .date-section {
+                        text-align: right;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="prescription-header">
+                    <div class="clinic-name">${clinic.name || 'Medical Centre'}</div>
+                    <div class="clinic-details">
+                        ${clinic.address || ''}<br>
+                        Tel: ${clinic.phone || ''}
+                    </div>
+                </div>
+                
+                <div class="prescription-title">PRESCRIPTION</div>
+                
+                <div class="section">
+                    <div class="section-title">Doctor Information</div>
+                    <div class="info-row">
+                        <span class="info-label">Doctor Name:</span>
+                        <span class="info-value">${doctor.name || ''}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Qualification:</span>
+                        <span class="info-value">${doctor.qualification || ''}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Registration No:</span>
+                        <span class="info-value">${doctor.registrationNo || ''}</span>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Patient Information</div>
+                    <div class="info-row">
+                        <span class="info-label">Patient Name:</span>
+                        <span class="info-value">${patient.name || ''}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Age:</span>
+                        <span class="info-value">${patient.age ? patient.age + ' years' : ''}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Gender:</span>
+                        <span class="info-value">${patient.gender || ''}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Address:</span>
+                        <span class="info-value">${patient.address || ''}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value">${patient.phone || ''}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Date:</span>
+                        <span class="info-value">${prescription.date || new Date().toLocaleDateString()}</span>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Prescribed Medications</div>
+                    ${medications.map((med, index) => `
+                        <div class="medication-item">
+                            <div class="medication-name">Rx ${index + 1}: ${med.name || 'Medication'}</div>
+                            <div class="medication-details">
+                                <div class="med-detail">
+                                    <span class="med-label">Dosage:</span>
+                                    <span>${med.dosage || ''}</span>
+                                </div>
+                                <div class="med-detail">
+                                    <span class="med-label">Frequency:</span>
+                                    <span>${med.frequency || ''}</span>
+                                </div>
+                                <div class="med-detail">
+                                    <span class="med-label">Duration:</span>
+                                    <span>${med.duration || ''}</span>
+                                </div>
+                                <div class="med-detail">
+                                    <span class="med-label">Instructions:</span>
+                                    <span>${med.instructions || ''}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${specialInstructions.length > 0 ? `
+                    <div class="special-instructions">
+                        <h4>Special Instructions</h4>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            ${specialInstructions.map((instruction) => `<li>${instruction}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                
+                ${futureNeeds.nextReviewDate || futureNeeds.additionalTests ? `
+                    <div class="section">
+                        <div class="section-title">Future Care</div>
+                        ${futureNeeds.nextReviewDate ? `
+                            <div class="info-row">
+                                <span class="info-label">Next Review:</span>
+                                <span class="info-value">${futureNeeds.nextReviewDate}</span>
+                            </div>
+                        ` : ''}
+                        ${futureNeeds.additionalTests ? `
+                            <div class="info-row">
+                                <span class="info-label">Additional Tests:</span>
+                                <span class="info-value">${futureNeeds.additionalTests}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+                
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <div style="font-weight: bold;">Doctor's Signature</div>
+                    </div>
+                    <div class="date-section">
+                        <div>Date: ${prescription.date || new Date().toLocaleDateString()}</div>
+                        <div style="margin-top: 10px;">Time: ${new Date().toLocaleTimeString()}</div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            `;
+        }
+    </script>
+</body>
+</html>
