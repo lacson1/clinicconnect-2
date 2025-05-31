@@ -10,7 +10,6 @@ import {
 import { Link, useLocation } from "wouter";
 import PatientRegistrationModal from "@/components/patient-registration-modal";
 import { useRole } from "@/components/role-guard";
-import { QuickActionsDashboard } from "@/components/quick-actions-dashboard";
 import { useGlobalShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
 interface DashboardStats {
@@ -72,9 +71,6 @@ export default function Dashboard() {
       {/* Scrollable Main Content */}
       <main className="flex-1 overflow-y-auto p-6 bg-slate-50">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Quick Actions Dashboard */}
-          <QuickActionsDashboard />
-          
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card 
