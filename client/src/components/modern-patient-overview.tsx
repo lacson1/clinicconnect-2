@@ -1014,228 +1014,146 @@ Present this QR code for medication dispensing.`;
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
                     <h4 className="font-medium text-blue-800 mb-2">Repeat Prescriptions</h4>
                     <p className="text-sm text-blue-700">
-                      These are ongoing medications that require regular review by medical staff. Reviews ensure safety and effectiveness.
+                      Long-term medications that require regular review by medical staff. Reviews ensure safety and effectiveness.
                     </p>
                   </div>
                   
-                  {/* Mock repeat medications for demonstration */}
-                  <div className="space-y-3">
-                    <div className="border border-green-200 rounded-lg p-4 bg-green-50">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="font-semibold text-green-800 text-lg">
-                              Lisinopril (Repeat Prescription)
-                            </h4>
-                            <Badge className="bg-green-100 text-green-800 border-green-200">
-                              Active Repeat
-                            </Badge>
-                            <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
-                              Review Due: Dec 15, 2025
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
-                            <div className="bg-white p-3 rounded-md border">
-                              <span className="font-medium text-gray-700 block">Dosage</span>
-                              <p className="text-gray-800 mt-1">10mg once daily</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-md border">
-                              <span className="font-medium text-gray-700 block">Frequency</span>
-                              <p className="text-gray-800 mt-1">Once daily</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-md border">
-                              <span className="font-medium text-gray-700 block">Review Interval</span>
-                              <p className="text-gray-800 mt-1">6 months</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-md border">
-                              <span className="font-medium text-gray-700 block">Reviewed By</span>
-                              <p className="text-gray-800 mt-1">Dr. Johnson</p>
-                            </div>
-                          </div>
-                          
-                          <div className="mt-4 p-3 bg-blue-50 rounded-md border border-blue-100">
-                            <span className="font-medium text-gray-700 flex items-center gap-2">
-                              <FileText className="w-4 h-4" />
-                              Review Notes
-                            </span>
-                            <p className="text-gray-800 mt-2">Blood pressure well controlled. Continue current dosage. Monitor kidney function.</p>
-                          </div>
-                          
-                          <div className="flex items-center justify-between mt-4 pt-3 border-t border-green-200">
-                            <div className="flex items-center space-x-4 text-xs text-gray-500">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                <span>Started: Jan 15, 2025</span>
+                  {/* Actual repeat medications based on patient's prescriptions */}
+                  {activeMedications.filter((prescription: any) => 
+                    prescription.isRepeat || prescription.duration === 'ongoing' || prescription.duration === 'long-term'
+                  ).length > 0 ? (
+                    <div className="space-y-3">
+                      {activeMedications
+                        .filter((prescription: any) => 
+                          prescription.isRepeat || prescription.duration === 'ongoing' || prescription.duration === 'long-term'
+                        )
+                        .map((prescription: any) => (
+                        <div key={prescription.id} className="border border-green-200 rounded-lg p-4 bg-green-50">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <h4 className="font-semibold text-green-800 text-lg">
+                                  {prescription.medicationName}
+                                </h4>
+                                <Badge className="bg-green-100 text-green-800 border-green-200">
+                                  Repeat Prescription
+                                </Badge>
+                                {prescription.reviewDate && (
+                                  <Badge variant="outline" className={`text-xs ${
+                                    new Date(prescription.reviewDate) < new Date() 
+                                      ? 'bg-red-50 text-red-700 border-red-200'
+                                      : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                  }`}>
+                                    {new Date(prescription.reviewDate) < new Date() 
+                                      ? 'Review Overdue' 
+                                      : `Review Due: ${new Date(prescription.reviewDate).toLocaleDateString()}`
+                                    }
+                                  </Badge>
+                                )}
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                <span>Last Review: Jun 15, 2025</span>
+                              
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
+                                <div className="bg-white p-3 rounded-md border">
+                                  <span className="font-medium text-gray-700 block">Dosage</span>
+                                  <p className="text-gray-800 mt-1">{prescription.dosage}</p>
+                                </div>
+                                <div className="bg-white p-3 rounded-md border">
+                                  <span className="font-medium text-gray-700 block">Frequency</span>
+                                  <p className="text-gray-800 mt-1">{prescription.frequency}</p>
+                                </div>
+                                <div className="bg-white p-3 rounded-md border">
+                                  <span className="font-medium text-gray-700 block">Duration</span>
+                                  <p className="text-gray-800 mt-1">{prescription.duration}</p>
+                                </div>
+                                <div className="bg-white p-3 rounded-md border">
+                                  <span className="font-medium text-gray-700 block">Prescribed by</span>
+                                  <p className="text-gray-800 mt-1">{prescription.prescribedBy}</p>
+                                </div>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-blue-600 hover:text-blue-800 border-blue-200"
-                                onClick={() => {
-                                  // Use the first active prescription for demo
-                                  const activePrescription = patientPrescriptions?.find(p => p.status === 'active');
-                                  if (activePrescription) {
-                                    handleScheduleReview(activePrescription.id, activePrescription.medicationName);
-                                  } else {
-                                    toast({
-                                      title: "No Active Prescriptions",
-                                      description: "Cannot schedule review - no active prescriptions found",
-                                      variant: "destructive",
-                                    });
-                                  }
-                                }}
-                              >
-                                <UserCheck className="w-3 h-3 mr-1" />
-                                Schedule Review
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-green-600 hover:text-green-800 border-green-200"
-                                onClick={() => {
-                                  // Use the first active prescription for demo
-                                  const activePrescription = patientPrescriptions?.find(p => p.status === 'active');
-                                  if (activePrescription) {
-                                    handleIssueRepeat(activePrescription.id, activePrescription.medicationName);
-                                  } else {
-                                    toast({
-                                      title: "No Active Prescriptions",
-                                      description: "Cannot issue repeat - no active prescriptions found",
-                                      variant: "destructive",
-                                    });
-                                  }
-                                }}
-                              >
-                                <RefreshCw className="w-3 h-3 mr-1" />
-                                Issue Repeat
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-800">
-                                    <MoreVertical className="w-3 h-3" />
+                              
+                              {prescription.instructions && (
+                                <div className="mt-4 p-3 bg-blue-50 rounded-md border border-blue-100">
+                                  <span className="font-medium text-gray-700 flex items-center gap-2">
+                                    <FileText className="w-4 h-4" />
+                                    Instructions
+                                  </span>
+                                  <p className="text-gray-800 mt-2">{prescription.instructions}</p>
+                                </div>
+                              )}
+                              
+                              <div className="flex items-center justify-between mt-4 pt-3 border-t border-green-200">
+                                <div className="flex items-center space-x-4 text-xs text-gray-500">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    <span>Started: {new Date(prescription.startDate).toLocaleDateString()}</span>
+                                  </div>
+                                  {prescription.lastReviewDate && (
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      <span>Last Review: {new Date(prescription.lastReviewDate).toLocaleDateString()}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-blue-600 hover:text-blue-800 border-blue-200"
+                                    onClick={() => handleScheduleReview(prescription.id, prescription.medicationName)}
+                                  >
+                                    <UserCheck className="w-3 h-3 mr-1" />
+                                    Schedule Review
                                   </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-[180px]">
-                                  <DropdownMenuItem onClick={() => {
-                                    toast({
-                                      title: "Edit Repeat",
-                                      description: "Opening edit form for repeat prescription",
-                                    });
-                                  }}>
-                                    <Edit className="w-3 h-3 mr-2" />
-                                    Edit Repeat
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => {
-                                    toast({
-                                      title: "Print Started",
-                                      description: "Printing repeat prescription for Lisinopril",
-                                    });
-                                  }}>
-                                    <Printer className="w-3 h-3 mr-2" />
-                                    Print
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem onClick={() => {
-                                    toast({
-                                      title: "Repeat Stopped",
-                                      description: "Repeat prescription has been discontinued",
-                                      variant: "destructive",
-                                    });
-                                  }}>
-                                    <XCircle className="w-3 h-3 mr-2 text-red-600" />
-                                    Stop Repeat
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-green-600 hover:text-green-800 border-green-200"
+                                    onClick={() => handleIssueRepeat(prescription.id, prescription.medicationName)}
+                                  >
+                                    <RefreshCw className="w-3 h-3 mr-1" />
+                                    Issue Repeat
+                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-800">
+                                        <MoreVertical className="w-3 h-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-[180px]">
+                                      <DropdownMenuItem onClick={() => handleEditPrescription(prescription)}>
+                                        <Edit className="w-3 h-3 mr-2" />
+                                        Edit Repeat
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handlePrintPrescription(prescription)}>
+                                        <Printer className="w-3 h-3 mr-2" />
+                                        Print
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => handleUpdateMedicationStatus(prescription.id, 'discontinued')}>
+                                        <XCircle className="w-3 h-3 mr-2 text-red-600" />
+                                        Stop Repeat
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
-
-                    <div className="border border-yellow-200 rounded-lg p-4 bg-yellow-50">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="font-semibold text-yellow-800 text-lg">
-                              Metformin (Repeat Prescription)
-                            </h4>
-                            <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
-                              Review Overdue
-                            </Badge>
-                            <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
-                              Review Overdue: Nov 20, 2025
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
-                            <div className="bg-white p-3 rounded-md border">
-                              <span className="font-medium text-gray-700 block">Dosage</span>
-                              <p className="text-gray-800 mt-1">500mg twice daily</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-md border">
-                              <span className="font-medium text-gray-700 block">Frequency</span>
-                              <p className="text-gray-800 mt-1">Twice daily</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-md border">
-                              <span className="font-medium text-gray-700 block">Review Interval</span>
-                              <p className="text-gray-800 mt-1">3 months</p>
-                            </div>
-                            <div className="bg-white p-3 rounded-md border">
-                              <span className="font-medium text-gray-700 block">Reviewed By</span>
-                              <p className="text-gray-800 mt-1">Dr. Smith</p>
-                            </div>
-                          </div>
-                          
-                          <div className="mt-4 p-3 bg-red-50 rounded-md border border-red-200">
-                            <span className="font-medium text-red-700 flex items-center gap-2">
-                              <AlertTriangle className="w-4 h-4" />
-                              Review Required
-                            </span>
-                            <p className="text-red-800 mt-2">This repeat prescription requires immediate medical review before issuing. Please schedule appointment.</p>
-                          </div>
-                          
-                          <div className="flex items-center justify-between mt-4 pt-3 border-t border-yellow-200">
-                            <div className="flex items-center space-x-4 text-xs text-gray-500">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                <span>Started: Mar 10, 2025</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                <span>Last Review: Aug 20, 2025</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button 
-                                size="sm" 
-                                className="bg-red-600 hover:bg-red-700 text-white"
-                              >
-                                <UserCheck className="w-3 h-3 mr-1" />
-                                Urgent Review
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-gray-400 border-gray-300"
-                                disabled
-                              >
-                                <RefreshCw className="w-3 h-3 mr-1" />
-                                Issue Repeat
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      <RefreshCw className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-700 mb-2">No Repeat Prescriptions</h3>
+                      <p className="text-sm text-gray-500 mb-4">
+                        Repeat prescriptions are long-term medications that require regular review.
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        To create a repeat prescription, add a medication with duration set to "ongoing" or "long-term".
+                      </p>
                     </div>
-                  </div>
+                  )}
 
                   {/* Review Assignment Section */}
                   <div className="bg-white p-4 rounded-lg border border-gray-200 mt-6">
