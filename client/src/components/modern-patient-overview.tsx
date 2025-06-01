@@ -337,6 +337,16 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
     );
   }, [displayPrescriptions]);
 
+  const repeatMedications = React.useMemo(() => {
+    return activeMedications.filter((prescription: any) => 
+      prescription.isRepeat || 
+      prescription.duration?.toLowerCase().includes('ongoing') || 
+      prescription.duration?.toLowerCase().includes('long') ||
+      prescription.duration?.toLowerCase().includes('term') ||
+      prescription.duration === 'Ongoing as directed'
+    );
+  }, [activeMedications]);
+
   // Toggle filter function
   const toggleFilter = (filterType: keyof typeof timelineFilters) => {
     setTimelineFilters(prev => ({
@@ -975,7 +985,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                     </TabsTrigger>
                     <TabsTrigger value="repeat" className="flex items-center gap-2">
                       <RefreshCw className="w-4 h-4" />
-                      Repeat
+                      Repeat ({repeatMedications.length})
                     </TabsTrigger>
                     <TabsTrigger value="summary" className="flex items-center gap-2">
                       <FileText className="w-4 h-4" />
@@ -1236,12 +1246,20 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                   
                   {/* Actual repeat medications based on patient's prescriptions */}
                   {activeMedications.filter((prescription: any) => 
-                    prescription.isRepeat || prescription.duration === 'ongoing' || prescription.duration === 'long-term'
+                    prescription.isRepeat || 
+                    prescription.duration?.toLowerCase().includes('ongoing') || 
+                    prescription.duration?.toLowerCase().includes('long') ||
+                    prescription.duration?.toLowerCase().includes('term') ||
+                    prescription.duration === 'Ongoing as directed'
                   ).length > 0 ? (
                     <div className="space-y-3">
                       {activeMedications
                         .filter((prescription: any) => 
-                          prescription.isRepeat || prescription.duration === 'ongoing' || prescription.duration === 'long-term'
+                          prescription.isRepeat || 
+                          prescription.duration?.toLowerCase().includes('ongoing') || 
+                          prescription.duration?.toLowerCase().includes('long') ||
+                          prescription.duration?.toLowerCase().includes('term') ||
+                          prescription.duration === 'Ongoing as directed'
                         )
                         .map((prescription: any) => (
                         <div key={prescription.id} className="border border-green-200 rounded-lg p-4 bg-green-50">
