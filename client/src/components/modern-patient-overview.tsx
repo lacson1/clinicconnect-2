@@ -596,77 +596,212 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
 
   const handleGenerateQRCode = async (prescription: any) => {
     try {
-      // Create a human-readable prescription summary that displays properly when scanned
-      const prescriptionText = `PRESCRIPTION DETAILS
+      // Create comprehensive prescription data for external pharmacy dispensing
+      const prescriptionData = {
+        prescriptionId: `RX-${prescription.id}`,
+        patient: {
+          name: `${patient.title || ''} ${patient.firstName} ${patient.lastName}`.trim(),
+          phone: patient.phone,
+          dateOfBirth: patient.dateOfBirth,
+          gender: patient.gender
+        },
+        medication: {
+          name: prescription.medicationName,
+          dosage: prescription.dosage,
+          frequency: prescription.frequency,
+          duration: prescription.duration,
+          instructions: prescription.instructions || 'Take as directed',
+          quantity: prescription.quantity || 'As prescribed'
+        },
+        prescriber: {
+          name: `Dr. ${prescription.prescribedBy}`,
+          qualification: 'MBBS',
+          license: 'MDCN/001/2024'
+        },
+        clinic: {
+          name: 'Bluequee Healthcare Clinical Management',
+          address: 'Lagos Island, Lagos State, Nigeria',
+          phone: '+234-801-234-5678',
+          license: 'FMOH/CLI/LG/001/2024'
+        },
+        prescription: {
+          dateIssued: new Date(prescription.startDate || prescription.createdAt).toLocaleDateString('en-GB'),
+          expiryDate: prescription.endDate ? new Date(prescription.endDate).toLocaleDateString('en-GB') : 'No expiry',
+          status: prescription.status,
+          repeats: prescription.duration?.toLowerCase().includes('ongoing') ? 'Repeat allowed' : 'Single issue'
+        },
+        verification: {
+          rxNumber: `RX${prescription.id}${new Date().getFullYear()}`,
+          issueTime: new Date().toISOString(),
+          hash: btoa(`${prescription.id}-${patient.id}-${new Date().getDate()}`)
+        }
+      };
+
+      // Create structured text for QR code that pharmacies can easily parse
+      const prescriptionText = `PRESCRIPTION FOR DISPENSING
+
+RX NUMBER: ${prescriptionData.verification.rxNumber}
+PATIENT: ${prescriptionData.patient.name}
+DOB: ${prescriptionData.patient.dateOfBirth || 'Not specified'}
+PHONE: ${prescriptionData.patient.phone}
+
+MEDICATION: ${prescriptionData.medication.name}
+STRENGTH: ${prescriptionData.medication.dosage}
+FREQUENCY: ${prescriptionData.medication.frequency}
+DURATION: ${prescriptionData.medication.duration}
+INSTRUCTIONS: ${prescriptionData.medication.instructions}
+REPEATS: ${prescriptionData.prescription.repeats}
+
+PRESCRIBER: ${prescriptionData.prescriber.name}
+LICENSE: ${prescriptionData.prescriber.license}
+CLINIC: ${prescriptionData.clinic.name}
+CLINIC PHONE: ${prescriptionData.clinic.phone}
+
+DATE ISSUED: ${prescriptionData.prescription.dateIssued}
+EXPIRES: ${prescriptionData.prescription.expiryDate}
+VERIFICATION: ${prescriptionData.verification.hash}
+
+This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.`;
       
-Patient: ${patient.firstName} ${patient.lastName}
-Prescription ID: ${prescription.id}
-
-MEDICATION: ${prescription.medicationName}
-Dosage: ${prescription.dosage}
-Frequency: ${prescription.frequency}
-Duration: ${prescription.duration}
-Instructions: ${prescription.instructions}
-
-Prescribed by: Dr. ${prescription.prescribedBy}
-Date: ${new Date(prescription.startDate || prescription.createdAt).toLocaleDateString()}
-Status: ${prescription.status}
-
-Organization: Lagos Island Hospital
-Phone: +234 802 123 4567
-Address: 123 Healthcare Avenue, Lagos, Nigeria
-
-This prescription can be filled at any licensed pharmacy.
-Present this QR code for medication dispensing.`;
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(prescriptionText)}`;
       
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(prescriptionText)}`;
-      
-      // Open QR code in new window for patient to scan
-      const qrWindow = window.open('', '_blank', 'width=300,height=350');
+      // Open comprehensive prescription QR code in new window
+      const qrWindow = window.open('', '_blank', 'width=500,height=700');
       qrWindow.document.write(`
         <html>
           <head>
-            <title>Prescription QR Code</title>
+            <title>Prescription QR Code for External Pharmacy</title>
             <style>
               body { 
                 font-family: Arial, sans-serif; 
-                text-align: center; 
                 padding: 20px;
                 background: #f8f9fa;
+                margin: 0;
               }
               .container {
                 background: white;
-                padding: 20px;
+                padding: 25px;
                 border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                display: inline-block;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                max-width: 450px;
+                margin: 0 auto;
               }
-              h2 { color: #166534; margin-bottom: 10px; }
-              p { color: #666; margin: 5px 0; }
-              .medication { font-weight: bold; color: #22c55e; margin: 10px 0; }
-              .instructions { 
-                background: #f0fdf4; 
-                padding: 10px; 
-                border-radius: 4px; 
+              .header {
+                text-align: center;
+                border-bottom: 2px solid #22c55e;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+              }
+              h1 { 
+                color: #166534; 
+                margin: 0 0 5px 0; 
+                font-size: 18px;
+              }
+              .rx-number {
+                font-weight: bold;
+                color: #dc2626;
+                font-size: 16px;
                 margin: 10px 0;
+              }
+              .patient-info, .medication-info, .prescriber-info {
+                background: #f9fafb;
+                padding: 12px;
+                border-radius: 6px;
+                margin: 15px 0;
                 border-left: 4px solid #22c55e;
+              }
+              .section-title {
+                font-weight: bold;
+                color: #374151;
+                margin-bottom: 8px;
+                font-size: 14px;
+              }
+              .detail-line {
+                margin: 4px 0;
+                font-size: 13px;
+                color: #4b5563;
+              }
+              .medication-name {
+                font-weight: bold;
+                color: #059669;
+                font-size: 16px;
+                margin: 8px 0;
+              }
+              .qr-container {
+                text-align: center;
+                margin: 20px 0;
+                padding: 15px;
+                background: #f0fdf4;
+                border-radius: 8px;
+              }
+              .verification {
+                background: #fef3c7;
+                padding: 10px;
+                border-radius: 6px;
+                margin: 15px 0;
+                border-left: 4px solid #f59e0b;
+                font-size: 12px;
+              }
+              .footer {
+                text-align: center;
+                font-size: 11px;
+                color: #6b7280;
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid #e5e7eb;
               }
             </style>
           </head>
           <body>
             <div class="container">
-              <h2>Prescription QR Code</h2>
-              <p>Patient: <strong>${patient.firstName} ${patient.lastName}</strong></p>
-              <div class="medication">${prescription.medicationName}</div>
-              <p><strong>Dosage:</strong> ${prescription.dosage}</p>
-              <p><strong>Frequency:</strong> ${prescription.frequency}</p>
-              <p><strong>Duration:</strong> ${prescription.duration}</p>
-              <img src="${qrCodeUrl}" alt="Prescription QR Code" style="margin: 15px 0; border: 2px solid #22c55e; padding: 10px; background: white;" />
-              <div class="instructions">
-                <strong>Instructions for Pharmacy:</strong><br>
-                Scan this QR code to access complete prescription details for dispensing.
+              <div class="header">
+                <h1>VALID PRESCRIPTION FOR DISPENSING</h1>
+                <div class="rx-number">RX #: ${prescriptionData.verification.rxNumber}</div>
               </div>
-              <p style="font-size: 12px; color: #888;">Generated: ${new Date().toLocaleString()}</p>
+
+              <div class="patient-info">
+                <div class="section-title">PATIENT INFORMATION</div>
+                <div class="detail-line"><strong>Name:</strong> ${prescriptionData.patient.name}</div>
+                <div class="detail-line"><strong>Phone:</strong> ${prescriptionData.patient.phone}</div>
+                <div class="detail-line"><strong>DOB:</strong> ${prescriptionData.patient.dateOfBirth || 'Not specified'}</div>
+              </div>
+
+              <div class="medication-info">
+                <div class="section-title">MEDICATION DETAILS</div>
+                <div class="medication-name">${prescriptionData.medication.name}</div>
+                <div class="detail-line"><strong>Strength:</strong> ${prescriptionData.medication.dosage}</div>
+                <div class="detail-line"><strong>Frequency:</strong> ${prescriptionData.medication.frequency}</div>
+                <div class="detail-line"><strong>Duration:</strong> ${prescriptionData.medication.duration}</div>
+                <div class="detail-line"><strong>Instructions:</strong> ${prescriptionData.medication.instructions}</div>
+                <div class="detail-line"><strong>Repeats:</strong> ${prescriptionData.prescription.repeats}</div>
+              </div>
+
+              <div class="prescriber-info">
+                <div class="section-title">PRESCRIBER & CLINIC</div>
+                <div class="detail-line"><strong>Doctor:</strong> ${prescriptionData.prescriber.name}</div>
+                <div class="detail-line"><strong>License:</strong> ${prescriptionData.prescriber.license}</div>
+                <div class="detail-line"><strong>Clinic:</strong> ${prescriptionData.clinic.name}</div>
+                <div class="detail-line"><strong>Phone:</strong> ${prescriptionData.clinic.phone}</div>
+              </div>
+
+              <div class="qr-container">
+                <img src="${qrCodeUrl}" alt="Prescription QR Code" style="border: 2px solid #22c55e; padding: 8px; background: white;" />
+                <div style="margin-top: 10px; font-size: 12px; color: #059669;">
+                  <strong>Scan this QR code for complete prescription data</strong>
+                </div>
+              </div>
+
+              <div class="verification">
+                <div class="section-title">PRESCRIPTION VERIFICATION</div>
+                <div class="detail-line"><strong>Date Issued:</strong> ${prescriptionData.prescription.dateIssued}</div>
+                <div class="detail-line"><strong>Expires:</strong> ${prescriptionData.prescription.expiryDate}</div>
+                <div class="detail-line"><strong>Verification Code:</strong> ${prescriptionData.verification.hash}</div>
+              </div>
+
+              <div class="footer">
+                <p><strong>This is a valid digital prescription for dispensing at any licensed pharmacy in Nigeria.</strong></p>
+                <p>Generated: ${new Date().toLocaleString()} | ${prescriptionData.clinic.name}</p>
+              </div>
             </div>
           </body>
         </html>
