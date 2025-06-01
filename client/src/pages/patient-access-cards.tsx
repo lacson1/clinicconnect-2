@@ -16,10 +16,10 @@ import JsBarcode from 'jsbarcode';
 
 interface Patient {
   id: number;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   phone: string;
-  date_of_birth: string;
+  dateOfBirth: string;
   email?: string;
   gender?: string;
 }
@@ -52,7 +52,7 @@ export default function PatientAccessCards() {
   });
 
   const filteredPatients = patients.filter((patient: Patient) =>
-    `${patient.first_name} ${patient.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.phone.includes(searchTerm)
   );
 
@@ -63,8 +63,8 @@ export default function PatientAccessCards() {
       url: portalUrl,
       patientId: patient.id,
       phone: patient.phone,
-      dob: patient.date_of_birth,
-      name: `${patient.first_name} ${patient.last_name}`
+      dob: patient.dateOfBirth,
+      name: `${patient.firstName} ${patient.lastName}`
     });
     
     try {
@@ -405,10 +405,10 @@ export default function PatientAccessCards() {
                             <div className="flex items-center justify-between">
                               <div>
                                 <div className="font-medium">
-                                  {patient.first_name} {patient.last_name}
+                                  {patient.firstName} {patient.lastName}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  ID: PT{patient.id.toString().padStart(6, '0')} • Phone: {patient.phone} • DOB: {patient.date_of_birth}
+                                  ID: PT{patient.id.toString().padStart(6, '0')} • Phone: {patient.phone} • DOB: {patient.dateOfBirth}
                                 </div>
                               </div>
                               <Badge variant={selectedPatients.find(p => p.id === patient.id) ? "default" : "outline"}>
@@ -447,12 +447,12 @@ export default function PatientAccessCards() {
                         <div className="flex justify-between items-start">
                           <div>
                             <div className="font-medium">
-                              {patient.first_name} {patient.last_name}
+                              {patient.firstName} {patient.lastName}
                             </div>
                             <div className="text-sm text-gray-600">
                               ID: PT{patient.id.toString().padStart(6, '0')}<br />
                               Phone: {patient.phone}<br />
-                              DOB: {patient.date_of_birth}
+                              DOB: {patient.dateOfBirth}
                             </div>
                           </div>
                           <Button
@@ -594,7 +594,7 @@ export default function PatientAccessCards() {
                     <div key={index} className="border rounded-lg p-4 bg-white shadow-sm">
                       <div className="text-center mb-3">
                         <div className="text-sm font-medium text-blue-600 mb-1">🏥 Bluequee Patient Portal</div>
-                        <div className="font-bold text-lg">{card.patient.first_name} {card.patient.last_name}</div>
+                        <div className="font-bold text-lg">{card.patient.firstName} {card.patient.lastName}</div>
                       </div>
                       
                       <div className="space-y-2 text-sm">
