@@ -408,7 +408,7 @@ export default function PatientAccessCards() {
                                   {patient.first_name} {patient.last_name}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  ID: PT{patient.id.toString().padStart(6, '0')} • Phone: {patient.phone}
+                                  ID: PT{patient.id.toString().padStart(6, '0')} • Phone: {patient.phone} • DOB: {patient.date_of_birth}
                                 </div>
                               </div>
                               <Badge variant={selectedPatients.find(p => p.id === patient.id) ? "default" : "outline"}>
