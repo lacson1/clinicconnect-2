@@ -5,6 +5,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ConsultationDropdownMenu } from "./consultation-dropdown-menu";
 import { FileText, Clock, User, Activity, Pill, Calendar, ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 interface ConsultationHistoryDisplayProps {
   patientId: number;
@@ -13,11 +14,17 @@ interface ConsultationHistoryDisplayProps {
 
 export default function ConsultationHistoryDisplay({ patientId, patient }: ConsultationHistoryDisplayProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [, navigate] = useLocation();
   
   // Fetch detailed consultation records with complete form data
   const { data: consultationHistory = [], isLoading: historyLoading } = useQuery({
     queryKey: ['/api/patients', patientId, 'consultation-records'],
   });
+
+  // Handle viewing consultation details
+  const handleViewConsultation = (consultation: any) => {
+    navigate(`/consultation-records/${consultation.id}`);
+  };
 
   if (historyLoading) {
     return (
@@ -146,7 +153,11 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
                               <Badge variant="secondary">
                                 {new Date(consultation.createdAt).toLocaleDateString()}
                               </Badge>
-                              <ConsultationDropdownMenu consultation={consultation} patient={patient} />
+                              <ConsultationDropdownMenu 
+                                consultation={consultation} 
+                                patient={patient}
+                                onView={handleViewConsultation}
+                              />
                             </div>
                           </div>
                           
