@@ -110,13 +110,7 @@ export function ModernPatientOverview({
   const [isConsultationHistoryOpen, setIsConsultationHistoryOpen] = useState(false);
   const [showEditPatientModal, setShowEditPatientModal] = useState(false);
 
-  // Fetch consultation records for this patient
-  const { data: consultationRecords = [] } = useQuery({
-    queryKey: ['/api/patients', patient.id, 'consultation-records'],
-    enabled: !!patient.id,
-  });
-
-  // Combine visits and consultation records
+  // Combine visits only (exclude consultation records to prevent phantom entries)
   const combinedVisits = React.useMemo(() => {
     const allVisits = [
       ...visits.map(visit => ({
@@ -125,18 +119,11 @@ export function ModernPatientOverview({
         date: visit.visitDate,
         title: visit.visitType || 'Consultation',
         description: visit.complaint || visit.diagnosis || 'No details recorded'
-      })),
-      ...(consultationRecords || []).map((record: any) => ({
-        ...record,
-        type: 'consultation',
-        date: record.recordedAt,
-        title: record.formName || 'Consultation Form',
-        description: record.responses ? Object.values(record.responses).slice(0, 2).join(', ') : 'Consultation completed'
       }))
     ];
     
     return allVisits.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [visits, consultationRecords]);
+  }, [visits]);
 
   // Handle visit actions
   const handleViewVisit = (visitId: number) => {
