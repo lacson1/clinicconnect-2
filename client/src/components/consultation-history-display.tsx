@@ -172,12 +172,12 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
                     <div className="ml-3 flex-1">
                       <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
                         <CardContent className="p-2">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex flex-col gap-1">
-                              <h4 className="font-semibold text-base text-gray-900">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex flex-col gap-0.5">
+                              <h4 className="font-semibold text-sm text-gray-900">
                                 {consultation.formName || 'Consultation'}
                               </h4>
-                              <div className="flex items-center gap-2 text-xs">
+                              <div className="flex items-center gap-1 text-xs">
                                 <span className="text-gray-600">By:</span>
                                 <span className="font-medium text-blue-800">
                                   {consultation.conductedByFullName || 'Healthcare Staff'}
@@ -202,8 +202,8 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
                             </div>
                           </div>
                           
-                          {/* Compact consultation details */}
-                          <div className="space-y-2">
+                          {/* Very compact consultation details */}
+                          <div className="space-y-1">
                             <div className="text-xs text-gray-600">
                               <strong>Date:</strong> {new Date(consultation.createdAt).toLocaleDateString()} at {new Date(consultation.createdAt).toLocaleTimeString('en-US', { 
                                 hour: '2-digit', 
@@ -211,10 +211,10 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
                               })}
                             </div>
                             
-                            {/* Core consultation information - Compact display */}
+                            {/* Core consultation information - Very compact display */}
                             {consultation.formData && (
-                              <div className="mt-2 p-2 bg-gray-50 rounded border">
-                                <div className="space-y-1 text-xs">
+                              <div className="mt-1 p-1.5 bg-gray-50 rounded border">
+                                <div className="space-y-0.5 text-xs">
                                   {consultation.formData['Chief Complaint'] && (
                                     <div>
                                       <span className="font-medium text-gray-700">Complaint:</span> {consultation.formData['Chief Complaint']}
@@ -251,12 +251,12 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
                   </div>
                 ))}
                 
-                {/* End of timeline indicator */}
-                <div className="relative flex items-center mt-6">
-                  <div className="flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                    <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                {/* End of timeline indicator - smaller */}
+                <div className="relative flex items-center mt-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
                   </div>
-                  <div className="ml-4 text-sm text-gray-500">
+                  <div className="ml-3 text-xs text-gray-500">
                     Start of consultation history
                   </div>
                 </div>
