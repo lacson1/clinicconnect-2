@@ -608,7 +608,7 @@ export default function PatientAccessCards() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">DOB:</span>
-                          <span className="font-mono">{card.patient.date_of_birth}</span>
+                          <span className="font-mono">{card.patient.dateOfBirth}</span>
                         </div>
                       </div>
 
@@ -690,7 +690,7 @@ export default function PatientAccessCards() {
                     {selectedPatients.map((patient) => (
                       <div key={patient.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
-                          <div className="font-medium">{patient.first_name} {patient.last_name}</div>
+                          <div className="font-medium">{patient.firstName} {patient.lastName}</div>
                           <div className="text-sm text-gray-500">
                             {patient.email && <span className="mr-3">📧 {patient.email}</span>}
                             📱 {patient.phone}
