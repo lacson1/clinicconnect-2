@@ -16,14 +16,43 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
   const [isOpen, setIsOpen] = useState(false);
   const [, navigate] = useLocation();
   
-  // Fetch detailed consultation records with complete form data
-  const { data: consultationHistory = [], isLoading: historyLoading } = useQuery({
-    queryKey: ['/api/patients', patientId, 'consultation-records'],
+  // Fetch consultation visits (visits with type="consultation")
+  const { data: visitData = [], isLoading: historyLoading } = useQuery({
+    queryKey: [`/api/patients/${patientId}/visits`],
   });
 
-  // Handle viewing consultation details
+  // Filter for consultation-type visits and format them
+  const consultationHistory = visitData.filter((visit: any) => 
+    visit.visitType === 'consultation'
+  ).map((visit: any) => ({
+    id: visit.id,
+    patientId: visit.patientId,
+    formName: 'General Consultation',
+    formDescription: 'Patient consultation visit',
+    conductedByUsername: 'Healthcare Staff',
+    conductedByRole: 'doctor',
+    roleDisplayName: 'Doctor',
+    specialistRole: 'General',
+    specialistRoleDisplay: 'General Medicine',
+    createdAt: visit.visitDate || visit.createdAt,
+    formData: {
+      'Chief Complaint': visit.complaint,
+      'Diagnosis': visit.diagnosis,
+      'Treatment Plan': visit.treatment,
+      'Vital Signs': {
+        'Blood Pressure': visit.bloodPressure,
+        'Heart Rate': visit.heartRate,
+        'Temperature': visit.temperature,
+        'Weight': visit.weight
+      },
+      'Visit Type': visit.visitType,
+      'Status': visit.status
+    }
+  }));
+
+  // Handle viewing consultation details - navigate to visit edit page for now
   const handleViewConsultation = (consultation: any) => {
-    navigate(`/consultation-records/${consultation.id}`);
+    navigate(`/patients/${patientId}/visits/${consultation.id}/edit`);
   };
 
   if (historyLoading) {
