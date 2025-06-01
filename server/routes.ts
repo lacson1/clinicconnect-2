@@ -4602,26 +4602,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Medical Documents API Endpoints
   
   // Get all medical documents for organization
-  app.get("/api/files/medical", authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+  app.get("/api/files/medical", authenticateToken, async (req: AuthRequest, res) => {
     try {
+      const organizationId = req.user?.organizationId || 1;
+      
       const result = await db
         .select({
-          id: medicalDocuments.id,
-          fileName: medicalDocuments.fileName,
-          originalName: medicalDocuments.originalName,
-          category: medicalDocuments.category,
-          patientId: medicalDocuments.patientId,
-          uploadedBy: medicalDocuments.uploadedBy,
-          uploadedAt: medicalDocuments.uploadedAt,
-          size: medicalDocuments.size,
+          id: sql`${medicalDocuments.id}`.as('id'),
+          fileName: sql`${medicalDocuments.fileName}`.as('fileName'),
+          originalName: sql`${medicalDocuments.originalName}`.as('originalName'),
+          category: sql`${medicalDocuments.category}`.as('category'),
+          patientId: sql`${medicalDocuments.patientId}`.as('patientId'),
+          uploadedBy: sql`${medicalDocuments.uploadedBy}`.as('uploadedBy'),
+          uploadedAt: sql`${medicalDocuments.uploadedAt}`.as('uploadedAt'),
+          size: sql`${medicalDocuments.size}`.as('size'),
           patient: {
-            firstName: patients.firstName,
-            lastName: patients.lastName
+            firstName: sql`${patients.firstName}`.as('firstName'),
+            lastName: sql`${patients.lastName}`.as('lastName')
           }
         })
         .from(medicalDocuments)
         .leftJoin(patients, eq(medicalDocuments.patientId, patients.id))
-        .where(eq(medicalDocuments.organizationId, req.organizationId))
+        .where(eq(medicalDocuments.organizationId, organizationId))
         .orderBy(desc(medicalDocuments.uploadedAt));
 
       res.json(result);
@@ -4632,7 +4634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload medical document
-  app.post("/api/upload/medical", authenticateToken, tenantMiddleware, upload.single('file'), async (req: TenantRequest, res) => {
+  app.post("/api/upload/medical", authenticateToken, upload.single('file'), async (req: AuthRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -4662,6 +4664,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       fs.writeFileSync(filePath, req.file.buffer);
 
       // Save to database
+      const organizationId = req.user?.organizationId || 1;
       const [document] = await db
         .insert(medicalDocuments)
         .values({
@@ -4672,7 +4675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           uploadedBy: req.user!.id,
           size: req.file.size,
           mimeType: req.file.mimetype,
-          organizationId: req.organizationId
+          organizationId
         })
         .returning();
 
@@ -4691,9 +4694,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Serve medical document files
-  app.get("/api/files/medical/:fileName", authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+  app.get("/api/files/medical/:fileName", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { fileName } = req.params;
+      const organizationId = req.user?.organizationId || 1;
 
       // Verify document belongs to user's organization
       const [document] = await db
@@ -4701,7 +4705,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(medicalDocuments)
         .where(and(
           eq(medicalDocuments.fileName, fileName),
-          eq(medicalDocuments.organizationId, req.organizationId)
+          eq(medicalDocuments.organizationId, organizationId)
         ));
 
       if (!document) {
@@ -4729,9 +4733,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete medical document
-  app.delete("/api/files/medical/:fileName", authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+  app.delete("/api/files/medical/:fileName", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { fileName } = req.params;
+      const organizationId = req.user?.organizationId || 1;
 
       // Verify document belongs to user's organization
       const [document] = await db
@@ -4739,7 +4744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(medicalDocuments)
         .where(and(
           eq(medicalDocuments.fileName, fileName),
-          eq(medicalDocuments.organizationId, req.organizationId)
+          eq(medicalDocuments.organizationId, organizationId)
         ));
 
       if (!document) {
