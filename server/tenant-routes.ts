@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { organizations, users, patients, visits, labResults, medicines, prescriptions } from "@shared/schema";
 import { eq, and, desc, count } from "drizzle-orm";
 import { authenticateToken, requireRole, type AuthRequest } from "./middleware/auth";
@@ -28,10 +28,11 @@ export function setupTenantRoutes(app: Express) {
   });
 
   // Get organizations for patient assignment (accessible to all authenticated users)
-  app.get("/api/organizations/list", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/organizations-dropdown", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const orgs = await db.select().from(organizations).orderBy(organizations.name);
-      res.json(orgs);
+      // Use raw SQL to avoid any potential Drizzle query conflicts
+      const result = await pool.query('SELECT id, name, type FROM organizations ORDER BY name');
+      res.json(result.rows);
     } catch (error) {
       console.error('Error fetching organization list:', error);
       res.status(500).json({ error: 'Failed to fetch organization list' });

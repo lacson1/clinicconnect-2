@@ -3130,6 +3130,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const organizationId = parseInt(req.params.id);
       
+      if (isNaN(organizationId)) {
+        return res.status(400).json({ error: 'Invalid organization ID' });
+      }
+      
       const [organization] = await db.select()
         .from(organizations)
         .where(eq(organizations.id, organizationId))
