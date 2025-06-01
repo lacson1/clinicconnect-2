@@ -53,7 +53,8 @@ import {
   CheckCircle,
   XCircle,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  Building2
 } from 'lucide-react';
 
 interface Patient {
@@ -201,6 +202,77 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
       toast({
         title: "Error",
         description: "Failed to update medication status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSendToRepeatMedications = async (prescription: any) => {
+    try {
+      const response = await fetch(`/api/prescriptions/${prescription.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+          duration: 'Ongoing as directed',
+          instructions: (prescription.instructions || '') + ' [Added to repeat medications]'
+        })
+      });
+
+      if (response.ok) {
+        queryClient.invalidateQueries(['/api/patients', patient.id, 'prescriptions']);
+        toast({
+          title: "Added to Repeat Medications",
+          description: `${prescription.medicationName} is now available in repeat medications tab`,
+        });
+      } else {
+        throw new Error('Failed to add to repeat medications');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add medication to repeat list",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSendToDispensary = async (prescription: any) => {
+    try {
+      const response = await fetch(`/api/pharmacy-activities`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          prescriptionId: prescription.id,
+          patientId: prescription.patientId,
+          medicationName: prescription.medicationName,
+          dosage: prescription.dosage,
+          frequency: prescription.frequency,
+          activityType: 'dispensing_request',
+          status: 'pending',
+          requestedBy: 'doctor',
+          notes: `Prescription sent for dispensing: ${prescription.medicationName} ${prescription.dosage}`,
+          organizationId: prescription.organizationId
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Sent to Dispensary",
+          description: `${prescription.medicationName} has been sent to the dispensary for processing`,
+        });
+      } else {
+        throw new Error('Failed to send to dispensary');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send medication to dispensary",
         variant: "destructive"
       });
     }
@@ -890,6 +962,15 @@ Present this QR code for medication dispensing.`;
                                       <DropdownMenuItem onClick={() => handleGenerateQRCode(prescription)}>
                                         <QrCode className="w-3 h-3 mr-2" />
                                         Generate QR Code
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => handleSendToRepeatMedications(prescription)}>
+                                        <RefreshCw className="w-3 h-3 mr-2 text-blue-600" />
+                                        Add to Repeat Medications
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleSendToDispensary(prescription)}>
+                                        <Building2 className="w-3 h-3 mr-2 text-green-600" />
+                                        Send to Dispensary
                                       </DropdownMenuItem>
                                       <DropdownMenuSeparator />
                                       <DropdownMenuItem onClick={() => handleUpdateMedicationStatus(prescription.id, 'completed')}>

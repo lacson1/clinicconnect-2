@@ -99,17 +99,27 @@ export default function PrescriptionModal({
       return response.json();
     },
     onSuccess: () => {
+      // Comprehensive cache invalidation for immediate refresh
       queryClient.invalidateQueries({ queryKey: ["/api/patients"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/prescriptions"] });
       if (selectedPatientId) {
+        queryClient.invalidateQueries({ queryKey: ["/api/patients", selectedPatientId] });
         queryClient.invalidateQueries({ queryKey: ["/api/patients", selectedPatientId, "prescriptions"] });
         queryClient.invalidateQueries({ queryKey: ["/api/patients", selectedPatientId, "prescriptions", "active"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/patients", selectedPatientId, "activity-trail"] });
       }
       if (visitId) {
         queryClient.invalidateQueries({ queryKey: ["/api/visits", visitId, "prescriptions"] });
       }
+      
+      // Force refetch patient data immediately
+      if (selectedPatientId) {
+        queryClient.refetchQueries({ queryKey: ["/api/patients", selectedPatientId, "prescriptions"] });
+      }
+      
       toast({
         title: "Success",
-        description: "Prescription created successfully!",
+        description: "Prescription created and sent to pharmacy!",
       });
       form.reset();
       setSelectedPatientId(undefined);
