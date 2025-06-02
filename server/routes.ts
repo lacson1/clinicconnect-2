@@ -5041,6 +5041,154 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Print prescription endpoint
+  app.post("/api/prescriptions/:id/print", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const prescriptionId = parseInt(req.params.id);
+      
+      // Get prescription with patient details
+      const [prescriptionData] = await db.select({
+        prescriptionId: prescriptions.id,
+        medicationName: prescriptions.medicationName,
+        dosage: prescriptions.dosage,
+        frequency: prescriptions.frequency,
+        duration: prescriptions.duration,
+        instructions: prescriptions.instructions,
+        startDate: prescriptions.startDate,
+        prescribedBy: prescriptions.prescribedBy,
+        patientFirstName: patients.firstName,
+        patientLastName: patients.lastName,
+        patientPhone: patients.phone,
+        patientDateOfBirth: patients.dateOfBirth,
+      })
+      .from(prescriptions)
+      .leftJoin(patients, eq(prescriptions.patientId, patients.id))
+      .where(eq(prescriptions.id, prescriptionId));
+
+      if (!prescriptionData) {
+        return res.status(404).json({ message: "Prescription not found" });
+      }
+
+      // Generate printable HTML
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Prescription - RX${prescriptionId}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
+            .prescription-details { margin: 20px 0; }
+            .patient-info, .medication-info { margin: 15px 0; }
+            .signature-section { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h2>Bluequee Healthcare Clinical Management</h2>
+            <p>Prescription - RX${prescriptionId}</p>
+          </div>
+          <div class="patient-info">
+            <h3>Patient Information</h3>
+            <p><strong>Name:</strong> ${prescriptionData.patientFirstName} ${prescriptionData.patientLastName}</p>
+            <p><strong>Phone:</strong> ${prescriptionData.patientPhone || 'N/A'}</p>
+            <p><strong>Date of Birth:</strong> ${prescriptionData.patientDateOfBirth || 'N/A'}</p>
+          </div>
+          <div class="medication-info">
+            <h3>Medication Details</h3>
+            <p><strong>Medication:</strong> ${prescriptionData.medicationName}</p>
+            <p><strong>Dosage:</strong> ${prescriptionData.dosage}</p>
+            <p><strong>Frequency:</strong> ${prescriptionData.frequency}</p>
+            <p><strong>Duration:</strong> ${prescriptionData.duration}</p>
+            <p><strong>Instructions:</strong> ${prescriptionData.instructions || 'Take as directed'}</p>
+          </div>
+          <div class="signature-section">
+            <p><strong>Prescribed by:</strong> ${prescriptionData.prescribedBy}</p>
+            <p><strong>Date:</strong> ${new Date(prescriptionData.startDate).toLocaleDateString()}</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      res.json({ html });
+    } catch (error) {
+      console.error('Print prescription error:', error);
+      res.status(500).json({ message: "Failed to generate print version" });
+    }
+  });
+
+  // Re-order prescription endpoint
+  app.post("/api/prescriptions/:id/reorder", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const prescriptionId = parseInt(req.params.id);
+      
+      // Get the original prescription
+      const [originalPrescription] = await db
+        .select()
+        .from(prescriptions)
+        .where(eq(prescriptions.id, prescriptionId));
+
+      if (!originalPrescription) {
+        return res.status(404).json({ message: "Original prescription not found" });
+      }
+
+      // Create new prescription based on original
+      const reorderData = {
+        patientId: originalPrescription.patientId,
+        medicationId: originalPrescription.medicationId,
+        medicationName: originalPrescription.medicationName,
+        dosage: originalPrescription.dosage,
+        frequency: originalPrescription.frequency,
+        duration: originalPrescription.duration,
+        instructions: originalPrescription.instructions,
+        prescribedBy: req.user?.username || originalPrescription.prescribedBy,
+        status: 'active',
+        startDate: new Date(),
+        organizationId: req.user?.organizationId || originalPrescription.organizationId,
+        createdAt: new Date()
+      };
+
+      const [newPrescription] = await db
+        .insert(prescriptions)
+        .values(reorderData)
+        .returning();
+
+      console.log(`🔄 PRESCRIPTION REORDERED: #${newPrescription.id} from original #${prescriptionId}`);
+      res.json(newPrescription);
+    } catch (error) {
+      console.error('Reorder prescription error:', error);
+      res.status(500).json({ message: "Failed to reorder prescription" });
+    }
+  });
+
+  // Send to pharmacy endpoint
+  app.post("/api/prescriptions/:id/send-to-pharmacy", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const prescriptionId = parseInt(req.params.id);
+      
+      // Update prescription status to indicate it's been sent to pharmacy
+      const [updatedPrescription] = await db
+        .update(prescriptions)
+        .set({
+          pharmacyStatus: 'sent',
+          sentToPharmacyAt: new Date(),
+          status: 'pending'
+        })
+        .where(eq(prescriptions.id, prescriptionId))
+        .returning();
+
+      if (!updatedPrescription) {
+        return res.status(404).json({ message: "Prescription not found" });
+      }
+
+      console.log(`💊 PRESCRIPTION SENT TO PHARMACY: #${prescriptionId} - ${updatedPrescription.medicationName}`);
+      res.json(updatedPrescription);
+    } catch (error) {
+      console.error('Send to pharmacy error:', error);
+      res.status(500).json({ message: "Failed to send prescription to pharmacy" });
+    }
+  });
+
   // Procedural Reports Routes
   app.get("/api/procedural-reports", authenticateToken, async (req: AuthRequest, res) => {
     try {

@@ -310,6 +310,54 @@ export default function MedicationManagementTabs({ patient, prescriptions }: Med
     }
   });
 
+  // Print prescription function
+  const printPrescription = useMutation({
+    mutationFn: async (prescriptionId: number) => {
+      return apiRequest('POST', `/api/prescriptions/${prescriptionId}/print`, {});
+    },
+    onSuccess: (response: any) => {
+      // Open print preview in new window
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(response.html);
+        printWindow.document.close();
+        printWindow.print();
+      }
+      toast({ title: "Success", description: "Prescription sent to printer" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to print prescription", variant: "destructive" });
+    }
+  });
+
+  // Re-order prescription function
+  const reorderPrescription = useMutation({
+    mutationFn: async (prescriptionId: number) => {
+      return apiRequest('POST', `/api/prescriptions/${prescriptionId}/reorder`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries([`/api/patients/${patient.id}/prescriptions`]);
+      toast({ title: "Success", description: "Prescription reordered successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to reorder prescription", variant: "destructive" });
+    }
+  });
+
+  // Send to pharmacy function
+  const sendToPharmacy = useMutation({
+    mutationFn: async (prescriptionId: number) => {
+      return apiRequest('POST', `/api/prescriptions/${prescriptionId}/send-to-pharmacy`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries([`/api/patients/${patient.id}/prescriptions`]);
+      toast({ title: "Success", description: "Prescription sent to pharmacy successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to send to pharmacy", variant: "destructive" });
+    }
+  });
+
   const handlePrescriptionSelect = (prescriptionId: number, checked: boolean) => {
     if (checked) {
       setSelectedPrescriptions(prev => [...prev, prescriptionId]);
@@ -426,12 +474,41 @@ export default function MedicationManagementTabs({ patient, prescriptions }: Med
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => printPrescription.mutate(prescription.id)}
+                      disabled={printPrescription.isPending}
+                      title="Print Prescription"
+                    >
+                      <Printer className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => reorderPrescription.mutate(prescription.id)}
+                      disabled={reorderPrescription.isPending}
+                      title="Re-order Prescription"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => sendToPharmacy.mutate(prescription.id)}
+                      disabled={sendToPharmacy.isPending}
+                      title="Send to Pharmacy"
+                      className="bg-green-50 hover:bg-green-100 text-green-700"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => generateQRCode.mutate(prescription.id)}
                       disabled={generateQRCode.isPending}
+                      title="Generate QR Code"
                     >
                       <QrCode className="w-4 h-4" />
                     </Button>
@@ -440,6 +517,7 @@ export default function MedicationManagementTabs({ patient, prescriptions }: Med
                       size="sm"
                       onClick={() => addToPastMedications.mutate(prescription.id)}
                       disabled={addToPastMedications.isPending}
+                      title="Archive Prescription"
                     >
                       <Archive className="w-4 h-4" />
                     </Button>
