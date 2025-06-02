@@ -67,13 +67,19 @@ export default function StandaloneVitalSignsRecorder({
 
   const recordVitalsMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest(`/api/patients/${patientId}/vitals`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      try {
+        return await apiRequest(`/api/patients/${patientId}/vitals`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+      } catch (error) {
+        console.error('API request failed:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
+      setIsRecording(false);
       toast({
         title: "Vital Signs Recorded",
         description: "Patient vital signs have been successfully recorded.",
@@ -97,6 +103,8 @@ export default function StandaloneVitalSignsRecorder({
       onClose();
     },
     onError: (error: any) => {
+      setIsRecording(false);
+      console.error('Mutation error:', error);
       toast({
         title: "Error Recording Vitals",
         description: error.message || "Failed to record vital signs. Please try again.",
