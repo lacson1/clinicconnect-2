@@ -12,11 +12,6 @@ import {
   vaccinations,
   allergies,
   medicalHistory,
-  pastMedications,
-  repeatPrescriptionLists,
-  repeatPrescriptionItems,
-  medicationSummaryReports,
-  bulkOperations,
   type Patient, 
   type InsertPatient,
   type Visit,
@@ -40,17 +35,7 @@ import {
   type Allergy,
   type InsertAllergy,
   type MedicalHistory,
-  type InsertMedicalHistory,
-  type PastMedication,
-  type InsertPastMedication,
-  type RepeatPrescriptionList,
-  type InsertRepeatPrescriptionList,
-  type RepeatPrescriptionItem,
-  type InsertRepeatPrescriptionItem,
-  type MedicationSummaryReport,
-  type InsertMedicationSummaryReport,
-  type BulkOperation,
-  type InsertBulkOperation
+  type InsertMedicalHistory
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, gte, lte, and, ilike, or, sql } from "drizzle-orm";
@@ -127,36 +112,6 @@ export interface IStorage {
   getMedicalHistoryByPatient(patientId: number): Promise<MedicalHistory[]>;
   createMedicalHistory(history: InsertMedicalHistory): Promise<MedicalHistory>;
   deleteMedicalHistory(id: number): Promise<void>;
-
-  // Past Medications Management
-  getPastMedicationsByPatient(patientId: number): Promise<PastMedication[]>;
-  createPastMedication(pastMedication: InsertPastMedication): Promise<PastMedication>;
-  updatePastMedication(id: number, updates: Partial<InsertPastMedication>): Promise<PastMedication>;
-
-  // Repeat Prescription Lists
-  getRepeatPrescriptionListsByPatient(patientId: number): Promise<RepeatPrescriptionList[]>;
-  getRepeatPrescriptionList(id: number): Promise<RepeatPrescriptionList | undefined>;
-  createRepeatPrescriptionList(list: InsertRepeatPrescriptionList): Promise<RepeatPrescriptionList>;
-  updateRepeatPrescriptionList(id: number, updates: Partial<InsertRepeatPrescriptionList>): Promise<RepeatPrescriptionList>;
-  
-  // Repeat Prescription Items
-  getRepeatPrescriptionItems(listId: number): Promise<RepeatPrescriptionItem[]>;
-  createRepeatPrescriptionItem(item: InsertRepeatPrescriptionItem): Promise<RepeatPrescriptionItem>;
-  updateRepeatPrescriptionItem(id: number, updates: Partial<InsertRepeatPrescriptionItem>): Promise<RepeatPrescriptionItem>;
-  deleteRepeatPrescriptionItem(id: number): Promise<void>;
-  
-  // Medication Summary Reports
-  getMedicationSummaryReports(patientId: number): Promise<MedicationSummaryReport[]>;
-  createMedicationSummaryReport(report: InsertMedicationSummaryReport): Promise<MedicationSummaryReport>;
-  
-  // Bulk Operations
-  createBulkOperation(operation: InsertBulkOperation): Promise<BulkOperation>;
-  getBulkOperations(organizationId?: number): Promise<BulkOperation[]>;
-  
-  // Enhanced Prescription Management
-  updatePrescriptionQRCode(id: number, qrCode: string): Promise<Prescription>;
-  getDispensedMedications(patientId: number, organizationId?: number): Promise<Prescription[]>;
-  bulkUpdatePrescriptionStatus(prescriptionIds: number[], status: string, performedBy: number): Promise<number>;
 
   // Dashboard stats
   getDashboardStats(): Promise<{
@@ -345,10 +300,6 @@ export class DatabaseStorage implements IStorage {
       status: prescriptions.status,
       startDate: prescriptions.startDate,
       endDate: prescriptions.endDate,
-      isRepeat: prescriptions.isRepeat,
-      quantity: prescriptions.quantity,
-      pharmacyId: prescriptions.pharmacyId,
-      pharmacyStatus: prescriptions.pharmacyStatus,
       organizationId: prescriptions.organizationId,
       createdAt: prescriptions.createdAt
     })
@@ -628,226 +579,6 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMedicalHistory(id: number): Promise<void> {
     await db.delete(medicalHistory).where(eq(medicalHistory.id, id));
-  }
-
-  // Past Medications Management
-  async getPastMedicationsByPatient(patientId: number): Promise<PastMedication[]> {
-    return await db.select()
-      .from(pastMedications)
-      .where(eq(pastMedications.patientId, patientId))
-      .orderBy(desc(pastMedications.endDate));
-  }
-
-  async createPastMedication(pastMedication: InsertPastMedication): Promise<PastMedication> {
-    const [result] = await db
-      .insert(pastMedications)
-      .values(pastMedication)
-      .returning();
-    return result;
-  }
-
-  async updatePastMedication(id: number, updates: Partial<InsertPastMedication>): Promise<PastMedication> {
-    const [result] = await db
-      .update(pastMedications)
-      .set(updates)
-      .where(eq(pastMedications.id, id))
-      .returning();
-    return result;
-  }
-
-  // Repeat Prescription Lists
-  async getRepeatPrescriptionListsByPatient(patientId: number): Promise<RepeatPrescriptionList[]> {
-    return await db.select()
-      .from(repeatPrescriptionLists)
-      .where(eq(repeatPrescriptionLists.patientId, patientId))
-      .orderBy(desc(repeatPrescriptionLists.createdAt));
-  }
-
-  async getRepeatPrescriptionList(id: number): Promise<RepeatPrescriptionList | undefined> {
-    const [list] = await db.select()
-      .from(repeatPrescriptionLists)
-      .where(eq(repeatPrescriptionLists.id, id));
-    return list || undefined;
-  }
-
-  async createRepeatPrescriptionList(list: InsertRepeatPrescriptionList): Promise<RepeatPrescriptionList> {
-    const [result] = await db
-      .insert(repeatPrescriptionLists)
-      .values(list)
-      .returning();
-    return result;
-  }
-
-  async updateRepeatPrescriptionList(id: number, updates: Partial<InsertRepeatPrescriptionList>): Promise<RepeatPrescriptionList> {
-    const [result] = await db
-      .update(repeatPrescriptionLists)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(repeatPrescriptionLists.id, id))
-      .returning();
-    return result;
-  }
-
-  // Repeat Prescription Items
-  async getRepeatPrescriptionItems(listId: number): Promise<RepeatPrescriptionItem[]> {
-    return await db.select()
-      .from(repeatPrescriptionItems)
-      .where(eq(repeatPrescriptionItems.listId, listId))
-      .orderBy(repeatPrescriptionItems.priority);
-  }
-
-  async createRepeatPrescriptionItem(item: InsertRepeatPrescriptionItem): Promise<RepeatPrescriptionItem> {
-    const [result] = await db
-      .insert(repeatPrescriptionItems)
-      .values(item)
-      .returning();
-    return result;
-  }
-
-  async updateRepeatPrescriptionItem(id: number, updates: Partial<InsertRepeatPrescriptionItem>): Promise<RepeatPrescriptionItem> {
-    const [result] = await db
-      .update(repeatPrescriptionItems)
-      .set(updates)
-      .where(eq(repeatPrescriptionItems.id, id))
-      .returning();
-    return result;
-  }
-
-  async deleteRepeatPrescriptionItem(id: number): Promise<void> {
-    await db.delete(repeatPrescriptionItems).where(eq(repeatPrescriptionItems.id, id));
-  }
-
-  // Medication Summary Reports
-  async getMedicationSummaryReports(patientId: number): Promise<MedicationSummaryReport[]> {
-    return await db.select()
-      .from(medicationSummaryReports)
-      .where(eq(medicationSummaryReports.patientId, patientId))
-      .orderBy(desc(medicationSummaryReports.createdAt));
-  }
-
-  async createMedicationSummaryReport(report: InsertMedicationSummaryReport): Promise<MedicationSummaryReport> {
-    const [result] = await db
-      .insert(medicationSummaryReports)
-      .values(report)
-      .returning();
-    return result;
-  }
-
-  // Bulk Operations
-  async createBulkOperation(operation: InsertBulkOperation): Promise<BulkOperation> {
-    const [result] = await db
-      .insert(bulkOperations)
-      .values(operation)
-      .returning();
-    return result;
-  }
-
-  async getBulkOperations(organizationId?: number): Promise<BulkOperation[]> {
-    if (organizationId) {
-      return await db.select()
-        .from(bulkOperations)
-        .where(eq(bulkOperations.organizationId, organizationId))
-        .orderBy(desc(bulkOperations.createdAt));
-    }
-    return await db.select()
-      .from(bulkOperations)
-      .orderBy(desc(bulkOperations.createdAt));
-  }
-
-  // Enhanced Prescription Management
-  async updatePrescriptionQRCode(id: number, qrCode: string): Promise<Prescription> {
-    const [result] = await db
-      .update(prescriptions)
-      .set({ 
-        qrCode,
-        qrCodeGeneratedAt: new Date()
-      })
-      .where(eq(prescriptions.id, id))
-      .returning();
-    return result;
-  }
-
-  async getDispensedMedications(patientId: number, organizationId?: number): Promise<Prescription[]> {
-    const conditions = [
-      eq(prescriptions.patientId, patientId),
-      eq(prescriptions.pharmacyStatus, 'dispensed')
-    ];
-
-    if (organizationId) {
-      conditions.push(eq(prescriptions.organizationId, organizationId));
-    }
-
-    return await db.select()
-      .from(prescriptions)
-      .where(and(...conditions))
-      .orderBy(desc(prescriptions.dispensedAt));
-  }
-
-  async bulkUpdatePrescriptionStatus(prescriptionIds: number[], status: string, performedBy: number): Promise<number> {
-    const updateData: any = { status };
-    
-    // Set appropriate timestamp based on status
-    if (status === 'dispensed') {
-      updateData.dispensedAt = new Date();
-      updateData.pharmacyStatus = 'dispensed';
-    } else if (status === 'collected') {
-      updateData.collectedAt = new Date();
-      updateData.pharmacyStatus = 'collected';
-    }
-
-    const results = await Promise.all(
-      prescriptionIds.map(id =>
-        db.update(prescriptions)
-          .set(updateData)
-          .where(eq(prescriptions.id, id))
-          .returning()
-      )
-    );
-
-    // Log bulk operation
-    await this.createBulkOperation({
-      operationType: 'bulk_status_update',
-      performedBy,
-      affectedItems: results.length,
-      operationData: {
-        prescriptionIds,
-        newStatus: status,
-        timestamp: new Date()
-      }
-    });
-
-    return results.length;
-  }
-
-  // Dashboard stats
-  async getDashboardStats(): Promise<{
-    totalPatients: number;
-    todayVisits: number;
-    lowStockItems: number;
-    pendingLabs: number;
-  }> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const [patientsCount] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(patients);
-
-    const [visitsCount] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(visits)
-      .where(gte(visits.createdAt, today));
-
-    const [lowStockCount] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(medicines)
-      .where(lte(medicines.quantity, medicines.lowStockThreshold));
-
-    return {
-      totalPatients: patientsCount.count,
-      todayVisits: visitsCount.count,
-      lowStockItems: lowStockCount.count,
-      pendingLabs: 0
-    };
   }
 }
 

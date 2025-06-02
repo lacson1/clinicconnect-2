@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { PatientTimeline } from './patient-timeline';
 import { PatientAlertsPanel } from './patient-alerts-panel';
 import { PatientSafetyAlertsRealtime, QuickSafetyIndicator } from './patient-safety-alerts-realtime';
@@ -16,7 +15,6 @@ import { PatientCommunicationHub } from './patient-communication-hub';
 import ConsultationFormSelector from './consultation-form-selector';
 import { PatientDropdownMenu } from './patient-dropdown-menu';
 import { EditPatientModal } from './edit-patient-modal';
-import { PrescriptionCard } from './PrescriptionCard';
 import { useLocation } from "wouter";
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
@@ -606,11 +604,7 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
 
 
 
-  const [qrModalOpen, setQrModalOpen] = useState(false);
-  const [qrCodeData, setQrCodeData] = useState(null);
-
   const handleGenerateQRCode = async (prescription: any) => {
-    console.log('QR Code button clicked for prescription:', prescription);
     try {
       // Create comprehensive prescription data for external pharmacy dispensing
       const prescriptionData = {
@@ -681,19 +675,151 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
       
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(prescriptionText)}`;
       
-      // Copy prescription data to clipboard and show popup
-      await navigator.clipboard.writeText(prescriptionText);
-      
-      setQrCodeData({
-        qrCodeUrl,
-        prescriptionData,
-        prescriptionText
-      });
-      setQrModalOpen(true);
+      // Open comprehensive prescription QR code in new window
+      const qrWindow = window.open('', '_blank', 'width=500,height=700');
+      qrWindow.document.write(`
+        <html>
+          <head>
+            <title>Prescription QR Code for External Pharmacy</title>
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                padding: 20px;
+                background: #f8f9fa;
+                margin: 0;
+              }
+              .container {
+                background: white;
+                padding: 25px;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                max-width: 450px;
+                margin: 0 auto;
+              }
+              .header {
+                text-align: center;
+                border-bottom: 2px solid #22c55e;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+              }
+              h1 { 
+                color: #166534; 
+                margin: 0 0 5px 0; 
+                font-size: 18px;
+              }
+              .rx-number {
+                font-weight: bold;
+                color: #dc2626;
+                font-size: 16px;
+                margin: 10px 0;
+              }
+              .patient-info, .medication-info, .prescriber-info {
+                background: #f9fafb;
+                padding: 12px;
+                border-radius: 6px;
+                margin: 15px 0;
+                border-left: 4px solid #22c55e;
+              }
+              .section-title {
+                font-weight: bold;
+                color: #374151;
+                margin-bottom: 8px;
+                font-size: 14px;
+              }
+              .detail-line {
+                margin: 4px 0;
+                font-size: 13px;
+                color: #4b5563;
+              }
+              .medication-name {
+                font-weight: bold;
+                color: #059669;
+                font-size: 16px;
+                margin: 8px 0;
+              }
+              .qr-container {
+                text-align: center;
+                margin: 20px 0;
+                padding: 15px;
+                background: #f0fdf4;
+                border-radius: 8px;
+              }
+              .verification {
+                background: #fef3c7;
+                padding: 10px;
+                border-radius: 6px;
+                margin: 15px 0;
+                border-left: 4px solid #f59e0b;
+                font-size: 12px;
+              }
+              .footer {
+                text-align: center;
+                font-size: 11px;
+                color: #6b7280;
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid #e5e7eb;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>VALID PRESCRIPTION FOR DISPENSING</h1>
+                <div class="rx-number">RX #: ${prescriptionData.verification.rxNumber}</div>
+              </div>
+
+              <div class="patient-info">
+                <div class="section-title">PATIENT INFORMATION</div>
+                <div class="detail-line"><strong>Name:</strong> ${prescriptionData.patient.name}</div>
+                <div class="detail-line"><strong>Phone:</strong> ${prescriptionData.patient.phone}</div>
+                <div class="detail-line"><strong>DOB:</strong> ${prescriptionData.patient.dateOfBirth || 'Not specified'}</div>
+              </div>
+
+              <div class="medication-info">
+                <div class="section-title">MEDICATION DETAILS</div>
+                <div class="medication-name">${prescriptionData.medication.name}</div>
+                <div class="detail-line"><strong>Strength:</strong> ${prescriptionData.medication.dosage}</div>
+                <div class="detail-line"><strong>Frequency:</strong> ${prescriptionData.medication.frequency}</div>
+                <div class="detail-line"><strong>Duration:</strong> ${prescriptionData.medication.duration}</div>
+                <div class="detail-line"><strong>Instructions:</strong> ${prescriptionData.medication.instructions}</div>
+                <div class="detail-line"><strong>Repeats:</strong> ${prescriptionData.prescription.repeats}</div>
+              </div>
+
+              <div class="prescriber-info">
+                <div class="section-title">PRESCRIBER & CLINIC</div>
+                <div class="detail-line"><strong>Doctor:</strong> ${prescriptionData.prescriber.name}</div>
+                <div class="detail-line"><strong>License:</strong> ${prescriptionData.prescriber.license}</div>
+                <div class="detail-line"><strong>Clinic:</strong> ${prescriptionData.clinic.name}</div>
+                <div class="detail-line"><strong>Phone:</strong> ${prescriptionData.clinic.phone}</div>
+              </div>
+
+              <div class="qr-container">
+                <img src="${qrCodeUrl}" alt="Prescription QR Code" style="border: 2px solid #22c55e; padding: 8px; background: white;" />
+                <div style="margin-top: 10px; font-size: 12px; color: #059669;">
+                  <strong>Scan this QR code for complete prescription data</strong>
+                </div>
+              </div>
+
+              <div class="verification">
+                <div class="section-title">PRESCRIPTION VERIFICATION</div>
+                <div class="detail-line"><strong>Date Issued:</strong> ${prescriptionData.prescription.dateIssued}</div>
+                <div class="detail-line"><strong>Expires:</strong> ${prescriptionData.prescription.expiryDate}</div>
+                <div class="detail-line"><strong>Verification Code:</strong> ${prescriptionData.verification.hash}</div>
+              </div>
+
+              <div class="footer">
+                <p><strong>This is a valid digital prescription for dispensing at any licensed pharmacy in Nigeria.</strong></p>
+                <p>Generated: ${new Date().toLocaleString()} | ${prescriptionData.clinic.name}</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
       
       toast({
         title: "QR Code Generated",
-        description: "QR code data copied to clipboard and displayed in popup.",
+        description: "QR code opened in new window for pharmacy scanning.",
       });
     } catch (error) {
       console.error('Failed to generate QR code:', error);
@@ -897,16 +1023,120 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                   ) : activeMedications.length > 0 ? (
                     <div className="grid gap-4">
                       {activeMedications.map((prescription: any) => (
-                        <PrescriptionCard
-                          key={prescription.id}
-                          prescription={prescription}
-                          variant="active"
-                          onEdit={handleEditPrescription}
-                          onPrint={handlePrintPrescription}
-                          onReorder={handleReorderMedication}
-                          onUpdateStatus={handleUpdateMedicationStatus}
-                          onGenerateQR={handleGenerateQRCode}
-                        />
+                        <div key={prescription.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <h4 className="font-semibold text-slate-800 text-lg">
+                                  {prescription.medicationName}
+                                </h4>
+                                {prescription.medicationId && (
+                                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                    ✓ Verified
+                                  </Badge>
+                                )}
+                                <Badge className={
+                                  prescription.status === "active" 
+                                    ? "bg-green-100 text-green-800 border-green-200" 
+                                    : prescription.status === "completed"
+                                    ? "bg-blue-100 text-blue-800 border-blue-200"
+                                    : "bg-gray-100 text-gray-800 border-gray-200"
+                                }>
+                                  {prescription.status}
+                                </Badge>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
+                                <div className="bg-slate-50 p-3 rounded-md">
+                                  <span className="font-medium text-slate-700 block">Dosage</span>
+                                  <p className="text-slate-800 mt-1">{prescription.dosage}</p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-md">
+                                  <span className="font-medium text-slate-700 block">Frequency</span>
+                                  <p className="text-slate-800 mt-1">{prescription.frequency}</p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-md">
+                                  <span className="font-medium text-slate-700 block">Duration</span>
+                                  <p className="text-slate-800 mt-1">{prescription.duration}</p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-md">
+                                  <span className="font-medium text-slate-700 block">Prescribed by</span>
+                                  <p className="text-slate-800 mt-1">{prescription.prescribedBy}</p>
+                                </div>
+                              </div>
+                              
+                              {prescription.instructions && (
+                                <div className="mt-4 p-3 bg-blue-50 rounded-md border border-blue-100">
+                                  <span className="font-medium text-slate-700 flex items-center gap-2">
+                                    <FileText className="w-4 h-4" />
+                                    Special Instructions
+                                  </span>
+                                  <p className="text-slate-800 mt-2">{prescription.instructions}</p>
+                                </div>
+                              )}
+                              
+                              <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+                                <div className="flex items-center space-x-4 text-xs text-slate-500">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    <span>Started: {new Date(prescription.startDate).toLocaleDateString()}</span>
+                                  </div>
+                                  {prescription.endDate && (
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      <span>Ends: {new Date(prescription.endDate).toLocaleDateString()}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
+                                        <MoreVertical className="w-3 h-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-[180px]">
+                                      <DropdownMenuItem onClick={() => handleEditPrescription(prescription)}>
+                                        <Edit className="w-3 h-3 mr-2" />
+                                        Edit Details
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handlePrintPrescription(prescription)}>
+                                        <Printer className="w-3 h-3 mr-2" />
+                                        Print
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleGenerateQRCode(prescription)}>
+                                        <QrCode className="w-3 h-3 mr-2" />
+                                        Generate QR Code
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => handleSendToRepeatMedications(prescription)}>
+                                        <RefreshCw className="w-3 h-3 mr-2 text-blue-600" />
+                                        Add to Repeat Medications
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleSendToDispensary(prescription)}>
+                                        <Building2 className="w-3 h-3 mr-2 text-green-600" />
+                                        Send to Dispensary
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => handleUpdateMedicationStatus(prescription.id, 'completed')}>
+                                        <CheckCircle className="w-3 h-3 mr-2 text-blue-600" />
+                                        Mark Completed
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleUpdateMedicationStatus(prescription.id, 'discontinued')}>
+                                        <XCircle className="w-3 h-3 mr-2 text-orange-600" />
+                                        Discontinue
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleUpdateMedicationStatus(prescription.id, 'active')}>
+                                        <RefreshCw className="w-3 h-3 mr-2 text-green-600" />
+                                        Reactivate
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       ))}
                     </div>
                 ) : (
@@ -1032,16 +1262,118 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                           prescription.duration === 'Ongoing as directed'
                         )
                         .map((prescription: any) => (
-                        <PrescriptionCard
-                          key={prescription.id}
-                          prescription={prescription}
-                          variant="repeat"
-                          onEdit={handleEditPrescription}
-                          onPrint={handlePrintPrescription}
-                          onScheduleReview={handleScheduleReview}
-                          onIssueRepeat={handleIssueRepeat}
-                          onUpdateStatus={handleUpdateMedicationStatus}
-                        />
+                        <div key={prescription.id} className="border border-green-200 rounded-lg p-4 bg-green-50">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <h4 className="font-semibold text-green-800 text-lg">
+                                  {prescription.medicationName}
+                                </h4>
+                                <Badge className="bg-green-100 text-green-800 border-green-200">
+                                  Repeat Prescription
+                                </Badge>
+                                {prescription.reviewDate && (
+                                  <Badge variant="outline" className={`text-xs ${
+                                    new Date(prescription.reviewDate) < new Date() 
+                                      ? 'bg-red-50 text-red-700 border-red-200'
+                                      : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                  }`}>
+                                    {new Date(prescription.reviewDate) < new Date() 
+                                      ? 'Review Overdue' 
+                                      : `Review Due: ${new Date(prescription.reviewDate).toLocaleDateString()}`
+                                    }
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
+                                <div className="bg-white p-3 rounded-md border">
+                                  <span className="font-medium text-gray-700 block">Dosage</span>
+                                  <p className="text-gray-800 mt-1">{prescription.dosage}</p>
+                                </div>
+                                <div className="bg-white p-3 rounded-md border">
+                                  <span className="font-medium text-gray-700 block">Frequency</span>
+                                  <p className="text-gray-800 mt-1">{prescription.frequency}</p>
+                                </div>
+                                <div className="bg-white p-3 rounded-md border">
+                                  <span className="font-medium text-gray-700 block">Duration</span>
+                                  <p className="text-gray-800 mt-1">{prescription.duration}</p>
+                                </div>
+                                <div className="bg-white p-3 rounded-md border">
+                                  <span className="font-medium text-gray-700 block">Prescribed by</span>
+                                  <p className="text-gray-800 mt-1">{prescription.prescribedBy}</p>
+                                </div>
+                              </div>
+                              
+                              {prescription.instructions && (
+                                <div className="mt-4 p-3 bg-blue-50 rounded-md border border-blue-100">
+                                  <span className="font-medium text-gray-700 flex items-center gap-2">
+                                    <FileText className="w-4 h-4" />
+                                    Instructions
+                                  </span>
+                                  <p className="text-gray-800 mt-2">{prescription.instructions}</p>
+                                </div>
+                              )}
+                              
+                              <div className="flex items-center justify-between mt-4 pt-3 border-t border-green-200">
+                                <div className="flex items-center space-x-4 text-xs text-gray-500">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    <span>Started: {new Date(prescription.startDate).toLocaleDateString()}</span>
+                                  </div>
+                                  {prescription.lastReviewDate && (
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      <span>Last Review: {new Date(prescription.lastReviewDate).toLocaleDateString()}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-blue-600 hover:text-blue-800 border-blue-200"
+                                    onClick={() => handleScheduleReview(prescription.id, prescription.medicationName)}
+                                  >
+                                    <UserCheck className="w-3 h-3 mr-1" />
+                                    Schedule Review
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-green-600 hover:text-green-800 border-green-200"
+                                    onClick={() => handleIssueRepeat(prescription.id, prescription.medicationName)}
+                                  >
+                                    <RefreshCw className="w-3 h-3 mr-1" />
+                                    Issue Repeat
+                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-800">
+                                        <MoreVertical className="w-3 h-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-[180px]">
+                                      <DropdownMenuItem onClick={() => handleEditPrescription(prescription)}>
+                                        <Edit className="w-3 h-3 mr-2" />
+                                        Edit Repeat
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handlePrintPrescription(prescription)}>
+                                        <Printer className="w-3 h-3 mr-2" />
+                                        Print
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => handleUpdateMedicationStatus(prescription.id, 'discontinued')}>
+                                        <XCircle className="w-3 h-3 mr-2 text-red-600" />
+                                        Stop Repeat
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   ) : (
@@ -1848,91 +2180,6 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
             queryClient.invalidateQueries({ queryKey: ["/api/patients"] });
           }}
         />
-
-        {/* QR Code Modal */}
-        <Dialog open={qrModalOpen} onOpenChange={setQrModalOpen}>
-          <DialogContent className="max-w-md mx-auto fixed top-4 left-1/2 transform -translate-x-1/2 bg-white border border-green-200 shadow-xl rounded-lg z-50">
-            <DialogHeader>
-              <DialogTitle className="text-center text-green-800 text-lg font-bold">
-                Prescription QR Code
-              </DialogTitle>
-              <DialogDescription className="text-center text-green-600 text-sm">
-                Scan this QR code for complete prescription data
-              </DialogDescription>
-            </DialogHeader>
-            
-            {qrCodeData && (
-              <div className="space-y-4 p-4">
-                {/* QR Code Display */}
-                <div className="text-center bg-green-50 p-4 rounded-lg border border-green-200">
-                  <img 
-                    src={qrCodeData.qrCodeUrl} 
-                    alt="Prescription QR Code" 
-                    className="mx-auto border-2 border-green-300 rounded"
-                    style={{ width: '200px', height: '200px' }}
-                  />
-                  <p className="text-xs text-green-700 mt-2 font-medium">
-                    QR Code for External Pharmacy
-                  </p>
-                </div>
-
-                {/* Prescription Summary */}
-                <div className="bg-white border border-green-200 rounded p-3 space-y-2">
-                  <div className="text-center">
-                    <h4 className="font-semibold text-green-800 text-sm">
-                      RX #{qrCodeData.prescriptionData.verification.rxNumber}
-                    </h4>
-                  </div>
-                  
-                  <div className="text-xs space-y-1">
-                    <p><span className="font-medium text-green-700">Patient:</span> {qrCodeData.prescriptionData.patient.name}</p>
-                    <p><span className="font-medium text-green-700">Medication:</span> {qrCodeData.prescriptionData.medication.name}</p>
-                    <p><span className="font-medium text-green-700">Dosage:</span> {qrCodeData.prescriptionData.medication.dosage}</p>
-                    <p><span className="font-medium text-green-700">Frequency:</span> {qrCodeData.prescriptionData.medication.frequency}</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1 text-green-700 border-green-300 hover:bg-green-50"
-                    onClick={async () => {
-                      await navigator.clipboard.writeText(qrCodeData.prescriptionText);
-                      toast({
-                        title: "Data Copied",
-                        description: "Prescription data copied to clipboard",
-                      });
-                    }}
-                  >
-                    Copy Data
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1 text-blue-700 border-blue-300 hover:bg-blue-50"
-                    onClick={() => {
-                      window.print();
-                    }}
-                  >
-                    Print QR
-                  </Button>
-                </div>
-
-                <div className="text-center">
-                  <Button 
-                    onClick={() => setQrModalOpen(false)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6"
-                    size="sm"
-                  >
-                    Close
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
     </div>
   );
 }

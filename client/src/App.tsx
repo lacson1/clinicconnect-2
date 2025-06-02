@@ -18,7 +18,6 @@ import { Search } from "lucide-react";
 import Dashboard from "@/pages/dashboard";
 import Patients from "@/pages/patients";
 import PatientProfile from "@/pages/patient-profile-clean";
-import EnhancedPatientProfile from "@/pages/enhanced-patient-profile";
 import Visits from "@/pages/visits";
 import LabResults from "@/pages/lab-results";
 import Pharmacy from "@/pages/pharmacy";
@@ -104,7 +103,6 @@ function AuthenticatedApp() {
                   <Route path="/dashboard" component={Dashboard} />
                   <Route path="/patients" component={Patients} />
                   <Route path="/patients/:id" component={PatientProfile} />
-                  <Route path="/patients/:id/enhanced" component={EnhancedPatientProfile} />
                   <Route path="/patients/:patientId/record-visit" component={RecordVisitPage} />
                   <Route path="/patients/:patientId/visits/:visitId/edit" component={EditVisit} />
                   <Route path="/consultation-records/:id" component={ConsultationRecordDetails} />
@@ -187,32 +185,50 @@ function AuthenticatedApp() {
 function Router() {
   const { user, isLoading } = useAuth();
 
-  console.log("Router - User:", user, "Loading:", isLoading);
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/90 to-indigo-900/80 flex items-center justify-center">
-        <div className="text-white text-center">
-          <div className="text-4xl mb-4">🏥</div>
-          <div className="text-xl">Loading Healthcare Platform...</div>
-        </div>
-      </div>
-    );
-  }
-
   // Patient Portal Route - Independent of staff authentication
   return (
     <Switch>
       <Route path="/patient-portal" component={PatientPortal} />
       <Route>
         {() => {
-          // Show login if no user authenticated
+          if (isLoading) {
+            return (
+              <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-50 relative overflow-hidden">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-5">
+                  <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500 rounded-full blur-3xl"></div>
+                  <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500 rounded-full blur-3xl"></div>
+                </div>
+                
+                <div className="flex flex-col items-center space-y-6 z-10">
+                  {/* Enhanced Loading Animation */}
+                  <div className="relative">
+                    <div className="w-16 h-16 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+                    <div className="absolute inset-2 w-8 h-8 border-2 border-blue-200 border-b-blue-500 rounded-full animate-spin animate-reverse"></div>
+                  </div>
+                  
+                  {/* Brand and Status */}
+                  <div className="text-center space-y-2">
+                    <div className="text-2xl font-bold text-gray-800 tracking-tight">Bluequee</div>
+                    <div className="text-lg font-medium text-gray-600">Loading your workspace...</div>
+                    <div className="text-sm text-gray-500">Preparing healthcare tools and patient data</div>
+                  </div>
+                  
+                  {/* Progress Dots */}
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-75"></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-150"></div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
           if (!user) {
             return <Login />;
           }
 
-          // Show full authenticated app
           return <AuthenticatedApp />;
         }}
       </Route>

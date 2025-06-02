@@ -3,10 +3,10 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { fileStorage } from "./storage-service";
-import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, insertSafetyAlertSchema, insertPharmacyActivitySchema, insertMedicationReviewSchema, insertProceduralReportSchema, insertConsentFormSchema, insertPatientConsentSchema, insertMessageSchema, insertAppointmentReminderSchema, insertAvailabilitySlotSchema, insertBlackoutDateSchema, insertInvoiceSchema, insertInvoiceItemSchema, insertPaymentSchema, insertInsuranceClaimSchema, insertServicePriceSchema, users, auditLogs, labTests, medications, medicines, labOrders, labOrderItems, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, vitalSignsAlerts, appointments, safetyAlerts, pharmacyActivities, medicationReviews, prescriptions, pharmacies, proceduralReports, consentForms, patientConsents, messages, appointmentReminders, availabilitySlots, blackoutDates, invoices, invoiceItems, payments, insuranceClaims, servicePrices, medicalDocuments } from "@shared/schema";
+import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, insertSafetyAlertSchema, insertPharmacyActivitySchema, insertMedicationReviewSchema, insertProceduralReportSchema, insertConsentFormSchema, insertPatientConsentSchema, insertMessageSchema, insertAppointmentReminderSchema, insertAvailabilitySlotSchema, insertBlackoutDateSchema, insertInvoiceSchema, insertInvoiceItemSchema, insertPaymentSchema, insertInsuranceClaimSchema, insertServicePriceSchema, users, auditLogs, labTests, medications, medicines, labOrders, labOrderItems, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, appointments, safetyAlerts, pharmacyActivities, medicationReviews, prescriptions, pharmacies, proceduralReports, consentForms, patientConsents, messages, appointmentReminders, availabilitySlots, blackoutDates, invoices, invoiceItems, payments, insuranceClaims, servicePrices, medicalDocuments } from "@shared/schema";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
-import { db, pool } from "./db";
+import { db } from "./db";
 import { eq, desc, or, ilike, gte, lte, lt, and, isNotNull, isNull, inArray, sql, notExists } from "drizzle-orm";
 import { authenticateToken, requireRole, requireAnyRole, requireSuperOrOrgAdmin, hashPassword, comparePassword, generateToken, type AuthRequest } from "./middleware/auth";
 import { tenantMiddleware, type TenantRequest } from "./middleware/tenant";
@@ -1383,12 +1383,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Prescription creation error:', error);
       console.error('Request body:', req.body);
+      console.error('Processed data:', requestData);
       if (error instanceof z.ZodError) {
         console.error('Validation errors:', error.errors);
         res.status(400).json({ message: "Invalid prescription data", errors: error.errors });
       } else {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        res.status(500).json({ message: "Failed to create prescription", error: errorMessage });
+        res.status(500).json({ message: "Failed to create prescription", error: error.message });
       }
     }
   });
@@ -1495,106 +1495,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Update prescription status error:', error);
       res.status(500).json({ message: "Failed to update prescription status" });
-    }
-  });
-
-  // Send prescription to pharmacy
-  app.post("/api/prescriptions/:id/send-to-pharmacy", authenticateToken, async (req: AuthRequest, res) => {
-    try {
-      const prescriptionId = parseInt(req.params.id);
-      const { pharmacyId, notes } = req.body;
-
-      if (!pharmacyId) {
-        return res.status(400).json({ message: "Pharmacy ID is required" });
-      }
-
-      const [updatedPrescription] = await db
-        .update(prescriptions)
-        .set({
-          pharmacyId: pharmacyId,
-          pharmacyStatus: 'sent',
-          sentToPharmacyAt: new Date(),
-          pharmacistNotes: notes || null
-        })
-        .where(eq(prescriptions.id, prescriptionId))
-        .returning();
-
-      if (!updatedPrescription) {
-        return res.status(404).json({ message: "Prescription not found" });
-      }
-
-      // Log pharmacy activity
-      await db.insert(pharmacyActivities).values({
-        pharmacistId: req.user!.id,
-        activityType: 'prescription_received',
-        prescriptionId: prescriptionId,
-        patientId: updatedPrescription.patientId,
-        title: 'Prescription Received',
-        description: `Prescription for ${updatedPrescription.medicationName} received from clinic`,
-        status: 'pending',
-        organizationId: req.user!.organizationId
-      });
-
-      res.json(updatedPrescription);
-    } catch (error) {
-      console.error('Send to pharmacy error:', error);
-      res.status(500).json({ message: "Failed to send prescription to pharmacy" });
-    }
-  });
-
-  // Update pharmacy status (for pharmacists)
-  app.patch("/api/prescriptions/:id/pharmacy-status", authenticateToken, async (req: AuthRequest, res) => {
-    try {
-      const prescriptionId = parseInt(req.params.id);
-      const { pharmacyStatus, pharmacistNotes } = req.body;
-
-      if (!pharmacyStatus || !['pending', 'sent', 'dispensed', 'ready', 'collected'].includes(pharmacyStatus)) {
-        return res.status(400).json({ message: "Invalid pharmacy status provided" });
-      }
-
-      const updateData: any = {
-        pharmacyStatus: pharmacyStatus,
-        pharmacistNotes: pharmacistNotes || null
-      };
-
-      if (pharmacyStatus === 'dispensed') {
-        updateData.dispensedAt = new Date();
-      } else if (pharmacyStatus === 'collected') {
-        updateData.collectedAt = new Date();
-        updateData.status = 'completed'; // Mark prescription as completed when collected
-      }
-
-      const [updatedPrescription] = await db
-        .update(prescriptions)
-        .set(updateData)
-        .where(eq(prescriptions.id, prescriptionId))
-        .returning();
-
-      if (!updatedPrescription) {
-        return res.status(404).json({ message: "Prescription not found" });
-      }
-
-      // Log pharmacy activity
-      const activityTitle = pharmacyStatus === 'dispensed' ? 'Medication Dispensed' :
-                           pharmacyStatus === 'collected' ? 'Medication Collected' :
-                           pharmacyStatus === 'ready' ? 'Medication Ready for Collection' :
-                           'Prescription Status Updated';
-
-      await db.insert(pharmacyActivities).values({
-        pharmacistId: req.user!.id,
-        activityType: 'dispensing',
-        prescriptionId: prescriptionId,
-        patientId: updatedPrescription.patientId,
-        title: activityTitle,
-        description: `${updatedPrescription.medicationName} - ${pharmacyStatus}`,
-        status: 'completed',
-        organizationId: req.user!.organizationId
-      });
-
-      res.json(updatedPrescription);
-    } catch (error) {
-      console.error('Update pharmacy status error:', error);
-      res.status(500).json({ message: "Failed to update pharmacy status" });
     }
   });
 
@@ -2231,19 +2131,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const patientId = parseInt(req.params.id);
       
-      const orders = await db.select({
-        id: labOrders.id,
-        patientId: labOrders.patientId,
-        orderedBy: labOrders.orderedBy,
-        status: labOrders.status,
-        createdAt: labOrders.createdAt,
-        completedAt: labOrders.completedAt,
-        doctorName: users.username
-      })
+      const orders = await db.select()
         .from(labOrders)
-        .leftJoin(users, eq(labOrders.orderedBy, users.id))
         .where(eq(labOrders.patientId, patientId))
-        .orderBy(desc(labOrders.createdAt));
+        .orderBy(labOrders.createdAt);
       
       res.json(orders);
     } catch (error) {
@@ -3875,117 +3766,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error recording vitals:', error);
       res.status(500).json({ message: "Failed to record vital signs" });
-    }
-  });
-
-  // Get patient vital signs alerts
-  app.get("/api/patients/:id/vital-alerts", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
-    try {
-      const patientId = parseInt(req.params.id);
-      
-      const alerts = await db
-        .select()
-        .from(vitalSignsAlerts)
-        .where(eq(vitalSignsAlerts.patientId, patientId))
-        .orderBy(desc(vitalSignsAlerts.createdAt));
-      
-      res.json(alerts);
-    } catch (error) {
-      console.error("Error fetching vital signs alerts:", error);
-      res.status(500).json({ message: "Failed to fetch vital signs alerts" });
-    }
-  });
-
-  // Create vital signs alert
-  app.post("/api/patients/:id/vital-alerts", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
-    try {
-      const patientId = parseInt(req.params.id);
-      
-      const alertData = {
-        patientId,
-        vitalType: req.body.vitalType,
-        condition: req.body.condition,
-        thresholdMin: req.body.thresholdMin,
-        thresholdMax: req.body.thresholdMax,
-        severity: req.body.severity,
-        isActive: req.body.isActive ?? true,
-        alertMethod: req.body.alertMethod,
-        createdBy: req.user?.username || 'Unknown',
-        organizationId: req.user?.organizationId
-      };
-
-      const [newAlert] = await db.insert(vitalSignsAlerts).values(alertData).returning();
-      
-      // Create audit log
-      const auditLogger = new AuditLogger(req);
-      await auditLogger.logPatientAction('VITAL_ALERT_CREATED', patientId, {
-        alertId: newAlert.id,
-        vitalType: alertData.vitalType,
-        condition: alertData.condition,
-        severity: alertData.severity
-      });
-      
-      res.status(201).json(newAlert);
-    } catch (error) {
-      console.error("Error creating vital signs alert:", error);
-      res.status(500).json({ message: "Failed to create vital signs alert" });
-    }
-  });
-
-  // Update vital signs alert
-  app.patch("/api/vital-alerts/:alertId", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
-    try {
-      const alertId = parseInt(req.params.alertId);
-      
-      const [updatedAlert] = await db
-        .update(vitalSignsAlerts)
-        .set(req.body)
-        .where(eq(vitalSignsAlerts.id, alertId))
-        .returning();
-      
-      if (!updatedAlert) {
-        return res.status(404).json({ message: "Alert not found" });
-      }
-      
-      // Create audit log
-      const auditLogger = new AuditLogger(req);
-      await auditLogger.logPatientAction('VITAL_ALERT_UPDATED', updatedAlert.patientId, {
-        alertId,
-        changes: req.body
-      });
-      
-      res.json(updatedAlert);
-    } catch (error) {
-      console.error("Error updating vital signs alert:", error);
-      res.status(500).json({ message: "Failed to update vital signs alert" });
-    }
-  });
-
-  // Delete vital signs alert
-  app.delete("/api/vital-alerts/:alertId", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
-    try {
-      const alertId = parseInt(req.params.alertId);
-      
-      const [deletedAlert] = await db
-        .delete(vitalSignsAlerts)
-        .where(eq(vitalSignsAlerts.id, alertId))
-        .returning();
-      
-      if (!deletedAlert) {
-        return res.status(404).json({ message: "Alert not found" });
-      }
-      
-      // Create audit log
-      const auditLogger = new AuditLogger(req);
-      await auditLogger.logPatientAction('VITAL_ALERT_DELETED', deletedAlert.patientId, {
-        alertId,
-        vitalType: deletedAlert.vitalType
-      });
-      
-      res.json({ message: "Alert deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting vital signs alert:", error);
-      res.status(500).json({ message: "Failed to delete vital signs alert" });
     }
   });
 
@@ -6067,36 +5847,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user!.id;
       
-      // Use raw SQL to avoid Drizzle ORM issues with complex select structures
-      const userResult = await pool.query('SELECT organization_id FROM users WHERE id = $1', [userId]);
-      
-      if (userResult.rows.length === 0 || !userResult.rows[0].organization_id) {
+      const [userOrg] = await db.select({
+        organizationId: users.organizationId,
+        name: organizations.name,
+        type: organizations.type,
+        address: organizations.address,
+        phone: organizations.phone,
+        email: organizations.email,
+        website: organizations.website,
+        registrationNumber: organizations.registrationNumber,
+        licenseNumber: organizations.licenseNumber,
+        description: organizations.description,
+        themeColor: organizations.themeColor,
+        logoUrl: organizations.logoUrl
+      })
+      .from(users)
+      .leftJoin(organizations, eq(users.organizationId, organizations.id))
+      .where(eq(users.id, userId));
+
+      if (!userOrg || !userOrg.organizationId) {
         return res.status(404).json({ error: "No organization found for user" });
       }
 
-      const organizationId = userResult.rows[0].organization_id;
-
-      // Get organization details using raw SQL
-      const orgResult = await pool.query(`
-        SELECT 
-          id as "organizationId",
-          name,
-          type,
-          address,
-          phone,
-          email,
-          website,
-          theme_color as "themeColor",
-          logo_url as "logoUrl"
-        FROM organizations 
-        WHERE id = $1
-      `, [organizationId]);
-
-      if (orgResult.rows.length === 0) {
-        return res.status(404).json({ error: "Organization not found" });
-      }
-
-      res.json(orgResult.rows[0]);
+      res.json(userOrg);
     } catch (error) {
       console.error('Error fetching user organization:', error);
       res.status(500).json({ error: "Failed to fetch organization data" });

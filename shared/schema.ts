@@ -135,26 +135,10 @@ export const prescriptions = pgTable("prescriptions", {
   duration: text("duration").notNull(),
   instructions: text("instructions"),
   prescribedBy: text("prescribed_by").notNull(),
-  status: text("status").notNull().default("active"), // active, completed, discontinued, on_hold
+  status: text("status").notNull().default("active"),
   startDate: timestamp("start_date").defaultNow().notNull(),
   endDate: timestamp("end_date"),
   pharmacyId: integer("pharmacy_id").references(() => pharmacies.id), // Reference to selected pharmacy
-  pharmacyStatus: text("pharmacy_status").default("pending"), // pending, sent, dispensed, ready, collected
-  sentToPharmacyAt: timestamp("sent_to_pharmacy_at"),
-  dispensedAt: timestamp("dispensed_at"),
-  collectedAt: timestamp("collected_at"),
-  pharmacistNotes: text("pharmacist_notes"),
-  quantity: text("quantity"),
-  isRepeat: boolean("is_repeat").default(false),
-  repeatInterval: integer("repeat_interval"), // Days between repeats
-  repeatCount: integer("repeat_count").default(0), // Number of times repeated
-  maxRepeats: integer("max_repeats"), // Maximum allowed repeats
-  lastDispensedDate: timestamp("last_dispensed_date"),
-  discontinueReason: text("discontinue_reason"),
-  discontinueDate: timestamp("discontinue_date"),
-  qrCode: text("qr_code"), // Store QR code for verification
-  qrCodeGeneratedAt: timestamp("qr_code_generated_at"),
-  urgentDispense: boolean("urgent_dispense").default(false),
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -182,21 +166,6 @@ export const vitalSigns = pgTable('vital_signs', {
   height: decimal('height', { precision: 5, scale: 2 }),
   recordedAt: timestamp('recorded_at').defaultNow().notNull(),
   recordedBy: varchar('recorded_by', { length: 100 }).notNull(),
-  organizationId: integer('organization_id').references(() => organizations.id)
-});
-
-export const vitalSignsAlerts = pgTable('vital_signs_alerts', {
-  id: serial('id').primaryKey(),
-  patientId: integer('patient_id').notNull().references(() => patients.id),
-  vitalType: varchar('vital_type', { length: 50 }).notNull(), // bloodPressureSystolic, heartRate, etc.
-  condition: varchar('condition', { length: 20 }).notNull(), // above, below, between
-  thresholdMin: decimal('threshold_min', { precision: 8, scale: 2 }),
-  thresholdMax: decimal('threshold_max', { precision: 8, scale: 2 }),
-  severity: varchar('severity', { length: 20 }).notNull(), // low, medium, high
-  isActive: boolean('is_active').default(true),
-  alertMethod: varchar('alert_method', { length: 20 }).notNull(), // notification, email, both
-  createdBy: varchar('created_by', { length: 100 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
   organizationId: integer('organization_id').references(() => organizations.id)
 });
 
@@ -456,89 +425,6 @@ export const medicationReviews = pgTable('medication_reviews', {
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
 
-// Past Medications History
-export const pastMedications = pgTable('past_medications', {
-  id: serial('id').primaryKey(),
-  patientId: integer('patient_id').references(() => patients.id).notNull(),
-  prescriptionId: integer('prescription_id').references(() => prescriptions.id),
-  medicationName: varchar('medication_name', { length: 150 }).notNull(),
-  dosage: varchar('dosage', { length: 100 }).notNull(),
-  frequency: varchar('frequency', { length: 100 }).notNull(),
-  duration: varchar('duration', { length: 100 }).notNull(),
-  startDate: timestamp('start_date').notNull(),
-  endDate: timestamp('end_date'),
-  discontinueReason: text('discontinue_reason'),
-  effectiveness: varchar('effectiveness', { length: 50 }), // excellent, good, fair, poor
-  sideEffects: text('side_effects'),
-  adherence: varchar('adherence', { length: 50 }), // excellent, good, fair, poor
-  prescribedBy: varchar('prescribed_by', { length: 100 }).notNull(),
-  organizationId: integer('organization_id').references(() => organizations.id),
-  createdAt: timestamp('created_at').defaultNow().notNull()
-});
-
-// Repeat Prescription Lists
-export const repeatPrescriptionLists = pgTable('repeat_prescription_lists', {
-  id: serial('id').primaryKey(),
-  patientId: integer('patient_id').references(() => patients.id).notNull(),
-  name: varchar('name', { length: 100 }).notNull(), // e.g., "Monthly Diabetes Medications"
-  description: text('description'),
-  isActive: boolean('is_active').default(true).notNull(),
-  nextOrderDate: timestamp('next_order_date'),
-  lastOrderedDate: timestamp('last_ordered_date'),
-  totalItems: integer('total_items').default(0),
-  createdBy: integer('created_by').references(() => users.id).notNull(),
-  organizationId: integer('organization_id').references(() => organizations.id),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull()
-});
-
-// Repeat Prescription Items
-export const repeatPrescriptionItems = pgTable('repeat_prescription_items', {
-  id: serial('id').primaryKey(),
-  listId: integer('list_id').references(() => repeatPrescriptionLists.id).notNull(),
-  medicationId: integer('medication_id').references(() => medications.id),
-  medicationName: varchar('medication_name', { length: 150 }).notNull(),
-  dosage: varchar('dosage', { length: 100 }).notNull(),
-  frequency: varchar('frequency', { length: 100 }).notNull(),
-  duration: varchar('duration', { length: 100 }).notNull(),
-  quantity: varchar('quantity', { length: 50 }),
-  instructions: text('instructions'),
-  priority: integer('priority').default(1), // For ordering items in the list
-  isActive: boolean('is_active').default(true).notNull(),
-  lastOrderedDate: timestamp('last_ordered_date'),
-  nextOrderDate: timestamp('next_order_date'),
-  organizationId: integer('organization_id').references(() => organizations.id),
-  createdAt: timestamp('created_at').defaultNow().notNull()
-});
-
-// Medication Summary Reports
-export const medicationSummaryReports = pgTable('medication_summary_reports', {
-  id: serial('id').primaryKey(),
-  patientId: integer('patient_id').references(() => patients.id).notNull(),
-  reportType: varchar('report_type', { length: 50 }).notNull(), // current, historical, adherence, allergy_summary
-  reportPeriod: varchar('report_period', { length: 50 }), // last_month, last_3_months, last_year, all_time
-  generatedBy: integer('generated_by').references(() => users.id).notNull(),
-  reportData: json('report_data').notNull(), // JSON containing the report details
-  totalMedications: integer('total_medications').default(0),
-  activeMedications: integer('active_medications').default(0),
-  completedMedications: integer('completed_medications').default(0),
-  discontinuedMedications: integer('discontinued_medications').default(0),
-  organizationId: integer('organization_id').references(() => organizations.id),
-  createdAt: timestamp('created_at').defaultNow().notNull()
-});
-
-// Bulk Operations Log
-export const bulkOperations = pgTable('bulk_operations', {
-  id: serial('id').primaryKey(),
-  operationType: varchar('operation_type', { length: 50 }).notNull(), // bulk_dispense, bulk_status_update, bulk_transfer
-  performedBy: integer('performed_by').references(() => users.id).notNull(),
-  affectedItems: integer('affected_items').default(0),
-  operationData: json('operation_data').notNull(), // Details of what was changed
-  status: varchar('status', { length: 20 }).default('completed').notNull(), // pending, completed, failed
-  organizationId: integer('organization_id').references(() => organizations.id),
-  createdAt: timestamp('created_at').defaultNow().notNull()
-});
-
 // Type definitions for new tables
 export type Pharmacy = typeof pharmacies.$inferSelect;
 export type InsertPharmacy = typeof pharmacies.$inferInsert;
@@ -546,42 +432,11 @@ export type PharmacyActivity = typeof pharmacyActivities.$inferSelect;
 export type InsertPharmacyActivity = typeof pharmacyActivities.$inferInsert;
 export type MedicationReview = typeof medicationReviews.$inferSelect;
 export type InsertMedicationReview = typeof medicationReviews.$inferInsert;
-export type PastMedication = typeof pastMedications.$inferSelect;
-export type InsertPastMedication = typeof pastMedications.$inferInsert;
-export type RepeatPrescriptionList = typeof repeatPrescriptionLists.$inferSelect;
-export type InsertRepeatPrescriptionList = typeof repeatPrescriptionLists.$inferInsert;
-export type RepeatPrescriptionItem = typeof repeatPrescriptionItems.$inferSelect;
-export type InsertRepeatPrescriptionItem = typeof repeatPrescriptionItems.$inferInsert;
-export type MedicationSummaryReport = typeof medicationSummaryReports.$inferSelect;
-export type InsertMedicationSummaryReport = typeof medicationSummaryReports.$inferInsert;
-export type BulkOperation = typeof bulkOperations.$inferSelect;
-export type InsertBulkOperation = typeof bulkOperations.$inferInsert;
 
 // Insert schemas for forms
 export const insertPharmacySchema = createInsertSchema(pharmacies);
 export const insertPharmacyActivitySchema = createInsertSchema(pharmacyActivities);
 export const insertMedicationReviewSchema = createInsertSchema(medicationReviews);
-export const insertPastMedicationSchema = createInsertSchema(pastMedications).omit({
-  id: true,
-  createdAt: true,
-});
-export const insertRepeatPrescriptionListSchema = createInsertSchema(repeatPrescriptionLists).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export const insertRepeatPrescriptionItemSchema = createInsertSchema(repeatPrescriptionItems).omit({
-  id: true,
-  createdAt: true,
-});
-export const insertMedicationSummaryReportSchema = createInsertSchema(medicationSummaryReports).omit({
-  id: true,
-  createdAt: true,
-});
-export const insertBulkOperationSchema = createInsertSchema(bulkOperations).omit({
-  id: true,
-  createdAt: true,
-});
 
 // Relations
 export const patientsRelations = relations(patients, ({ many }) => ({

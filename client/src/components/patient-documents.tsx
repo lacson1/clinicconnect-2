@@ -20,7 +20,6 @@ import {
   Filter
 } from 'lucide-react';
 import { format } from 'date-fns';
-import PDFViewer from '@/components/PDFViewer';
 
 interface Document {
   id: string;
@@ -47,8 +46,6 @@ export default function PatientDocuments({ patientId, patientName }: PatientDocu
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadCategory, setUploadCategory] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -174,9 +171,8 @@ export default function PatientDocuments({ patientId, patientName }: PatientDocu
     }
   };
 
-  const handleView = (document: Document) => {
-    setSelectedDocument(document);
-    setPdfViewerOpen(true);
+  const handleView = (fileName: string) => {
+    window.open(`/api/files/medical/${fileName}`, '_blank');
   };
 
   const handleDownload = (fileName: string, originalName: string) => {
@@ -184,12 +180,6 @@ export default function PatientDocuments({ patientId, patientName }: PatientDocu
     link.href = `/api/files/medical/${fileName}`;
     link.download = originalName;
     link.click();
-  };
-
-  const handlePdfViewerDownload = () => {
-    if (selectedDocument) {
-      handleDownload(selectedDocument.fileName, selectedDocument.originalName);
-    }
   };
 
   const handleDelete = (fileName: string) => {
@@ -295,7 +285,7 @@ export default function PatientDocuments({ patientId, patientName }: PatientDocu
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleView(document)}
+                        onClick={() => handleView(document.fileName)}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View
@@ -378,17 +368,6 @@ export default function PatientDocuments({ patientId, patientName }: PatientDocu
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* PDF Viewer */}
-      {selectedDocument && (
-        <PDFViewer
-          isOpen={pdfViewerOpen}
-          onClose={() => setPdfViewerOpen(false)}
-          fileName={selectedDocument.fileName}
-          originalName={selectedDocument.originalName}
-          onDownload={handlePdfViewerDownload}
-        />
-      )}
     </div>
   );
 }
