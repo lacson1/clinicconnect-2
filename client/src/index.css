@@ -137,9 +137,32 @@
   @apply hover:shadow-md transition-shadow border border-slate-100;
 }
 
-/* Form Enhancements */
+/* Professional Form Enhancements */
 .form-section {
   @apply space-y-4 p-4 bg-slate-50 rounded-lg border border-slate-200;
+}
+
+.form-input-professional {
+  @apply border-slate-300 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200;
+  @apply transition-all duration-200 ease-in-out rounded-lg;
+  @apply bg-white shadow-sm hover:shadow-md;
+}
+
+.form-label-professional {
+  @apply font-medium text-slate-700 mb-2 block;
+}
+
+.form-group-professional {
+  @apply space-y-3 mb-4;
+}
+
+.form-card-professional {
+  @apply bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md;
+  @apply transition-all duration-200 ease-in-out p-6;
+}
+
+.form-button-group {
+  @apply flex gap-3 justify-end mt-6 pt-4 border-t border-slate-200;
 }
 
 /* Mobile and Touch Optimizations */

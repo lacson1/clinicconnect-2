@@ -28,6 +28,7 @@ import {
   Edit,
   Brain,
   MessageCircle,
+  CheckCircle,
   Eye,
   Thermometer,
   Ear,
@@ -688,23 +689,23 @@ export default function PatientProfile() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-1 gap-3">
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={() => setShowVisitModal(true)}
-                        className="justify-start"
+                        className="justify-start btn-outline hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
                       >
-                        <Plus className="w-4 h-4 mr-2" />
+                        <Plus className="w-4 h-4 mr-2 icon-professional text-blue-600" />
                         Record Visit
                       </Button>
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={() => setShowLabModal(true)}
-                        className="justify-start"
+                        className="justify-start btn-outline hover:bg-emerald-50 hover:border-emerald-300 transition-all duration-200"
                       >
-                        <FlaskRound className="w-4 h-4 mr-2" />
+                        <FlaskRound className="w-4 h-4 mr-2 icon-professional text-emerald-600" />
                         Order Lab Test
                       </Button>
                       {(user?.role === 'doctor' || user?.role === 'admin') && (
@@ -712,9 +713,9 @@ export default function PatientProfile() {
                           variant="outline" 
                           size="sm" 
                           onClick={() => setShowPrescriptionModal(true)}
-                          className="justify-start"
+                          className="justify-start btn-outline hover:bg-purple-50 hover:border-purple-300 transition-all duration-200"
                         >
-                          <Pill className="w-4 h-4 mr-2" />
+                          <Pill className="w-4 h-4 mr-2 icon-professional text-purple-600" />
                           Prescribe Medication
                         </Button>
                       )}
@@ -722,9 +723,9 @@ export default function PatientProfile() {
                         variant="outline" 
                         size="sm" 
                         onClick={() => setActiveTab('chat')}
-                        className="justify-start"
+                        className="justify-start btn-outline hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-200"
                       >
-                        <MessageCircle className="w-4 h-4 mr-2" />
+                        <MessageCircle className="w-4 h-4 mr-2 icon-professional text-indigo-600" />
                         Send Message
                       </Button>
                     </div>
@@ -748,9 +749,9 @@ export default function PatientProfile() {
                 <CardContent>
                   <Button 
                     onClick={() => setShowVisitModal(true)}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="btn-primary shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                   >
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="mr-2 h-4 w-4 icon-professional" />
                     Start New Visit Recording
                   </Button>
                 </CardContent>
@@ -795,16 +796,18 @@ export default function PatientProfile() {
                                 size="sm"
                                 onClick={() => handleViewVisit(visit)}
                                 title="View Visit Details"
+                                className="btn-icon-secondary hover:bg-blue-50 hover:border-blue-300"
                               >
-                                <Eye className="w-4 h-4" />
+                                <Eye className="w-4 h-4 icon-professional text-blue-600" />
                               </Button>
                               <Button 
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => handlePrintVisit(visit)}
                                 title="Print Visit Record"
+                                className="btn-icon-secondary hover:bg-green-50 hover:border-green-300"
                               >
-                                <FileText className="w-4 h-4" />
+                                <FileText className="w-4 h-4 icon-professional text-green-600" />
                               </Button>
                             </div>
                           </div>
@@ -859,9 +862,9 @@ export default function PatientProfile() {
                       {(user?.role === 'doctor' || user?.role === 'admin') && (
                         <Button 
                           onClick={() => setShowPrescriptionModal(true)}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          className="btn-primary shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                         >
-                          <Plus className="mr-2 h-4 w-4" />
+                          <Plus className="mr-2 h-4 w-4 icon-professional" />
                           Prescribe Medication
                         </Button>
                       )}
@@ -920,7 +923,9 @@ export default function PatientProfile() {
                                           size="sm" 
                                           onClick={() => handleCompletePrescription(prescription)}
                                           title="Mark as Completed"
+                                          className="btn-success text-white border-green-500 hover:bg-green-600 transition-all duration-200"
                                         >
+                                          <CheckCircle className="w-4 h-4 mr-1 icon-professional" />
                                           Complete
                                         </Button>
                                         <Button 
@@ -928,8 +933,9 @@ export default function PatientProfile() {
                                           size="sm" 
                                           onClick={() => handlePrintPrescription(prescription)}
                                           title="Print Prescription"
+                                          className="btn-icon-ghost hover:bg-blue-50 transition-all duration-200"
                                         >
-                                          <Printer className="w-4 h-4 mr-1" />
+                                          <Printer className="w-4 h-4 mr-1 icon-professional text-blue-600" />
                                           Print
                                         </Button>
                                       </>
@@ -1044,10 +1050,10 @@ export default function PatientProfile() {
                   </h2>
                   <Button 
                     onClick={() => setShowStandaloneVitals(true)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                    className="btn-primary shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                     disabled={!user || (user.role !== 'nurse' && user.role !== 'doctor' && user.role !== 'admin')}
                   >
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Plus className="w-4 h-4 mr-2 icon-professional" />
                     Record Vital Signs
                   </Button>
                 </div>
