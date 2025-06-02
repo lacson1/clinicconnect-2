@@ -44,7 +44,12 @@ import {
   Send,
   Ban,
   StopCircle,
-  RotateCcw
+  RotateCcw,
+  TrendingUp,
+  AlertTriangle,
+  Droplets,
+  Wind,
+  Gauge
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { VisitRecordingModal } from "@/components/visit-recording-modal";
@@ -1470,143 +1475,354 @@ export default function PatientProfile() {
             </TabsContent>
 
             <TabsContent value="vitals" className="space-y-6">
-              {/* Vital Signs Monitor - Enhanced Professional Design */}
-              <div className="bg-gradient-to-br from-white via-blue-50/30 to-green-50/30 rounded-xl shadow-sm border border-slate-200 p-6">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <Activity className="w-5 h-5 text-white" />
+              {/* Vital Signs Dashboard - Modern Medical Interface */}
+              <div className="bg-gradient-to-br from-slate-50 via-blue-50/50 to-emerald-50/30 rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                {/* Header Section with Live Status */}
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                          <Activity className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        </div>
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold">Vital Signs Monitor</h2>
+                        <p className="text-blue-100 text-sm">
+                          {vitalSigns && vitalSigns.length > 0 
+                            ? `Last updated: ${new Date(vitalSigns[0].recordedAt).toLocaleString()}`
+                            : 'No vital signs recorded yet'
+                          }
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900">Vital Signs Monitor</h2>
-                      <p className="text-sm text-gray-600">Real-time patient monitoring dashboard</p>
+                    <div className="flex items-center gap-3">
+                      <Button 
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setActiveTab('specialty')}
+                        className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                      >
+                        <Stethoscope className="w-4 h-4 mr-2" />
+                        Assessment
+                      </Button>
+                      <Button 
+                        onClick={() => setShowStandaloneVitals(true)}
+                        className="bg-white text-blue-600 hover:bg-blue-50 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                        disabled={!user || (user.role !== 'nurse' && user.role !== 'doctor' && user.role !== 'admin')}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Record New Vitals
+                      </Button>
                     </div>
                   </div>
-                  <Button 
-                    onClick={() => setShowStandaloneVitals(true)}
-                    className="btn-primary shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 bg-gradient-to-r from-blue-600 to-blue-700 border-0"
-                    disabled={!user || (user.role !== 'nurse' && user.role !== 'doctor' && user.role !== 'admin')}
-                  >
-                    <Plus className="w-4 h-4 mr-2 icon-professional" />
-                    Record Vital Signs
-                  </Button>
                 </div>
-                
-                {/* Enhanced Vital Signs Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-                  {(() => {
-                    const latestVitals = vitalSigns?.[0]; // Most recent vital signs
-                    
-                    const getVitalStatus = (type: string, value: any) => {
-                      if (!value) return { status: 'No Data', color: 'text-gray-400', bgColor: 'bg-gray-50', borderColor: 'border-gray-200' };
-                      
-                      switch (type) {
-                        case 'bloodPressure':
-                          const systolic = latestVitals?.bloodPressureSystolic;
-                          const diastolic = latestVitals?.bloodPressureDiastolic;
-                          if (!systolic || !diastolic) return { status: 'No Data', color: 'text-gray-400', bgColor: 'bg-gray-50', borderColor: 'border-gray-200' };
-                          
-                          // European Heart Association guidelines
-                          if (systolic >= 180 || diastolic >= 110) {
-                            return { status: 'Grade 3 HTN', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
-                          } else if (systolic >= 160 || diastolic >= 100) {
-                            return { status: 'Grade 2 HTN', color: 'text-red-500', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
-                          } else if (systolic >= 140 || diastolic >= 90) {
-                            return { status: 'Grade 1 HTN', color: 'text-orange-600', bgColor: 'bg-orange-50', borderColor: 'border-orange-200' };
-                          } else if (systolic >= 130 || diastolic >= 85) {
-                            return { status: 'High Normal', color: 'text-yellow-600', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200' };
-                          } else if (systolic < 90 || diastolic < 60) {
-                            return { status: 'Low', color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' };
-                          }
-                          return { status: 'Optimal', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
-                          
-                        case 'heartRate':
-                          if (value < 60) return { status: 'Bradycardia', color: 'text-orange-600', bgColor: 'bg-orange-50', borderColor: 'border-orange-200' };
-                          if (value > 100) return { status: 'Tachycardia', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
-                          return { status: 'Normal', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
-                          
-                        case 'temperature':
-                          const temp = parseFloat(value);
-                          if (temp < 36.1) return { status: 'Hypothermia', color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' };
-                          if (temp > 37.2) return { status: 'Fever', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
-                          return { status: 'Normal', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
-                          
-                        case 'oxygenSat':
-                          if (value < 90) return { status: 'Critical', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
-                          if (value < 95) return { status: 'Low', color: 'text-orange-600', bgColor: 'bg-orange-50', borderColor: 'border-orange-200' };
-                          return { status: 'Normal', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
-                          
-                        default:
-                          return { status: 'Normal', color: 'text-gray-600', bgColor: 'bg-gray-50', borderColor: 'border-gray-200' };
-                      }
-                    };
 
-                    const bpStatus = getVitalStatus('bloodPressure', latestVitals?.bloodPressureSystolic);
-                    const hrStatus = getVitalStatus('heartRate', latestVitals?.heartRate);
-                    const tempStatus = getVitalStatus('temperature', latestVitals?.temperature);
-                    const o2Status = getVitalStatus('oxygenSat', latestVitals?.oxygenSaturation);
-
-                    return (
-                      <>
-                        {/* Blood Pressure Card */}
-                        <div className={`${bpStatus.bgColor} ${bpStatus.borderColor} border-2 rounded-xl p-6 transition-all duration-200 hover:shadow-lg hover:scale-105`}>
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="p-6 space-y-8">
+                  {/* Critical Vitals Dashboard */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    {/* Blood Pressure Monitor */}
+                    <Card className="border-2 border-red-100 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-red-50/30">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg">
                               <Heart className="w-6 h-6 text-white" />
                             </div>
-                            <div className={`px-3 py-1 rounded-full text-xs font-semibold ${bpStatus.bgColor} ${bpStatus.color} border ${bpStatus.borderColor}`}>
-                              {bpStatus.status}
+                            <div>
+                              <h3 className="text-lg font-bold text-gray-900">Blood Pressure</h3>
+                              <p className="text-sm text-gray-600">Systolic / Diastolic (mmHg)</p>
                             </div>
                           </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-gray-900 mb-1">
-                              {latestVitals?.bloodPressureSystolic && latestVitals?.bloodPressureDiastolic 
-                                ? `${latestVitals.bloodPressureSystolic}/${latestVitals.bloodPressureDiastolic}`
-                                : 'N/A'
-                              }
-                            </div>
-                            <div className="text-sm font-medium text-gray-600">Blood Pressure</div>
-                            <div className="text-xs text-gray-500">mmHg</div>
+                          {vitalSigns && vitalSigns.length > 0 && (
+                            <Badge className={`
+                              ${(() => {
+                                const systolic = vitalSigns[0]?.bloodPressureSystolic;
+                                const diastolic = vitalSigns[0]?.bloodPressureDiastolic;
+                                if (!systolic || !diastolic) return 'bg-gray-100 text-gray-600';
+                                if (systolic >= 180 || diastolic >= 110) return 'bg-red-100 text-red-700 border-red-200';
+                                if (systolic >= 160 || diastolic >= 100) return 'bg-red-100 text-red-600 border-red-200';
+                                if (systolic >= 140 || diastolic >= 90) return 'bg-orange-100 text-orange-700 border-orange-200';
+                                if (systolic >= 130 || diastolic >= 85) return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+                                if (systolic < 90 || diastolic < 60) return 'bg-blue-100 text-blue-700 border-blue-200';
+                                return 'bg-green-100 text-green-700 border-green-200';
+                              })()}
+                            `}>
+                              {(() => {
+                                const systolic = vitalSigns[0]?.bloodPressureSystolic;
+                                const diastolic = vitalSigns[0]?.bloodPressureDiastolic;
+                                if (!systolic || !diastolic) return 'No Data';
+                                if (systolic >= 180 || diastolic >= 110) return 'Grade 3 HTN';
+                                if (systolic >= 160 || diastolic >= 100) return 'Grade 2 HTN';
+                                if (systolic >= 140 || diastolic >= 90) return 'Grade 1 HTN';
+                                if (systolic >= 130 || diastolic >= 85) return 'High Normal';
+                                if (systolic < 90 || diastolic < 60) return 'Low';
+                                return 'Optimal';
+                              })()}
+                            </Badge>
+                          )}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center space-y-4">
+                          <div className="text-4xl font-bold text-gray-900">
+                            {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.bloodPressureSystolic && vitalSigns[0]?.bloodPressureDiastolic
+                              ? `${vitalSigns[0].bloodPressureSystolic}/${vitalSigns[0].bloodPressureDiastolic}`
+                              : '-- / --'
+                            }
+                          </div>
+                          {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.recordedAt && (
+                            <p className="text-xs text-gray-500">
+                              Recorded: {new Date(vitalSigns[0].recordedAt).toLocaleDateString()} at {new Date(vitalSigns[0].recordedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </p>
+                          )}
+                          <div className="flex justify-center gap-2">
+                            <Button size="sm" variant="outline" className="text-xs">
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                              Trends
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-xs">
+                              <AlertTriangle className="w-3 h-3 mr-1" />
+                              Alerts
+                            </Button>
                           </div>
                         </div>
-                        
-                        {/* Heart Rate Card */}
-                        <div className={`${hrStatus.bgColor} ${hrStatus.borderColor} border-2 rounded-xl p-6 transition-all duration-200 hover:shadow-lg hover:scale-105`}>
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                      </CardContent>
+                    </Card>
+
+                    {/* Heart Rate Monitor */}
+                    <Card className="border-2 border-pink-100 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-pink-50/30">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-3 bg-gradient-to-r from-pink-500 to-red-500 rounded-xl shadow-lg">
                               <Activity className="w-6 h-6 text-white" />
                             </div>
-                            <div className={`px-3 py-1 rounded-full text-xs font-semibold ${hrStatus.bgColor} ${hrStatus.color} border ${hrStatus.borderColor}`}>
-                              {hrStatus.status}
+                            <div>
+                              <h3 className="text-lg font-bold text-gray-900">Heart Rate</h3>
+                              <p className="text-sm text-gray-600">Beats per minute (BPM)</p>
                             </div>
                           </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-gray-900 mb-1">
-                              {latestVitals?.heartRate || 'N/A'}
-                            </div>
-                            <div className="text-sm font-medium text-gray-600">Heart Rate</div>
-                            <div className="text-xs text-gray-500">bpm</div>
+                          {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.heartRate && (
+                            <Badge className={`
+                              ${(() => {
+                                const hr = vitalSigns[0]?.heartRate;
+                                if (!hr) return 'bg-gray-100 text-gray-600';
+                                if (hr < 60) return 'bg-orange-100 text-orange-700 border-orange-200';
+                                if (hr > 100) return 'bg-red-100 text-red-700 border-red-200';
+                                return 'bg-green-100 text-green-700 border-green-200';
+                              })()}
+                            `}>
+                              {(() => {
+                                const hr = vitalSigns[0]?.heartRate;
+                                if (!hr) return 'No Data';
+                                if (hr < 60) return 'Bradycardia';
+                                if (hr > 100) return 'Tachycardia';
+                                return 'Normal';
+                              })()}
+                            </Badge>
+                          )}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center space-y-4">
+                          <div className="text-4xl font-bold text-gray-900">
+                            {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.heartRate
+                              ? vitalSigns[0].heartRate
+                              : '--'
+                            }
+                            {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.heartRate && (
+                              <span className="text-lg text-gray-600 ml-2">bpm</span>
+                            )}
+                          </div>
+                          {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.recordedAt && (
+                            <p className="text-xs text-gray-500">
+                              Recorded: {new Date(vitalSigns[0].recordedAt).toLocaleDateString()} at {new Date(vitalSigns[0].recordedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </p>
+                          )}
+                          <div className="flex justify-center gap-2">
+                            <Button size="sm" variant="outline" className="text-xs">
+                              <Activity className="w-3 h-3 mr-1" />
+                              Rhythm
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-xs">
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                              History
+                            </Button>
                           </div>
                         </div>
-                        
-                        {/* Temperature Card */}
-                        <div className={`${tempStatus.bgColor} ${tempStatus.borderColor} border-2 rounded-xl p-6 transition-all duration-200 hover:shadow-lg hover:scale-105`}>
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                              <Thermometer className="w-6 h-6 text-white" />
-                            </div>
-                            <div className={`px-3 py-1 rounded-full text-xs font-semibold ${tempStatus.bgColor} ${tempStatus.color} border ${tempStatus.borderColor}`}>
-                              {tempStatus.status}
-                            </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Secondary Vitals Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    {/* Temperature */}
+                    <Card className="border border-orange-200 hover:shadow-lg transition-all duration-300">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <div className="p-1.5 bg-gradient-to-r from-orange-500 to-amber-500 rounded-lg">
+                            <Thermometer className="w-4 h-4 text-white" />
                           </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-gray-900 mb-1">
-                              {latestVitals?.temperature ? `${parseFloat(latestVitals.temperature).toFixed(1)}°C` : 'N/A'}
-                            </div>
-                            <div className="text-sm font-medium text-gray-600">Temperature</div>
-                            <div className="text-xs text-gray-500">Celsius</div>
+                          <div>
+                            <span className="text-sm font-semibold">Temperature</span>
+                            <p className="text-xs text-gray-500 font-normal">°C</p>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="text-center space-y-2">
+                          <div className="text-2xl font-bold text-gray-900">
+                            {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.temperature
+                              ? `${vitalSigns[0].temperature}°C`
+                              : '--°C'
+                            }
+                          </div>
+                          {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.temperature && (
+                            <Badge className={`text-xs ${(() => {
+                              const temp = parseFloat(vitalSigns[0].temperature);
+                              if (temp < 36.1) return 'bg-blue-100 text-blue-700 border-blue-200';
+                              if (temp > 37.2) return 'bg-red-100 text-red-700 border-red-200';
+                              return 'bg-green-100 text-green-700 border-green-200';
+                            })()}`}>
+                              {(() => {
+                                const temp = parseFloat(vitalSigns[0].temperature);
+                                if (temp < 36.1) return 'Hypothermia';
+                                if (temp > 37.2) return 'Fever';
+                                return 'Normal';
+                              })()}
+                            </Badge>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Oxygen Saturation */}
+                    <Card className="border border-blue-200 hover:shadow-lg transition-all duration-300">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <div className="p-1.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg">
+                            <Droplets className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-semibold">O2 Saturation</span>
+                            <p className="text-xs text-gray-500 font-normal">%</p>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="text-center space-y-2">
+                          <div className="text-2xl font-bold text-gray-900">
+                            {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.oxygenSaturation
+                              ? `${vitalSigns[0].oxygenSaturation}%`
+                              : '--%'
+                            }
+                          </div>
+                          {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.oxygenSaturation && (
+                            <Badge className={`text-xs ${(() => {
+                              const o2 = vitalSigns[0].oxygenSaturation;
+                              if (o2 < 90) return 'bg-red-100 text-red-700 border-red-200';
+                              if (o2 < 95) return 'bg-orange-100 text-orange-700 border-orange-200';
+                              return 'bg-green-100 text-green-700 border-green-200';
+                            })()}`}>
+                              {(() => {
+                                const o2 = vitalSigns[0].oxygenSaturation;
+                                if (o2 < 90) return 'Critical';
+                                if (o2 < 95) return 'Low';
+                                return 'Normal';
+                              })()}
+                            </Badge>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Respiratory Rate */}
+                    <Card className="border border-cyan-200 hover:shadow-lg transition-all duration-300">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <div className="p-1.5 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-lg">
+                            <Wind className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-semibold">Respiratory</span>
+                            <p className="text-xs text-gray-500 font-normal">/min</p>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-gray-900">
+                            {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.respiratoryRate
+                              ? vitalSigns[0].respiratoryRate
+                              : '--'
+                            }
                           </div>
                         </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* BMI Indicator */}
+                    <Card className="border border-purple-200 hover:shadow-lg transition-all duration-300">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <div className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg">
+                            <Gauge className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-semibold">BMI</span>
+                            <p className="text-xs text-gray-500 font-normal">kg/m²</p>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="text-center space-y-1">
+                          <div className="text-2xl font-bold text-gray-900">
+                            {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.weight && vitalSigns[0]?.height
+                              ? (vitalSigns[0].weight / Math.pow(vitalSigns[0].height / 100, 2)).toFixed(1)
+                              : '--'
+                            }
+                          </div>
+                          {vitalSigns && vitalSigns.length > 0 && vitalSigns[0]?.weight && vitalSigns[0]?.height && (
+                            <div className="text-xs text-gray-600">
+                              {vitalSigns[0].weight}kg / {vitalSigns[0].height}cm
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Quick Actions Panel */}
+                  <Card className="bg-gradient-to-r from-gray-50 to-blue-50 border-blue-200">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold text-gray-900 mb-1">Vital Signs Management</h3>
+                          <p className="text-sm text-gray-600">Record new measurements or view historical trends</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Button variant="outline" size="sm" onClick={() => setActiveTab('visits')}>
+                            <History className="w-4 h-4 mr-2" />
+                            View History
+                          </Button>
+                          <Button 
+                            onClick={() => setShowStandaloneVitals(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Record Vitals
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
                         
                         {/* Oxygen Saturation Card */}
                         <div className={`${o2Status.bgColor} ${o2Status.borderColor} border-2 rounded-xl p-6 transition-all duration-200 hover:shadow-lg hover:scale-105`}>
