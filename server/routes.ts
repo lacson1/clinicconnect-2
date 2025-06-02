@@ -892,6 +892,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Optimized: Complete patient data for doctor workflow efficiency
+  app.get("/api/patients/:id/complete", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      
+      // Get patient details first
+      const patient = await storage.getPatient(patientId);
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+
+      // Fetch all related data in parallel for maximum efficiency
+      const [recentVisits, recentLabs, activePrescriptions, activityTrail] = await Promise.all([
+        // Recent visits (last 10)
+        db.select({
+          id: visits.id,
+          visitDate: visits.visitDate,
+          diagnosis: visits.diagnosis,
+          treatment: visits.treatment,
+          doctorId: visits.doctorId,
+          doctorName: users.username,
+          doctorRole: users.role,
+          status: visits.status,
+          notes: visits.notes,
+          followUpDate: visits.followUpDate
+        })
+        .from(visits)
+        .leftJoin(users, eq(visits.doctorId, users.id))
+        .where(eq(visits.patientId, patientId))
+        .orderBy(desc(visits.visitDate))
+        .limit(10),
+
+        // Recent lab orders (last 10)
+        db.select({
+          id: labOrders.id,
+          status: labOrders.status,
+          createdAt: labOrders.createdAt,
+          orderedBy: labOrders.orderedBy
+        })
+        .from(labOrders)
+        .where(eq(labOrders.patientId, patientId))
+        .orderBy(desc(labOrders.createdAt))
+        .limit(10),
+
+        // Active prescriptions
+        db.select({
+          id: prescriptions.id,
+          medicationName: prescriptions.medicationName,
+          dosage: prescriptions.dosage,
+          frequency: prescriptions.frequency,
+          duration: prescriptions.duration,
+          instructions: prescriptions.instructions,
+          status: prescriptions.status,
+          startDate: prescriptions.startDate,
+          endDate: prescriptions.endDate,
+          prescribedBy: prescriptions.prescribedBy
+        })
+        .from(prescriptions)
+        .where(and(
+          eq(prescriptions.patientId, patientId),
+          inArray(prescriptions.status, ['active', 'dispensed', 'pending'])
+        ))
+        .orderBy(desc(prescriptions.startDate))
+        .limit(15),
+
+        // Activity trail - visits only for now (can be expanded)
+        db.select({
+          id: visits.id,
+          type: sql<string>`'visit'`,
+          date: visits.visitDate,
+          description: visits.diagnosis,
+          doctorName: users.username,
+          status: visits.status
+        })
+        .from(visits)
+        .leftJoin(users, eq(visits.doctorId, users.id))
+        .where(eq(visits.patientId, patientId))
+        .orderBy(desc(visits.visitDate))
+        .limit(15)
+      ]);
+
+      // Calculate age
+      const dob = patient.dateOfBirth ? new Date(patient.dateOfBirth) : null;
+      let age = null;
+      if (dob && !isNaN(dob.getTime())) {
+        const today = new Date();
+        age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+          age--;
+        }
+        if (age < 0 || age > 150) age = null;
+      }
+
+      // Compile complete patient data
+      const completePatientData = {
+        patient: {
+          ...patient,
+          age,
+          fullName: `${patient.firstName || ''} ${patient.lastName || ''}`.trim() || 'Unknown'
+        },
+        visits: recentVisits,
+        labs: recentLabs,
+        prescriptions: activePrescriptions,
+        activityTrail,
+        summary: {
+          totalVisits: recentVisits.length,
+          activePrescriptions: activePrescriptions.filter(p => p.status === 'active').length,
+          pendingLabs: recentLabs.filter(l => l.status === 'pending').length,
+          lastVisit: recentVisits[0]?.visitDate || null,
+          lastLabTest: recentLabs[0]?.testDate || null,
+          hasActiveAlerts: recentLabs.some(l => l.status === 'abnormal'),
+          updatedAt: new Date().toISOString()
+        }
+      };
+
+      // Cache headers for optimization
+      res.set('Cache-Control', 'public, max-age=60');
+      res.json(completePatientData);
+      
+    } catch (error) {
+      console.error("Failed to fetch complete patient data:", error);
+      res.status(500).json({ message: "Failed to fetch complete patient data" });
+    }
+  });
+
   // Update patient information
   app.patch("/api/patients/:id", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
