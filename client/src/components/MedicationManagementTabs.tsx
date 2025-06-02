@@ -146,9 +146,10 @@ export default function MedicationManagementTabs({ patient, prescriptions }: Med
       const prescription = prescriptions.find(p => p.id === prescriptionId);
       if (!prescription) throw new Error('Prescription not found');
 
-      return apiRequest(`/api/patients/${patient.id}/past-medications`, {
-        method: 'POST',
-        body: JSON.stringify({
+      return apiRequest(
+        'POST',
+        `/api/patients/${patient.id}/past-medications`,
+        {
           prescriptionId,
           medicationName: prescription.medicationName,
           dosage: prescription.dosage,
@@ -157,8 +158,8 @@ export default function MedicationManagementTabs({ patient, prescriptions }: Med
           startDate: prescription.startDate,
           endDate: prescription.endDate || new Date().toISOString(),
           prescribedBy: 'Current Doctor'
-        })
-      });
+        }
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries([`/api/patients/${patient.id}/past-medications`]);
@@ -171,31 +172,33 @@ export default function MedicationManagementTabs({ patient, prescriptions }: Med
 
   const createRepeatList = useMutation({
     mutationFn: async (data: { name: string; description?: string; prescriptionIds: number[] }) => {
-      const list = await apiRequest(`/api/patients/${patient.id}/repeat-prescriptions`, {
-        method: 'POST',
-        body: JSON.stringify({
+      const list = await apiRequest(
+        'POST',
+        `/api/patients/${patient.id}/repeat-prescriptions`,
+        {
           name: data.name,
           description: data.description,
           patientId: patient.id,
           createdBy: 1 // This should be the current user ID
-        })
-      });
+        }
+      );
 
       // Add selected prescriptions as items
       for (const prescriptionId of data.prescriptionIds) {
         const prescription = prescriptions.find(p => p.id === prescriptionId);
         if (prescription) {
-          await apiRequest(`/api/repeat-prescriptions/${list.id}/items`, {
-            method: 'POST',
-            body: JSON.stringify({
+          await apiRequest(
+            'POST',
+            `/api/repeat-prescriptions/${list.id}/items`,
+            {
               medicationName: prescription.medicationName,
               dosage: prescription.dosage,
               frequency: prescription.frequency,
               duration: prescription.duration,
               quantity: '30 tablets',
               instructions: 'Take as prescribed'
-            })
-          });
+            }
+          );
         }
       }
 
@@ -226,9 +229,10 @@ export default function MedicationManagementTabs({ patient, prescriptions }: Med
         }
       };
 
-      return apiRequest(`/api/patients/${patient.id}/medication-reports`, {
-        method: 'POST',
-        body: JSON.stringify({
+      return apiRequest(
+        'POST',
+        `/api/patients/${patient.id}/medication-reports`,
+        {
           reportType,
           reportPeriod: 'all_time',
           generatedBy: 1, // Current user ID
@@ -237,8 +241,8 @@ export default function MedicationManagementTabs({ patient, prescriptions }: Med
           activeMedications: prescriptions.filter(p => p.status === 'active').length,
           completedMedications: prescriptions.filter(p => p.status === 'completed').length,
           discontinuedMedications: prescriptions.filter(p => p.status === 'discontinued').length
-        })
-      });
+        }
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries([`/api/patients/${patient.id}/medication-reports`]);
@@ -251,14 +255,15 @@ export default function MedicationManagementTabs({ patient, prescriptions }: Med
 
   const bulkUpdateStatus = useMutation({
     mutationFn: async (data: { prescriptionIds: number[]; status: string }) => {
-      return apiRequest('/api/prescriptions/bulk-update', {
-        method: 'PATCH',
-        body: JSON.stringify({
+      return apiRequest(
+        'PATCH',
+        '/api/prescriptions/bulk-update',
+        {
           prescriptionIds: data.prescriptionIds,
           status: data.status,
           performedBy: 1 // Current user ID
-        })
-      });
+        }
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries([`/api/patients/${patient.id}/prescriptions`]);
@@ -279,10 +284,11 @@ export default function MedicationManagementTabs({ patient, prescriptions }: Med
 
       const qrData = `RX${prescriptionId} ${patient.firstName} ${patient.lastName} - ${prescription.medicationName} ${prescription.dosage} ${prescription.frequency} ${prescription.duration} - ${format(new Date(prescription.startDate), 'dd/MM/yyyy')}`;
       
-      return apiRequest(`/api/prescriptions/${prescriptionId}/qr-code`, {
-        method: 'PATCH',
-        body: JSON.stringify({ qrCode: qrData })
-      });
+      return apiRequest(
+        'PATCH',
+        `/api/prescriptions/${prescriptionId}/qr-code`,
+        { qrCode: qrData }
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries([`/api/patients/${patient.id}/prescriptions`]);
