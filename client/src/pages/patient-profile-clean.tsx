@@ -722,18 +722,18 @@ export default function PatientProfile() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="documents"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:border-blue-600 
-                           rounded-lg transition-all duration-300 ease-in-out text-slate-700 hover:bg-blue-50 hover:text-blue-700 border border-transparent
-                           font-medium py-3 px-4 text-sm flex items-center justify-center gap-2 min-h-[44px]"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm 
+                           rounded-md transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-white/50
+                           font-medium py-2 px-3 text-sm flex items-center justify-center gap-2 h-9"
                 >
                   <FileText className="w-4 h-4" />
                   Documents
                 </TabsTrigger>
                 <TabsTrigger 
                   value="chat"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:border-blue-600 
-                           rounded-lg transition-all duration-300 ease-in-out text-slate-700 hover:bg-blue-50 hover:text-blue-700 border border-transparent
-                           font-medium py-3 px-4 text-sm flex items-center justify-center gap-2 min-h-[44px]"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm 
+                           rounded-md transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-white/50
+                           font-medium py-2 px-3 text-sm flex items-center justify-center gap-2 h-9"
                 >
                   <MessageCircle className="w-4 h-4" />
                   Chat
