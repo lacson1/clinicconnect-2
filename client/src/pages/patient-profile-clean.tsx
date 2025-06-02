@@ -146,18 +146,18 @@ export default function PatientProfile() {
     });
     
     if (matchingForm) {
-      // Switch to visits tab and pre-select the form
-      setActiveTab("visits");
-      setSelectedFormId(matchingForm.id);
+      // Switch to consultation tab and pre-select the form
+      setActiveTab("consultation");
+      setPreSelectedFormId(matchingForm.id);
       
-      // Clear the selection after a brief delay
+      // Clear the selection after a brief delay to allow form to load
       setTimeout(() => {
-        setSelectedFormId(null);
-      }, 1500);
+        setPreSelectedFormId(null);
+      }, 2000);
     } else {
-      // Show modal for forms not yet created
-      setSelectedAssessmentType(assessmentType);
-      setShowAssessmentModal(true);
+      // Switch to consultation tab to show form selector for creating new assessment
+      setActiveTab("consultation");
+      setPreSelectedFormId(null);
     }
   };
 
