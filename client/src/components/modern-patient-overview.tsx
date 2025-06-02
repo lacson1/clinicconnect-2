@@ -10,6 +10,7 @@ import { PatientTimeline } from './patient-timeline';
 import { PatientAlertsPanel } from './patient-alerts-panel';
 import { PatientSafetyAlertsRealtime, QuickSafetyIndicator } from './patient-safety-alerts-realtime';
 import PatientVitalSignsTracker from './patient-vital-signs-tracker';
+import { formatPatientName, getPatientInitials } from '@/lib/patient-utils';
 
 import { PatientCommunicationHub } from './patient-communication-hub';
 import ConsultationFormSelector from './consultation-form-selector';
@@ -842,9 +843,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
     return age;
   };
 
-  const getPatientInitials = (firstName: string, lastName: string) => {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
-  };
+
 
   // Fetch activity trail using React Query
   const { data: activityTrail = [] } = useQuery({
@@ -885,7 +884,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
               <Button variant="ghost" className="h-auto p-0 rounded-full hover:scale-105 transition-transform">
                 <Avatar className="w-10 h-10 cursor-pointer">
                   <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-sm">
-                    {getPatientInitials(patient.firstName, patient.lastName)}
+                    {getPatientInitials(patient)}
                   </AvatarFallback>
                 </Avatar>
               </Button>
