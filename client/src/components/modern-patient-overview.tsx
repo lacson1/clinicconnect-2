@@ -904,6 +904,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                           onPrint={handlePrintPrescription}
                           onReorder={handleReorderMedication}
                           onUpdateStatus={handleUpdateMedicationStatus}
+                          onGenerateQR={handleGenerateQRCode}
                         />
                       ))}
                     </div>

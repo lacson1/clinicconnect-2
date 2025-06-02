@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Calendar, Clock, Edit, FileText, MoreVertical, Printer, RefreshCw, UserCheck, XCircle } from "lucide-react";
+import { Calendar, Clock, Edit, FileText, MoreVertical, Printer, QrCode, RefreshCw, UserCheck, XCircle } from "lucide-react";
 
 interface PrescriptionCardProps {
   prescription: any;
@@ -13,6 +13,7 @@ interface PrescriptionCardProps {
   onScheduleReview?: (prescriptionId: number, medicationName: string) => void;
   onIssueRepeat?: (prescriptionId: number, medicationName: string) => void;
   onUpdateStatus?: (prescriptionId: number, status: string) => void;
+  onGenerateQR?: (prescription: any) => void;
 }
 
 export function PrescriptionCard({
@@ -23,7 +24,8 @@ export function PrescriptionCard({
   onReorder,
   onScheduleReview,
   onIssueRepeat,
-  onUpdateStatus
+  onUpdateStatus,
+  onGenerateQR
 }: PrescriptionCardProps) {
   const getVariantStyles = () => {
     switch (variant) {
@@ -69,6 +71,15 @@ export function PrescriptionCard({
             >
               <Edit className="w-3 h-3 mr-1" />
               Edit
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-green-600 hover:text-green-800 border-green-200"
+              onClick={() => onGenerateQR?.(prescription)}
+            >
+              <QrCode className="w-3 h-3 mr-1" />
+              QR Code
             </Button>
             <Button 
               variant="ghost" 
