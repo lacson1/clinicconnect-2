@@ -186,7 +186,7 @@ export function EditPatientModal({ open, onOpenChange, patient, onPatientUpdated
                     <SelectValue placeholder="Select title" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="Mr">Mr</SelectItem>
                     <SelectItem value="Mrs">Mrs</SelectItem>
                     <SelectItem value="Miss">Miss</SelectItem>

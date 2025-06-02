@@ -22,7 +22,11 @@ import {
   Clock,
   UserCheck,
   FileText,
-  Edit
+  Edit,
+  Brain,
+  MessageCircle,
+  Eye,
+  Ear
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { EnhancedVisitRecording } from "@/components/enhanced-visit-recording";
@@ -212,9 +216,10 @@ export default function PatientProfile() {
         <div className="w-full max-w-none">
           {/* Tabs for different sections */}
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="visits">Visits</TabsTrigger>
+              <TabsTrigger value="specialty">Specialty Assessment</TabsTrigger>
               <TabsTrigger value="labs">Lab Results</TabsTrigger>
               <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
               <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -255,20 +260,30 @@ export default function PatientProfile() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Blood Pressure:</span>
-                        <span className="font-medium">120/80 mmHg</span>
+                    {visits && visits.length > 0 && visits[0].bloodPressure ? (
+                      <div className="space-y-2 text-sm">
+                        {visits[0].bloodPressure && (
+                          <div className="flex justify-between">
+                            <span>Blood Pressure:</span>
+                            <span className="font-medium">{visits[0].bloodPressure}</span>
+                          </div>
+                        )}
+                        {visits[0].heartRate && (
+                          <div className="flex justify-between">
+                            <span>Heart Rate:</span>
+                            <span className="font-medium">{visits[0].heartRate} bpm</span>
+                          </div>
+                        )}
+                        {visits[0].temperature && (
+                          <div className="flex justify-between">
+                            <span>Temperature:</span>
+                            <span className="font-medium">{visits[0].temperature}°C</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex justify-between">
-                        <span>Heart Rate:</span>
-                        <span className="font-medium">72 bpm</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Temperature:</span>
-                        <span className="font-medium">36.5°C</span>
-                      </div>
-                    </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">No vital signs recorded yet</p>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -297,6 +312,155 @@ export default function PatientProfile() {
 
             <TabsContent value="visits">
               <ConsultationHistory patientId={patient.id} />
+            </TabsContent>
+
+            <TabsContent value="specialty">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Specialty Assessment Forms</CardTitle>
+                  <CardDescription>Select and complete specialized medical assessment forms</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    
+                    {/* Antenatal Assessment */}
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-pink-200 hover:border-pink-400">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                            <Heart className="w-5 h-5 text-pink-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">Antenatal Assessment</h3>
+                            <p className="text-sm text-gray-500">Prenatal care evaluation</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Pediatric Assessment */}
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-blue-200 hover:border-blue-400">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <User className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">Pediatric Assessment</h3>
+                            <p className="text-sm text-gray-500">Child health evaluation</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Cardiac Assessment */}
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-red-200 hover:border-red-400">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                            <Heart className="w-5 h-5 text-red-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">Cardiac Assessment</h3>
+                            <p className="text-sm text-gray-500">Heart health evaluation</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Respiratory Assessment */}
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-green-200 hover:border-green-400">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <Activity className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">Respiratory Assessment</h3>
+                            <p className="text-sm text-gray-500">Lung function evaluation</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Neurological Assessment */}
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-purple-200 hover:border-purple-400">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <Brain className="w-5 h-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">Neurological Assessment</h3>
+                            <p className="text-sm text-gray-500">Nervous system evaluation</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Mental Health Assessment */}
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-indigo-200 hover:border-indigo-400">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                            <MessageCircle className="w-5 h-5 text-indigo-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">Mental Health Assessment</h3>
+                            <p className="text-sm text-gray-500">Psychological evaluation</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Dermatological Assessment */}
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-orange-200 hover:border-orange-400">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <Eye className="w-5 h-5 text-orange-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">Dermatological Assessment</h3>
+                            <p className="text-sm text-gray-500">Skin health evaluation</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Orthopedic Assessment */}
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-teal-200 hover:border-teal-400">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+                            <Activity className="w-5 h-5 text-teal-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">Orthopedic Assessment</h3>
+                            <p className="text-sm text-gray-500">Bone and joint evaluation</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* ENT Assessment */}
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-yellow-200 hover:border-yellow-400">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <Ear className="w-5 h-5 text-yellow-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">ENT Assessment</h3>
+                            <p className="text-sm text-gray-500">Ear, nose, throat evaluation</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="labs">
