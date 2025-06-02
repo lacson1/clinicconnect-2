@@ -304,7 +304,7 @@ export default function PatientProfile() {
                     <Brain className="w-4 h-4 mr-2" />
                     Specialty Assessment
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setActiveTab("lab-results")}>
+                  <DropdownMenuItem onClick={() => setActiveTab("labs")}>
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Lab Results
                   </DropdownMenuItem>
