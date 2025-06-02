@@ -1,120 +1,264 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Stethoscope, FlaskRound, Pill, FileText, Activity } from 'lucide-react';
-
-interface TimelineEvent {
-  id: number;
-  type: 'visit' | 'lab' | 'prescription' | 'consultation';
-  date: string;
-  title: string;
-  description?: string;
-  status?: string;
-  details?: Record<string, any>;
-}
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { 
+  Calendar, 
+  FlaskRound, 
+  Pill, 
+  Stethoscope, 
+  Clock,
+  Activity,
+  Filter
+} from "lucide-react";
+import { useState } from "react";
 
 interface PatientTimelineProps {
-  events: TimelineEvent[];
+  patientId: number;
 }
 
-export function PatientTimeline({ events }: PatientTimelineProps) {
+interface TimelineEvent {
+  id: string;
+  type: 'visit' | 'lab' | 'prescription' | 'consultation';
+  title: string;
+  description: string;
+  date: string;
+  status?: string;
+}
+
+export default function PatientTimeline({ patientId }: PatientTimelineProps) {
+  const [eventFilters, setEventFilters] = useState({
+    visits: true,
+    labResults: true,
+    consultations: true,
+    prescriptions: true
+  });
+
+  // Fetch visits data
+  const { data: visits = [] } = useQuery({
+    queryKey: [`/api/patients/${patientId}/visits`],
+    enabled: !!patientId,
+  });
+
+  // Fetch lab orders data
+  const { data: labOrders = [] } = useQuery({
+    queryKey: [`/api/patients/${patientId}/lab-orders`],
+    enabled: !!patientId,
+  });
+
+  // Fetch prescriptions data
+  const { data: prescriptions = [] } = useQuery({
+    queryKey: [`/api/patients/${patientId}/prescriptions`],
+    enabled: !!patientId,
+  });
+
+  // Combine all events into timeline format
+  const timelineEvents: TimelineEvent[] = [
+    // Add visits
+    ...(eventFilters.visits ? visits.map((visit: any) => ({
+      id: `visit-${visit.id}`,
+      type: 'visit' as const,
+      title: 'Medical Visit',
+      description: visit.reason || 'Regular visit',
+      date: visit.visitDate,
+      status: visit.status
+    })) : []),
+    
+    // Add lab orders
+    ...(eventFilters.labResults ? labOrders.map((order: any) => ({
+      id: `lab-${order.id}`,
+      type: 'lab' as const,
+      title: 'Lab Order',
+      description: `Ordered by Dr. ${order.doctorName || order.orderedBy}`,
+      date: order.createdAt,
+      status: order.status
+    })) : []),
+    
+    // Add prescriptions
+    ...(eventFilters.prescriptions ? prescriptions.map((prescription: any) => ({
+      id: `prescription-${prescription.id}`,
+      type: 'prescription' as const,
+      title: 'Prescription',
+      description: prescription.medicineName || 'Medication prescribed',
+      date: prescription.createdAt,
+      status: prescription.status
+    })) : [])
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   const getEventIcon = (type: string) => {
     switch (type) {
       case 'visit':
-        return <Stethoscope className="w-4 h-4" />;
+        return <Stethoscope className="w-4 h-4 text-blue-600" />;
       case 'lab':
-        return <FlaskRound className="w-4 h-4" />;
+        return <FlaskRound className="w-4 h-4 text-green-600" />;
       case 'prescription':
-        return <Pill className="w-4 h-4" />;
+        return <Pill className="w-4 h-4 text-purple-600" />;
       case 'consultation':
-        return <FileText className="w-4 h-4" />;
+        return <Activity className="w-4 h-4 text-orange-600" />;
       default:
-        return <Activity className="w-4 h-4" />;
+        return <Clock className="w-4 h-4 text-gray-600" />;
     }
   };
 
-  const getEventColor = (type: string) => {
-    switch (type) {
-      case 'visit':
-        return 'bg-blue-100 text-blue-800';
-      case 'lab':
-        return 'bg-green-100 text-green-800';
-      case 'prescription':
-        return 'bg-purple-100 text-purple-800';
-      case 'consultation':
-        return 'bg-orange-100 text-orange-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const sortedEvents = events
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 10); // Show latest 10 events
-
-  if (sortedEvents.length === 0) {
+  const getStatusBadge = (status: string) => {
+    const statusColors = {
+      completed: 'bg-green-100 text-green-800 border-green-200',
+      pending: 'bg-orange-100 text-orange-800 border-orange-200',
+      active: 'bg-blue-100 text-blue-800 border-blue-200',
+      cancelled: 'bg-red-100 text-red-800 border-red-200'
+    };
+    
     return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <Activity className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Timeline Events</h3>
-          <p className="text-gray-600">Patient history will appear here as visits and treatments are recorded.</p>
-        </CardContent>
-      </Card>
+      <Badge 
+        variant="outline" 
+        className={`text-xs ${statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}`}
+      >
+        {status}
+      </Badge>
     );
-  }
+  };
+
+  const toggleFilter = (filterKey: keyof typeof eventFilters) => {
+    setEventFilters(prev => ({
+      ...prev,
+      [filterKey]: !prev[filterKey]
+    }));
+  };
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold mb-4">Patient Timeline</h3>
-      <div className="relative">
-        {/* Timeline line */}
-        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-        
-        {sortedEvents.map((event, index) => (
-          <div key={event.id} className="relative flex items-start space-x-4 pb-4">
-            {/* Timeline dot */}
-            <div className={`flex-shrink-0 w-12 h-12 rounded-full ${getEventColor(event.type)} flex items-center justify-center relative z-10`}>
-              {getEventIcon(event.type)}
+      {/* Filter Section */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Filter className="w-4 h-4" />
+            Filter Timeline
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-gray-700">Event Types</p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox 
+                  id="visits"
+                  checked={eventFilters.visits}
+                  onCheckedChange={() => toggleFilter('visits')}
+                />
+                <Stethoscope className="w-4 h-4 text-blue-600" />
+                <label htmlFor="visits" className="text-sm">Visits</label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox 
+                  id="labResults"
+                  checked={eventFilters.labResults}
+                  onCheckedChange={() => toggleFilter('labResults')}
+                />
+                <FlaskRound className="w-4 h-4 text-green-600" />
+                <label htmlFor="labResults" className="text-sm">Lab Results</label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox 
+                  id="consultations"
+                  checked={eventFilters.consultations}
+                  onCheckedChange={() => toggleFilter('consultations')}
+                />
+                <Activity className="w-4 h-4 text-orange-600" />
+                <label htmlFor="consultations" className="text-sm">Consultations</label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox 
+                  id="prescriptions"
+                  checked={eventFilters.prescriptions}
+                  onCheckedChange={() => toggleFilter('prescriptions')}
+                />
+                <Pill className="w-4 h-4 text-purple-600" />
+                <label htmlFor="prescriptions" className="text-sm">Prescriptions</label>
+              </div>
             </div>
-            
-            {/* Event content */}
-            <div className="flex-1 min-w-0">
-              <Card className="shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium text-gray-900">{event.title}</h4>
-                    <span className="text-xs text-gray-500">
-                      {new Date(event.date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  
-                  {event.description && (
-                    <p className="text-sm text-gray-600 mb-2">{event.description}</p>
-                  )}
-                  
-                  {event.status && (
-                    <Badge variant="secondary" className="text-xs">
-                      {event.status}
-                    </Badge>
-                  )}
-                  
-                  {/* Additional details based on event type */}
-                  {event.type === 'visit' && event.details && (
-                    <div className="mt-2 text-xs text-gray-500 space-y-1">
-                      {event.details.bloodPressure && (
-                        <div>BP: {event.details.bloodPressure}</div>
-                      )}
-                      {event.details.temperature && (
-                        <div>Temp: {event.details.temperature}°C</div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            <div className="pt-2 border-t">
+              <p className="text-sm text-gray-500">
+                Showing {timelineEvents.length} events
+              </p>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs mt-1 h-6 px-2"
+                onClick={() => setEventFilters({
+                  visits: true,
+                  labResults: true,
+                  consultations: true,
+                  prescriptions: true
+                })}
+              >
+                Reset
+              </Button>
             </div>
           </div>
-        ))}
-      </div>
+        </CardContent>
+      </Card>
+
+      {/* Timeline Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            Patient Timeline
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {timelineEvents.length === 0 ? (
+            <div className="text-center py-8">
+              <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-sm font-medium text-gray-900">No events found</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                No timeline events match your current filters.
+              </p>
+            </div>
+          ) : (
+            <div className="relative">
+              {/* Timeline line */}
+              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+              
+              <div className="space-y-6">
+                {timelineEvents.map((event, index) => (
+                  <div key={event.id} className="relative flex items-start gap-4">
+                    {/* Timeline icon */}
+                    <div className="relative z-10 flex items-center justify-center w-12 h-12 bg-white border-2 border-gray-200 rounded-full">
+                      {getEventIcon(event.type)}
+                    </div>
+                    
+                    {/* Event content */}
+                    <div className="flex-1 min-w-0 pb-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-900">
+                            {event.title}
+                          </h4>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {event.description}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500">
+                            {new Date(event.date).toLocaleDateString('en-US', {
+                              month: '2-digit',
+                              day: '2-digit',
+                              year: '2-digit'
+                            })}
+                          </span>
+                          {event.status && getStatusBadge(event.status)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

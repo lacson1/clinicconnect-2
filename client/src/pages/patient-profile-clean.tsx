@@ -75,6 +75,7 @@ import PatientLabOrdersSummary from "@/components/patient-lab-orders-summary";
 import StandaloneVitalSignsRecorder from "@/components/standalone-vital-signs-recorder";
 import VitalSignsTrends from "@/components/vital-signs-trends";
 import VitalSignsAlerts from "@/components/vital-signs-alerts";
+import PatientTimeline from "@/components/patient-timeline";
 import type { Patient, Visit, LabResult, Prescription } from "@shared/schema";
 
 interface Organization {
@@ -657,6 +658,15 @@ export default function PatientProfile() {
                 >
                   <User className="w-4 h-4" />
                   Overview
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="timeline"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:border-blue-600 
+                           rounded-lg transition-all duration-300 ease-in-out text-slate-700 hover:bg-blue-50 hover:text-blue-700 border border-transparent
+                           font-medium py-3 px-4 text-sm flex items-center justify-center gap-2 min-h-[44px]"
+                >
+                  <Clock className="w-4 h-4" />
+                  Timeline
                 </TabsTrigger>
                 <TabsTrigger 
                   value="vitals"
