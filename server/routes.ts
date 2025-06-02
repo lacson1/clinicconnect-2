@@ -5124,12 +5124,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentDate = new Date().toLocaleDateString('en-GB');
 
       // Debug log to check prescription data
-      console.log('Prescription Data for Print:', {
-        medicationName: prescriptionData.medicationName,
-        dosage: prescriptionData.dosage,
-        frequency: prescriptionData.frequency,
-        duration: prescriptionData.duration,
-        instructions: prescriptionData.instructions
+      console.log('Full Prescription Data for Print:', prescriptionData);
+      console.log('Patient Data:', {
+        title: prescriptionData.patientTitle,
+        firstName: prescriptionData.patientFirstName,
+        lastName: prescriptionData.patientLastName,
+        phone: prescriptionData.patientPhone,
+        dob: prescriptionData.patientDateOfBirth,
+        gender: prescriptionData.patientGender
+      });
+      console.log('Organization Data:', {
+        name: prescriptionData.organizationName,
+        address: prescriptionData.organizationAddress,
+        phone: prescriptionData.organizationPhone
       });
 
       // Generate medical standard prescription with organization letterhead
@@ -5456,15 +5463,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 </head>
 <body>
   <div class="header">
-    <h1>${prescriptionData.organizationName}</h1>
-    <p>${prescriptionData.organizationAddress}</p>
+    <h1>${prescriptionData.organizationName || 'Healthcare Facility'}</h1>
+    <p>${prescriptionData.organizationAddress || 'Healthcare Facility Address'}</p>
     <h2>℞ MEDICAL PRESCRIPTION</h2>
     <p>Prescription No: RX-${String(prescriptionId).padStart(4, '0')}</p>
   </div>
   
   <div class="section">
     <h3>Patient Information</h3>
-    <p><strong>Name:</strong> ${prescriptionData.patientTitle} ${prescriptionData.patientFirstName} ${prescriptionData.patientLastName}</p>
+    <p><strong>Name:</strong> ${(prescriptionData.patientTitle || '') + ' ' + (prescriptionData.patientFirstName || '') + ' ' + (prescriptionData.patientLastName || '')}</p>
     <p><strong>DOB:</strong> ${prescriptionData.patientDateOfBirth || 'Not specified'}</p>
     <p><strong>Gender:</strong> ${prescriptionData.patientGender || 'Not specified'}</p>
     <p><strong>Phone:</strong> ${prescriptionData.patientPhone || 'Not provided'}</p>
@@ -5472,22 +5479,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   <div class="section">
     <h3>Prescribed Medication</h3>
-    <div class="medication">${prescriptionData.medicationName}</div>
-    <p><strong>Strength:</strong> ${prescriptionData.dosage}</p>
-    <p><strong>Frequency:</strong> ${prescriptionData.frequency}</p>
-    <p><strong>Duration:</strong> ${prescriptionData.duration}</p>
-    ${prescriptionData.instructions ? `<p><strong>Instructions:</strong> ${prescriptionData.instructions}</p>` : ''}
+    <div class="medication">${prescriptionData.medicationName || 'Unknown Medication'}</div>
+    <p><strong>Strength:</strong> ${prescriptionData.dosage || 'Not specified'}</p>
+    <p><strong>Frequency:</strong> ${prescriptionData.frequency || 'Not specified'}</p>
+    <p><strong>Duration:</strong> ${prescriptionData.duration || 'Not specified'}</p>
+    ${prescriptionData.instructions ? `<p><strong>Instructions:</strong> ${prescriptionData.instructions}</p>` : '<p><strong>Instructions:</strong> Take as directed</p>'}
   </div>
   
   <div class="section">
-    <p><strong>Prescribed by:</strong> ${prescriptionData.prescribedBy}</p>
-    <p><strong>Date Prescribed:</strong> ${prescriptionDate}</p>
-    <p><strong>Date Printed:</strong> ${currentDate}</p>
+    <p><strong>Prescribed by:</strong> ${prescriptionData.prescribedBy || 'Healthcare Provider'}</p>
+    <p><strong>Date Prescribed:</strong> ${prescriptionDate || 'Not available'}</p>
+    <p><strong>Date Printed:</strong> ${currentDate || new Date().toLocaleDateString('en-GB')}</p>
   </div>
   
   <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #666;">
     This prescription is valid for dispensing at any licensed pharmacy<br>
-    For verification, contact ${prescriptionData.organizationPhone}
+    For verification, contact ${prescriptionData.organizationPhone || 'the prescribing facility'}
   </div>
 </body>
 </html>`;
