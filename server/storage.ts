@@ -12,6 +12,11 @@ import {
   vaccinations,
   allergies,
   medicalHistory,
+  pastMedications,
+  repeatPrescriptionLists,
+  repeatPrescriptionItems,
+  medicationSummaryReports,
+  bulkOperations,
   type Patient, 
   type InsertPatient,
   type Visit,
@@ -35,7 +40,17 @@ import {
   type Allergy,
   type InsertAllergy,
   type MedicalHistory,
-  type InsertMedicalHistory
+  type InsertMedicalHistory,
+  type PastMedication,
+  type InsertPastMedication,
+  type RepeatPrescriptionList,
+  type InsertRepeatPrescriptionList,
+  type RepeatPrescriptionItem,
+  type InsertRepeatPrescriptionItem,
+  type MedicationSummaryReport,
+  type InsertMedicationSummaryReport,
+  type BulkOperation,
+  type InsertBulkOperation
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, gte, lte, and, ilike, or, sql } from "drizzle-orm";
