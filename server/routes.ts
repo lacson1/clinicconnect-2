@@ -5428,21 +5428,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </html>
       `;
 
-      // Create a minimal test template to identify the issue
+      // Create a prescription template using actual data
       const simpleHtml = `<!DOCTYPE html>
 <html>
 <head>
-  <title>Prescription Test</title>
+  <title>Medical Prescription - RX${prescriptionId}</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 20px; 
+      padding: 20px;
+      background: white;
+      color: black;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .header { 
+      text-align: center; 
+      border-bottom: 2px solid #22c55e; 
+      padding-bottom: 15px; 
+      margin-bottom: 20px; 
+    }
+    .org-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #16a34a;
+      margin: 0;
+    }
+    .section { 
+      margin: 20px 0; 
+      padding: 15px; 
+      border: 1px solid #ddd; 
+      background: #f9f9f9;
+    }
+    .medication { 
+      font-size: 18px; 
+      font-weight: bold; 
+      color: #16a34a; 
+      margin-bottom: 10px; 
+    }
+    .info {
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .rx-symbol {
+      font-size: 36px;
+      color: #22c55e;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-  <h1>MEDICAL PRESCRIPTION</h1>
-  <h2>Lagos Island Hospital</h2>
-  <p>Patient: Alhaji Mufutau Babalola</p>
-  <p>Medication: Amoxicillin 500mg</p>
-  <p>Frequency: Every 8 hours</p>
-  <p>Duration: 7 days</p>
-  <p>Prescribed by: ade</p>
-  <p>Date: 02/06/2025</p>
+  <div class="header">
+    <h1 class="org-name">${prescriptionData.organizationName || 'Healthcare Facility'}</h1>
+    <p>${prescriptionData.organizationAddress || 'Healthcare Address'}</p>
+    <p>Tel: ${prescriptionData.organizationPhone || 'Contact Number'} | Email: ${prescriptionData.organizationEmail || 'Contact Email'}</p>
+    <div class="rx-symbol">℞</div>
+    <h2>MEDICAL PRESCRIPTION</h2>
+    <p>Prescription No: RX-${String(prescriptionId).padStart(4, '0')}</p>
+  </div>
+  
+  <div class="section">
+    <h3>Patient Information</h3>
+    <div class="info"><strong>Name:</strong> ${(prescriptionData.patientTitle || '') + ' ' + (prescriptionData.patientFirstName || '') + ' ' + (prescriptionData.patientLastName || '')}</div>
+    <div class="info"><strong>Date of Birth:</strong> ${prescriptionData.patientDateOfBirth ? new Date(prescriptionData.patientDateOfBirth).toLocaleDateString('en-GB') : 'Not specified'}</div>
+    <div class="info"><strong>Gender:</strong> ${prescriptionData.patientGender || 'Not specified'}</div>
+    <div class="info"><strong>Phone:</strong> ${prescriptionData.patientPhone || 'Not provided'}</div>
+  </div>
+  
+  <div class="section">
+    <h3>Prescribed Medication</h3>
+    <div class="medication">${prescriptionData.medicationName || 'Unknown Medication'}</div>
+    <div class="info"><strong>Strength:</strong> ${prescriptionData.dosage || 'Not specified'}</div>
+    <div class="info"><strong>Frequency:</strong> ${prescriptionData.frequency || 'Not specified'}</div>
+    <div class="info"><strong>Duration:</strong> ${prescriptionData.duration || 'Not specified'}</div>
+    ${prescriptionData.instructions ? `<div class="info"><strong>Instructions:</strong> ${prescriptionData.instructions}</div>` : '<div class="info"><strong>Instructions:</strong> Take as directed</div>'}
+  </div>
+  
+  <div class="section">
+    <div class="info"><strong>Prescribed by:</strong> ${prescriptionData.prescribedBy || 'Healthcare Provider'}</div>
+    <div class="info"><strong>Date Prescribed:</strong> ${prescriptionDate || 'Not available'}</div>
+    <div class="info"><strong>Date Printed:</strong> ${currentDate || new Date().toLocaleDateString('en-GB')}</div>
+  </div>
+  
+  <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 15px;">
+    This prescription is valid for dispensing at any licensed pharmacy in Nigeria<br>
+    For verification, contact ${prescriptionData.organizationPhone || 'the prescribing facility'}
+  </div>
 </body>
 </html>`;
 
