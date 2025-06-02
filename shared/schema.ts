@@ -139,6 +139,13 @@ export const prescriptions = pgTable("prescriptions", {
   startDate: timestamp("start_date").defaultNow().notNull(),
   endDate: timestamp("end_date"),
   pharmacyId: integer("pharmacy_id").references(() => pharmacies.id), // Reference to selected pharmacy
+  pharmacyStatus: text("pharmacy_status").default("pending"), // pending, sent, dispensed, ready, collected
+  sentToPharmacyAt: timestamp("sent_to_pharmacy_at"),
+  dispensedAt: timestamp("dispensed_at"),
+  collectedAt: timestamp("collected_at"),
+  pharmacistNotes: text("pharmacist_notes"),
+  quantity: text("quantity"),
+  isRepeat: boolean("is_repeat").default(false),
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

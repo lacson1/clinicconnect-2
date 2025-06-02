@@ -1104,16 +1104,38 @@ export default function PatientProfile() {
                                             <RotateCcw className="mr-2 h-4 w-4" />
                                             Add to Repeat
                                           </DropdownMenuItem>
-                                          <DropdownMenuItem onClick={() => {
-                                            const pharmacyData = {
-                                              prescriptionId: prescription.id,
-                                              medication: prescription.medicationName,
-                                              patient: `${patient?.firstName} ${patient?.lastName}`,
-                                              dosage: prescription.dosage,
-                                              quantity: prescription.quantity || 'As prescribed'
-                                            };
-                                            navigator.clipboard.writeText(JSON.stringify(pharmacyData, null, 2));
-                                            alert(`Prescription details for ${prescription.medicationName} copied to clipboard for pharmacy transmission`);
+                                          <DropdownMenuItem onClick={async () => {
+                                            try {
+                                              const pharmaciesResponse = await fetch('/api/pharmacies');
+                                              const pharmacies = await pharmaciesResponse.json();
+                                              
+                                              if (pharmacies.length === 0) {
+                                                alert('No pharmacies available. Please contact administrator.');
+                                                return;
+                                              }
+                                              
+                                              // For simplicity, use the first available pharmacy
+                                              // In a full implementation, you would show a selection dialog
+                                              const selectedPharmacy = pharmacies[0];
+                                              
+                                              const response = await fetch(`/api/prescriptions/${prescription.id}/send-to-pharmacy`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ 
+                                                  pharmacyId: selectedPharmacy.id,
+                                                  notes: `Prescription for ${prescription.medicationName} sent from clinic`
+                                                })
+                                              });
+                                              
+                                              if (response.ok) {
+                                                alert(`Prescription for ${prescription.medicationName} sent to ${selectedPharmacy.name} successfully`);
+                                                window.location.reload();
+                                              } else {
+                                                throw new Error('Failed to send prescription');
+                                              }
+                                            } catch (error) {
+                                              alert('Failed to send prescription to pharmacy. Please try again.');
+                                            }
                                           }}>
                                             <Send className="mr-2 h-4 w-4" />
                                             Send to Pharmacy

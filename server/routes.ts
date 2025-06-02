@@ -1498,6 +1498,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send prescription to pharmacy
+  app.post("/api/prescriptions/:id/send-to-pharmacy", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const prescriptionId = parseInt(req.params.id);
+      const { pharmacyId, notes } = req.body;
+
+      if (!pharmacyId) {
+        return res.status(400).json({ message: "Pharmacy ID is required" });
+      }
+
+      const [updatedPrescription] = await db
+        .update(prescriptions)
+        .set({
+          pharmacyId: pharmacyId,
+          pharmacyStatus: 'sent',
+          sentToPharmacyAt: new Date(),
+          pharmacistNotes: notes || null
+        })
+        .where(eq(prescriptions.id, prescriptionId))
+        .returning();
+
+      if (!updatedPrescription) {
+        return res.status(404).json({ message: "Prescription not found" });
+      }
+
+      // Log pharmacy activity
+      await db.insert(pharmacyActivities).values({
+        pharmacistId: req.user!.id,
+        activityType: 'prescription_received',
+        prescriptionId: prescriptionId,
+        patientId: updatedPrescription.patientId,
+        title: 'Prescription Received',
+        description: `Prescription for ${updatedPrescription.medicationName} received from clinic`,
+        status: 'pending',
+        organizationId: req.user!.organizationId
+      });
+
+      res.json(updatedPrescription);
+    } catch (error) {
+      console.error('Send to pharmacy error:', error);
+      res.status(500).json({ message: "Failed to send prescription to pharmacy" });
+    }
+  });
+
+  // Update pharmacy status (for pharmacists)
+  app.patch("/api/prescriptions/:id/pharmacy-status", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const prescriptionId = parseInt(req.params.id);
+      const { pharmacyStatus, pharmacistNotes } = req.body;
+
+      if (!pharmacyStatus || !['pending', 'sent', 'dispensed', 'ready', 'collected'].includes(pharmacyStatus)) {
+        return res.status(400).json({ message: "Invalid pharmacy status provided" });
+      }
+
+      const updateData: any = {
+        pharmacyStatus: pharmacyStatus,
+        pharmacistNotes: pharmacistNotes || null
+      };
+
+      if (pharmacyStatus === 'dispensed') {
+        updateData.dispensedAt = new Date();
+      } else if (pharmacyStatus === 'collected') {
+        updateData.collectedAt = new Date();
+        updateData.status = 'completed'; // Mark prescription as completed when collected
+      }
+
+      const [updatedPrescription] = await db
+        .update(prescriptions)
+        .set(updateData)
+        .where(eq(prescriptions.id, prescriptionId))
+        .returning();
+
+      if (!updatedPrescription) {
+        return res.status(404).json({ message: "Prescription not found" });
+      }
+
+      // Log pharmacy activity
+      const activityTitle = pharmacyStatus === 'dispensed' ? 'Medication Dispensed' :
+                           pharmacyStatus === 'collected' ? 'Medication Collected' :
+                           pharmacyStatus === 'ready' ? 'Medication Ready for Collection' :
+                           'Prescription Status Updated';
+
+      await db.insert(pharmacyActivities).values({
+        pharmacistId: req.user!.id,
+        activityType: 'dispensing',
+        prescriptionId: prescriptionId,
+        patientId: updatedPrescription.patientId,
+        title: activityTitle,
+        description: `${updatedPrescription.medicationName} - ${pharmacyStatus}`,
+        status: 'completed',
+        organizationId: req.user!.organizationId
+      });
+
+      res.json(updatedPrescription);
+    } catch (error) {
+      console.error('Update pharmacy status error:', error);
+      res.status(500).json({ message: "Failed to update pharmacy status" });
+    }
+  });
+
   app.get("/api/patients/:id/prescriptions/active", async (req, res) => {
     try {
       const patientId = parseInt(req.params.id);
