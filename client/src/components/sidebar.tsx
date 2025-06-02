@@ -56,9 +56,9 @@ const getNavigationGroupsForRole = (role: string) => {
     },
     {
       name: "Specialized Care",
-      icon: Heart,
+      icon: Stethoscope,
       items: [
-        { name: "Physiotherapy", href: "/physiotherapy", icon: Heart, roles: ["superadmin", "admin", "physiotherapist"] },
+        { name: "Physiotherapy", href: "/physiotherapy", icon: Activity, roles: ["superadmin", "admin", "physiotherapist"] },
         { name: "Procedural Reports", href: "/procedural-reports", icon: ClipboardList, roles: ["superadmin", "admin", "doctor", "nurse"] },
         { name: "Telemedicine", href: "/telemedicine", icon: Heart, roles: ["superadmin", "admin", "doctor", "nurse"] },
         { 
