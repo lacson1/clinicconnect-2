@@ -179,31 +179,18 @@ app.use((req, res, next) => {
   // Simple diagnostic page to test display
   app.get('/', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('X-Frame-Options', 'ALLOWALL');
     res.send(`<!DOCTYPE html>
     <html>
     <head>
       <meta charset="UTF-8">
       <title>Bluequee Healthcare Platform</title>
-      <style>
-        body { 
-          background: #ff0000; 
-          color: white; 
-          font-size: 32px; 
-          padding: 40px; 
-          text-align: center;
-          font-family: Arial, sans-serif;
-        }
-        .blink { animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
-      </style>
+      <meta http-equiv="refresh" content="0; url=/app">
     </head>
-    <body>
-      <h1 class="blink">🏥 HEALTHCARE PLATFORM ACTIVE</h1>
-      <p>✅ SERVER IS WORKING CORRECTLY</p>
-      <p>Time: ${new Date().toLocaleString()}</p>
-      <p>Status: ONLINE</p>
-      <p><a href="/app" style="color: yellow; font-size: 28px;">Click here for full healthcare app</a></p>
-      <p style="font-size: 18px; margin-top: 20px;">Direct URL: <span style="color: #90EE90;">https://${req.get('host')}</span></p>
+    <body style="background: #2563eb; color: white; font-family: Arial; text-align: center; padding: 50px;">
+      <h1>🏥 Redirecting to Healthcare Platform...</h1>
+      <p>If not redirected automatically, <a href="/app" style="color: #90EE90;">click here</a></p>
     </body></html>`);
   });
 
