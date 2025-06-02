@@ -140,7 +140,7 @@ export default function PatientLabResults({ patientId }: PatientLabResultsProps)
                               {order.status.replace('_', ' ').toUpperCase()}
                             </Badge>
                             <Badge className={getPriorityColor(order.priority)}>
-                              {order.priority.toUpperCase()}
+                              {order.priority ? order.priority.toUpperCase() : 'NORMAL'}
                             </Badge>
                           </div>
                           
