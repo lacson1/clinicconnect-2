@@ -105,30 +105,40 @@ export default function StandaloneVitalSignsRecorder({
     },
   });
 
-  const handleSubmit = () => {
-    // Validate required fields
-    if (!vitalSigns.bloodPressureSystolic || !vitalSigns.bloodPressureDiastolic) {
+  const handleSubmit = async () => {
+    try {
+      // Validate required fields
+      if (!vitalSigns.bloodPressureSystolic || !vitalSigns.bloodPressureDiastolic) {
+        toast({
+          title: "Missing Information",
+          description: "Blood pressure is required. Please enter both systolic and diastolic values.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const vitalData = {
+        bloodPressureSystolic: parseInt(vitalSigns.bloodPressureSystolic) || null,
+        bloodPressureDiastolic: parseInt(vitalSigns.bloodPressureDiastolic) || null,
+        heartRate: parseInt(vitalSigns.heartRate) || null,
+        temperature: parseFloat(vitalSigns.temperature) || null,
+        respiratoryRate: parseInt(vitalSigns.respiratoryRate) || null,
+        oxygenSaturation: parseInt(vitalSigns.oxygenSaturation) || null,
+        weight: parseFloat(vitalSigns.weight) || null,
+        height: parseFloat(vitalSigns.height) || null,
+      };
+
+      setIsRecording(true);
+      recordVitalsMutation.mutate(vitalData);
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
       toast({
-        title: "Missing Information",
-        description: "Blood pressure is required. Please enter both systolic and diastolic values.",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-      return;
+      setIsRecording(false);
     }
-
-    const vitalData = {
-      bloodPressureSystolic: parseInt(vitalSigns.bloodPressureSystolic) || null,
-      bloodPressureDiastolic: parseInt(vitalSigns.bloodPressureDiastolic) || null,
-      heartRate: parseInt(vitalSigns.heartRate) || null,
-      temperature: parseFloat(vitalSigns.temperature) || null,
-      respiratoryRate: parseInt(vitalSigns.respiratoryRate) || null,
-      oxygenSaturation: parseInt(vitalSigns.oxygenSaturation) || null,
-      weight: parseFloat(vitalSigns.weight) || null,
-      height: parseFloat(vitalSigns.height) || null,
-    };
-
-    setIsRecording(true);
-    recordVitalsMutation.mutate(vitalData);
   };
 
   const updateVitalSign = (field: keyof VitalSignsData, value: string) => {

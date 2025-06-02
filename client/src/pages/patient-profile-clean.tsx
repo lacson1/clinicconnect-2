@@ -840,6 +840,61 @@ export default function PatientProfile() {
             </TabsContent>
 
             <TabsContent value="visits" className="space-y-6">
+              {/* Nursing Quick Actions Panel */}
+              {(user?.role === 'nurse' || user?.role === 'admin') && (
+                <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <UserCheck className="w-5 h-5 text-green-600" />
+                      Nursing Actions
+                    </CardTitle>
+                    <CardDescription>
+                      Quick access to common nursing tasks and patient care activities.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setShowStandaloneVitals(true)}
+                        className="justify-start btn-outline hover:bg-green-50 hover:border-green-300 transition-all duration-200"
+                      >
+                        <Activity className="w-4 h-4 mr-2 text-green-600" />
+                        Record Vitals
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setActiveTab('prescriptions')}
+                        className="justify-start btn-outline hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+                      >
+                        <Pill className="w-4 h-4 mr-2 text-blue-600" />
+                        Check Medications
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setActiveTab('lab')}
+                        className="justify-start btn-outline hover:bg-purple-50 hover:border-purple-300 transition-all duration-200"
+                      >
+                        <FlaskRound className="w-4 h-4 mr-2 text-purple-600" />
+                        Lab Preparation
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setActiveTab('chat')}
+                        className="justify-start btn-outline hover:bg-orange-50 hover:border-orange-300 transition-all duration-200"
+                      >
+                        <MessageCircle className="w-4 h-4 mr-2 text-orange-600" />
+                        Patient Notes
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Visit Recording Interface */}
               <Card>
                 <CardHeader>
