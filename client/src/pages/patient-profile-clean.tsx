@@ -871,7 +871,7 @@ export default function PatientProfile() {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        onClick={() => setShowLabModal(true)}
+                        onClick={() => setActiveTab("lab-orders")}
                         className="justify-start btn-outline hover:bg-emerald-50 hover:border-emerald-300 transition-all duration-200"
                       >
                         <FlaskRound className="w-4 h-4 mr-2 icon-professional text-emerald-600" />
