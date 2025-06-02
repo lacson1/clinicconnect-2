@@ -523,23 +523,80 @@ export default function PatientProfile() {
             </TabsContent>
 
             <TabsContent value="visits" className="space-y-6">
-              <ConsultationFormSelector 
-                patientId={patient.id} 
-                patient={patient}
-                preSelectedFormId={preSelectedFormId}
-              />
-              
-              {/* Chat Integration */}
+              {/* Visit Recording Interface */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <MessageCircle className="w-5 h-5 text-blue-500" />
-                    Patient Communication
+                    <Stethoscope className="w-5 h-5 text-blue-500" />
+                    Record Patient Visit
                   </CardTitle>
-                  <CardDescription>Send messages and view communication history</CardDescription>
+                  <CardDescription>
+                    Record comprehensive visit details including vital signs, symptoms, diagnosis, and treatment plans.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <PatientChat patientId={patient.id} />
+                  <Button 
+                    onClick={() => setShowVisitModal(true)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Start New Visit Recording
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Recent Visits & Consultations */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <History className="w-5 h-5 text-gray-500" />
+                    Recent Visits & Consultations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {visits && visits.length > 0 ? (
+                    <div className="space-y-4">
+                      {visits.map((visit: any) => (
+                        <div key={visit.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline" className="text-blue-600">
+                                  consultation
+                                </Badge>
+                                <span className="text-sm text-gray-500">{visit.visitDate}</span>
+                              </div>
+                              <h4 className="font-semibold text-lg mb-1">{visit.reasonForVisit}</h4>
+                              {visit.diagnosis && (
+                                <p className="text-sm text-gray-600 mb-2">
+                                  <strong>Diagnosis:</strong> {visit.diagnosis}
+                                </p>
+                              )}
+                              {visit.vitalSigns && (
+                                <div className="text-sm text-gray-600">
+                                  <strong>Vitals:</strong> BP: {visit.vitalSigns.bloodPressure || 'N/A'} | HR: {visit.vitalSigns.heartRate || 'N/A'}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <FileText className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No visits recorded yet</p>
+                      <p className="text-sm">Start by recording a new visit</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -1089,6 +1146,13 @@ export default function PatientProfile() {
             </TabsContent>
 
             <TabsContent value="specialty">
+              {/* Consultation Form Selector */}
+              <ConsultationFormSelector 
+                patientId={patient.id} 
+                patient={patient}
+                preSelectedFormId={preSelectedFormId}
+              />
+              
               <Card>
                 <CardHeader>
                   <div className="flex justify-between items-center">
