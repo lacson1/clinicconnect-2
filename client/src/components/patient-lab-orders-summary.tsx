@@ -10,6 +10,7 @@ interface LabOrder {
   status: 'pending' | 'completed' | 'cancelled';
   createdAt: string;
   completedAt: string | null;
+  doctorName: string;
 }
 
 interface PatientLabOrdersSummaryProps {
@@ -73,7 +74,7 @@ export default function PatientLabOrdersSummary({ patientId }: PatientLabOrdersS
                 </span>
               </div>
               <div className="text-xs text-gray-500 mt-1">
-                By Doctor #{order.orderedBy}
+                By Dr. {order.doctorName || `Doctor #${order.orderedBy}`}
               </div>
             </div>
             <Badge 

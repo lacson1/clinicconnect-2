@@ -2231,10 +2231,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const patientId = parseInt(req.params.id);
       
-      const orders = await db.select()
+      const orders = await db.select({
+        id: labOrders.id,
+        patientId: labOrders.patientId,
+        orderedBy: labOrders.orderedBy,
+        status: labOrders.status,
+        createdAt: labOrders.createdAt,
+        completedAt: labOrders.completedAt,
+        doctorName: users.username
+      })
         .from(labOrders)
+        .leftJoin(users, eq(labOrders.orderedBy, users.id))
         .where(eq(labOrders.patientId, patientId))
-        .orderBy(labOrders.createdAt);
+        .orderBy(desc(labOrders.createdAt));
       
       res.json(orders);
     } catch (error) {
