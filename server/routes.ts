@@ -6086,9 +6086,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           phone,
           email,
           website,
-          registration_number as "registrationNumber",
-          license_number as "licenseNumber",
-          description,
           theme_color as "themeColor",
           logo_url as "logoUrl"
         FROM organizations 
