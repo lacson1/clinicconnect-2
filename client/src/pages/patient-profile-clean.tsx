@@ -134,6 +134,47 @@ export default function PatientProfile() {
 
   const filteredVisits = filterVisitsByTimeRange(visits, vitalsTimeRange);
   
+  // Helper function to determine vital sign status and color
+  const getVitalStatus = (type: string, value: any) => {
+    if (!value || value === 'N/A') return { status: 'No Data', color: 'text-gray-500', bgColor: 'from-gray-50 to-gray-100', borderColor: 'border-gray-500' };
+    
+    switch (type) {
+      case 'bloodPressure':
+        if (typeof value === 'string' && value.includes('/')) {
+          const [systolic, diastolic] = value.split('/').map(Number);
+          if (systolic >= 120 && systolic <= 139 || diastolic >= 80 && diastolic <= 89) {
+            return { status: 'Elevated', color: 'text-yellow-800', bgColor: 'from-yellow-50 to-yellow-100', borderColor: 'border-yellow-500' };
+          } else if (systolic >= 140 || diastolic >= 90) {
+            return { status: 'High', color: 'text-red-800', bgColor: 'from-red-50 to-red-100', borderColor: 'border-red-500' };
+          } else if (systolic < 90 || diastolic < 60) {
+            return { status: 'Low', color: 'text-orange-800', bgColor: 'from-orange-50 to-orange-100', borderColor: 'border-orange-500' };
+          }
+        }
+        return { status: 'Normal', color: 'text-green-800', bgColor: 'from-green-50 to-green-100', borderColor: 'border-green-500' };
+      
+      case 'heartRate':
+        const hr = typeof value === 'string' ? parseInt(value) : value;
+        if (hr < 60) {
+          return { status: 'Low', color: 'text-orange-800', bgColor: 'from-orange-50 to-orange-100', borderColor: 'border-orange-500' };
+        } else if (hr > 100) {
+          return { status: 'High', color: 'text-red-800', bgColor: 'from-red-50 to-red-100', borderColor: 'border-red-500' };
+        }
+        return { status: 'Normal', color: 'text-green-800', bgColor: 'from-green-50 to-green-100', borderColor: 'border-green-500' };
+      
+      case 'temperature':
+        const temp = typeof value === 'string' ? parseFloat(value) : value;
+        if (temp < 36.1) {
+          return { status: 'Low', color: 'text-blue-800', bgColor: 'from-blue-50 to-blue-100', borderColor: 'border-blue-500' };
+        } else if (temp > 37.2) {
+          return { status: 'High', color: 'text-red-800', bgColor: 'from-red-50 to-red-100', borderColor: 'border-red-500' };
+        }
+        return { status: 'Normal', color: 'text-green-800', bgColor: 'from-green-50 to-green-100', borderColor: 'border-green-500' };
+      
+      default:
+        return { status: 'Normal', color: 'text-green-800', bgColor: 'from-green-50 to-green-100', borderColor: 'border-green-500' };
+    }
+  };
+
   // Calculate summary statistics for filtered data
   const calculateVitalStats = (visits: any[]) => {
     const visitsWithVitals = visits?.filter(v => v.bloodPressure || v.heartRate || v.temperature) || [];
@@ -143,18 +184,25 @@ export default function PatientProfile() {
     const hrValues = visitsWithVitals.filter(v => v.heartRate).map(v => parseInt(v.heartRate));
     const tempValues = visitsWithVitals.filter(v => v.temperature).map(v => parseFloat(v.temperature));
     
+    const avgBp = bpValues.length > 0 ? bpValues[0] : 'N/A';
+    const avgHr = hrValues.length > 0 ? Math.round(hrValues.reduce((a, b) => a + b, 0) / hrValues.length) : 'N/A';
+    const avgTemp = tempValues.length > 0 ? (tempValues.reduce((a, b) => a + b, 0) / tempValues.length).toFixed(1) : 'N/A';
+    
     return {
       bloodPressure: {
-        trend: bpValues.length > 0 ? 'Stable' : 'No Data',
-        average: bpValues.length > 0 ? bpValues[0] : 'N/A'
+        trend: getVitalStatus('bloodPressure', avgBp).status,
+        average: avgBp,
+        ...getVitalStatus('bloodPressure', avgBp)
       },
       heartRate: {
-        trend: hrValues.length > 0 ? 'Normal' : 'No Data',
-        average: hrValues.length > 0 ? Math.round(hrValues.reduce((a, b) => a + b, 0) / hrValues.length) : 'N/A'
+        trend: getVitalStatus('heartRate', avgHr).status,
+        average: avgHr,
+        ...getVitalStatus('heartRate', avgHr)
       },
       temperature: {
-        trend: tempValues.length > 0 ? 'Normal' : 'No Data',
-        average: tempValues.length > 0 ? (tempValues.reduce((a, b) => a + b, 0) / tempValues.length).toFixed(1) : 'N/A'
+        trend: getVitalStatus('temperature', avgTemp).status,
+        average: avgTemp,
+        ...getVitalStatus('temperature', avgTemp)
       }
     };
   };
@@ -1441,20 +1489,20 @@ export default function PatientProfile() {
                     <div className="space-y-6">
                       {/* Summary Statistics */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg border-l-4 border-red-500">
-                          <div className="text-sm text-red-700 font-medium">Blood Pressure Trend</div>
-                          <div className="text-lg font-bold text-red-800">{vitalStats?.bloodPressure?.trend || 'No Data'}</div>
-                          <div className="text-xs text-red-600">Average: {vitalStats?.bloodPressure?.average || 'N/A'}</div>
+                        <div className={`bg-gradient-to-r ${vitalStats?.bloodPressure?.bgColor || 'from-gray-50 to-gray-100'} p-4 rounded-lg border-l-4 ${vitalStats?.bloodPressure?.borderColor || 'border-gray-500'}`}>
+                          <div className={`text-sm font-medium ${vitalStats?.bloodPressure?.color || 'text-gray-700'}`}>Blood Pressure Trend</div>
+                          <div className={`text-lg font-bold ${vitalStats?.bloodPressure?.color || 'text-gray-800'}`}>{vitalStats?.bloodPressure?.trend || 'No Data'}</div>
+                          <div className={`text-xs ${vitalStats?.bloodPressure?.color || 'text-gray-600'}`}>Average: {vitalStats?.bloodPressure?.average || 'N/A'}</div>
                         </div>
-                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border-l-4 border-blue-500">
-                          <div className="text-sm text-blue-700 font-medium">Heart Rate Trend</div>
-                          <div className="text-lg font-bold text-blue-800">{vitalStats?.heartRate?.trend || 'No Data'}</div>
-                          <div className="text-xs text-blue-600">Average: {vitalStats?.heartRate?.average || 'N/A'} {typeof vitalStats?.heartRate?.average === 'number' ? 'bpm' : ''}</div>
+                        <div className={`bg-gradient-to-r ${vitalStats?.heartRate?.bgColor || 'from-gray-50 to-gray-100'} p-4 rounded-lg border-l-4 ${vitalStats?.heartRate?.borderColor || 'border-gray-500'}`}>
+                          <div className={`text-sm font-medium ${vitalStats?.heartRate?.color || 'text-gray-700'}`}>Heart Rate Trend</div>
+                          <div className={`text-lg font-bold ${vitalStats?.heartRate?.color || 'text-gray-800'}`}>{vitalStats?.heartRate?.trend || 'No Data'}</div>
+                          <div className={`text-xs ${vitalStats?.heartRate?.color || 'text-gray-600'}`}>Average: {vitalStats?.heartRate?.average || 'N/A'} {typeof vitalStats?.heartRate?.average === 'number' ? 'bpm' : ''}</div>
                         </div>
-                        <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-lg border-l-4 border-orange-500">
-                          <div className="text-sm text-orange-700 font-medium">Temperature Trend</div>
-                          <div className="text-lg font-bold text-orange-800">{vitalStats?.temperature?.trend || 'No Data'}</div>
-                          <div className="text-xs text-orange-600">Average: {vitalStats?.temperature?.average || 'N/A'} {typeof vitalStats?.temperature?.average === 'number' ? '°C' : ''}</div>
+                        <div className={`bg-gradient-to-r ${vitalStats?.temperature?.bgColor || 'from-gray-50 to-gray-100'} p-4 rounded-lg border-l-4 ${vitalStats?.temperature?.borderColor || 'border-gray-500'}`}>
+                          <div className={`text-sm font-medium ${vitalStats?.temperature?.color || 'text-gray-700'}`}>Temperature Trend</div>
+                          <div className={`text-lg font-bold ${vitalStats?.temperature?.color || 'text-gray-800'}`}>{vitalStats?.temperature?.trend || 'No Data'}</div>
+                          <div className={`text-xs ${vitalStats?.temperature?.color || 'text-gray-600'}`}>Average: {vitalStats?.temperature?.average || 'N/A'} {typeof vitalStats?.temperature?.average === 'number' ? '°C' : ''}</div>
                         </div>
                       </div>
 
@@ -1486,31 +1534,92 @@ export default function PatientProfile() {
                               
                               <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
                                 {visit.bloodPressure && (
-                                  <div className="bg-white p-3 rounded-lg border border-red-200 hover:border-red-300 transition-colors">
-                                    <div className="text-red-600 font-medium text-xs">Blood Pressure</div>
-                                    <div className="font-bold text-red-800">{visit.bloodPressure}</div>
+                                  <div className={`bg-white p-3 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
+                                    getVitalStatus('bloodPressure', visit.bloodPressure).status === 'Normal' ? 'border-green-200 hover:border-green-300' :
+                                    getVitalStatus('bloodPressure', visit.bloodPressure).status === 'Elevated' ? 'border-yellow-200 hover:border-yellow-300' :
+                                    getVitalStatus('bloodPressure', visit.bloodPressure).status === 'High' ? 'border-red-200 hover:border-red-300' :
+                                    'border-orange-200 hover:border-orange-300'
+                                  }`}>
+                                    <div className={`font-medium text-xs flex items-center justify-between`}>
+                                      <span className={
+                                        getVitalStatus('bloodPressure', visit.bloodPressure).status === 'Normal' ? 'text-green-600' :
+                                        getVitalStatus('bloodPressure', visit.bloodPressure).status === 'Elevated' ? 'text-yellow-600' :
+                                        getVitalStatus('bloodPressure', visit.bloodPressure).status === 'High' ? 'text-red-600' :
+                                        'text-orange-600'
+                                      }>Blood Pressure</span>
+                                      <span className={`text-xs px-2 py-1 rounded-full ${
+                                        getVitalStatus('bloodPressure', visit.bloodPressure).status === 'Normal' ? 'bg-green-100 text-green-700' :
+                                        getVitalStatus('bloodPressure', visit.bloodPressure).status === 'Elevated' ? 'bg-yellow-100 text-yellow-700' :
+                                        getVitalStatus('bloodPressure', visit.bloodPressure).status === 'High' ? 'bg-red-100 text-red-700' :
+                                        'bg-orange-100 text-orange-700'
+                                      }`}>{getVitalStatus('bloodPressure', visit.bloodPressure).status}</span>
+                                    </div>
+                                    <div className={`font-bold ${
+                                      getVitalStatus('bloodPressure', visit.bloodPressure).status === 'Normal' ? 'text-green-800' :
+                                      getVitalStatus('bloodPressure', visit.bloodPressure).status === 'Elevated' ? 'text-yellow-800' :
+                                      getVitalStatus('bloodPressure', visit.bloodPressure).status === 'High' ? 'text-red-800' :
+                                      'text-orange-800'
+                                    }`}>{visit.bloodPressure}</div>
                                   </div>
                                 )}
                                 {visit.heartRate && (
-                                  <div className="bg-white p-3 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors">
-                                    <div className="text-blue-600 font-medium text-xs">Heart Rate</div>
-                                    <div className="font-bold text-blue-800">{visit.heartRate} bpm</div>
+                                  <div className={`bg-white p-3 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
+                                    getVitalStatus('heartRate', visit.heartRate).status === 'Normal' ? 'border-green-200 hover:border-green-300' :
+                                    getVitalStatus('heartRate', visit.heartRate).status === 'High' ? 'border-red-200 hover:border-red-300' :
+                                    'border-orange-200 hover:border-orange-300'
+                                  }`}>
+                                    <div className={`font-medium text-xs flex items-center justify-between`}>
+                                      <span className={
+                                        getVitalStatus('heartRate', visit.heartRate).status === 'Normal' ? 'text-green-600' :
+                                        getVitalStatus('heartRate', visit.heartRate).status === 'High' ? 'text-red-600' :
+                                        'text-orange-600'
+                                      }>Heart Rate</span>
+                                      <span className={`text-xs px-2 py-1 rounded-full ${
+                                        getVitalStatus('heartRate', visit.heartRate).status === 'Normal' ? 'bg-green-100 text-green-700' :
+                                        getVitalStatus('heartRate', visit.heartRate).status === 'High' ? 'bg-red-100 text-red-700' :
+                                        'bg-orange-100 text-orange-700'
+                                      }`}>{getVitalStatus('heartRate', visit.heartRate).status}</span>
+                                    </div>
+                                    <div className={`font-bold ${
+                                      getVitalStatus('heartRate', visit.heartRate).status === 'Normal' ? 'text-green-800' :
+                                      getVitalStatus('heartRate', visit.heartRate).status === 'High' ? 'text-red-800' :
+                                      'text-orange-800'
+                                    }`}>{visit.heartRate} bpm</div>
                                   </div>
                                 )}
                                 {visit.temperature && (
-                                  <div className="bg-white p-3 rounded-lg border border-orange-200 hover:border-orange-300 transition-colors">
-                                    <div className="text-orange-600 font-medium text-xs">Temperature</div>
-                                    <div className="font-bold text-orange-800">{visit.temperature}°C</div>
+                                  <div className={`bg-white p-3 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
+                                    getVitalStatus('temperature', visit.temperature).status === 'Normal' ? 'border-green-200 hover:border-green-300' :
+                                    getVitalStatus('temperature', visit.temperature).status === 'High' ? 'border-red-200 hover:border-red-300' :
+                                    'border-blue-200 hover:border-blue-300'
+                                  }`}>
+                                    <div className={`font-medium text-xs flex items-center justify-between`}>
+                                      <span className={
+                                        getVitalStatus('temperature', visit.temperature).status === 'Normal' ? 'text-green-600' :
+                                        getVitalStatus('temperature', visit.temperature).status === 'High' ? 'text-red-600' :
+                                        'text-blue-600'
+                                      }>Temperature</span>
+                                      <span className={`text-xs px-2 py-1 rounded-full ${
+                                        getVitalStatus('temperature', visit.temperature).status === 'Normal' ? 'bg-green-100 text-green-700' :
+                                        getVitalStatus('temperature', visit.temperature).status === 'High' ? 'bg-red-100 text-red-700' :
+                                        'bg-blue-100 text-blue-700'
+                                      }`}>{getVitalStatus('temperature', visit.temperature).status}</span>
+                                    </div>
+                                    <div className={`font-bold ${
+                                      getVitalStatus('temperature', visit.temperature).status === 'Normal' ? 'text-green-800' :
+                                      getVitalStatus('temperature', visit.temperature).status === 'High' ? 'text-red-800' :
+                                      'text-blue-800'
+                                    }`}>{visit.temperature}°C</div>
                                   </div>
                                 )}
                                 {visit.weight && (
-                                  <div className="bg-white p-3 rounded-lg border border-green-200 hover:border-green-300 transition-colors">
-                                    <div className="text-green-600 font-medium text-xs">Weight</div>
-                                    <div className="font-bold text-green-800">{visit.weight} kg</div>
+                                  <div className="bg-white p-3 rounded-lg border-2 border-indigo-200 hover:border-indigo-300 transition-all duration-200 hover:shadow-md">
+                                    <div className="text-indigo-600 font-medium text-xs">Weight</div>
+                                    <div className="font-bold text-indigo-800">{visit.weight} kg</div>
                                   </div>
                                 )}
                                 {visit.height && (
-                                  <div className="bg-white p-3 rounded-lg border border-purple-200 hover:border-purple-300 transition-colors">
+                                  <div className="bg-white p-3 rounded-lg border-2 border-purple-200 hover:border-purple-300 transition-all duration-200 hover:shadow-md">
                                     <div className="text-purple-600 font-medium text-xs">Height</div>
                                     <div className="font-bold text-purple-800">{visit.height} cm</div>
                                   </div>
