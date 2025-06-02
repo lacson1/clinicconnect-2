@@ -1681,19 +1681,15 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                     <span>{patient.phone}</span>
                   </div>
                   
-                  {patient.email && (
-                    <div className="flex items-center space-x-2">
-                      <Mail className="w-4 h-4 text-gray-400" />
-                      <span className="truncate">{patient.email}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    <Mail className="w-4 h-4 text-gray-400" />
+                    <span className="truncate">{patient.email || 'Email not recorded'}</span>
+                  </div>
 
-                  {patient.address && (
-                    <div className="flex items-center space-x-2 md:col-span-2">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="truncate">{patient.address}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-2 md:col-span-2">
+                    <MapPin className="w-4 h-4 text-gray-400" />
+                    <span className="truncate">{patient.address || 'Address not recorded'}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>

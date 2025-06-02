@@ -176,7 +176,7 @@ export default function PatientAccessCards() {
             <div class="clinic-name">Bluequee Patient Portal</div>
           </div>
           <div class="patient-section">
-            <div class="patient-name">${patient.first_name} ${patient.last_name}</div>
+            <div class="patient-name">${patient.title ? `${patient.title} ` : ''}${patient.first_name} ${patient.last_name}</div>
             <div class="credentials">
               <div class="credential-row">
                 <span class="label">Patient ID:</span>
