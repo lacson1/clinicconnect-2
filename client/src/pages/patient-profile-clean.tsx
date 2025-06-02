@@ -1188,7 +1188,6 @@ export default function PatientProfile() {
                   </CardTitle>
                   <CardDescription>Track patient vitals over time</CardDescription>
                 </CardHeader>
-                <CardContent>
                   {visits && visits.filter(v => v.bloodPressure || v.heartRate || v.temperature).length > 0 ? (
                     <div className="space-y-4">
                       {visits
@@ -1251,7 +1250,6 @@ export default function PatientProfile() {
                       </p>
                     </div>
                   )}
-                </CardContent>
               </Card>
             </TabsContent>
 
