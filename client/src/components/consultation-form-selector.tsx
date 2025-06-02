@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,13 +47,15 @@ interface ConsultationFormSelectorProps {
   visitId?: number;
   patient?: any;
   onFormSubmit?: (data: any) => void;
+  preSelectedFormId?: number | null;
 }
 
 export default function ConsultationFormSelector({ 
   patientId, 
   visitId, 
   patient,
-  onFormSubmit 
+  onFormSubmit,
+  preSelectedFormId 
 }: ConsultationFormSelectorProps) {
   const [selectedFormId, setSelectedFormId] = useState<number | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -78,6 +80,17 @@ export default function ConsultationFormSelector({
 
   // Get unique specialist roles for filter dropdown
   const uniqueRoles = Array.from(new Set(forms.map(form => form.specialistRole))).sort();
+
+  // Auto-select form when preSelectedFormId is provided
+  useEffect(() => {
+    if (preSelectedFormId && forms.length > 0) {
+      const formExists = forms.find(form => form.id === preSelectedFormId);
+      if (formExists) {
+        setSelectedFormId(preSelectedFormId);
+        setIsFormSelectorOpen(false); // Collapse the selector to show the form
+      }
+    }
+  }, [preSelectedFormId, forms]);
 
   // Get selected form details
   const selectedForm = forms.find(form => form.id === selectedFormId);

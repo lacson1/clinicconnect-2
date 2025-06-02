@@ -39,6 +39,7 @@ import PatientChat from "@/components/patient-chat";
 import LabOrderForm from "@/components/lab-order-form";
 import LabOrdersList from "@/components/lab-orders-list";
 import ConsultationHistory from "@/components/consultation-history";
+import ConsultationFormSelector from "@/components/consultation-form-selector";
 import VaccinationManagement from "@/components/vaccination-management";
 import AllergyManagement from "@/components/allergy-management";
 import MedicalHistoryManagement from "@/components/medical-history-management";
@@ -118,6 +119,11 @@ export default function PatientProfile() {
       // Switch to visits tab (where consultation forms are) and pre-select the form
       setActiveTab("visits");
       setSelectedFormId(matchingForm.id);
+      
+      // Clear the selection after a brief moment to allow for future selections
+      setTimeout(() => {
+        setSelectedFormId(null);
+      }, 1000);
     } else {
       // Fallback to assessment modal for forms not yet created
       setSelectedAssessmentType(assessmentType);
