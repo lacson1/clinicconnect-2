@@ -530,7 +530,7 @@ export default function PatientProfile() {
                     {/* Orthopedic Assessment */}
                     <Card 
                       className="cursor-pointer hover:shadow-lg transition-shadow border-teal-200 hover:border-teal-400"
-                      onClick={() => handleAssessmentSelection('orthopedic')}
+                      onClick={() => handleAssessmentFormSelect('orthopedic')}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
@@ -548,7 +548,7 @@ export default function PatientProfile() {
                     {/* ENT Assessment */}
                     <Card 
                       className="cursor-pointer hover:shadow-lg transition-shadow border-yellow-200 hover:border-yellow-400"
-                      onClick={() => handleAssessmentSelection('ent')}
+                      onClick={() => handleAssessmentFormSelect('ent')}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
