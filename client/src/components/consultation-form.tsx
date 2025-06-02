@@ -280,7 +280,7 @@ export default function ConsultationForm({ patientId, onComplete }: Consultation
         <CardContent className="flex items-center justify-center p-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading consultation forms...</p>
+            <p className="mt-2 text-gray-600">Loading specialty assessments...</p>
           </div>
         </CardContent>
       </Card>
@@ -293,13 +293,13 @@ export default function ConsultationForm({ patientId, onComplete }: Consultation
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Select Consultation Form
+            Select Specialty Assessment
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <p className="text-gray-600">
-              Choose a consultation form to record patient assessment:
+              Choose a specialty assessment to record patient evaluation:
             </p>
             <div className="grid gap-3">
               {forms.length === 0 ? (

@@ -2449,7 +2449,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       res.json(forms);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch consultation forms" });
+      res.status(500).json({ message: "Failed to fetch specialty assessments" });
     }
   });
 
@@ -2459,12 +2459,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const form = await storage.getConsultationForm(id);
       
       if (!form) {
-        return res.status(404).json({ message: "Consultation form not found" });
+        return res.status(404).json({ message: "Specialty assessment not found" });
       }
       
       res.json(form);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch consultation form" });
+      res.status(500).json({ message: "Failed to fetch specialty assessment" });
     }
   });
 

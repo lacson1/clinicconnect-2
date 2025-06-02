@@ -257,7 +257,7 @@ export const medications = pgTable('medications', {
   createdAt: timestamp('created_at').defaultNow()
 });
 
-// Consultation Forms - Specialist-specific form templates
+// Specialty Assessments - Specialist-specific assessment templates
 export const consultationForms = pgTable('consultation_forms', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 100 }).notNull(), // e.g., "Cardiology Assessment"
@@ -270,7 +270,7 @@ export const consultationForms = pgTable('consultation_forms', {
   updatedAt: timestamp('updated_at').defaultNow()
 });
 
-// Consultation Records - Filled forms linked to patients
+// Consultation Records - Completed specialty assessments linked to patients
 export const consultationRecords = pgTable('consultation_records', {
   id: serial('id').primaryKey(),
   patientId: integer('patient_id').references(() => patients.id).notNull(),
