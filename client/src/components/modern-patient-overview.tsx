@@ -10,7 +10,7 @@ import { PatientTimeline } from './patient-timeline';
 import { PatientAlertsPanel } from './patient-alerts-panel';
 import { PatientSafetyAlertsRealtime, QuickSafetyIndicator } from './patient-safety-alerts-realtime';
 import PatientVitalSignsTracker from './patient-vital-signs-tracker';
-import SmartAppointmentScheduler from './smart-appointment-scheduler';
+
 import { PatientCommunicationHub } from './patient-communication-hub';
 import ConsultationFormSelector from './consultation-form-selector';
 import { PatientDropdownMenu } from './patient-dropdown-menu';
