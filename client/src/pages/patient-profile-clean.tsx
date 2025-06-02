@@ -63,6 +63,9 @@ export default function PatientProfile() {
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [showLabModal, setShowLabModal] = useState(false);
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [showAssessmentFormBuilder, setShowAssessmentFormBuilder] = useState(false);
+  const [selectedAssessmentType, setSelectedAssessmentType] = useState<string | null>(null);
+  const [showAssessmentModal, setShowAssessmentModal] = useState(false);
   const [showEditPatientModal, setShowEditPatientModal] = useState(false);
 
   const { data: patient, isLoading: patientLoading } = useQuery<Patient>({
@@ -94,6 +97,49 @@ export default function PatientProfile() {
   const currentOrganization = Array.isArray(organizations) 
     ? organizations.find(org => org.id === (user as any)?.organizationId)
     : undefined;
+
+  // Fetch consultation forms for specialty assessments
+  const { data: consultationForms = [] } = useQuery({
+    queryKey: ["/api/consultation-forms"],
+  });
+
+  // Handler for selecting an assessment form
+  const handleAssessmentFormSelect = (assessmentType: string) => {
+    setSelectedAssessmentType(assessmentType);
+    setShowAssessmentModal(true);
+  };
+
+  // Handler for creating a new assessment form
+  const handleCreateAssessmentForm = () => {
+    setShowAssessmentFormBuilder(true);
+  };
+
+  // Handler for completing an assessment
+  const handleAssessmentComplete = async (assessmentData: any) => {
+    try {
+      // Save the assessment as a consultation record
+      const consultationData = {
+        patientId: patientId,
+        type: 'specialty_assessment',
+        specialtyType: selectedAssessmentType,
+        findings: assessmentData.findings || '',
+        diagnosis: assessmentData.diagnosis || '',
+        treatment: assessmentData.treatment || '',
+        notes: JSON.stringify(assessmentData),
+        followUpDate: assessmentData.followUpDate,
+      };
+
+      // This would integrate with your existing visit recording system
+      console.log('Saving specialty assessment:', consultationData);
+      setShowAssessmentModal(false);
+      setSelectedAssessmentType(null);
+      
+      // Refresh consultation history
+      // The consultation would appear in the visits tab
+    } catch (error) {
+      console.error('Error saving assessment:', error);
+    }
+  };
 
   if (patientLoading) {
     return (
@@ -317,14 +363,49 @@ export default function PatientProfile() {
             <TabsContent value="specialty">
               <Card>
                 <CardHeader>
-                  <CardTitle>Specialty Assessment Forms</CardTitle>
-                  <CardDescription>Select and complete specialized medical assessment forms</CardDescription>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle>Specialty Assessment Forms</CardTitle>
+                      <CardDescription>Select and complete specialized medical assessment forms</CardDescription>
+                    </div>
+                    <Button 
+                      onClick={handleCreateAssessmentForm}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Form
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     
-                    {/* Antenatal Assessment */}
-                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-pink-200 hover:border-pink-400">
+                    {/* Display forms from form builder */}
+                    {consultationForms.map((form: any) => (
+                      <Card 
+                        key={form.id}
+                        className="cursor-pointer hover:shadow-lg transition-shadow border-gray-200 hover:border-blue-400"
+                        onClick={() => handleAssessmentFormSelect(form.templateName || form.name)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                              <FileText className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-gray-900">{form.templateName || form.name}</h3>
+                              <p className="text-sm text-gray-500">Custom assessment form</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    
+                    {/* Default Specialty Assessment Cards */}
+                    <Card 
+                      className="cursor-pointer hover:shadow-lg transition-shadow border-pink-200 hover:border-pink-400"
+                      onClick={() => handleAssessmentFormSelect('antenatal')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
@@ -339,7 +420,10 @@ export default function PatientProfile() {
                     </Card>
 
                     {/* Pediatric Assessment */}
-                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-blue-200 hover:border-blue-400">
+                    <Card 
+                      className="cursor-pointer hover:shadow-lg transition-shadow border-blue-200 hover:border-blue-400"
+                      onClick={() => handleAssessmentFormSelect('pediatric')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -354,7 +438,10 @@ export default function PatientProfile() {
                     </Card>
 
                     {/* Cardiac Assessment */}
-                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-red-200 hover:border-red-400">
+                    <Card 
+                      className="cursor-pointer hover:shadow-lg transition-shadow border-red-200 hover:border-red-400"
+                      onClick={() => handleAssessmentFormSelect('cardiac')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
@@ -369,7 +456,10 @@ export default function PatientProfile() {
                     </Card>
 
                     {/* Respiratory Assessment */}
-                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-green-200 hover:border-green-400">
+                    <Card 
+                      className="cursor-pointer hover:shadow-lg transition-shadow border-green-200 hover:border-green-400"
+                      onClick={() => handleAssessmentFormSelect('respiratory')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -384,7 +474,10 @@ export default function PatientProfile() {
                     </Card>
 
                     {/* Neurological Assessment */}
-                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-purple-200 hover:border-purple-400">
+                    <Card 
+                      className="cursor-pointer hover:shadow-lg transition-shadow border-purple-200 hover:border-purple-400"
+                      onClick={() => handleAssessmentFormSelect('neurological')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -399,7 +492,10 @@ export default function PatientProfile() {
                     </Card>
 
                     {/* Mental Health Assessment */}
-                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-indigo-200 hover:border-indigo-400">
+                    <Card 
+                      className="cursor-pointer hover:shadow-lg transition-shadow border-indigo-200 hover:border-indigo-400"
+                      onClick={() => handleAssessmentFormSelect('mental-health')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
@@ -414,7 +510,10 @@ export default function PatientProfile() {
                     </Card>
 
                     {/* Dermatological Assessment */}
-                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-orange-200 hover:border-orange-400">
+                    <Card 
+                      className="cursor-pointer hover:shadow-lg transition-shadow border-orange-200 hover:border-orange-400"
+                      onClick={() => handleAssessmentFormSelect('dermatological')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -429,7 +528,10 @@ export default function PatientProfile() {
                     </Card>
 
                     {/* Orthopedic Assessment */}
-                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-teal-200 hover:border-teal-400">
+                    <Card 
+                      className="cursor-pointer hover:shadow-lg transition-shadow border-teal-200 hover:border-teal-400"
+                      onClick={() => handleAssessmentSelection('orthopedic')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
@@ -444,7 +546,10 @@ export default function PatientProfile() {
                     </Card>
 
                     {/* ENT Assessment */}
-                    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-yellow-200 hover:border-yellow-400">
+                    <Card 
+                      className="cursor-pointer hover:shadow-lg transition-shadow border-yellow-200 hover:border-yellow-400"
+                      onClick={() => handleAssessmentSelection('ent')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
