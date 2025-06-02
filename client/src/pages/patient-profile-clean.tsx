@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import QRCode from 'qrcode.react';
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
@@ -112,6 +113,8 @@ export default function PatientProfile() {
   const [vitalsTimeRange, setVitalsTimeRange] = useState('30'); // Days to show
   const [showPrescriptionPrintModal, setShowPrescriptionPrintModal] = useState(false);
   const [selectedPrescriptionForPrint, setSelectedPrescriptionForPrint] = useState(null);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrCodeData, setQRCodeData] = useState('');
 
   // Handle lab orders navigation events
   useEffect(() => {
@@ -1283,8 +1286,8 @@ export default function PatientProfile() {
                                               prescribedDate: prescription.createdAt,
                                               verificationCode: `RX${prescription.id}${new Date().getFullYear()}`
                                             });
-                                            navigator.clipboard.writeText(qrData);
-                                            alert(`QR Code data copied to clipboard for ${prescription.medicationName}`);
+                                            setQRCodeData(qrData);
+                                            setShowQRModal(true);
                                           }}>
                                             <QrCode className="mr-2 h-4 w-4" />
                                             Generate QR Code
@@ -2347,6 +2350,61 @@ export default function PatientProfile() {
           }}
         />
       )}
+
+      {/* QR Code Modal */}
+      <Dialog open={showQRModal} onOpenChange={setShowQRModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-green-600" />
+              Prescription QR Code
+            </DialogTitle>
+            <DialogDescription>
+              Scan this QR code to verify prescription details
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center space-y-4 py-6">
+            {qrCodeData && (
+              <div className="p-4 bg-white border rounded-lg shadow-sm">
+                <QRCode 
+                  value={qrCodeData} 
+                  size={200}
+                  level="M"
+                  includeMargin={true}
+                />
+              </div>
+            )}
+            
+            <div className="text-center space-y-2">
+              <p className="text-sm text-gray-600">
+                This QR code contains secure prescription verification information
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (qrCodeData) {
+                      navigator.clipboard.writeText(qrCodeData);
+                      alert('QR code data copied to clipboard');
+                    }
+                  }}
+                >
+                  Copy Data
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowQRModal(false)}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Hidden Printable Patient Summary */}
       <div className="hidden">
