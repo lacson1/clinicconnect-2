@@ -1184,42 +1184,8 @@ export default function PatientProfile() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="labs">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Laboratory Results</CardTitle>
-                  <CardDescription>Recent lab tests and results</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {labResults?.map((lab: any) => (
-                      <div key={lab.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium">{lab.testName}</h4>
-                            <p className="text-sm text-gray-500">
-                              {new Date(lab.testDate).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <Badge variant={lab.status === 'normal' ? 'default' : 'destructive'}>
-                            {lab.status}
-                          </Badge>
-                        </div>
-                        <div className="mt-2">
-                          <p className="text-sm">
-                            <span className="font-medium">Result:</span> {lab.result} {lab.unit}
-                          </p>
-                          {lab.referenceRange && (
-                            <p className="text-sm text-gray-500">
-                              Reference: {lab.referenceRange}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="labs" className="space-y-6">
+              <PatientLabResults patientId={patient.id} />
             </TabsContent>
 
             <TabsContent value="documents">
