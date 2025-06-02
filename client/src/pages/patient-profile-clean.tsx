@@ -1172,20 +1172,39 @@ export default function PatientProfile() {
                       switch (type) {
                         case 'bloodPressure':
                           const systolic = latestVitals?.bloodPressureSystolic;
-                          if (systolic < 90) return { status: 'Low', color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' };
-                          if (systolic > 140) return { status: 'High', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
-                          return { status: 'Normal', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
+                          const diastolic = latestVitals?.bloodPressureDiastolic;
+                          if (!systolic || !diastolic) return { status: 'No Data', color: 'text-gray-400', bgColor: 'bg-gray-50', borderColor: 'border-gray-200' };
+                          
+                          // European Heart Association guidelines
+                          if (systolic >= 180 || diastolic >= 110) {
+                            return { status: 'Grade 3 HTN', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
+                          } else if (systolic >= 160 || diastolic >= 100) {
+                            return { status: 'Grade 2 HTN', color: 'text-red-500', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
+                          } else if (systolic >= 140 || diastolic >= 90) {
+                            return { status: 'Grade 1 HTN', color: 'text-orange-600', bgColor: 'bg-orange-50', borderColor: 'border-orange-200' };
+                          } else if (systolic >= 130 || diastolic >= 85) {
+                            return { status: 'High Normal', color: 'text-yellow-600', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200' };
+                          } else if (systolic < 90 || diastolic < 60) {
+                            return { status: 'Low', color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' };
+                          }
+                          return { status: 'Optimal', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
+                          
                         case 'heartRate':
-                          if (value < 60) return { status: 'Low', color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' };
-                          if (value > 100) return { status: 'High', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
+                          if (value < 60) return { status: 'Bradycardia', color: 'text-orange-600', bgColor: 'bg-orange-50', borderColor: 'border-orange-200' };
+                          if (value > 100) return { status: 'Tachycardia', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
                           return { status: 'Normal', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
+                          
                         case 'temperature':
-                          if (value < 36.1) return { status: 'Low', color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' };
-                          if (value > 37.2) return { status: 'High', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
+                          const temp = parseFloat(value);
+                          if (temp < 36.1) return { status: 'Hypothermia', color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' };
+                          if (temp > 37.2) return { status: 'Fever', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
                           return { status: 'Normal', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
+                          
                         case 'oxygenSat':
-                          if (value < 95) return { status: 'Low', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
+                          if (value < 90) return { status: 'Critical', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
+                          if (value < 95) return { status: 'Low', color: 'text-orange-600', bgColor: 'bg-orange-50', borderColor: 'border-orange-200' };
                           return { status: 'Normal', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
+                          
                         default:
                           return { status: 'Normal', color: 'text-gray-600', bgColor: 'bg-gray-50', borderColor: 'border-gray-200' };
                       }
