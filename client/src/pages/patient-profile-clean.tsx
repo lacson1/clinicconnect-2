@@ -64,7 +64,7 @@ export default function PatientProfile() {
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [showLabModal, setShowLabModal] = useState(false);
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
-  const [showAssessmentFormBuilder, setShowAssessmentFormBuilder] = useState(false);
+
   const [selectedAssessmentType, setSelectedAssessmentType] = useState<string | null>(null);
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
   const [showEditPatientModal, setShowEditPatientModal] = useState(false);
@@ -111,9 +111,7 @@ export default function PatientProfile() {
   };
 
   // Handler for creating a new assessment form
-  const handleCreateAssessmentForm = () => {
-    setShowAssessmentFormBuilder(true);
-  };
+
 
   // Handler for completing an assessment
   const handleAssessmentComplete = async (assessmentData: any) => {
