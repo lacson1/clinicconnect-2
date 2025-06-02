@@ -118,8 +118,8 @@ export default function PatientProfile() {
     enabled: !!patientId,
   });
 
-  const { data: labResults, isLoading: labsLoading } = useQuery<LabResult[]>({
-    queryKey: ["/api/patients", patientId, "labs"],
+  const { data: labOrders, isLoading: labOrdersLoading } = useQuery({
+    queryKey: [`/api/patients/${patientId}/lab-orders`],
     enabled: !!patientId,
   });
 
@@ -622,7 +622,7 @@ export default function PatientProfile() {
               <div className="flex items-center gap-2">
                 <FlaskRound className="w-4 h-4 text-green-500" />
                 <span className="font-medium">Lab Results:</span>
-                <Badge variant="outline">{labResults?.length || 0}</Badge>
+                <Badge variant="outline">{labOrders?.length || 0}</Badge>
               </div>
               <div className="flex items-center gap-2">
                 <Pill className="w-4 h-4 text-purple-500" />
