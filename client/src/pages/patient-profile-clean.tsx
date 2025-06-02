@@ -344,16 +344,58 @@ export default function PatientProfile() {
         <div className="w-full max-w-none">
           {/* Tabs for different sections */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-8">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="vitals">Vitals</TabsTrigger>
-              <TabsTrigger value="visits">Visits</TabsTrigger>
-              <TabsTrigger value="specialty">Specialty Assessment</TabsTrigger>
-              <TabsTrigger value="labs">Lab Results</TabsTrigger>
-              <TabsTrigger value="medications">Medications</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
-              <TabsTrigger value="chat">Chat</TabsTrigger>
-            </TabsList>
+            <div className="bg-blue-50 rounded-xl p-2 mb-6">
+              <TabsList className="grid w-full grid-cols-8 bg-transparent gap-1">
+                <TabsTrigger 
+                  value="overview" 
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200 text-blue-700 hover:bg-blue-100"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="vitals"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200 text-blue-700 hover:bg-blue-100"
+                >
+                  Vitals
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="visits"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200 text-blue-700 hover:bg-blue-100"
+                >
+                  Visits
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="specialty"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200 text-blue-700 hover:bg-blue-100"
+                >
+                  Specialty Assessment
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="labs"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200 text-blue-700 hover:bg-blue-100"
+                >
+                  Lab Results
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="medications"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200 text-blue-700 hover:bg-blue-100"
+                >
+                  Medications
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="documents"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200 text-blue-700 hover:bg-blue-100"
+                >
+                  Documents
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="chat"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200 text-blue-700 hover:bg-blue-100"
+                >
+                  Chat
+                </TabsTrigger>
+              </TabsList>
+            </div>
             
             <TabsContent value="overview" className="space-y-6">
               {/* Patient Summary Cards */}
