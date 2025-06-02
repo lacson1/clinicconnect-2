@@ -52,6 +52,7 @@ import { PatientSummaryPrintable } from "@/components/patient-summary-printable"
 import { ModernPatientOverview } from "@/components/modern-patient-overview";
 import { FloatingActionMenu } from "@/components/floating-action-menu";
 import { useRole } from "@/components/role-guard";
+import PatientDocuments from "@/components/patient-documents";
 import type { Patient, Visit, LabResult, Prescription } from "@shared/schema";
 
 interface Organization {
@@ -1434,21 +1435,7 @@ export default function PatientProfile() {
             </TabsContent>
 
             <TabsContent value="documents">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Patient Documents</CardTitle>
-                  <CardDescription>Medical records and patient files</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8">
-                    <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-4 text-lg font-medium text-gray-900">No documents yet</h3>
-                    <p className="mt-2 text-sm text-gray-500">
-                      Patient documents will appear here when uploaded.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <PatientDocuments patientId={patient.id} patientName={`${patient.firstName} ${patient.lastName}`} />
             </TabsContent>
           </Tabs>
         </div>
