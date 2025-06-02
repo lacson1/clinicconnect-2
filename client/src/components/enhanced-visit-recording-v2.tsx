@@ -160,7 +160,7 @@ export function EnhancedVisitRecordingV2({ patientId, onSave }: EnhancedVisitRec
     queryKey: ["/api/staff"],
   });
 
-  const patientName = patient ? `${patient.firstName} ${patient.lastName}` : "Patient";
+  const patientName = patient ? `${patient.firstName || ''} ${patient.lastName || ''}`.trim() || "Patient" : "Patient";
 
   // Vital signs validation and alerts
   const checkVitalSigns = () => {
@@ -212,11 +212,14 @@ export function EnhancedVisitRecordingV2({ patientId, onSave }: EnhancedVisitRec
         secondaryDiagnoses: additionalDiagnoses.join(", "),
         medications: medicationList.join(", "),
         status: "completed",
-        doctorId: staff.find(s => s.role === "doctor")?.id || 1,
+        doctorId: Array.isArray(staff) ? staff.find((s: any) => s.role === "doctor")?.id || 1 : 1,
       };
 
       return await apiRequest("/api/visits", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(visitData),
       });
     },
