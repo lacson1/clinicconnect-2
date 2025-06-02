@@ -77,6 +77,7 @@ import VitalSignsTrends from "@/components/vital-signs-trends";
 import VitalSignsAlerts from "@/components/vital-signs-alerts";
 import PatientTimeline from "@/components/patient-timeline";
 import DocumentActionButtons from "@/components/DocumentActionButtons";
+import PrescriptionPrintModal from "@/components/PrescriptionPrintModal";
 import type { Patient, Visit, LabResult, Prescription } from "@shared/schema";
 
 interface Organization {
@@ -109,6 +110,8 @@ export default function PatientProfile() {
   const [showVitalsTrends, setShowVitalsTrends] = useState(false);
   const [showVitalsAlerts, setShowVitalsAlerts] = useState(false);
   const [vitalsTimeRange, setVitalsTimeRange] = useState('30'); // Days to show
+  const [showPrescriptionPrintModal, setShowPrescriptionPrintModal] = useState(false);
+  const [selectedPrescriptionForPrint, setSelectedPrescriptionForPrint] = useState(null);
 
   // Handle lab orders navigation events
   useEffect(() => {
@@ -331,54 +334,8 @@ export default function PatientProfile() {
   };
 
   const handlePrintPrescription = (prescription: any) => {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Prescription - ${patient?.firstName} ${patient?.lastName}</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; }
-              .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
-              .patient-info { margin-bottom: 20px; }
-              .prescription-details { margin-bottom: 20px; }
-              .label { font-weight: bold; }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h2>PRESCRIPTION</h2>
-              <p>Date: ${new Date(prescription.createdAt).toLocaleDateString()}</p>
-            </div>
-            <div class="patient-info">
-              <div class="label">Patient:</div>
-              <p>${patient?.firstName} ${patient?.lastName}</p>
-              <p>DOB: ${patient?.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : 'N/A'}</p>
-            </div>
-            <div class="prescription-details">
-              <div class="label">Medication:</div>
-              <p style="font-size: 18px; font-weight: bold;">${prescription.medicationName}</p>
-              <div class="label">Dosage:</div>
-              <p>${prescription.dosage}</p>
-              <div class="label">Frequency:</div>
-              <p>${prescription.frequency}</p>
-              <div class="label">Duration:</div>
-              <p>${prescription.duration}</p>
-              ${prescription.instructions ? `
-                <div class="label">Instructions:</div>
-                <p>${prescription.instructions}</p>
-              ` : ''}
-            </div>
-            <div style="margin-top: 40px;">
-              <p>Doctor: _________________________</p>
-              <p>Signature: _____________________</p>
-            </div>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
-    }
+    setSelectedPrescriptionForPrint(prescription);
+    setShowPrescriptionPrintModal(true);
   };
 
   // Fetch consultation forms for specialty assessments
@@ -2375,6 +2332,19 @@ export default function PatientProfile() {
           onClose={() => setShowVitalsAlerts(false)}
           patientId={patientId!}
           patientName={`${patient.firstName} ${patient.lastName}`}
+        />
+      )}
+
+      {/* Professional Prescription Print Modal with Letterhead */}
+      {selectedPrescriptionForPrint && patient && (
+        <PrescriptionPrintModal
+          prescription={selectedPrescriptionForPrint}
+          patient={patient}
+          isOpen={showPrescriptionPrintModal}
+          onClose={() => {
+            setShowPrescriptionPrintModal(false);
+            setSelectedPrescriptionForPrint(null);
+          }}
         />
       )}
 
