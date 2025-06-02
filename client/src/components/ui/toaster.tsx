@@ -13,7 +13,7 @@ export function Toaster() {
 
   return (
     <ToastProvider>
-      {toasts.map(function (toast) {
+      {toasts.map((toast) => {
         const { id, title, description, action, ...props } = toast;
         return (
           <Toast key={id} {...props}>
