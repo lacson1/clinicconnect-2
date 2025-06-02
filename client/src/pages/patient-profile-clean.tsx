@@ -71,6 +71,7 @@ import { FloatingActionMenu } from "@/components/floating-action-menu";
 import { useRole } from "@/components/role-guard";
 import PatientDocuments from "@/components/patient-documents";
 import PatientLabResults from "@/components/patient-lab-results";
+import PatientLabOrdersSummary from "@/components/patient-lab-orders-summary";
 import StandaloneVitalSignsRecorder from "@/components/standalone-vital-signs-recorder";
 import VitalSignsTrends from "@/components/vital-signs-trends";
 import VitalSignsAlerts from "@/components/vital-signs-alerts";
@@ -725,7 +726,7 @@ export default function PatientProfile() {
             
             <TabsContent value="overview" className="space-y-6">
               {/* Patient Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {/* Recent Activity */}
                 <Card>
                   <CardHeader>
@@ -746,6 +747,19 @@ export default function PatientProfile() {
                         </div>
                       ))}
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* Lab Orders Summary */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FlaskRound className="w-5 h-5 text-green-500" />
+                      Lab Orders
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <PatientLabOrdersSummary patientId={patient.id} />
                   </CardContent>
                 </Card>
 
