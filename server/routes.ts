@@ -5047,7 +5047,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prescriptionId = parseInt(req.params.id);
       
       // Get prescription with patient and organization details
-      const [prescriptionData] = await db.select({
+      const prescriptionResults = await db.select({
         prescriptionId: prescriptions.id,
         medicationName: prescriptions.medicationName,
         dosage: prescriptions.dosage,
@@ -5074,6 +5074,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .leftJoin(patients, eq(prescriptions.patientId, patients.id))
       .leftJoin(organizations, eq(prescriptions.organizationId, organizations.id))
       .where(eq(prescriptions.id, prescriptionId));
+
+      const prescriptionData = prescriptionResults[0];
 
       if (!prescriptionData) {
         return res.status(404).json({ message: "Prescription not found" });
@@ -5426,28 +5428,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Send to pharmacy endpoint
+  // Send to pharmacy endpoint with enhanced routing
   app.post("/api/prescriptions/:id/send-to-pharmacy", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const prescriptionId = parseInt(req.params.id);
+      const { pharmacyId, notes, preferredPharmacy } = req.body;
       
-      // Update prescription status to indicate it's been sent to pharmacy
-      const [updatedPrescription] = await db
-        .update(prescriptions)
-        .set({
-          pharmacyStatus: 'sent',
-          sentToPharmacyAt: new Date(),
-          status: 'pending'
-        })
-        .where(eq(prescriptions.id, prescriptionId))
-        .returning();
+      // Get current prescription details
+      const [currentPrescription] = await db
+        .select()
+        .from(prescriptions)
+        .where(eq(prescriptions.id, prescriptionId));
 
-      if (!updatedPrescription) {
+      if (!currentPrescription) {
         return res.status(404).json({ message: "Prescription not found" });
       }
 
+      // Update prescription with pharmacy routing information
+      const updateData: any = {
+        pharmacyStatus: 'sent',
+        sentToPharmacyAt: new Date(),
+        status: 'pending',
+        pharmacistNotes: notes || null
+      };
+
+      // If a specific pharmacy is selected, include pharmacy routing
+      if (pharmacyId) {
+        updateData.pharmacyId = pharmacyId;
+      }
+
+      const [updatedPrescription] = await db
+        .update(prescriptions)
+        .set(updateData)
+        .where(eq(prescriptions.id, prescriptionId))
+        .returning();
+
+      // Log the pharmacy routing activity
       console.log(`💊 PRESCRIPTION SENT TO PHARMACY: #${prescriptionId} - ${updatedPrescription.medicationName}`);
-      res.json(updatedPrescription);
+      console.log(`📍 PHARMACY ROUTING: ${pharmacyId ? `Pharmacy ID ${pharmacyId}` : 'General pharmacy network'}`);
+      console.log(`📋 NOTES: ${notes || 'No special instructions'}`);
+
+      // Create comprehensive response with routing information
+      const response = {
+        ...updatedPrescription,
+        routingInfo: {
+          pharmacyId: pharmacyId || null,
+          preferredPharmacy: preferredPharmacy || 'General Network',
+          routedAt: new Date().toISOString(),
+          routedBy: req.user?.username || 'System',
+          specialInstructions: notes || null,
+          trackingNumber: `RX-${prescriptionId}-${Date.now().toString().slice(-6)}`
+        }
+      };
+
+      res.json(response);
     } catch (error) {
       console.error('Send to pharmacy error:', error);
       res.status(500).json({ message: "Failed to send prescription to pharmacy" });
