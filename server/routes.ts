@@ -5051,6 +5051,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select({
           id: prescriptions.id,
           patientId: prescriptions.patientId,
+          medicationId: prescriptions.medicationId,
           medicationName: prescriptions.medicationName,
           dosage: prescriptions.dosage,
           frequency: prescriptions.frequency,
@@ -5073,6 +5074,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(patients)
         .where(eq(patients.id, prescription.patientId));
 
+      // Get medication name from medications table if medication_id exists but medication_name is empty
+      let medicationName = prescription.medicationName;
+      if (!medicationName && prescription.medicationId) {
+        const [medication] = await db
+          .select({ name: medications.name })
+          .from(medications)
+          .where(eq(medications.id, prescription.medicationId));
+        medicationName = medication?.name || 'Unknown Medication';
+      }
+
       // Get organization details if organizationId exists
       let organization = null;
       if (prescription.organizationId) {
@@ -5086,7 +5097,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Combine the data
       const prescriptionData = {
         prescriptionId: prescription.id,
-        medicationName: prescription.medicationName,
+        medicationName: medicationName,
         dosage: prescription.dosage,
         frequency: prescription.frequency,
         duration: prescription.duration,
