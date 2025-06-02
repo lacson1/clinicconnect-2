@@ -300,6 +300,10 @@ export class DatabaseStorage implements IStorage {
       status: prescriptions.status,
       startDate: prescriptions.startDate,
       endDate: prescriptions.endDate,
+      isRepeat: prescriptions.isRepeat,
+      quantity: prescriptions.quantity,
+      pharmacyId: prescriptions.pharmacyId,
+      pharmacyStatus: prescriptions.pharmacyStatus,
       organizationId: prescriptions.organizationId,
       createdAt: prescriptions.createdAt
     })
