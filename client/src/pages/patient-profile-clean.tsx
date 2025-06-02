@@ -1276,17 +1276,16 @@ export default function PatientProfile() {
                                             Print Prescription
                                           </DropdownMenuItem>
                                           <DropdownMenuItem onClick={() => {
-                                            const qrData = JSON.stringify({
-                                              id: prescription.id,
-                                              patient: `${patient?.firstName} ${patient?.lastName}`,
-                                              medication: prescription.medicationName,
-                                              dosage: prescription.dosage,
-                                              frequency: prescription.frequency,
-                                              duration: prescription.duration,
-                                              prescribedDate: prescription.createdAt,
-                                              verificationCode: `RX${prescription.id}${new Date().getFullYear()}`
-                                            });
-                                            setQRCodeData(qrData);
+                                            const qrText = `PRESCRIPTION DETAILS
+Patient: ${patient?.firstName} ${patient?.lastName}
+Medication: ${prescription.medicationName}
+Dosage: ${prescription.dosage}
+Frequency: ${prescription.frequency}
+Duration: ${prescription.duration}
+Prescribed: ${new Date(prescription.createdAt).toLocaleDateString()}
+Verification Code: RX${prescription.id}${new Date().getFullYear()}
+Prescription ID: ${prescription.id}`;
+                                            setQRCodeData(qrText);
                                             setShowQRModal(true);
                                           }}>
                                             <QrCode className="mr-2 h-4 w-4" />
@@ -2376,10 +2375,19 @@ export default function PatientProfile() {
               </div>
             )}
             
-            <div className="text-center space-y-2">
+            <div className="text-center space-y-3">
               <p className="text-sm text-gray-600">
-                This QR code contains secure prescription verification information
+                Scan this QR code to view prescription details
               </p>
+              
+              {/* Preview of QR Code Content */}
+              <div className="text-left bg-gray-50 p-3 rounded-lg border text-xs">
+                <div className="font-medium text-gray-700 mb-2">QR Code Content:</div>
+                <pre className="whitespace-pre-wrap text-gray-600 leading-relaxed">
+                  {qrCodeData}
+                </pre>
+              </div>
+              
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -2391,7 +2399,7 @@ export default function PatientProfile() {
                     }
                   }}
                 >
-                  Copy Data
+                  Copy Text
                 </Button>
                 <Button
                   variant="outline"
