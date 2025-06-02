@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
@@ -2367,7 +2367,7 @@ export default function PatientProfile() {
           <div className="flex flex-col items-center space-y-4 py-6">
             {qrCodeData && (
               <div className="p-4 bg-white border rounded-lg shadow-sm">
-                <QRCode 
+                <QRCodeSVG 
                   value={qrCodeData} 
                   size={200}
                   level="M"
