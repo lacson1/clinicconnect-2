@@ -610,6 +610,7 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
   const [qrCodeData, setQrCodeData] = useState(null);
 
   const handleGenerateQRCode = async (prescription: any) => {
+    console.log('QR Code button clicked for prescription:', prescription);
     try {
       // Create comprehensive prescription data for external pharmacy dispensing
       const prescriptionData = {
