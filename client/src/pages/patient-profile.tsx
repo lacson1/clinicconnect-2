@@ -160,9 +160,9 @@ export default function PatientProfile() {
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Schedule and Edit patient info - always show for logged in users */}
-            <Button variant="outline">
+          <div className="flex items-center space-x-2">
+            {/* Schedule button - always visible */}
+            <Button variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
               <Calendar className="mr-2 h-4 w-4" />
               Schedule
             </Button>
