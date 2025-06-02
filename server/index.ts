@@ -412,7 +412,7 @@ app.use((req, res, next) => {
 </html>`);
   });
 
-  // Direct route to show full healthcare application
+  // Modern Healthcare Platform Gateway
   app.get('/app*', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
     res.setHeader('Cache-Control', 'no-cache');
@@ -421,64 +421,246 @@ app.use((req, res, next) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bluequee Healthcare Management</title>
+    <title>Bluequee | Modern Healthcare Management Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --accent: #10b981;
+            --background: #ffffff;
+            --surface: #f8fafc;
+            --border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8fafc;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--surface);
             height: 100vh;
             overflow: hidden;
+            color: var(--text-primary);
+            line-height: 1.5;
         }
         .app-container {
             display: flex;
             height: 100vh;
+            background: var(--background);
         }
+        
         .sidebar {
             width: 280px;
-            background: #1e293b;
-            color: white;
-            padding: 20px;
+            background: var(--background);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
             overflow-y: auto;
+            box-shadow: var(--shadow);
+        }
+        
+        .sidebar-content {
+            padding: 0 24px;
         }
         .logo {
             display: flex;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #334155;
+            margin-bottom: 40px;
+            padding: 0 24px;
         }
+        
         .logo-icon {
-            font-size: 24px;
+            font-size: 28px;
             margin-right: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
+        
         .logo-text {
             font-size: 20px;
             font-weight: 700;
+            color: var(--text-primary);
         }
+        
         .nav-section {
-            margin-bottom: 25px;
+            margin-bottom: 32px;
         }
+        
         .nav-title {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            color: #94a3b8;
+            color: var(--text-muted);
             text-transform: uppercase;
-            margin-bottom: 10px;
             letter-spacing: 0.5px;
+            padding: 0 24px 12px;
         }
+        
         .nav-item {
             display: flex;
             align-items: center;
-            padding: 12px;
-            margin-bottom: 4px;
+            padding: 12px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
             border-radius: 8px;
+            margin: 0 12px 4px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 14px;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
+        
         .nav-item:hover {
-            background: #334155;
+            background: var(--surface);
+            color: var(--text-primary);
+            transform: translateX(2px);
         }
+        
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-icon {
+            margin-right: 12px;
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        .main-content {
+            flex: 1;
+            background: var(--background);
+            overflow-y: auto;
+        }
+        
+        .header {
+            background: var(--background);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+        }
+        
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .dashboard-grid {
+            padding: 32px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        
+        .dashboard-card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+        }
+        
+        .dashboard-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: 16px;
+        }
+        
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .card-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .card-metrics {
+            display: flex;
+            gap: 24px;
+            margin-top: 20px;
+        }
+        
+        .metric {
+            flex: 1;
+        }
+        
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+
         .nav-item.active {
             background: #3b82f6;
         }
