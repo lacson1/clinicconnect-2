@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Shield } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Shield, Brain } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import AIErrorInsights from "@/components/ai-error-insights";
 
 interface ErrorLog {
   id: number;

@@ -327,4 +327,47 @@ export const setupErrorRoutes = (app: any) => {
       });
     }
   });
+
+  // AI Insights endpoint
+  app.get('/api/errors/ai-insights', async (req: AuthRequest, res: Response) => {
+    try {
+      const organizationId = req.user?.organizationId;
+      if (!organizationId) {
+        return res.status(400).json({ message: 'Organization context required' });
+      }
+
+      const timeframe = req.query.timeframe as string || '7d';
+      const { aiErrorInsights } = await import('./ai-error-insights');
+      
+      const insights = await aiErrorInsights.generateInsights(organizationId, timeframe);
+      res.json(insights);
+    } catch (error) {
+      console.error('Failed to generate AI insights:', error);
+      res.status(500).json({ 
+        message: 'Failed to generate AI insights',
+        error: error.message 
+      });
+    }
+  });
+
+  // Predictive insights endpoint
+  app.get('/api/errors/predictions', async (req: AuthRequest, res: Response) => {
+    try {
+      const organizationId = req.user?.organizationId;
+      if (!organizationId) {
+        return res.status(400).json({ message: 'Organization context required' });
+      }
+
+      const { aiErrorInsights } = await import('./ai-error-insights');
+      const predictions = await aiErrorInsights.generateErrorPredictions(organizationId);
+      
+      res.json({ predictions });
+    } catch (error) {
+      console.error('Failed to generate predictions:', error);
+      res.status(500).json({ 
+        message: 'Failed to generate predictions',
+        error: error.message 
+      });
+    }
+  });
 };
