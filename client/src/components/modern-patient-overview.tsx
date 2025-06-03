@@ -1739,39 +1739,6 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
 
         {/* Overview Tab - Reorganized Layout */}
         <TabsContent value="overview" className="space-y-4">
-          {/* Record Patient Form - Moved to Top */}
-          <Card className="border-blue-200 bg-blue-50/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-700">
-                <MedicalIcons.stethoscope className="h-5 w-5" />
-                Record Patient Visit
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <p className="text-sm text-blue-600">
-                  Document a new visit for {formatPatientName(patient)} including vital signs, symptoms, diagnosis, and treatment plans.
-                </p>
-                <div className="flex gap-3">
-                  <Button 
-                    onClick={() => navigate(`/patients/${patient.id}/record-visit`)}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    <MedicalIcons.stethoscope className="h-4 w-4 mr-2" />
-                    Start New Visit Recording
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={onAddPrescription}
-                    className="border-purple-200 text-purple-700 hover:bg-purple-50"
-                  >
-                    <MedicalIcons.medication className="h-4 w-4 mr-2" />
-                    Add Prescription
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Quick Stats - Enhanced */}
