@@ -902,7 +902,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                       Repeat ({repeatMedications.length})
                     </TabsTrigger>
                     <TabsTrigger value="summary" className="flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
+                      <MedicalIcons.prescription className="w-4 h-4" />
                       Summary
                     </TabsTrigger>
                   </TabsList>

@@ -51,7 +51,6 @@ export const MedicalIcons = {
   
   // Medications & Pharmacy
   medication: Pill,
-  prescription: FileText,
   injection: Syringe,
   pharmacy: Building2,
   dosage: Pill,
@@ -65,6 +64,7 @@ export const MedicalIcons = {
   
   // Appointments & Scheduling
   appointment: Calendar,
+  calendar: Calendar,
   schedule: CalendarDays,
   clock: Clock,
   timer: Timer,
@@ -79,6 +79,8 @@ export const MedicalIcons = {
   report: FileCheck,
   newDocument: FilePlus,
   deleteDocument: FileX,
+  prescription: FileText,
+  consultation: Stethoscope,
   
   // Communication
   message: MessageSquare,
