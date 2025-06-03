@@ -114,7 +114,7 @@ export interface IStorage {
   deleteMedicalHistory(id: number): Promise<void>;
 
   // Dashboard stats
-  getDashboardStats(): Promise<{
+  getDashboardStats(organizationId: number): Promise<{
     totalPatients: number;
     todayVisits: number;
     lowStockItems: number;
@@ -513,16 +513,53 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Dashboard stats
-  async getDashboardStats(): Promise<{
+  async getDashboardStats(organizationId: number): Promise<{
     totalPatients: number;
     todayVisits: number;
     lowStockItems: number;
     pendingLabs: number;
   }> {
-    const totalPatientsResult = await db.select().from(patients);
-    const todayVisitsResult = await this.getTodaysVisits();
-    const lowStockResult = await this.getLowStockMedicines();
-    const pendingLabsResult = await this.getPendingLabResults();
+    // Organization-filtered patient count
+    const totalPatientsResult = await db.select()
+      .from(patients)
+      .where(eq(patients.organizationId, organizationId));
+    
+    // Organization-filtered today's visits
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    
+    const todayVisitsResult = await db.select()
+      .from(visits)
+      .leftJoin(patients, eq(visits.patientId, patients.id))
+      .where(
+        and(
+          eq(patients.organizationId, organizationId),
+          gte(visits.visitDate, startOfDay),
+          lte(visits.visitDate, endOfDay)
+        )
+      );
+    
+    // Organization-filtered low stock medicines
+    const lowStockResult = await db.select()
+      .from(medicines)
+      .where(
+        and(
+          eq(medicines.organizationId, organizationId),
+          lte(medicines.quantity, 10)
+        )
+      );
+    
+    // Organization-filtered pending lab results
+    const pendingLabsResult = await db.select()
+      .from(labResults)
+      .leftJoin(patients, eq(labResults.patientId, patients.id))
+      .where(
+        and(
+          eq(patients.organizationId, organizationId),
+          eq(labResults.status, 'pending')
+        )
+      );
 
     return {
       totalPatients: totalPatientsResult.length,

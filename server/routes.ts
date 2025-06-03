@@ -1267,9 +1267,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard stats
-  app.get("/api/dashboard/stats", async (req, res) => {
+  app.get("/api/dashboard/stats", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const stats = await storage.getDashboardStats();
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      const stats = await storage.getDashboardStats(userOrgId);
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch dashboard stats" });
@@ -1277,9 +1282,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Low stock medicines with automatic notifications
-  app.get("/api/medicines/low-stock", async (req, res) => {
+  app.get("/api/medicines/low-stock", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const lowStockMedicines = await storage.getLowStockMedicines();
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      // Organization-filtered low stock medicines
+      const lowStockMedicines = await db.select()
+        .from(medicines)
+        .where(
+          and(
+            eq(medicines.organizationId, userOrgId),
+            lte(medicines.quantity, 10)
+          )
+        );
       
       // Send notifications for critically low stock items
       for (const medicine of lowStockMedicines) {
@@ -3366,11 +3384,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Clinical Activity Center - Workflow Integration Endpoints
   app.get("/api/clinical-activity/dashboard", authenticateToken, async (req: AuthRequest, res) => {
     try {
+      const user = req.user as any;
+      const userOrgId = user.organizationId;
+      
       const today = new Date();
       const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
       const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
 
-      // Get today's appointments with status breakdown
+      // Get today's appointments with status breakdown (organization-filtered)
       const todayAppointments = await db.select({
         id: appointments.id,
         patientId: appointments.patientId,
@@ -3385,13 +3406,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .leftJoin(patients, eq(appointments.patientId, patients.id))
       .where(
         and(
+          eq(appointments.organizationId, userOrgId),
           gte(sql`DATE(${appointments.appointmentDate})`, startOfDay.toISOString().split('T')[0]),
           lte(sql`DATE(${appointments.appointmentDate})`, endOfDay.toISOString().split('T')[0])
         )
       )
       .orderBy(appointments.appointmentTime);
 
-      // Get recent prescriptions with patient names
+      // Get recent prescriptions with patient names (organization-filtered)
       const recentPrescriptions = await db.select({
         id: prescriptions.id,
         patientId: prescriptions.patientId,
@@ -3405,11 +3427,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       })
       .from(prescriptions)
       .leftJoin(patients, eq(prescriptions.patientId, patients.id))
-      .where(gte(prescriptions.createdAt, startOfDay))
+      .where(
+        and(
+          eq(prescriptions.organizationId, userOrgId),
+          gte(prescriptions.createdAt, startOfDay)
+        )
+      )
       .orderBy(desc(prescriptions.createdAt))
       .limit(10);
 
-      // Get pending lab orders
+      // Get pending lab orders (organization-filtered)
       const pendingLabOrders = await db.select({
         id: labOrders.id,
         patientId: labOrders.patientId,
@@ -3420,7 +3447,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       })
       .from(labOrders)
       .leftJoin(patients, eq(labOrders.patientId, patients.id))
-      .where(eq(labOrders.status, 'pending'))
+      .where(
+        and(
+          eq(labOrders.organizationId, userOrgId),
+          eq(labOrders.status, 'pending')
+        )
+      )
       .orderBy(desc(labOrders.createdAt))
       .limit(10);
 
