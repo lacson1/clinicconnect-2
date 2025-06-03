@@ -197,7 +197,7 @@ export function PerformanceDashboard() {
                     <BarChart3 className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.totalRequests.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">{stats.totalRequests?.toLocaleString() || 0}</div>
                     <p className="text-xs text-muted-foreground">
                       Last {timeframe}
                     </p>
@@ -210,7 +210,7 @@ export function PerformanceDashboard() {
                     <Clock className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.avgResponseTime}ms</div>
+                    <div className="text-2xl font-bold">{stats.avgResponseTime || 0}ms</div>
                     <p className="text-xs text-muted-foreground">
                       Average response time
                     </p>
@@ -223,7 +223,7 @@ export function PerformanceDashboard() {
                     <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.errorRate}%</div>
+                    <div className="text-2xl font-bold">{stats.errorRate || 0}%</div>
                     <p className="text-xs text-muted-foreground">
                       Error percentage
                     </p>
@@ -241,7 +241,7 @@ export function PerformanceDashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">{stats.avgMemoryUsage} MB</div>
+                    <div className="text-3xl font-bold">{stats.avgMemoryUsage || 0} MB</div>
                     <p className="text-sm text-muted-foreground">
                       Average memory consumption per request
                     </p>
@@ -256,7 +256,7 @@ export function PerformanceDashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">{stats.avgCpuUsage} ms</div>
+                    <div className="text-3xl font-bold">{stats.avgCpuUsage || 0} ms</div>
                     <p className="text-sm text-muted-foreground">
                       Average CPU time per request
                     </p>
@@ -274,7 +274,7 @@ export function PerformanceDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {stats.slowestEndpoints.map((endpoint, index) => (
+                    {(stats.slowestEndpoints || []).map((endpoint, index) => (
                       <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="space-y-1">
                           <p className="font-medium">{endpoint.endpoint}</p>
