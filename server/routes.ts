@@ -1929,6 +1929,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search symptoms for autocomplete
+  app.get("/api/symptoms/search", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const search = req.query.search as string || "";
+      
+      // Common medical symptoms for healthcare system
+      const commonSymptoms = [
+        { id: 1, name: "Fever", category: "General" },
+        { id: 2, name: "Headache", category: "Neurological" },
+        { id: 3, name: "Cough", category: "Respiratory" },
+        { id: 4, name: "Sore throat", category: "Respiratory" },
+        { id: 5, name: "Nausea", category: "Digestive" },
+        { id: 6, name: "Vomiting", category: "Digestive" },
+        { id: 7, name: "Diarrhea", category: "Digestive" },
+        { id: 8, name: "Chest pain", category: "Cardiovascular" },
+        { id: 9, name: "Shortness of breath", category: "Respiratory" },
+        { id: 10, name: "Fatigue", category: "General" },
+        { id: 11, name: "Dizziness", category: "Neurological" },
+        { id: 12, name: "Joint pain", category: "Musculoskeletal" },
+        { id: 13, name: "Back pain", category: "Musculoskeletal" },
+        { id: 14, name: "Abdominal pain", category: "Digestive" },
+        { id: 15, name: "Rash", category: "Dermatological" }
+      ];
+      
+      const filteredSymptoms = search 
+        ? commonSymptoms.filter(symptom => 
+            symptom.name.toLowerCase().includes(search.toLowerCase()) ||
+            symptom.category.toLowerCase().includes(search.toLowerCase())
+          )
+        : commonSymptoms;
+      
+      res.json(filteredSymptoms.slice(0, 20));
+    } catch (error) {
+      console.error("Error searching symptoms:", error);
+      res.status(500).json({ message: "Failed to search symptoms" });
+    }
+  });
+
   // User management routes (Admin only)
   app.get('/api/users', authenticateToken, requireRole('admin'), async (req: AuthRequest, res) => {
     try {

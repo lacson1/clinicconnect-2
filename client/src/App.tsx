@@ -41,6 +41,7 @@ import PhysiotherapyPage from "@/pages/physiotherapy";
 import ExerciseLeafletsPage from "@/pages/exercise-leaflets";
 import MedicalCertificatesPage from "@/pages/medical-certificates";
 import ReferralLettersPage from "@/pages/referral-letters";
+import EnhancedPrescriptionForm from "@/pages/enhanced-prescription";
 
 import ClinicalProtocols from "@/components/clinical-protocols";
 import ExportCompliance from "@/components/export-compliance";
@@ -118,6 +119,7 @@ function AuthenticatedApp() {
                   <Route path="/exercise-leaflets" component={ExerciseLeafletsPage} />
                   <Route path="/medical-certificates" component={MedicalCertificatesPage} />
                   <Route path="/referral-letters" component={ReferralLettersPage} />
+                  <Route path="/enhanced-prescription" component={EnhancedPrescriptionForm} />
 
                   <Route path="/protocols" component={ClinicalProtocols} />
                   <Route path="/compliance" component={ExportCompliance} />
