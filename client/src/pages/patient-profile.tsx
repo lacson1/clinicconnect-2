@@ -57,10 +57,15 @@ export default function PatientProfile() {
   });
 
   // Lab results using React Query (same pattern as working sidebar)
-  const { data: labResults = [], isLoading: labsLoading } = useQuery<LabResultFromOrder[]>({
+  console.log('Lab Query Debug - patientId:', patientId, 'enabled:', !!patientId);
+  
+  const { data: labResults = [], isLoading: labsLoading, error: labsError } = useQuery<LabResultFromOrder[]>({
     queryKey: [`/api/patients/${patientId}/labs`],
-    enabled: !!patientId
+    enabled: !!patientId,
+    retry: 2
   });
+
+  console.log('Lab Results State:', { labResults, labsLoading, labsError });
 
 
 
