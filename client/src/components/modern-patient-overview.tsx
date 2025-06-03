@@ -31,7 +31,122 @@ import { apiRequest } from '@/lib/queryClient';
 import { DocumentPreviewCarousel } from './document-preview-carousel';
 import CustomPrescriptionPrint from './custom-prescription-print';
 import CustomLabOrderPrint from './custom-lab-order-print';
+import { CheckCircle } from 'lucide-react';
 // All icons now imported via MedicalIcons system
+
+// CompletedLabResult interface for reviewed results
+interface CompletedLabResult {
+  id: number;
+  testName: string;
+  result: string;
+  units?: string;
+  normalRange: string;
+  status: string;
+  category: string;
+  completedDate: string;
+  remarks?: string;
+  reviewedBy: string;
+  orderId: number;
+}
+
+// PatientReviewedResults Component
+function PatientReviewedResults({ patientId }: { patientId: number }) {
+  const { data: reviewedResults = [], isLoading } = useQuery<CompletedLabResult[]>({
+    queryKey: ['/api/lab-results/reviewed', patientId],
+    queryFn: async () => {
+      const response = await fetch(`/api/lab-results/reviewed?patientId=${patientId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch reviewed results');
+      }
+      return response.json();
+    }
+  });
+
+  // Results are already filtered by patient ID in the backend
+  const patientResults = reviewedResults;
+
+  const getStatusBadge = (status: string) => {
+    const statusColors = {
+      normal: 'bg-green-100 text-green-800 border-green-200',
+      abnormal: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      critical: 'bg-red-100 text-red-800 border-red-200'
+    };
+    
+    return (
+      <Badge className={statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+        <span>Loading reviewed results...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {patientResults.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>No reviewed lab results available for this patient.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {patientResults.map(result => (
+            <div
+              key={result.id}
+              className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-2">
+                    <h4 className="font-medium text-lg">{result.testName}</h4>
+                    {getStatusBadge(result.status)}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-muted-foreground">Result:</span>
+                      <p className="font-semibold">{result.result} {result.units || ''}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">Normal Range:</span>
+                      <p>{result.normalRange}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">Category:</span>
+                      <p>{result.category}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">Completed:</span>
+                      <p>{new Date(result.completedDate).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  
+                  {result.remarks && (
+                    <div className="mt-3 text-sm">
+                      <span className="font-medium text-muted-foreground">Remarks:</span>
+                      <p className="mt-1 text-gray-700">{result.remarks}</p>
+                    </div>
+                  )}
+                  
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    Reviewed by: {result.reviewedBy} • Order #{result.orderId}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Documents List Component
 interface DocumentsListSectionProps {
@@ -2316,7 +2431,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="orders" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4 max-w-2xl mb-6">
+                  <TabsList className="grid w-full grid-cols-5 max-w-3xl mb-6">
                     <TabsTrigger value="orders" className="flex items-center gap-2">
                       <MedicalIcons.labOrder className="w-4 h-4" />
                       Lab Orders
@@ -2324,6 +2439,10 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                     <TabsTrigger value="results" className="flex items-center gap-2">
                       <MedicalIcons.bloodTest className="w-4 h-4" />
                       Results
+                    </TabsTrigger>
+                    <TabsTrigger value="reviewed" className="flex items-center gap-2">
+                      <MedicalIcons.success className="w-4 h-4" />
+                      Reviewed
                     </TabsTrigger>
                     <TabsTrigger value="pending" className="flex items-center gap-2">
                       <MedicalIcons.clock className="w-4 h-4" />
@@ -2341,6 +2460,10 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
 
                   <TabsContent value="results" className="space-y-4">
                     <LabOrdersList patientId={patient.id} />
+                  </TabsContent>
+
+                  <TabsContent value="reviewed" className="space-y-4">
+                    <PatientReviewedResults patientId={patient.id} />
                   </TabsContent>
 
                   <TabsContent value="pending" className="space-y-4">
