@@ -311,37 +311,94 @@ export default function PrescriptionModal({
               />
             )}
 
-            {/* Enhanced Quick Medication Search */}
+            {/* Medication Input Method Toggle */}
             <FormItem>
               <FormLabel className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-blue-500" />
-                Medication (Enhanced Quick Search)
+                <Pill className="h-4 w-4 text-blue-500" />
+                Medication Selection
               </FormLabel>
-              <QuickMedicationSearch
-                onSelect={(medication) => {
-                  setSelectedMedicine(medication);
-                  setManualMedicationName("");
-                  handleMedicationSelect(medication);
-                }}
-                placeholder="Search medications by name, category, or description..."
-                showDetails={false}
-                className="w-full"
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Search from comprehensive medication database with instant results and smart auto-fill.
-                {!selectedMedicine && manualMedicationName && " Or add any medication manually if not found in database."}
-              </p>
               
-              {/* Manual Medication Display */}
-              {manualMedicationName && !selectedMedicine && (
-                <div className="mt-3 bg-orange-50 border border-orange-200 rounded-lg p-3 text-sm">
-                  <div className="flex items-center mb-2">
-                    <Pill className="h-4 w-4 text-orange-600 mr-2" />
-                    <span className="font-medium text-orange-800">Manual medication: {manualMedicationName}</span>
-                  </div>
-                  <p className="text-orange-700 text-xs">
-                    Please fill in dosage, frequency, and instructions manually below.
+              {/* Toggle between search and manual input */}
+              <div className="flex gap-2 mb-3">
+                <Button
+                  type="button"
+                  variant={!manualMedicationName ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setManualMedicationName("");
+                    setSelectedMedicine(null);
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <Sparkles className="h-3 w-3" />
+                  Search Database
+                </Button>
+                <Button
+                  type="button"
+                  variant={manualMedicationName ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setSelectedMedicine(null);
+                    setManualMedicationName("manual");
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <Pill className="h-3 w-3" />
+                  Manual Entry
+                </Button>
+              </div>
+
+              {/* Database Search Mode */}
+              {!manualMedicationName && (
+                <div>
+                  <QuickMedicationSearch
+                    onSelect={(medication) => {
+                      setSelectedMedicine(medication);
+                      handleMedicationSelect(medication);
+                    }}
+                    placeholder="Search medications by name, category, or description..."
+                    showDetails={false}
+                    className="w-full"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    Search from comprehensive medication database with instant results and smart auto-fill.
                   </p>
+                </div>
+              )}
+
+              {/* Manual Entry Mode */}
+              {manualMedicationName && (
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="medicationName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter medication name manually..."
+                            className="focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 
+                                     border-orange-300 hover:border-orange-400"
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              setManualMedicationName(e.target.value || "manual");
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="mt-2 bg-orange-50 border border-orange-200 rounded-lg p-3 text-sm">
+                    <div className="flex items-center mb-1">
+                      <Pill className="h-4 w-4 text-orange-600 mr-2" />
+                      <span className="font-medium text-orange-800">Manual medication entry</span>
+                    </div>
+                    <p className="text-orange-700 text-xs">
+                      Please fill in all dosage, frequency, and instruction details manually below.
+                    </p>
+                  </div>
                 </div>
               )}
               
