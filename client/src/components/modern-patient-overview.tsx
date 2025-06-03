@@ -1347,7 +1347,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
     <div className="space-y-4 min-h-screen w-full">
       {/* Enhanced Tabbed Interface - Full Width */}
       <Tabs defaultValue="overview" className="w-full h-full">
-        <TabsList className="grid w-full grid-cols-10 mb-8 h-20 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 border-2 border-blue-200/60 rounded-2xl p-3 shadow-2xl backdrop-blur-lg ring-1 ring-blue-100/50">
+        <TabsList className="grid w-full grid-cols-11 mb-8 h-20 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 border-2 border-blue-200/60 rounded-2xl p-3 shadow-2xl backdrop-blur-lg ring-1 ring-blue-100/50">
           <TabsTrigger value="overview" className="flex flex-col items-center gap-1.5 text-xs font-bold px-3 py-4 rounded-xl transition-all duration-300 data-[state=active]:bg-white data-[state=active]:shadow-xl data-[state=active]:text-blue-900 data-[state=active]:border-2 data-[state=active]:border-blue-300 data-[state=active]:scale-105 hover:bg-white/80 hover:shadow-lg hover:scale-102 text-blue-800 group">
             <MedicalIcons.patient className="w-6 h-6 group-data-[state=active]:text-blue-600" />
             <span className="font-semibold">Overview</span>
@@ -1383,6 +1383,10 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
           <TabsTrigger value="consultation" className="flex flex-col items-center gap-1.5 text-xs font-bold px-3 py-4 rounded-xl transition-all duration-300 data-[state=active]:bg-white data-[state=active]:shadow-xl data-[state=active]:text-blue-900 data-[state=active]:border-2 data-[state=active]:border-blue-300 data-[state=active]:scale-105 hover:bg-white/80 hover:shadow-lg hover:scale-102 text-blue-800 group">
             <MedicalIcons.consultation className="w-6 h-6 group-data-[state=active]:text-cyan-600" />
             <span className="font-semibold">Specialty</span>
+          </TabsTrigger>
+          <TabsTrigger value="med-reviews" className="flex flex-col items-center gap-1.5 text-xs font-bold px-3 py-4 rounded-xl transition-all duration-300 data-[state=active]:bg-white data-[state=active]:shadow-xl data-[state=active]:text-blue-900 data-[state=active]:border-2 data-[state=active]:border-blue-300 data-[state=active]:scale-105 hover:bg-white/80 hover:shadow-lg hover:scale-102 text-blue-800 group">
+            <MedicalIcons.prescription className="w-6 h-6 group-data-[state=active]:text-orange-600" />
+            <span className="font-semibold">Reviews</span>
           </TabsTrigger>
           <TabsTrigger value="communication" className="flex flex-col items-center gap-1.5 text-xs font-bold px-3 py-4 rounded-xl transition-all duration-300 data-[state=active]:bg-white data-[state=active]:shadow-xl data-[state=active]:text-blue-900 data-[state=active]:border-2 data-[state=active]:border-blue-300 data-[state=active]:scale-105 hover:bg-white/80 hover:shadow-lg hover:scale-102 text-blue-800 group">
             <MedicalIcons.message className="w-6 h-6 group-data-[state=active]:text-violet-600" />
@@ -2674,7 +2678,14 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
             <ConsultationFormSelector patientId={patient.id} />
           </TabsContent>
 
-
+          {/* Medication Review Assignments Tab */}
+          <TabsContent value="med-reviews" className="space-y-6">
+            <MedicationReviewAssignmentsList
+              patientId={patient.id}
+              patient={patient}
+              onCreateAssignment={() => handleCreateMedicationReviewAssignment()}
+            />
+          </TabsContent>
 
           {/* Communication Tab */}
           <TabsContent value="communication" className="space-y-6">
@@ -2724,6 +2735,18 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
             onClose={() => setShowLabOrderPrint(false)}
           />
         )}
+
+        {/* Medication Review Assignment Modal */}
+        <MedicationReviewAssignmentModal
+          open={showMedicationReviewAssignmentModal}
+          onClose={handleCloseMedicationReviewAssignment}
+          patientId={patient.id}
+          patient={patient}
+          selectedPrescription={selectedPrescriptionForReview}
+          onAssignmentCreated={() => {
+            queryClient.invalidateQueries({ queryKey: ["/api/patients", patient.id, "medication-review-assignments"] });
+          }}
+        />
     </div>
   );
 }
