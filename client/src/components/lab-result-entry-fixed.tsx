@@ -63,7 +63,7 @@ export default function LabResultEntry({ className }: LabResultEntryProps) {
 
   const updateResultMutation = useMutation({
     mutationFn: async ({ itemId, result, remarks }: { itemId: number; result: string; remarks: string }) => {
-      return apiRequest("PATCH", `/api/lab-order-items/${itemId}`, { result, remarks });
+      return apiRequest(`/api/lab-order-items/${itemId}`, "PATCH", { result, remarks });
     },
     onSuccess: () => {
       toast({
