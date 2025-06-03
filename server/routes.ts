@@ -28,6 +28,7 @@ import { performanceMonitor, globalErrorHandler, setupErrorRoutes } from "./erro
 import { getOptimizationTasks, implementOptimizationTask } from "./system-optimizer";
 import { setupNetworkValidationRoutes } from "./network-validator";
 import { setupAuthValidationRoutes } from "./auth-validator";
+import { setupSystemHealthRoutes } from "./system-health-dashboard";
 
 // Helper function to generate prescription HTML for printing
 function generatePrescriptionHTML(prescriptionResult: any): string {
@@ -4133,6 +4134,11 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       res.status(500).json({ message: "Failed to fetch patient context" });
     }
   });
+
+  // Register system health validation routes
+  setupSystemHealthRoutes(app);
+  setupNetworkValidationRoutes(app);
+  setupAuthValidationRoutes(app);
 
   const httpServer = createServer(app);
   // Organization Management endpoints
