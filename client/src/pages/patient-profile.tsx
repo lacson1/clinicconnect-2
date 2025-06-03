@@ -49,12 +49,31 @@ export default function PatientProfile() {
   });
 
   // Fetch lab results using React Query (fixed approach)
-  const { data: labResults, isLoading: labsLoading, error: labsError } = useQuery<LabResult[]>({
+  const labResultsQuery = useQuery<LabResult[]>({
     queryKey: [`/api/patients/${patientId}/labs`],
     enabled: !!patientId,
     staleTime: 0,
     gcTime: 0,
+    retry: false,
   });
+
+  // Debug logging for lab results query
+  useEffect(() => {
+    console.log('Lab Results Query State:', {
+      patientId,
+      queryKey: [`/api/patients/${patientId}/labs`],
+      enabled: !!patientId,
+      data: labResultsQuery.data,
+      isLoading: labResultsQuery.isLoading,
+      error: labResultsQuery.error,
+      status: labResultsQuery.status,
+      fetchStatus: labResultsQuery.fetchStatus,
+    });
+  }, [patientId, labResultsQuery.data, labResultsQuery.isLoading, labResultsQuery.error, labResultsQuery.status, labResultsQuery.fetchStatus]);
+
+  const labResults = labResultsQuery.data;
+  const labsLoading = labResultsQuery.isLoading;
+  const labsError = labResultsQuery.error;
 
   if (!patientId) {
     return (
