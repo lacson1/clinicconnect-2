@@ -2142,6 +2142,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/lab-orders/pending', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
       const pendingOrders = await db.select({
         id: labOrders.id,
         patientId: labOrders.patientId,
@@ -2157,7 +2162,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .from(labOrders)
       .leftJoin(patients, eq(labOrders.patientId, patients.id))
       .leftJoin(users, eq(labOrders.orderedBy, users.id))
-      .where(eq(labOrders.status, 'pending'))
+      .where(
+        and(
+          eq(labOrders.status, 'pending'),
+          eq(labOrders.organizationId, userOrgId)
+        )
+      )
       .orderBy(labOrders.createdAt);
       
       // Transform the data to match frontend expectations
