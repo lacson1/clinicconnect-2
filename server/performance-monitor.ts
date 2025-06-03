@@ -218,7 +218,7 @@ class PerformanceMonitor {
         .slice(0, 10);
 
       // Error rates (as percentage)
-      const errorRate = (metrics.filter(m => m.statusCode >= 400).length / totalRequests) * 100 || 0;
+      const errorRate = (metrics.filter(m => m.statusCode >= 400).length / totalRequests) || 0;
 
       return {
         totalRequests,

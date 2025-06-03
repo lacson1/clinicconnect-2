@@ -140,10 +140,10 @@ export function PerformanceDashboard() {
   const getSystemStatus = () => {
     if (!stats) return { status: 'unknown', message: 'Loading performance data...', color: 'text-gray-500', icon: Activity, label: 'Loading' };
     
-    if (stats.avgResponseTime > 2000 || stats.errorRate > 5) {
+    if (stats.avgResponseTime > 2000 || stats.errorRate > 0.05) {
       return { status: 'critical', message: 'System performance needs immediate attention', color: 'text-red-500', icon: TrendingDown, label: 'Critical' };
     }
-    if (stats.avgResponseTime > 1000 || stats.errorRate > 2) {
+    if (stats.avgResponseTime > 1000 || stats.errorRate > 0.02) {
       return { status: 'warning', message: 'System performance needs optimization', color: 'text-yellow-500', icon: Activity, label: 'Warning' };
     }
     return { status: 'good', message: 'System performance is optimal', color: 'text-green-500', icon: TrendingUp, label: 'Excellent' };
@@ -363,7 +363,7 @@ export function PerformanceDashboard() {
                     <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.errorRate || 0}%</div>
+                    <div className="text-2xl font-bold">{((stats.errorRate || 0) * 100).toFixed(1)}%</div>
                     <p className="text-xs text-muted-foreground">
                       Error percentage
                     </p>
