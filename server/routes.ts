@@ -470,6 +470,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get('/api/errors/ai-insights', authenticateToken, generateAIInsights);
   app.post('/api/test-ai-analysis', testAIAnalysis);
+  
+  // Direct AI test endpoint
+  app.get('/api/ai-test', async (req, res) => {
+    try {
+      if (!process.env.ANTHROPIC_API_KEY) {
+        return res.json({ 
+          error: "ANTHROPIC_API_KEY not configured",
+          status: "API key missing"
+        });
+      }
+
+      const Anthropic = require('@anthropic-ai/sdk');
+      const anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+
+      const prompt = `Analyze these healthcare system errors and provide actionable insights:
+
+Error Summary:
+- Total errors: 3
+- Error types: {"NETWORK":1,"VALIDATION":1,"AUTHENTICATION":1}
+- Severity: {"HIGH":1,"MEDIUM":1,"LOW":1}
+- Messages: Test network connection timeout, Test validation error for debugging, Test authentication warning
+
+Provide JSON response with: summary, systemHealth (score, trend, riskFactors), recommendations (immediate, shortTerm, longTerm), predictions.`;
+
+      const message = await anthropic.messages.create({
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }],
+        model: 'claude-sonnet-4-20250514',
+      });
+
+      const aiResponse = JSON.parse(message.content[0].text);
+      
+      res.json({
+        success: true,
+        aiAnalysis: aiResponse,
+        timestamp: new Date().toISOString(),
+        model: 'claude-sonnet-4-20250514'
+      });
+
+    } catch (error) {
+      res.json({ 
+        error: 'AI analysis failed', 
+        details: error.message,
+        hasApiKey: !!process.env.ANTHROPIC_API_KEY
+      });
+    }
+  });
 
   app.get('/api/errors/predictions', authenticateToken, async (req: AuthRequest, res) => {
     try {

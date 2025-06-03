@@ -9,7 +9,7 @@ import { AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Shield, Brain 
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import AIErrorInsights from "@/components/ai-error-insights-simplified";
+import { AIInsightsDisplay } from "@/components/ai-insights-display";
 
 interface ErrorLog {
   id: number;
@@ -385,7 +385,7 @@ export default function ErrorMonitoring() {
           </TabsContent>
 
           <TabsContent value="ai-insights">
-            <AIErrorInsights timeframe={timeframe} />
+            <AIInsightsDisplay />
           </TabsContent>
         </Tabs>
       </div>
