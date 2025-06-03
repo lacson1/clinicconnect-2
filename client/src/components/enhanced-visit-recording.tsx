@@ -42,7 +42,8 @@ import {
   Plus,
   X,
   Check,
-  ChevronsUpDown
+  ChevronsUpDown,
+  Sparkles
 } from "lucide-react";
 import {
   Command,
