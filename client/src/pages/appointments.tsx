@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarIcon, Clock, Plus, Search, User, Stethoscope, Filter, Grid3X3, List, CheckCircle, XCircle, Calendar as CalendarView, Brain, Zap, AlertCircle } from 'lucide-react';
+import { CalendarIcon, Clock, Plus, Search, User, Stethoscope, Filter, Grid3X3, List, CheckCircle, XCircle, Calendar as CalendarView, Brain, Zap, AlertCircle, Play, Pause } from 'lucide-react';
 import { format, isSameDay, parseISO, startOfWeek, endOfWeek, addWeeks, subWeeks, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { apiRequest } from '@/lib/queryClient';
@@ -300,9 +300,10 @@ export default function AppointmentsPage() {
   });
 
   // Get status badge variant
-  const getStatusVariant = (status: string) => {
+  const getStatusVariant = (status: string): any => {
     switch (status) {
       case 'scheduled': return 'default';
+      case 'in-progress': return { className: 'bg-blue-100 text-blue-800 border-blue-300' };
       case 'completed': return 'secondary';
       case 'cancelled': return 'destructive';
       case 'no-show': return 'outline';
@@ -389,6 +390,7 @@ export default function AppointmentsPage() {
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="scheduled">Scheduled</SelectItem>
+                  <SelectItem value="in-progress">In Progress</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
                   <SelectItem value="no-show">No Show</SelectItem>
@@ -795,11 +797,11 @@ export default function AppointmentsPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-green-600 hover:bg-green-50"
-                                onClick={() => updateAppointmentStatus(appointment.id, 'completed')}
+                                className="text-blue-600 hover:bg-blue-50"
+                                onClick={() => updateAppointmentStatus(appointment.id, 'in-progress')}
                               >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Complete
+                                <Play className="h-4 w-4 mr-1" />
+                                Start Consultation
                               </Button>
                               <Button
                                 size="sm"
@@ -809,6 +811,28 @@ export default function AppointmentsPage() {
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
                                 Cancel
+                              </Button>
+                            </>
+                          )}
+                          {appointment.status === 'in-progress' && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-green-600 hover:bg-green-50"
+                                onClick={() => updateAppointmentStatus(appointment.id, 'completed')}
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Complete Consultation
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-yellow-600 hover:bg-yellow-50"
+                                onClick={() => updateAppointmentStatus(appointment.id, 'scheduled')}
+                              >
+                                <Pause className="h-4 w-4 mr-1" />
+                                Pause
                               </Button>
                             </>
                           )}
