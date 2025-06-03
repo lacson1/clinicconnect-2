@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, User, Stethoscope, CheckCircle, Play, Pause, Timer, Activity, Users, Calendar } from 'lucide-react';
+import { Clock, User, Stethoscope, CheckCircle, Play, Pause, Timer, Activity, Users, Calendar, Plus, FileText, Pill, ArrowRight, Eye } from 'lucide-react';
 import { format, differenceInMinutes } from 'date-fns';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
