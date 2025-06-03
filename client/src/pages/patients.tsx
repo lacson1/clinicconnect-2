@@ -24,7 +24,7 @@ export default function Patients() {
           <div className="flex items-center justify-between relative z-10">
             <div>
               <h1 className="text-2xl font-bold text-white drop-shadow-sm">Patient Management</h1>
-              <p className="text-white/90 mt-1 font-medium">Comprehensive patient records and healthcare management</p>
+              <p className="text-white/90 mt-1 font-medium">Manage patient records and coordinate care</p>
             </div>
             <div className="flex items-center space-x-3">
               {(user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse') && (
