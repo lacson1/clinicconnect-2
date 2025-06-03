@@ -799,7 +799,8 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
       
       // Open comprehensive medication QR code in new window
       const qrWindow = window.open('', '_blank', 'width=500,height=700');
-      qrWindow.document.write(`
+      if (qrWindow) {
+        qrWindow.document.write(`
         <html>
           <head>
             <title>Medication QR Code - ${medication.medicationName}</title>
@@ -897,9 +898,9 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                 color: white;
                 border: none;
                 padding: 10px 20px;
-                border-radius: 5px;
+                border-radius: 4px;
+                margin: 0 5px;
                 cursor: pointer;
-                margin: 10px 5px;
               }
               .status-badge {
                 display: inline-block;
@@ -976,7 +977,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
           </body>
         </html>
       `);
-      
+      }
     } catch (error) {
       console.error('Failed to generate medication QR code:', error);
     }
