@@ -126,13 +126,12 @@ export default function CustomPrescriptionPrint({ prescriptions, patient, onClos
           className="bg-green-50 p-4 print:p-3" 
           style={{ 
             width: '148mm',
-            height: '105mm',
+            minHeight: '210mm',
             maxWidth: '148mm',
-            maxHeight: '105mm',
             backgroundColor: '#f0fdf4',
-            fontSize: '10px',
-            lineHeight: '1.2',
-            overflow: 'hidden'
+            fontSize: '11px',
+            lineHeight: '1.3',
+            overflow: 'visible'
           }}
         >
         {/* Organization Header */}
