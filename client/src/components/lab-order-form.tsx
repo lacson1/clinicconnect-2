@@ -104,6 +104,88 @@ export default function LabOrderForm({ patientId, onOrderCreated }: LabOrderForm
     );
   };
 
+  // Bulk selection handlers
+  const selectAllInCategory = (category: string) => {
+    const categoryTests = categorizedTests[category] || [];
+    const categoryTestIds = categoryTests.map(test => test.id);
+    setSelectedTests(prev => {
+      const newSelection = [...prev];
+      categoryTestIds.forEach(id => {
+        if (!newSelection.includes(id)) {
+          newSelection.push(id);
+        }
+      });
+      return newSelection;
+    });
+  };
+
+  const deselectAllInCategory = (category: string) => {
+    const categoryTests = categorizedTests[category] || [];
+    const categoryTestIds = categoryTests.map(test => test.id);
+    setSelectedTests(prev => prev.filter(id => !categoryTestIds.includes(id)));
+  };
+
+  const selectAllFiltered = () => {
+    const allFilteredIds = filteredTests.map(test => test.id);
+    setSelectedTests(prev => {
+      const newSelection = [...prev];
+      allFilteredIds.forEach(id => {
+        if (!newSelection.includes(id)) {
+          newSelection.push(id);
+        }
+      });
+      return newSelection;
+    });
+  };
+
+  const clearAllSelections = () => {
+    setSelectedTests([]);
+  };
+
+  const getCommonTestPanels = () => {
+    return {
+      'Basic Metabolic Panel': labTests.filter(test => 
+        ['Glucose', 'Sodium', 'Potassium', 'Chloride', 'BUN', 'Creatinine'].some(name => 
+          test.name.toLowerCase().includes(name.toLowerCase())
+        )
+      ).map(test => test.id),
+      'Complete Blood Count': labTests.filter(test => 
+        ['Hemoglobin', 'Hematocrit', 'White Blood Cell', 'Platelet', 'Red Blood Cell'].some(name => 
+          test.name.toLowerCase().includes(name.toLowerCase())
+        )
+      ).map(test => test.id),
+      'Liver Function Panel': labTests.filter(test => 
+        ['ALT', 'AST', 'Bilirubin', 'Alkaline Phosphatase'].some(name => 
+          test.name.toLowerCase().includes(name.toLowerCase())
+        )
+      ).map(test => test.id),
+      'Lipid Panel': labTests.filter(test => 
+        ['Cholesterol', 'Triglycerides', 'HDL', 'LDL'].some(name => 
+          test.name.toLowerCase().includes(name.toLowerCase())
+        )
+      ).map(test => test.id),
+      'Thyroid Panel': labTests.filter(test => 
+        ['TSH', 'T4', 'T3'].some(name => 
+          test.name.toLowerCase().includes(name.toLowerCase())
+        )
+      ).map(test => test.id)
+    };
+  };
+
+  const selectTestPanel = (panelName: string) => {
+    const panels = getCommonTestPanels();
+    const panelTestIds = panels[panelName] || [];
+    setSelectedTests(prev => {
+      const newSelection = [...prev];
+      panelTestIds.forEach(id => {
+        if (!newSelection.includes(id)) {
+          newSelection.push(id);
+        }
+      });
+      return newSelection;
+    });
+  };
+
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => 
       prev.includes(category)
@@ -232,25 +314,94 @@ export default function LabOrderForm({ patientId, onOrderCreated }: LabOrderForm
             </Select>
           </div>
           
-          {/* Search Results Summary */}
+          {/* Search Results Summary and Bulk Actions */}
           <div className="flex items-center justify-between text-sm text-gray-600">
             <span>
               {filteredTests.length} test{filteredTests.length !== 1 ? 's' : ''} found
               {searchQuery && ` for "${searchQuery}"`}
               {selectedCategory !== 'all' && ` in ${selectedCategory}`}
             </span>
-            {(searchQuery || selectedCategory !== 'all') && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('all');
-                }}
-              >
-                Clear filters
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {filteredTests.length > 0 && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={selectAllFiltered}
+                    className="text-xs"
+                  >
+                    Select All ({filteredTests.length})
+                  </Button>
+                  {selectedTests.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={clearAllSelections}
+                      className="text-xs text-red-600 hover:text-red-700"
+                    >
+                      Clear All ({selectedTests.length})
+                    </Button>
+                  )}
+                </>
+              )}
+              {(searchQuery || selectedCategory !== 'all') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory('all');
+                  }}
+                >
+                  Clear filters
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Test Panels */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TestTube className="h-5 w-5" />
+            Quick Test Panels
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">Select common test combinations with one click</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {Object.entries(getCommonTestPanels()).map(([panelName, testIds]) => {
+              const selectedCount = testIds.filter(id => selectedTests.includes(id)).length;
+              const isFullySelected = selectedCount === testIds.length && testIds.length > 0;
+              const isPartiallySelected = selectedCount > 0 && selectedCount < testIds.length;
+              
+              return (
+                <Button
+                  key={panelName}
+                  variant={isFullySelected ? "default" : "outline"}
+                  className={`h-auto p-4 flex flex-col items-start justify-start text-left ${
+                    isPartiallySelected ? "border-blue-500 bg-blue-50" : ""
+                  }`}
+                  onClick={() => selectTestPanel(panelName)}
+                  disabled={testIds.length === 0}
+                >
+                  <div className="font-medium text-sm">{panelName}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {testIds.length} tests
+                    {selectedCount > 0 && (
+                      <span className="text-blue-600 font-medium ml-2">
+                        ({selectedCount} selected)
+                      </span>
+                    )}
+                  </div>
+                  {testIds.length === 0 && (
+                    <div className="text-xs text-red-500 mt-1">No matching tests found</div>
+                  )}
+                </Button>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
