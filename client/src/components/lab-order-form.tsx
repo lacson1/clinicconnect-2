@@ -59,7 +59,10 @@ export default function LabOrderForm({ patientId, onOrderCreated }: LabOrderForm
         description: "Laboratory tests have been ordered successfully."
       });
       setSelectedTests([]);
+      // Invalidate all related lab order queries
       queryClient.invalidateQueries({ queryKey: ['/api/patients', selectedPatientId, 'lab-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/lab-orders/pending'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/patients', selectedPatientId] });
       onOrderCreated?.();
     },
     onError: (error) => {
