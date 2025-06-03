@@ -66,7 +66,7 @@ export default function AIErrorInsights({ timeframe }: AIErrorInsightsProps) {
 
   const { data: insights, isLoading: insightsLoading, error: insightsError } = useQuery<AIInsight>({
     queryKey: ["/api/errors/ai-insights", timeframe],
-    queryParams: { timeframe }
+    queryFn: () => fetch(`/api/errors/ai-insights?timeframe=${timeframe}`).then(res => res.json())
   });
 
   const { data: predictions, isLoading: predictionsLoading } = useQuery<{ predictions: PredictiveInsight[] }>({

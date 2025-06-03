@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { db } from './db';
 import { errorLogs, systemHealth } from '@shared/schema';
 import { eq, desc, and, gte, count, avg } from 'drizzle-orm';
+import { authenticateToken } from './middleware/auth';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -329,7 +330,7 @@ export const setupErrorRoutes = (app: any) => {
   });
 
   // AI Insights endpoint
-  app.get('/api/errors/ai-insights', async (req: AuthRequest, res: Response) => {
+  app.get('/api/errors/ai-insights', authenticateToken, async (req: AuthRequest, res: Response) => {
     try {
       const organizationId = req.user?.organizationId;
       if (!organizationId) {
@@ -351,7 +352,7 @@ export const setupErrorRoutes = (app: any) => {
   });
 
   // Predictive insights endpoint
-  app.get('/api/errors/predictions', async (req: AuthRequest, res: Response) => {
+  app.get('/api/errors/predictions', authenticateToken, async (req: AuthRequest, res: Response) => {
     try {
       const organizationId = req.user?.organizationId;
       if (!organizationId) {
