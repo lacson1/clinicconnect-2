@@ -44,42 +44,42 @@ export default function PatientProfile() {
 
   // Manual fetch for debugging with useEffect
   useEffect(() => {
+    console.log('useEffect triggered, patientId:', patientId);
     if (patientId) {
       console.log('Manual lab results fetch for patient:', patientId);
       const fetchLabResults = async () => {
         try {
+          console.log('Starting lab results fetch...');
           setLabsLoading(true);
-          const token = localStorage.getItem('clinic_token');
-          console.log('Auth token exists:', !!token);
+          setLabsError(null);
           
           const response = await fetch(`/api/patients/${patientId}/labs`, {
             method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-            },
             credentials: 'include',
           });
           
-          console.log('Response status:', response.status);
+          console.log('Lab results response status:', response.status);
           if (!response.ok) {
             const errorText = await response.text();
-            console.error('Fetch error:', errorText);
+            console.error('Lab results fetch error:', errorText);
             throw new Error(`Failed to fetch lab results: ${response.status} - ${errorText}`);
           }
           const data = await response.json();
           console.log('Lab results data received:', data);
           setLabResults(data);
-          setLabsError(null);
         } catch (error) {
           console.error('Lab results fetch error:', error);
           setLabsError(error as Error);
+          setLabResults([]);
         } finally {
           setLabsLoading(false);
         }
       };
 
       fetchLabResults();
+    } else {
+      console.log('No patientId, skipping lab results fetch');
+      setLabsLoading(false);
     }
   }, [patientId]);
 
