@@ -858,20 +858,20 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
             Safety
           </TabsTrigger>
           <TabsTrigger value="vitals" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
-            <Monitor className="w-5 h-5" />
+            <MedicalIcons.monitor className="w-5 h-5" />
             Vitals
           </TabsTrigger>
           <TabsTrigger value="record-visit" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
-            <Calendar className="w-5 h-5" />
+            <MedicalIcons.calendar className="w-5 h-5" />
             Visit
           </TabsTrigger>
           <TabsTrigger value="consultation" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
-            <FileText className="w-5 h-5" />
+            <MedicalIcons.consultation className="w-5 h-5" />
             Specialty Assessment
           </TabsTrigger>
 
           <TabsTrigger value="communication" className="flex items-center gap-2 text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-800 data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-white/70 hover:shadow-sm text-blue-700">
-            <MessageSquare className="w-5 h-5" />
+            <MedicalIcons.message className="w-5 h-5" />
             Chat
           </TabsTrigger>
         </TabsList>
@@ -890,15 +890,15 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                 <div className="flex items-center justify-between mb-4">
                   <TabsList className="grid w-full grid-cols-4 max-w-2xl">
                     <TabsTrigger value="current" className="flex items-center gap-2">
-                      <Pill className="w-4 h-4" />
+                      <MedicalIcons.medication className="w-4 h-4" />
                       Current ({activeMedications.length})
                     </TabsTrigger>
                     <TabsTrigger value="past" className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
+                      <MedicalIcons.clock className="w-4 h-4" />
                       Past ({discontinuedMedications.length})
                     </TabsTrigger>
                     <TabsTrigger value="repeat" className="flex items-center gap-2">
-                      <RefreshCw className="w-4 h-4" />
+                      <MedicalIcons.refresh className="w-4 h-4" />
                       Repeat ({repeatMedications.length})
                     </TabsTrigger>
                     <TabsTrigger value="summary" className="flex items-center gap-2">
