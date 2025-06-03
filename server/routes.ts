@@ -24,6 +24,7 @@ import path from 'path';
 import { setupOrganizationStaffRoutes } from "./organization-staff";
 import { setupTenantRoutes } from "./tenant-routes";
 import { setupSuperAdminRoutes } from "./super-admin-routes";
+import { performanceMonitor, globalErrorHandler, setupErrorRoutes } from "./error-handler";
 
 // Helper function to generate prescription HTML for printing
 function generatePrescriptionHTML(prescriptionResult: any): string {
@@ -458,6 +459,10 @@ function generateLabOrderHTML(orderResult: any, orderItems: any[]): string {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Firebase for push notifications
   initializeFirebase();
+  
+  // Setup error tracking and performance monitoring
+  app.use(performanceMonitor);
+  setupErrorRoutes(app);
   
   console.log('🔧 Registering lab order item PATCH endpoint...');
 

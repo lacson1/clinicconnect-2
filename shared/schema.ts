@@ -426,6 +426,38 @@ export const medicationReviews = pgTable('medication_reviews', {
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
 
+// Error Tracking Tables
+export const errorLogs = pgTable('error_logs', {
+  id: serial('id').primaryKey(),
+  errorId: varchar('error_id', { length: 100 }).notNull().unique(),
+  type: varchar('type', { length: 50 }).notNull(), // NETWORK, VALIDATION, AUTHENTICATION, etc.
+  severity: varchar('severity', { length: 20 }).notNull(), // LOW, MEDIUM, HIGH, CRITICAL
+  message: text('message').notNull(),
+  stack: text('stack'),
+  userId: integer('user_id').references(() => users.id),
+  organizationId: integer('organization_id').references(() => organizations.id),
+  patientId: integer('patient_id').references(() => patients.id),
+  sessionId: varchar('session_id', { length: 100 }),
+  url: varchar('url', { length: 500 }),
+  userAgent: text('user_agent'),
+  action: varchar('action', { length: 100 }),
+  component: varchar('component', { length: 100 }),
+  resolved: boolean('resolved').default(false),
+  retryable: boolean('retryable').default(false),
+  metadata: json('metadata'), // Additional error context
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  resolvedAt: timestamp('resolved_at')
+});
+
+export const systemHealth = pgTable('system_health', {
+  id: serial('id').primaryKey(),
+  metric: varchar('metric', { length: 50 }).notNull(), // response_time, error_rate, memory_usage, etc.
+  value: decimal('value', { precision: 10, scale: 2 }).notNull(),
+  unit: varchar('unit', { length: 20 }), // ms, %, MB, etc.
+  organizationId: integer('organization_id').references(() => organizations.id),
+  timestamp: timestamp('timestamp').defaultNow().notNull()
+});
+
 // Type definitions for new tables
 export type Pharmacy = typeof pharmacies.$inferSelect;
 export type InsertPharmacy = typeof pharmacies.$inferInsert;
@@ -433,11 +465,17 @@ export type PharmacyActivity = typeof pharmacyActivities.$inferSelect;
 export type InsertPharmacyActivity = typeof pharmacyActivities.$inferInsert;
 export type MedicationReview = typeof medicationReviews.$inferSelect;
 export type InsertMedicationReview = typeof medicationReviews.$inferInsert;
+export type ErrorLog = typeof errorLogs.$inferSelect;
+export type InsertErrorLog = typeof errorLogs.$inferInsert;
+export type SystemHealth = typeof systemHealth.$inferSelect;
+export type InsertSystemHealth = typeof systemHealth.$inferInsert;
 
 // Insert schemas for forms
 export const insertPharmacySchema = createInsertSchema(pharmacies);
 export const insertPharmacyActivitySchema = createInsertSchema(pharmacyActivities);
 export const insertMedicationReviewSchema = createInsertSchema(medicationReviews);
+export const insertErrorLogSchema = createInsertSchema(errorLogs);
+export const insertSystemHealthSchema = createInsertSchema(systemHealth);
 
 // Relations
 export const patientsRelations = relations(patients, ({ many }) => ({
