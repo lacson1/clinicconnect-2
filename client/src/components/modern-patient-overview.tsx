@@ -2131,7 +2131,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
               <CardContent>
                 <div className="space-y-4">
                   <p className="text-sm text-gray-600 mb-4">
-                    Document a new visit for {patient.title ? `${patient.title} ` : ""}{patient.firstName} {patient.lastName}
+                    Document a new visit for {formatPatientName(patient)}
                   </p>
                   <Button 
                     onClick={() => navigate(`/patients/${patient.id}/record-visit`)}
@@ -2156,7 +2156,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
           <TabsContent value="communication" className="space-y-6">
             <PatientCommunicationHub
               patientId={patient.id}
-              patientName={`${patient.title ? `${patient.title} ` : ""}${patient.firstName} ${patient.lastName}`}
+              patientName={formatPatientName(patient)}
               patientPhone={patient.phone}
               patientEmail={patient.email}
             />
