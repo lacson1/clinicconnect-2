@@ -328,31 +328,9 @@ export default function TopBar() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Settings Toggle */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleLanguage}
-                className="hidden sm:flex h-9 w-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <Globe className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                <span className="sr-only">Language: {language}</span>
-              </Button>
 
-              {/* Dark Mode Toggle */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleDarkMode}
-                className="h-9 w-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                {isDarkMode ? (
-                  <Sun className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                ) : (
-                  <Moon className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                )}
-                <span className="sr-only">Toggle theme</span>
-              </Button>
+
+
 
               {/* Offline Status */}
               <OfflineIndicator />
