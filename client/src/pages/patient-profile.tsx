@@ -44,7 +44,14 @@ export default function PatientProfile() {
   });
 
   // Debug logging
-  console.log('Lab results query:', { patientId, labResults, labsLoading, labsError });
+  console.log('Lab results query:', { 
+    patientId, 
+    queryKey: [`/api/patients/${patientId}/labs`],
+    labResults, 
+    labsLoading, 
+    labsError,
+    enabled: !!patientId 
+  });
 
   // Fetch prescriptions
   const { data: prescriptions, isLoading: prescriptionsLoading } = useQuery<Prescription[]>({
