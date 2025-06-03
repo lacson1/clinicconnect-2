@@ -976,7 +976,59 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
             </div>
           </body>
         </html>
-      `);
+        `);
+        qrWindow.document.close();
+      }
+    } catch (error) {
+      console.error('Failed to generate medication QR code:', error);
+    }
+  };
+Patient: ${patientSession?.firstName} ${patientSession?.lastName}
+Phone: ${patientSession?.phone}
+Medication: ${medication.medicationName}
+Dosage: ${medication.dosage}
+Frequency: ${medication.frequency}
+Duration: ${medication.duration}
+Instructions: ${medication.instructions || 'Take as directed'}
+Prescribed by: Dr. ${medication.prescribedBy}`;
+      
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(prescriptionText)}`;
+      
+      const qrWindow = window.open('', '_blank', 'width=500,height=700');
+      if (qrWindow) {
+        qrWindow.document.write(`
+          <html>
+            <head>
+              <title>Medication QR Code</title>
+              <style>
+                body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+                .container { max-width: 400px; margin: 0 auto; }
+                .medication-info { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+                .qr-code { margin: 20px 0; }
+                button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h1>Medication QR Code</h1>
+                <div class="medication-info">
+                  <h3>${medication.medicationName}</h3>
+                  <p><strong>Patient:</strong> ${patientSession?.firstName} ${patientSession?.lastName}</p>
+                  <p><strong>Dosage:</strong> ${medication.dosage}</p>
+                  <p><strong>Frequency:</strong> ${medication.frequency}</p>
+                  <p><strong>Duration:</strong> ${medication.duration}</p>
+                  <p><strong>Prescribed by:</strong> Dr. ${medication.prescribedBy}</p>
+                </div>
+                <div class="qr-code">
+                  <img src="${qrCodeUrl}" alt="Medication QR Code" />
+                  <p>Scan this QR code for medication details</p>
+                </div>
+                <button onclick="window.print()">Print</button>
+                <button onclick="window.close()">Close</button>
+              </div>
+            </body>
+          `);
+        qrWindow.document.close();
       }
     } catch (error) {
       console.error('Failed to generate medication QR code:', error);
