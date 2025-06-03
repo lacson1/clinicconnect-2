@@ -2663,6 +2663,97 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
+  // Helper function to determine if a lab result is normal
+  function isResultNormal(result: string, normalRange: string): boolean {
+    try {
+      // Simple logic for common ranges like "3.5-5.0" or "< 10"
+      if (normalRange.includes('-')) {
+        const [min, max] = normalRange.split('-').map(s => parseFloat(s.trim()));
+        const value = parseFloat(result);
+        return !isNaN(value) && !isNaN(min) && !isNaN(max) && value >= min && value <= max;
+      }
+      if (normalRange.startsWith('<')) {
+        const max = parseFloat(normalRange.substring(1).trim());
+        const value = parseFloat(result);
+        return !isNaN(value) && !isNaN(max) && value < max;
+      }
+      if (normalRange.startsWith('>')) {
+        const min = parseFloat(normalRange.substring(1).trim());
+        const value = parseFloat(result);
+        return !isNaN(value) && !isNaN(min) && value > min;
+      }
+      // Default to normal if we can't parse
+      return true;
+    } catch {
+      return true;
+    }
+  }
+
+  // Get reviewed lab results for the "Reviewed Results" tab
+  app.get('/api/lab-results/reviewed', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      // Get completed lab results that have been reviewed (status = 'completed')
+      const reviewedResults = await db.select({
+        id: labOrderItems.id,
+        orderId: labOrderItems.labOrderId,
+        patientName: sql<string>`CONCAT(${patients.firstName}, ' ', ${patients.lastName})`,
+        testName: labTests.name,
+        result: labOrderItems.result,
+        normalRange: labTests.referenceRange,
+        status: labOrderItems.status,
+        completedDate: labOrderItems.completedAt,
+        reviewedBy: users.username,
+        category: labTests.category,
+        units: labTests.units,
+        remarks: labOrderItems.remarks
+      })
+      .from(labOrderItems)
+      .innerJoin(labOrders, eq(labOrderItems.labOrderId, labOrders.id))
+      .innerJoin(labTests, eq(labOrderItems.labTestId, labTests.id))
+      .innerJoin(patients, eq(labOrders.patientId, patients.id))
+      .leftJoin(users, eq(labOrderItems.reviewedBy, users.id))
+      .where(
+        and(
+          eq(labOrders.organizationId, userOrgId),
+          eq(labOrderItems.status, 'completed'),
+          isNotNull(labOrderItems.result),
+          isNotNull(labOrderItems.completedAt)
+        )
+      )
+      .orderBy(desc(labOrderItems.completedAt));
+      
+      // Transform the data to match frontend expectations
+      const transformedResults = reviewedResults.map(result => ({
+        id: result.id,
+        orderId: result.orderId,
+        patientName: result.patientName,
+        testName: result.testName,
+        result: result.result,
+        normalRange: result.normalRange || 'See lab standards',
+        status: result.status === 'completed' ? 
+          (result.result && result.normalRange ? 
+            (isResultNormal(result.result, result.normalRange) ? 'normal' : 'abnormal') 
+            : 'normal') 
+          : 'normal',
+        completedDate: result.completedDate,
+        reviewedBy: result.reviewedBy || 'Lab Staff',
+        category: result.category || 'General',
+        units: result.units,
+        remarks: result.remarks
+      }));
+      
+      res.json(transformedResults);
+    } catch (error) {
+      console.error("Error fetching reviewed lab results:", error);
+      res.status(500).json({ message: "Failed to fetch reviewed lab results" });
+    }
+  });
+
   app.get('/api/patients/:id/lab-orders', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const userOrgId = req.user?.organizationId;
