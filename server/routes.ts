@@ -2103,6 +2103,156 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
+  // Medication Review Assignment endpoints
+  app.post("/api/medication-review-assignments", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+
+      const validatedData = insertMedicationReviewAssignmentSchema.parse(req.body);
+      
+      const [assignment] = await db.insert(medicationReviewAssignments).values({
+        ...validatedData,
+        assignedBy: req.user!.id,
+        organizationId: userOrgId,
+      }).returning();
+
+      res.status(201).json(assignment);
+    } catch (error) {
+      console.error("Error creating medication review assignment:", error);
+      res.status(500).json({ message: "Failed to create medication review assignment" });
+    }
+  });
+
+  app.get("/api/medication-review-assignments", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userOrgId = req.user?.organizationId;
+      const userId = req.user?.id;
+      const status = req.query.status as string;
+      const assignedTo = req.query.assignedTo as string;
+
+      let query = db.select({
+        assignment: medicationReviewAssignments,
+        patient: {
+          id: patients.id,
+          firstName: patients.firstName,
+          lastName: patients.lastName,
+          title: patients.title
+        },
+        assignedToUser: {
+          id: users.id,
+          username: users.username,
+          role: users.role
+        },
+        assignedByUser: {
+          id: sql<number>`assigned_by_user.id`,
+          username: sql<string>`assigned_by_user.username`,
+          role: sql<string>`assigned_by_user.role`
+        },
+        prescription: {
+          id: prescriptions.id,
+          medicationName: prescriptions.medicationName,
+          dosage: prescriptions.dosage,
+          frequency: prescriptions.frequency
+        }
+      })
+      .from(medicationReviewAssignments)
+      .leftJoin(patients, eq(medicationReviewAssignments.patientId, patients.id))
+      .leftJoin(users, eq(medicationReviewAssignments.assignedTo, users.id))
+      .leftJoin(sql`users assigned_by_user`, sql`medication_review_assignments.assigned_by = assigned_by_user.id`)
+      .leftJoin(prescriptions, eq(medicationReviewAssignments.prescriptionId, prescriptions.id))
+      .where(
+        and(
+          userOrgId ? eq(medicationReviewAssignments.organizationId, userOrgId) : undefined,
+          status ? eq(medicationReviewAssignments.status, status) : undefined,
+          assignedTo ? eq(medicationReviewAssignments.assignedTo, parseInt(assignedTo)) : undefined
+        )
+      )
+      .orderBy(desc(medicationReviewAssignments.createdAt));
+
+      const assignments = await query;
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching medication review assignments:", error);
+      res.status(500).json({ message: "Failed to fetch medication review assignments" });
+    }
+  });
+
+  app.patch("/api/medication-review-assignments/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const assignmentId = parseInt(req.params.id);
+      const userOrgId = req.user?.organizationId;
+      const updates = req.body;
+
+      // Handle status transitions
+      if (updates.status === 'in_progress' && !updates.startedAt) {
+        updates.startedAt = new Date();
+      }
+      if (updates.status === 'completed' && !updates.completedAt) {
+        updates.completedAt = new Date();
+      }
+
+      const [updatedAssignment] = await db
+        .update(medicationReviewAssignments)
+        .set(updates)
+        .where(
+          and(
+            eq(medicationReviewAssignments.id, assignmentId),
+            userOrgId ? eq(medicationReviewAssignments.organizationId, userOrgId) : undefined
+          )
+        )
+        .returning();
+
+      if (!updatedAssignment) {
+        return res.status(404).json({ message: "Assignment not found" });
+      }
+
+      res.json(updatedAssignment);
+    } catch (error) {
+      console.error("Error updating medication review assignment:", error);
+      res.status(500).json({ message: "Failed to update medication review assignment" });
+    }
+  });
+
+  app.get("/api/patients/:patientId/medication-review-assignments", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.patientId);
+      const userOrgId = req.user?.organizationId;
+
+      const assignments = await db.select({
+        assignment: medicationReviewAssignments,
+        assignedToUser: {
+          id: users.id,
+          username: users.username,
+          role: users.role
+        },
+        prescription: {
+          id: prescriptions.id,
+          medicationName: prescriptions.medicationName,
+          dosage: prescriptions.dosage,
+          frequency: prescriptions.frequency
+        }
+      })
+      .from(medicationReviewAssignments)
+      .leftJoin(users, eq(medicationReviewAssignments.assignedTo, users.id))
+      .leftJoin(prescriptions, eq(medicationReviewAssignments.prescriptionId, prescriptions.id))
+      .where(
+        and(
+          eq(medicationReviewAssignments.patientId, patientId),
+          userOrgId ? eq(medicationReviewAssignments.organizationId, userOrgId) : undefined
+        )
+      )
+      .orderBy(desc(medicationReviewAssignments.createdAt));
+
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching patient medication review assignments:", error);
+      res.status(500).json({ message: "Failed to fetch medication review assignments" });
+    }
+  });
+
   // Search pharmacies for autocomplete
   app.get("/api/pharmacies/search", authenticateToken, async (req: AuthRequest, res) => {
     try {

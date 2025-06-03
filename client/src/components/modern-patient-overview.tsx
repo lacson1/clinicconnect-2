@@ -31,6 +31,8 @@ import { apiRequest } from '@/lib/queryClient';
 import { DocumentPreviewCarousel } from './document-preview-carousel';
 import CustomPrescriptionPrint from './custom-prescription-print';
 import CustomLabOrderPrint from './custom-lab-order-print';
+import { MedicationReviewAssignmentModal } from './medication-review-assignment-modal';
+import { MedicationReviewAssignmentsList } from './medication-review-assignments-list';
 import { CheckCircle, MoreVertical, Eye, Download, Share, FileText, Printer, X } from 'lucide-react';
 // All icons now imported via MedicalIcons system
 
@@ -440,6 +442,8 @@ export function ModernPatientOverview({
   const queryClient = useQueryClient();
   const [isConsultationHistoryOpen, setIsConsultationHistoryOpen] = useState(false);
   const [showEditPatientModal, setShowEditPatientModal] = useState(false);
+  const [showMedicationReviewAssignmentModal, setShowMedicationReviewAssignmentModal] = useState(false);
+  const [selectedPrescriptionForReview, setSelectedPrescriptionForReview] = useState<any>(null);
 
   // Combine visits only (exclude consultation records to prevent phantom entries)
   const combinedVisits = React.useMemo(() => {
@@ -518,6 +522,17 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
         variant: "destructive"
       });
     }
+  };
+
+  // Medication Review Assignment handlers
+  const handleCreateMedicationReviewAssignment = (prescription?: any) => {
+    setSelectedPrescriptionForReview(prescription || null);
+    setShowMedicationReviewAssignmentModal(true);
+  };
+
+  const handleCloseMedicationReviewAssignment = () => {
+    setShowMedicationReviewAssignmentModal(false);
+    setSelectedPrescriptionForReview(null);
   };
 
   const handleUpdateMedicationStatus = async (prescriptionId: number, newStatus: string) => {
