@@ -35,40 +35,27 @@ interface LabOrderData {
 }
 
 export default function ClinicalActivityCenter() {
-  // Fetch today's appointments
-  const { data: appointments = [], isLoading: appointmentsLoading } = useQuery<ExtendedAppointment[]>({
-    queryKey: ["/api/appointments"],
+  // Fetch integrated clinical activity dashboard data
+  const { data: dashboardData, isLoading: dashboardLoading } = useQuery({
+    queryKey: ["/api/clinical-activity/dashboard"],
+    refetchInterval: 30000, // Refresh every 30 seconds for real-time updates
   });
 
-  // Fetch recent prescriptions
-  const { data: prescriptions = [], isLoading: prescriptionsLoading } = useQuery<Prescription[]>({
-    queryKey: ["/api/prescriptions"],
-  });
-
-  // Fetch recent lab orders
-  const { data: labOrders = [], isLoading: labOrdersLoading } = useQuery<LabOrderData[]>({
-    queryKey: ["/api/lab-orders"],
-  });
-
-  // Filter data for different time periods
-  const todayAppointments = appointments.filter((apt: ExtendedAppointment) => 
-    isToday(new Date(apt.appointmentDate))
-  );
-
-  const completedToday = todayAppointments.filter((apt: ExtendedAppointment) => apt.status === 'completed');
-  const pendingToday = todayAppointments.filter((apt: ExtendedAppointment) => apt.status === 'scheduled');
-  const inProgressToday = todayAppointments.filter((apt: ExtendedAppointment) => apt.status === 'in-progress');
-
-  const recentPrescriptions = prescriptions.slice(0, 5);
-  const pendingLabOrders = labOrders.filter((order: LabOrderData) => order.status === 'pending').slice(0, 5);
-
-  // Calculate statistics
-  const todayStats = {
-    totalPatients: todayAppointments.length,
-    completed: completedToday.length,
-    pending: pendingToday.length,
-    inProgress: inProgressToday.length,
-    completionRate: todayAppointments.length > 0 ? Math.round((completedToday.length / todayAppointments.length) * 100) : 0
+  // Extract data from integrated response
+  const appointments = dashboardData?.appointments?.today || [];
+  const completedToday = dashboardData?.appointments?.completed || [];
+  const pendingToday = dashboardData?.appointments?.pending || [];
+  const inProgressToday = dashboardData?.appointments?.inProgress || [];
+  const recentPrescriptions = dashboardData?.prescriptions || [];
+  const pendingLabOrders = dashboardData?.labOrders || [];
+  const todayStats = dashboardData?.metrics || {
+    totalPatients: 0,
+    completed: 0,
+    pending: 0,
+    inProgress: 0,
+    completionRate: 0,
+    prescriptionsToday: 0,
+    pendingLabOrders: 0
   };
 
   const formatDate = (date: string | Date) => {
@@ -82,7 +69,7 @@ export default function ClinicalActivityCenter() {
     return format(new Date(date), 'h:mm a');
   };
 
-  if (appointmentsLoading || prescriptionsLoading || labOrdersLoading) {
+  if (dashboardLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
@@ -351,43 +338,130 @@ export default function ClinicalActivityCenter() {
           </TabsContent>
         </Tabs>
 
-        {/* Quick Actions */}
+        {/* Workflow Integration Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          {/* Consultation Workflow */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-blue-700">
+                <Activity className="w-5 h-5 mr-2" />
+                Consultation Workflow
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                <Link href="/consultation-dashboard">
+                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1 hover:bg-blue-50">
+                    <Activity className="w-5 h-5 text-blue-600" />
+                    <span className="text-xs">Start Consultation</span>
+                  </Button>
+                </Link>
+                
+                <Link href="/appointments">
+                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1 hover:bg-green-50">
+                    <Calendar className="w-5 h-5 text-green-600" />
+                    <span className="text-xs">Appointments</span>
+                  </Button>
+                </Link>
+                
+                <Link href="/patients">
+                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1 hover:bg-purple-50">
+                    <Users className="w-5 h-5 text-purple-600" />
+                    <span className="text-xs">Patient Records</span>
+                  </Button>
+                </Link>
+                
+                <Link href="/referrals">
+                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1 hover:bg-orange-50">
+                    <ArrowRight className="w-5 h-5 text-orange-600" />
+                    <span className="text-xs">Referrals</span>
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Clinical Operations */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-green-700">
+                <TestTube className="w-5 h-5 mr-2" />
+                Clinical Operations
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                <Link href="/lab-orders">
+                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1 hover:bg-blue-50">
+                    <TestTube className="w-5 h-5 text-blue-600" />
+                    <span className="text-xs">Lab Orders</span>
+                  </Button>
+                </Link>
+                
+                <Link href="/pharmacy">
+                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1 hover:bg-green-50">
+                    <Pill className="w-5 h-5 text-green-600" />
+                    <span className="text-xs">Pharmacy</span>
+                  </Button>
+                </Link>
+                
+                <Link href="/documents">
+                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1 hover:bg-purple-50">
+                    <FileText className="w-5 h-5 text-purple-600" />
+                    <span className="text-xs">Documents</span>
+                  </Button>
+                </Link>
+                
+                <Link href="/analytics">
+                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1 hover:bg-orange-50">
+                    <TrendingUp className="w-5 h-5 text-orange-600" />
+                    <span className="text-xs">Analytics</span>
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Today's Workflow Summary */}
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Activity className="w-5 h-5 mr-2" />
-              Quick Actions
+              <CheckCircle2 className="w-5 h-5 mr-2" />
+              Today's Workflow Summary
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Link href="/consultation-dashboard">
-                <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
-                  <Activity className="w-5 h-5" />
-                  <span className="text-xs">Start Consultation</span>
-                </Button>
-              </Link>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <p className="text-2xl font-bold text-blue-600">{todayStats.totalPatients}</p>
+                <p className="text-sm text-blue-700">Total Patients Scheduled</p>
+                <Link href="/appointments">
+                  <Button variant="ghost" size="sm" className="mt-2 text-blue-600 hover:bg-blue-100">
+                    View Schedule
+                  </Button>
+                </Link>
+              </div>
               
-              <Link href="/patients">
-                <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
-                  <Users className="w-5 h-5" />
-                  <span className="text-xs">View Patients</span>
-                </Button>
-              </Link>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <p className="text-2xl font-bold text-green-600">{recentPrescriptions.length}</p>
+                <p className="text-sm text-green-700">Prescriptions Today</p>
+                <Link href="/pharmacy">
+                  <Button variant="ghost" size="sm" className="mt-2 text-green-600 hover:bg-green-100">
+                    View Pharmacy
+                  </Button>
+                </Link>
+              </div>
               
-              <Link href="/lab-orders">
-                <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
-                  <TestTube className="w-5 h-5" />
-                  <span className="text-xs">Lab Orders</span>
-                </Button>
-              </Link>
-              
-              <Link href="/analytics">
-                <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
-                  <TrendingUp className="w-5 h-5" />
-                  <span className="text-xs">Analytics</span>
-                </Button>
-              </Link>
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <p className="text-2xl font-bold text-orange-600">{pendingLabOrders.length}</p>
+                <p className="text-sm text-orange-700">Pending Lab Orders</p>
+                <Link href="/lab-orders">
+                  <Button variant="ghost" size="sm" className="mt-2 text-orange-600 hover:bg-orange-100">
+                    Process Orders
+                  </Button>
+                </Link>
+              </div>
             </div>
           </CardContent>
         </Card>

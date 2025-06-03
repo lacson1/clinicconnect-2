@@ -3363,6 +3363,244 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clinical Activity Center - Workflow Integration Endpoints
+  app.get("/api/clinical-activity/dashboard", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+
+      // Get today's appointments with status breakdown
+      const todayAppointments = await db.select({
+        id: appointments.id,
+        patientId: appointments.patientId,
+        patientName: sql<string>`CONCAT(${patients.firstName}, ' ', ${patients.lastName})`,
+        appointmentDate: appointments.appointmentDate,
+        appointmentTime: appointments.appointmentTime,
+        status: appointments.status,
+        type: appointments.type,
+        priority: appointments.priority
+      })
+      .from(appointments)
+      .leftJoin(patients, eq(appointments.patientId, patients.id))
+      .where(
+        and(
+          gte(sql`DATE(${appointments.appointmentDate})`, startOfDay.toISOString().split('T')[0]),
+          lte(sql`DATE(${appointments.appointmentDate})`, endOfDay.toISOString().split('T')[0])
+        )
+      )
+      .orderBy(appointments.appointmentTime);
+
+      // Get recent prescriptions
+      const recentPrescriptions = await db.select({
+        id: prescriptions.id,
+        patientId: prescriptions.patientId,
+        medicationName: prescriptions.medicationName,
+        dosage: prescriptions.dosage,
+        frequency: prescriptions.frequency,
+        status: prescriptions.status,
+        createdAt: prescriptions.createdAt,
+        prescribedBy: prescriptions.prescribedBy
+      })
+      .from(prescriptions)
+      .where(gte(prescriptions.createdAt, startOfDay))
+      .orderBy(desc(prescriptions.createdAt))
+      .limit(10);
+
+      // Get pending lab orders
+      const pendingLabOrders = await db.select({
+        id: labOrders.id,
+        patientId: labOrders.patientId,
+        patientName: sql<string>`CONCAT(${patients.firstName}, ' ', ${patients.lastName})`,
+        orderedBy: labOrders.orderedBy,
+        status: labOrders.status,
+        createdAt: labOrders.createdAt
+      })
+      .from(labOrders)
+      .leftJoin(patients, eq(labOrders.patientId, patients.id))
+      .where(eq(labOrders.status, 'pending'))
+      .orderBy(desc(labOrders.createdAt))
+      .limit(10);
+
+      // Calculate workflow metrics
+      const completedToday = todayAppointments.filter(apt => apt.status === 'completed');
+      const inProgressToday = todayAppointments.filter(apt => apt.status === 'in-progress');
+      const pendingToday = todayAppointments.filter(apt => apt.status === 'scheduled');
+
+      const workflowMetrics = {
+        totalPatients: todayAppointments.length,
+        completed: completedToday.length,
+        inProgress: inProgressToday.length,
+        pending: pendingToday.length,
+        completionRate: todayAppointments.length > 0 ? Math.round((completedToday.length / todayAppointments.length) * 100) : 0,
+        prescriptionsToday: recentPrescriptions.length,
+        pendingLabOrders: pendingLabOrders.length
+      };
+
+      res.json({
+        metrics: workflowMetrics,
+        appointments: {
+          today: todayAppointments,
+          completed: completedToday,
+          inProgress: inProgressToday,
+          pending: pendingToday
+        },
+        prescriptions: recentPrescriptions,
+        labOrders: pendingLabOrders
+      });
+
+    } catch (error) {
+      console.error('Error fetching clinical activity dashboard:', error);
+      res.status(500).json({ message: "Failed to fetch clinical activity data" });
+    }
+  });
+
+  // Quick workflow actions - Start consultation from appointment
+  app.post("/api/appointments/:id/start-consultation", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const appointmentId = parseInt(req.params.id);
+      
+      // Update appointment status to in-progress
+      const [updatedAppointment] = await db
+        .update(appointments)
+        .set({ 
+          status: 'in-progress',
+          updatedAt: new Date()
+        })
+        .where(eq(appointments.id, appointmentId))
+        .returning();
+
+      if (!updatedAppointment) {
+        return res.status(404).json({ message: "Appointment not found" });
+      }
+
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logPatientAction("Consultation Started", updatedAppointment.patientId, {
+        appointmentId: appointmentId,
+        startTime: new Date().toISOString()
+      });
+
+      res.json({ 
+        message: "Consultation started successfully",
+        appointment: updatedAppointment 
+      });
+
+    } catch (error) {
+      console.error('Error starting consultation:', error);
+      res.status(500).json({ message: "Failed to start consultation" });
+    }
+  });
+
+  // Complete consultation workflow
+  app.post("/api/appointments/:id/complete-consultation", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const appointmentId = parseInt(req.params.id);
+      const { notes, followUpRequired, followUpDate } = req.body;
+      
+      // Update appointment status to completed
+      const [updatedAppointment] = await db
+        .update(appointments)
+        .set({ 
+          status: 'completed',
+          notes: notes || null,
+          updatedAt: new Date()
+        })
+        .where(eq(appointments.id, appointmentId))
+        .returning();
+
+      if (!updatedAppointment) {
+        return res.status(404).json({ message: "Appointment not found" });
+      }
+
+      // Create follow-up appointment if required
+      if (followUpRequired && followUpDate) {
+        await db.insert(appointments).values({
+          patientId: updatedAppointment.patientId,
+          doctorId: updatedAppointment.doctorId,
+          appointmentDate: followUpDate,
+          appointmentTime: "09:00",
+          type: "follow-up",
+          status: "scheduled",
+          notes: `Follow-up from appointment #${appointmentId}`,
+          organizationId: req.user!.organizationId
+        });
+      }
+
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logPatientAction("Consultation Completed", updatedAppointment.patientId, {
+        appointmentId: appointmentId,
+        completionTime: new Date().toISOString(),
+        followUpScheduled: followUpRequired || false
+      });
+
+      res.json({ 
+        message: "Consultation completed successfully",
+        appointment: updatedAppointment 
+      });
+
+    } catch (error) {
+      console.error('Error completing consultation:', error);
+      res.status(500).json({ message: "Failed to complete consultation" });
+    }
+  });
+
+  // Workflow navigation - Get patient context for quick access
+  app.get("/api/patients/:id/workflow-context", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      
+      // Get patient basic info
+      const [patient] = await db.select().from(patients).where(eq(patients.id, patientId));
+      
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+
+      // Get recent appointments
+      const recentAppointments = await db.select()
+        .from(appointments)
+        .where(eq(appointments.patientId, patientId))
+        .orderBy(desc(appointments.appointmentDate))
+        .limit(5);
+
+      // Get active prescriptions
+      const activePrescriptions = await db.select()
+        .from(prescriptions)
+        .where(and(
+          eq(prescriptions.patientId, patientId),
+          eq(prescriptions.status, 'active')
+        ))
+        .orderBy(desc(prescriptions.createdAt))
+        .limit(5);
+
+      // Get pending lab orders
+      const pendingLabs = await db.select()
+        .from(labOrders)
+        .where(and(
+          eq(labOrders.patientId, patientId),
+          eq(labOrders.status, 'pending')
+        ))
+        .orderBy(desc(labOrders.createdAt))
+        .limit(5);
+
+      res.json({
+        patient,
+        context: {
+          recentAppointments,
+          activePrescriptions,
+          pendingLabs,
+          hasActiveConsultation: recentAppointments.some(apt => apt.status === 'in-progress')
+        }
+      });
+
+    } catch (error) {
+      console.error('Error fetching patient workflow context:', error);
+      res.status(500).json({ message: "Failed to fetch patient context" });
+    }
+  });
+
   const httpServer = createServer(app);
   // Organization Management endpoints
   // Super Admin - Global system analytics
