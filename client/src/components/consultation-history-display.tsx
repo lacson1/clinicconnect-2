@@ -6,9 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ConsultationDropdownMenu } from "./consultation-dropdown-menu";
 import { formatStaffName } from "@/lib/patient-utils";
-import { FileText, Clock, User, Activity, Pill, Calendar, ChevronDown, ChevronRight, Filter, X } from "lucide-react";
+import { FileText, Clock, User, Activity, Pill, Calendar, ChevronDown, ChevronRight, Filter, X, Search } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { Input } from "@/components/ui/input";
 
 interface ConsultationHistoryDisplayProps {
   patientId: number;
@@ -18,11 +19,13 @@ interface ConsultationHistoryDisplayProps {
 export default function ConsultationHistoryDisplay({ patientId, patient }: ConsultationHistoryDisplayProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [, navigate] = useLocation();
-  const [filters, setFilters] = useState({
-    role: 'all',
-    dateRange: 'all',
-    formType: 'all'
-  });
+  
+  // Enhanced filtering state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRole, setSelectedRole] = useState<string>("all");
+  const [selectedFormType, setSelectedFormType] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<string>("all");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   
   // Fetch actual consultation records
   const { data: consultationRecords = [], isLoading: historyLoading } = useQuery({
@@ -31,17 +34,32 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
 
   // Apply filters to consultation records
   const filteredRecords = (consultationRecords as any[]).filter((record: any) => {
+    // Filter by search term
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      const staffName = formatStaffName(record.conductedByRole, record.conductedByName).toLowerCase();
+      const formName = (record.formName || '').toLowerCase();
+      if (!staffName.includes(searchLower) && !formName.includes(searchLower)) {
+        return false;
+      }
+    }
+    
     // Filter by role
-    if (filters.role !== 'all' && record.conductedByRole !== filters.role) {
+    if (selectedRole !== 'all' && record.conductedByRole !== selectedRole) {
+      return false;
+    }
+    
+    // Filter by form type
+    if (selectedFormType !== 'all' && record.formName !== selectedFormType) {
       return false;
     }
     
     // Filter by date range
-    if (filters.dateRange !== 'all') {
+    if (dateRange !== 'all') {
       const recordDate = new Date(record.createdAt);
       const now = new Date();
       
-      switch (filters.dateRange) {
+      switch (dateRange) {
         case 'today':
           return recordDate.toDateString() === now.toDateString();
         case 'week':
