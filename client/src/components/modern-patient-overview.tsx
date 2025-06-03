@@ -1773,74 +1773,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Patient Card - Enhanced */}
-            <Card className="lg:col-span-2">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-4 mb-4">
-                  <PatientDropdownMenu
-                    patient={patient}
-                    onEditPatient={() => setShowEditPatientModal(true)}
-                    onRecordVisit={onRecordVisit}
-                    onAddPrescription={onAddPrescription}
-                    onPrintRecord={onPrintRecord}
-                  >
-                    <Avatar className="w-16 h-16 cursor-pointer hover:scale-105 transition-transform">
-                      <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-                        {getPatientInitials(patient)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </PatientDropdownMenu>
-                  <div className="flex-1">
-                    <PatientDropdownMenu
-                      patient={patient}
-                      onEditPatient={() => setShowEditPatientModal(true)}
-                      onRecordVisit={onRecordVisit}
-                      onAddPrescription={onAddPrescription}
-                      onPrintRecord={onPrintRecord}
-                      showHeader={false}
-                    >
-                      <h2 className="text-xl font-bold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">
-                        {formatPatientName(patient)}
-                      </h2>
-                    </PatientDropdownMenu>
-                    <p className="text-sm text-gray-500">
-                      ID: HC{patient.id?.toString().padStart(6, "0")}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className="text-xs">
-                        Active Patient
-                      </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        {getPatientAge(patient.dateOfBirth)} years • {patient.gender}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <MedicalIcons.phone className="w-4 h-4 text-gray-400" />
-                    <span>{patient.phone}</span>
-                  </div>
-                  
-                  {patient.email && (
-                    <div className="flex items-center space-x-2">
-                      <MedicalIcons.email className="w-4 h-4 text-gray-400" />
-                      <span className="truncate">{patient.email}</span>
-                    </div>
-                  )}
-
-                  {patient.address && (
-                    <div className="flex items-center space-x-2 md:col-span-2">
-                      <MedicalIcons.location className="w-4 h-4 text-gray-400" />
-                      <span className="truncate">{patient.address}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Quick Stats - Enhanced */}
             <Card>
               <CardHeader className="pb-3">
