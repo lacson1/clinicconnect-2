@@ -401,12 +401,12 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
             body: JSON.stringify({
               type: 'medication_review_assigned',
               patientId: patient.id,
-              patientName: `${patient.title ? `${patient.title} ` : ""}${patient.firstName} ${patient.lastName}`,
+              patientName: formatPatientName(patient),
               medicationName: medicationName,
               reviewId: reviewData.id,
               priority: 'normal',
               assignedTo: ['doctor', 'pharmacist'], // Roles that should be notified
-              message: `Medication review required for ${medicationName} - Patient: ${patient.firstName} ${patient.lastName}`
+              message: `Medication review required for ${medicationName} - Patient: ${formatPatientName(patient)}`
             }),
           });
           
@@ -479,12 +479,12 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
             body: JSON.stringify({
               type: 'repeat_prescription_issued',
               patientId: patient.id,
-              patientName: `${patient.title ? `${patient.title} ` : ""}${patient.firstName} ${patient.lastName}`,
+              patientName: formatPatientName(patient),
               medicationName: medicationName,
               prescriptionId: repeatData.id,
               priority: 'normal',
               assignedTo: ['pharmacist', 'pharmacy_technician'], // Notify pharmacy staff
-              message: `New repeat prescription ready for dispensing: ${medicationName} - Patient: ${patient.firstName} ${patient.lastName}`
+              message: `New repeat prescription ready for dispensing: ${medicationName} - Patient: ${formatPatientName(patient)}`
             }),
           });
           
@@ -611,7 +611,7 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
       const prescriptionData = {
         prescriptionId: `RX-${prescription.id}`,
         patient: {
-          name: `${patient.title || ''} ${patient.firstName} ${patient.lastName}`.trim(),
+          name: formatPatientName(patient),
           phone: patient.phone,
           dateOfBirth: patient.dateOfBirth,
           gender: patient.gender
@@ -903,7 +903,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                     <Button variant="ghost" className="h-auto p-0 hover:bg-gray-100 rounded-md px-2 py-1">
                       <div className="text-left">
                         <h2 className="text-lg font-bold text-gray-900 whitespace-nowrap flex items-center gap-1">
-                          {patient.title ? `${patient.title} ` : ''}{patient.firstName} {patient.lastName}
+                          {formatPatientName(patient)}
                           <ChevronDown className="h-4 w-4 text-gray-400" />
                         </h2>
                         <p className="text-xs text-gray-500">
@@ -1606,7 +1606,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
             <CardContent>
               <div className="space-y-4">
                 <p className="text-sm text-blue-600">
-                  Document a new visit for {patient.title ? `${patient.title} ` : ""}{patient.firstName} {patient.lastName} including vital signs, symptoms, diagnosis, and treatment plans.
+                  Document a new visit for {formatPatientName(patient)} including vital signs, symptoms, diagnosis, and treatment plans.
                 </p>
                 <div className="flex gap-3">
                   <Button 
@@ -1643,7 +1643,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                   >
                     <Avatar className="w-16 h-16 cursor-pointer hover:scale-105 transition-transform">
                       <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-                        {getPatientInitials(patient.firstName, patient.lastName)}
+                        {getPatientInitials(patient)}
                       </AvatarFallback>
                     </Avatar>
                   </PatientDropdownMenu>
@@ -1657,7 +1657,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                       showHeader={false}
                     >
                       <h2 className="text-xl font-bold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">
-                        {patient.title ? `${patient.title} ` : ''}{patient.firstName} {patient.lastName}
+                        {formatPatientName(patient)}
                       </h2>
                     </PatientDropdownMenu>
                     <p className="text-sm text-gray-500">
