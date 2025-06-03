@@ -19,7 +19,6 @@ import Patients from "@/pages/patients";
 import PatientProfile from "@/pages/patient-profile-clean";
 import Visits from "@/pages/visits";
 import LabResults from "@/pages/lab-results";
-import Pharmacy from "@/pages/pharmacy";
 import EnhancedPharmacy from "@/pages/pharmacy-enhanced";
 import InventoryPage from "@/pages/inventory";
 import Referrals from "@/pages/referrals";
@@ -42,10 +41,7 @@ import PhysiotherapyPage from "@/pages/physiotherapy";
 import ExerciseLeafletsPage from "@/pages/exercise-leaflets";
 import MedicalCertificatesPage from "@/pages/medical-certificates";
 import ReferralLettersPage from "@/pages/referral-letters";
-import WellnessPage from "@/pages/wellness";
-import WellnessPlansPage from "@/pages/wellness-plans";
-import WellnessAnalyticsPage from "@/pages/wellness-analytics";
-import MentalHealthPage from "@/pages/mental-health";
+
 import ClinicalProtocols from "@/components/clinical-protocols";
 import ExportCompliance from "@/components/export-compliance";
 import ConsultationDashboard from "@/pages/consultation-dashboard";
@@ -108,8 +104,7 @@ function AuthenticatedApp() {
                   <Route path="/consultation-records/:id" component={ConsultationRecordDetails} />
                   <Route path="/visits" component={Visits} />
                   <Route path="/lab-results" component={LabResults} />
-                  <Route path="/pharmacy" component={Pharmacy} />
-                  <Route path="/pharmacy-enhanced" component={EnhancedPharmacy} />
+                  <Route path="/pharmacy" component={EnhancedPharmacy} />
                   <Route path="/inventory" component={InventoryPage} />
                   <Route path="/referrals" component={Referrals} />
                   <Route path="/appointments" component={AppointmentsPage} />
@@ -118,16 +113,12 @@ function AuthenticatedApp() {
                   <Route path="/documents" component={DocumentsPage} />
                   <Route path="/billing" component={BillingPage} />
                   <Route path="/analytics" component={RevenueAnalytics} />
-                  <Route path="/revenue-analytics" component={RevenueAnalytics} />
                   <Route path="/telemedicine" component={TelemedicinePage} />
                   <Route path="/physiotherapy" component={PhysiotherapyPage} />
                   <Route path="/exercise-leaflets" component={ExerciseLeafletsPage} />
                   <Route path="/medical-certificates" component={MedicalCertificatesPage} />
                   <Route path="/referral-letters" component={ReferralLettersPage} />
-                  <Route path="/wellness" component={WellnessPage} />
-                  <Route path="/wellness/plans" component={WellnessPlansPage} />
-                  <Route path="/wellness/analytics" component={WellnessAnalyticsPage} />
-                  <Route path="/mental-health" component={MentalHealthPage} />
+
                   <Route path="/protocols" component={ClinicalProtocols} />
                   <Route path="/compliance" component={ExportCompliance} />
                   <Route path="/form-builder" component={FormBuilder} />

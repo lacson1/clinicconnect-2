@@ -62,18 +62,6 @@ const getNavigationGroupsForRole = (role: string) => {
         { name: "Physiotherapy", href: "/physiotherapy", icon: Heart, roles: ["superadmin", "admin", "physiotherapist"] },
         { name: "Procedural Reports", href: "/procedural-reports", icon: ClipboardList, roles: ["superadmin", "admin", "doctor", "nurse"] },
         { name: "Telemedicine", href: "/telemedicine", icon: Heart, roles: ["superadmin", "admin", "doctor", "nurse"] },
-        { 
-          name: "Wellness Center", 
-          href: "/wellness", 
-          icon: Heart, 
-          roles: ["superadmin", "admin", "doctor", "nurse", "pharmacist", "physiotherapist"],
-          submenu: [
-            { name: "Wellness Dashboard", href: "/wellness", icon: Activity, roles: ["superadmin", "admin", "doctor", "nurse", "pharmacist", "physiotherapist"] },
-            { name: "Mental Health Support", href: "/mental-health", icon: Brain, roles: ["superadmin", "admin", "doctor", "nurse", "pharmacist"] },
-            { name: "Patient Wellness Plans", href: "/wellness/plans", icon: ClipboardList, roles: ["superadmin", "admin", "doctor", "nurse", "pharmacist", "physiotherapist"] },
-            { name: "Wellness Analytics", href: "/wellness/analytics", icon: TrendingUp, roles: ["superadmin", "admin", "doctor", "nurse", "pharmacist"] }
-          ]
-        },
       ]
     },
     {

@@ -29,6 +29,7 @@ interface Appointment {
 export default function ConsultationDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
 
   // Fetch appointments data
   const { data: appointments = [], isLoading } = useQuery({
