@@ -202,11 +202,35 @@ export default function ClinicalActivityCenter() {
 
         {/* Main Tabs */}
         <Tabs defaultValue="today" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="today">Today's Activity</TabsTrigger>
-            <TabsTrigger value="prescriptions">Recent Prescriptions</TabsTrigger>
-            <TabsTrigger value="lab-orders">Pending Lab Orders</TabsTrigger>
-            <TabsTrigger value="follow-ups">Follow-ups</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 bg-slate-100/80 backdrop-blur-sm border border-slate-200/60 rounded-lg p-1 shadow-sm">
+            <TabsTrigger 
+              value="today" 
+              className="flex items-center gap-2 text-slate-600 font-medium transition-all duration-200 hover:text-slate-900 hover:bg-white/80 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-md data-[state=active]:border data-[state=active]:border-blue-200/50"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Today's Activity
+            </TabsTrigger>
+            <TabsTrigger 
+              value="prescriptions" 
+              className="flex items-center gap-2 text-slate-600 font-medium transition-all duration-200 hover:text-slate-900 hover:bg-white/80 data-[state=active]:bg-white data-[state=active]:text-green-700 data-[state=active]:shadow-md data-[state=active]:border data-[state=active]:border-green-200/50"
+            >
+              <Pill className="w-4 h-4" />
+              Recent Prescriptions
+            </TabsTrigger>
+            <TabsTrigger 
+              value="lab-orders" 
+              className="flex items-center gap-2 text-slate-600 font-medium transition-all duration-200 hover:text-slate-900 hover:bg-white/80 data-[state=active]:bg-white data-[state=active]:text-orange-700 data-[state=active]:shadow-md data-[state=active]:border data-[state=active]:border-orange-200/50"
+            >
+              <TestTube className="w-4 h-4" />
+              Pending Lab Orders
+            </TabsTrigger>
+            <TabsTrigger 
+              value="follow-ups" 
+              className="flex items-center gap-2 text-slate-600 font-medium transition-all duration-200 hover:text-slate-900 hover:bg-white/80 data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-md data-[state=active]:border data-[state=active]:border-purple-200/50"
+            >
+              <Calendar className="w-4 h-4" />
+              Follow-ups
+            </TabsTrigger>
           </TabsList>
 
           {/* Today's Activity */}
