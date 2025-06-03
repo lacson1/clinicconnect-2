@@ -5274,6 +5274,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create a text-based patient document (for referral letters, reports, etc.)
+  app.post("/api/patient-documents", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { patientId, title, description, content, documentType, createdBy } = req.body;
+      const organizationId = req.user?.organizationId || 1;
+
+      if (!patientId || !title || !content) {
+        return res.status(400).json({ message: "Patient ID, title, and content are required" });
+      }
+
+      // Generate a unique filename for the text document
+      const timestamp = Date.now();
+      const fileName = `document_${timestamp}_${Math.random().toString(36).substring(2, 15)}.txt`;
+
+      // Save text content to file
+      const fs = require('fs');
+      const path = require('path');
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      const filePath = path.join(uploadsDir, fileName);
+      fs.writeFileSync(filePath, content, 'utf8');
+
+      // Save to database
+      const [document] = await db
+        .insert(medicalDocuments)
+        .values({
+          fileName,
+          originalName: `${title}.txt`,
+          category: documentType || 'referral_letter',
+          patientId: parseInt(patientId),
+          uploadedBy: req.user!.id,
+          size: Buffer.byteLength(content, 'utf8'),
+          mimeType: 'text/plain',
+          organizationId,
+          description: description || null
+        })
+        .returning();
+
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logPatientAction('DOCUMENT_CREATED', parseInt(patientId), {
+        documentId: document.id,
+        documentType: documentType || 'referral_letter',
+        title
+      });
+
+      res.json({
+        id: document.id,
+        fileName: document.fileName,
+        originalName: document.originalName,
+        category: document.category,
+        size: document.size,
+        uploadedAt: document.uploadedAt,
+        description: document.description
+      });
+    } catch (error) {
+      console.error('Error creating patient document:', error);
+      res.status(500).json({ message: "Failed to create patient document" });
+    }
+  });
+
   // Get documents for specific patient
   app.get("/api/patients/:patientId/documents", authenticateToken, async (req: AuthRequest, res) => {
     try {
