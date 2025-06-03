@@ -345,7 +345,7 @@ export default function PatientProfile() {
                                 </p>
                               )}
                               <p className="text-xs text-slate-400 mt-2">
-                                {new Date(result.testDate).toLocaleDateString()}
+                                {result.testDate ? new Date(result.testDate).toLocaleDateString() : 'No date recorded'}
                               </p>
                             </div>
                             <div>{getStatusBadge(result.status)}</div>
