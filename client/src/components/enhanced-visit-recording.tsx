@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { AutocompleteInput } from "@/components/autocomplete-input";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -344,12 +345,17 @@ export function EnhancedVisitRecording({ patientId, onSave }: EnhancedVisitRecor
                   name="chiefComplaint"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Chief Complaint *</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-blue-500" />
+                        Chief Complaint (with smart suggestions) *
+                      </FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <AutocompleteInput
+                          value={field.value || ""}
+                          onChange={field.onChange}
                           placeholder="Patient's main complaint or reason for visit..."
-                          {...field}
-                          rows={3}
+                          fieldType="symptoms"
+                          className="min-h-[80px]"
                         />
                       </FormControl>
                       <FormMessage />
@@ -609,9 +615,17 @@ export function EnhancedVisitRecording({ patientId, onSave }: EnhancedVisitRecor
                     name="diagnosis"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Primary Diagnosis *</FormLabel>
+                        <FormLabel className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 text-blue-500" />
+                          Primary Diagnosis (with smart suggestions) *
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="Primary diagnosis..." {...field} />
+                          <AutocompleteInput
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            placeholder="Primary diagnosis..."
+                            fieldType="diagnosis"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
