@@ -48,6 +48,7 @@ import WellnessAnalyticsPage from "@/pages/wellness-analytics";
 import MentalHealthPage from "@/pages/mental-health";
 import ClinicalProtocols from "@/components/clinical-protocols";
 import ExportCompliance from "@/components/export-compliance";
+import ConsultationDashboard from "@/pages/consultation-dashboard";
 import PatientAccessCards from "@/pages/patient-access-cards";
 import Settings from "@/pages/settings";
 import Profile from "@/pages/profile";
@@ -112,6 +113,7 @@ function AuthenticatedApp() {
                   <Route path="/inventory" component={InventoryPage} />
                   <Route path="/referrals" component={Referrals} />
                   <Route path="/appointments" component={AppointmentsPage} />
+                  <Route path="/consultation-dashboard" component={ConsultationDashboard} />
                   <Route path="/lab-orders" component={LabOrdersPage} />
                   <Route path="/documents" component={DocumentsPage} />
                   <Route path="/billing" component={BillingPage} />
