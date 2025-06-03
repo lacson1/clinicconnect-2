@@ -60,10 +60,13 @@ export default function AppointmentsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isSmartScheduling, setIsSmartScheduling] = useState(false);
   
-  // New state for enhanced features
+  // Enhanced filtering and sorting state
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [providerFilter, setProviderFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [sortBy, setSortBy] = useState<'dateCreated' | 'appointmentDate' | 'patientName' | 'status'>('appointmentDate');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [editingAppointment, setEditingAppointment] = useState<number | null>(null);
   
@@ -415,6 +418,30 @@ export default function AppointmentsPage() {
                       {staff.firstName || staff.username} {staff.lastName || ''} ({staff.role})
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={dateFilter} onValueChange={setDateFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="appointmentDate">Most Recent</SelectItem>
+                  <SelectItem value="patientName">Patient Name</SelectItem>
+                  <SelectItem value="status">Status</SelectItem>
+                  <SelectItem value="dateCreated">Date Created</SelectItem>
                 </SelectContent>
               </Select>
 

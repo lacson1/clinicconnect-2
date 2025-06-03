@@ -40,8 +40,10 @@ interface EnhancedPatientManagementProps {
 export default function EnhancedPatientManagementFixed({ user, onPatientSelect }: EnhancedPatientManagementProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState<"name" | "age" | "lastVisit" | "riskLevel">("name");
+  const [sortBy, setSortBy] = useState<"name" | "age" | "lastVisit" | "riskLevel" | "dateCreated">("dateCreated");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [filterBy, setFilterBy] = useState<"all" | "priority" | "recent" | "highrisk">("all");
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
   const [organizationFilter, setOrganizationFilter] = useState<string>("all");
   const [selectedPatients, setSelectedPatients] = useState<Set<number>>(new Set());
   const [isStatsOpen, setIsStatsOpen] = useState(true);
@@ -183,7 +185,28 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
                                  (organizationFilter === "unassigned" && !patient.organizationId) ||
                                  patient.organizationId?.toString() === organizationFilter;
 
-      const baseMatch = matchesSearch && matchesOrganization;
+      // Apply date filter
+      const now = new Date();
+      const patientCreatedDate = new Date(patient.createdAt);
+      let matchesDate = true;
+      
+      switch (dateFilter) {
+        case 'today':
+          matchesDate = patientCreatedDate.toDateString() === now.toDateString();
+          break;
+        case 'week':
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          matchesDate = patientCreatedDate >= weekAgo;
+          break;
+        case 'month':
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          matchesDate = patientCreatedDate >= monthAgo;
+          break;
+        default:
+          matchesDate = true;
+      }
+
+      const baseMatch = matchesSearch && matchesOrganization && matchesDate;
 
       switch (filterBy) {
         case 'priority':
@@ -199,19 +222,31 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
     });
 
     return filtered.sort((a, b) => {
+      let comparison = 0;
+      
       switch (sortBy) {
         case 'age':
-          return calculateAge(a.dateOfBirth) - calculateAge(b.dateOfBirth);
+          comparison = calculateAge(a.dateOfBirth) - calculateAge(b.dateOfBirth);
+          break;
         case 'lastVisit':
-          return new Date(b.lastVisit || 0).getTime() - new Date(a.lastVisit || 0).getTime();
+          comparison = new Date(b.lastVisit || 0).getTime() - new Date(a.lastVisit || 0).getTime();
+          break;
         case 'riskLevel':
           const riskOrder = { high: 3, medium: 2, low: 1 };
-          return (riskOrder[b.riskLevel || 'low'] || 1) - (riskOrder[a.riskLevel || 'low'] || 1);
+          comparison = (riskOrder[b.riskLevel || 'low'] || 1) - (riskOrder[a.riskLevel || 'low'] || 1);
+          break;
+        case 'dateCreated':
+          comparison = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          break;
+        case 'name':
         default:
-          return a.firstName.localeCompare(b.firstName);
+          comparison = a.firstName.localeCompare(b.firstName);
+          break;
       }
+      
+      return sortOrder === 'desc' ? comparison : -comparison;
     });
-  }, [patients, searchQuery, filterBy, sortBy]);
+  }, [patients, searchQuery, filterBy, sortBy, sortOrder, organizationFilter, dateFilter]);
 
   const stats = useMemo(() => ({
     total: patients.length,
@@ -344,9 +379,9 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
                   </div>
                 </div>
                 
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                   <Select value={filterBy} onValueChange={(value: any) => setFilterBy(value)}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-[160px]">
                       <SelectValue placeholder="Filter by..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -357,8 +392,46 @@ export default function EnhancedPatientManagementFixed({ user, onPatientSelect }
                     </SelectContent>
                   </Select>
 
+                  <Select value={dateFilter} onValueChange={(value: any) => setDateFilter(value)}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Date range..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Time</SelectItem>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="week">This Week</SelectItem>
+                      <SelectItem value="month">This Month</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Sort by..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dateCreated">Most Recent</SelectItem>
+                      <SelectItem value="name">Name</SelectItem>
+                      <SelectItem value="age">Age</SelectItem>
+                      <SelectItem value="lastVisit">Last Visit</SelectItem>
+                      <SelectItem value="riskLevel">Risk Level</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                    className="px-3"
+                  >
+                    {sortOrder === 'desc' ? (
+                      <SortAsc className="h-4 w-4" />
+                    ) : (
+                      <SortAsc className="h-4 w-4 rotate-180" />
+                    )}
+                  </Button>
+
                   <Select value={organizationFilter} onValueChange={(value: string) => setOrganizationFilter(value)}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-[160px]">
                       <SelectValue placeholder="Organization..." />
                     </SelectTrigger>
                     <SelectContent>
