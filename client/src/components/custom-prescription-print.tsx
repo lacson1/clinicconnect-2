@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useQuery } from '@tanstack/react-query';
 import { MedicalIcons } from '@/lib/medical-icons';
 import { exportToPDF, printElement, generateClinicHeader, formatDocumentDate } from './print-export-utils';
@@ -101,28 +102,26 @@ export default function CustomPrescriptionPrint({ prescriptions, patient, onClos
   }
 
   return (
-    <div className="space-y-4">
-      {/* Action Buttons */}
-      <div className="flex justify-between items-center mb-4 no-print">
-        <h2 className="text-xl font-semibold">Prescription Print Preview</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onClose}>
-            <MedicalIcons.close className="w-4 h-4 mr-2" />
-            Close
-          </Button>
-          <Button variant="outline" onClick={handlePrint} disabled={isGenerating}>
-            <MedicalIcons.print className="w-4 h-4 mr-2" />
-            Print
-          </Button>
-          <Button onClick={handleExportPDF} disabled={isGenerating}>
-            <MedicalIcons.download className="w-4 h-4 mr-2" />
-            Export PDF
-          </Button>
-        </div>
-      </div>
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex justify-between items-center">
+            <span>Prescription Print Preview</span>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handlePrint} disabled={isGenerating}>
+                <MedicalIcons.print className="w-4 h-4 mr-2" />
+                Print
+              </Button>
+              <Button onClick={handleExportPDF} disabled={isGenerating}>
+                <MedicalIcons.download className="w-4 h-4 mr-2" />
+                Export PDF
+              </Button>
+            </div>
+          </DialogTitle>
+        </DialogHeader>
 
-      {/* Print Content */}
-      <div id="prescription-print-content" className="bg-white p-8 print:p-0" style={{ minHeight: '297mm' }}>
+        {/* Print Content */}
+        <div id="prescription-print-content" className="bg-white p-8 print:p-0" style={{ minHeight: '297mm' }}>
         {/* Organization Header */}
         {generateClinicHeader(organization)}
 
@@ -235,6 +234,7 @@ export default function CustomPrescriptionPrint({ prescriptions, patient, onClos
           <p className="mt-2">Generated on {new Date().toLocaleString()} | {organization.name}</p>
         </div>
       </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

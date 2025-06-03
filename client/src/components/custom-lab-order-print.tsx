@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useQuery } from '@tanstack/react-query';
 import { MedicalIcons } from '@/lib/medical-icons';
 import { exportToPDF, printElement, generateClinicHeader, formatDocumentDate } from './print-export-utils';
