@@ -63,13 +63,18 @@ export default function PatientProfile() {
     retry: false,
   });
 
-  console.log('Lab Results Debug:', {
+  console.log('Lab Results Debug - Component State:', {
     patientId,
     labResults,
     labsLoading,
     labsError,
-    resultsLength: labResults?.length
+    resultsLength: labResults?.length,
+    queryEnabled: !!patientId,
+    queryKey: [`/api/patients/${patientId}/labs`]
   });
+
+  // Force a console log to ensure component is rendering
+  console.log('Patient Profile Component Rendering with patientId:', patientId);
 
   // Status badge helper function
   const getStatusBadge = (status: string) => {
