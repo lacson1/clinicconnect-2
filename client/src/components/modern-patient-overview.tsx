@@ -1730,7 +1730,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                                 {item.type === 'visit' ? (
                                   <>
                                     <DropdownMenuItem onClick={() => handleViewVisit(item.id)}>
-                                      <Eye className="mr-2 h-4 w-4" />
+                                      <MedicalIcons.vision className="mr-2 h-4 w-4" />
                                       View Details
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => handleEditVisit(item.id)}>
@@ -1753,7 +1753,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                                 ) : (
                                   <>
                                     <DropdownMenuItem onClick={() => handleViewConsultation(item.id)}>
-                                      <Eye className="mr-2 h-4 w-4" />
+                                      <MedicalIcons.vision className="mr-2 h-4 w-4" />
                                       View Consultation
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => navigator.clipboard.writeText(JSON.stringify(item.responses, null, 2))}>
@@ -1982,7 +1982,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                                 {item.type === 'visit' ? (
                                   <>
                                     <DropdownMenuItem onClick={() => handleViewVisit(item.id)}>
-                                      <Eye className="mr-2 h-4 w-4" />
+                                      <MedicalIcons.vision className="mr-2 h-4 w-4" />
                                       View Details
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => handleEditVisit(item.id)}>
@@ -2005,7 +2005,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                                 ) : (
                                   <>
                                     <DropdownMenuItem onClick={() => handleViewConsultation(item.id)}>
-                                      <Eye className="mr-2 h-4 w-4" />
+                                      <MedicalIcons.vision className="mr-2 h-4 w-4" />
                                       View Consultation
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => navigator.clipboard.writeText(JSON.stringify(item.responses, null, 2))}>
