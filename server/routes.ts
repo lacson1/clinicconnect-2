@@ -2874,6 +2874,13 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       .where(eq(labOrderItems.labOrderId, labOrderId))
       .orderBy(labTests.name);
       
+      // Set no-cache headers to ensure fresh data
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
       res.json(orderItems);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch lab order items" });

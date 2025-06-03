@@ -84,9 +84,13 @@ export const queryClient = new QueryClient({
       staleTime: 0, // Allow immediate refetching
       gcTime: 0, // Don't cache data (replaces cacheTime in v5)
       retry: false,
+      networkMode: 'always', // Always make requests regardless of network state
     },
     mutations: {
       retry: false,
     },
   },
 });
+
+// Force clear all cached data on module load
+queryClient.clear();
