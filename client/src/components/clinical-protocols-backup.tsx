@@ -180,6 +180,43 @@ export default function ClinicalProtocols() {
       followUp: 'Review in 2 weeks. Monitor for improvement and side effects'
     },
     {
+      id: 'postpartum-depression',
+      title: 'Postpartum Depression',
+      category: 'Mental Health',
+      symptoms: ['mood changes', 'difficulty bonding', 'excessive crying', 'feelings of guilt', 'thoughts of harm'],
+      diagnosis: 'Postpartum Depression',
+      urgency: 'high',
+      steps: [
+        {
+          order: 1,
+          description: 'Edinburgh Postnatal Depression Scale',
+          type: 'assessment',
+          details: 'Screen for mood, anxiety, thoughts of self-harm or baby harm'
+        },
+        {
+          order: 2,
+          description: 'Assess infant safety and bonding',
+          type: 'assessment',
+          details: 'Ask about thoughts of harming baby, ability to care for infant'
+        },
+        {
+          order: 3,
+          description: 'Provide immediate support and education',
+          type: 'treatment',
+          details: 'Normalize feelings, discuss support systems, breastfeeding considerations'
+        },
+        {
+          order: 4,
+          description: 'Consider safe medication options',
+          type: 'medication',
+          details: 'Sertraline compatible with breastfeeding. Avoid paroxetine'
+        }
+      ],
+      medications: ['Sertraline 50mg', 'Citalopram 20mg'],
+      contraindications: ['Breastfeeding contraindications vary by medication'],
+      followUp: 'Urgent follow-up within 1 week. Consider psychiatric referral'
+    },
+    {
       id: 'menstrual-irregularities',
       title: 'Menstrual Irregularities',
       category: 'Gynecology',
@@ -217,41 +254,78 @@ export default function ClinicalProtocols() {
       followUp: 'Review in 3 months or sooner if symptoms worsen'
     },
     {
-      id: 'diabetes-management',
-      title: 'Type 2 Diabetes Management',
-      category: 'Endocrinology',
-      symptoms: ['polyuria', 'polydipsia', 'weight loss', 'fatigue', 'blurred vision'],
-      diagnosis: 'Type 2 Diabetes Mellitus',
-      urgency: 'medium',
+      id: 'pelvic-inflammatory-disease',
+      title: 'Pelvic Inflammatory Disease',
+      category: 'Gynecology',
+      symptoms: ['pelvic pain', 'abnormal discharge', 'fever', 'painful urination', 'irregular bleeding'],
+      diagnosis: 'Pelvic Inflammatory Disease',
+      urgency: 'high',
       steps: [
         {
           order: 1,
-          description: 'Confirm diagnosis and assess complications',
+          description: 'Clinical assessment and examination',
           type: 'assessment',
-          details: 'HbA1c, fasting glucose, diabetic complications screening'
+          details: 'Cervical motion tenderness, adnexal tenderness, fever assessment'
         },
         {
           order: 2,
-          description: 'Lifestyle modification counseling',
-          type: 'treatment',
-          details: 'Diet, exercise, weight management, smoking cessation'
+          description: 'Laboratory and microbiological tests',
+          type: 'assessment',
+          details: 'High vaginal swab, cervical swab, pregnancy test, inflammatory markers'
         },
         {
           order: 3,
-          description: 'Initiate metformin therapy',
+          description: 'Start empirical antibiotic therapy',
           type: 'medication',
-          details: 'Start with 500mg BD, increase gradually to minimize side effects'
+          details: 'Broad spectrum antibiotics covering chlamydia and gonorrhea'
         },
         {
           order: 4,
-          description: 'Monitoring and follow-up plan',
-          type: 'monitoring',
-          details: 'Regular HbA1c, foot care, eye screening, cardiovascular risk'
+          description: 'Contact tracing and partner treatment',
+          type: 'treatment',
+          details: 'Test and treat sexual partners, safe sex counseling'
         }
       ],
-      medications: ['Metformin 500mg', 'Gliclazide 80mg', 'Insulin if required'],
-      contraindications: ['Renal impairment for metformin', 'Heart failure for some medications'],
-      followUp: 'Review in 2 weeks, then 3 monthly. Annual complications screening'
+      medications: ['Doxycycline 100mg BD', 'Metronidazole 400mg BD', 'Ceftriaxone 500mg IM'],
+      contraindications: ['Pregnancy for certain antibiotics', 'Allergy to prescribed antibiotics'],
+      followUp: 'Review in 3 days, then 1-2 weeks. Test of cure after treatment'
+    },
+    {
+      id: 'contraceptive-counseling',
+      title: 'Contraceptive Counseling',
+      category: 'Gynecology',
+      symptoms: ['requesting contraception', 'contraceptive failure', 'side effects'],
+      diagnosis: 'Contraceptive Consultation',
+      urgency: 'low',
+      steps: [
+        {
+          order: 1,
+          description: 'Comprehensive reproductive health history',
+          type: 'assessment',
+          details: 'Previous contraceptive use, medical history, lifestyle factors'
+        },
+        {
+          order: 2,
+          description: 'Discuss contraceptive options',
+          type: 'treatment',
+          details: 'Effectiveness, side effects, benefits, reversibility of each method'
+        },
+        {
+          order: 3,
+          description: 'Physical examination if indicated',
+          type: 'assessment',
+          details: 'Blood pressure, BMI, breast examination if starting hormonal methods'
+        },
+        {
+          order: 4,
+          description: 'Provide chosen method and follow-up plan',
+          type: 'treatment',
+          details: 'Prescription, insertion, or fitting as appropriate'
+        }
+      ],
+      medications: ['Combined oral contraceptive', 'Progestogen-only pill', 'Depo-Provera injection'],
+      contraindications: ['Pregnancy', 'Undiagnosed vaginal bleeding', 'Active liver disease'],
+      followUp: 'Review in 3 months, then annually. Earlier if side effects'
     },
     {
       id: 'hypertension-crisis',
@@ -291,6 +365,43 @@ export default function ClinicalProtocols() {
       followUp: 'Immediate hospital transfer for hypertensive emergency'
     },
     {
+      id: 'diabetes-management',
+      title: 'Type 2 Diabetes Management',
+      category: 'Endocrinology',
+      symptoms: ['polyuria', 'polydipsia', 'weight loss', 'fatigue', 'blurred vision'],
+      diagnosis: 'Type 2 Diabetes Mellitus',
+      urgency: 'medium',
+      steps: [
+        {
+          order: 1,
+          description: 'Confirm diagnosis and assess complications',
+          type: 'assessment',
+          details: 'HbA1c, fasting glucose, diabetic complications screening'
+        },
+        {
+          order: 2,
+          description: 'Lifestyle modification counseling',
+          type: 'treatment',
+          details: 'Diet, exercise, weight management, smoking cessation'
+        },
+        {
+          order: 3,
+          description: 'Initiate metformin therapy',
+          type: 'medication',
+          details: 'Start with 500mg BD, increase gradually to minimize side effects'
+        },
+        {
+          order: 4,
+          description: 'Monitoring and follow-up plan',
+          type: 'monitoring',
+          details: 'Regular HbA1c, foot care, eye screening, cardiovascular risk'
+        }
+      ],
+      medications: ['Metformin 500mg', 'Gliclazide 80mg', 'Insulin if required'],
+      contraindications: ['Renal impairment for metformin', 'Heart failure for some medications'],
+      followUp: 'Review in 2 weeks, then 3 monthly. Annual complications screening'
+    },
+    {
       id: 'malaria-treatment',
       title: 'Uncomplicated Malaria Treatment',
       category: 'Infectious Disease',
@@ -328,6 +439,43 @@ export default function ClinicalProtocols() {
       followUp: 'Return if no improvement in 48 hours or symptoms worsen'
     },
     {
+      id: 'tuberculosis-screening',
+      title: 'Tuberculosis Screening & Management',
+      category: 'Infectious Disease',
+      symptoms: ['persistent cough', 'weight loss', 'night sweats', 'fever', 'chest pain'],
+      diagnosis: 'Pulmonary Tuberculosis',
+      urgency: 'high',
+      steps: [
+        {
+          order: 1,
+          description: 'Clinical assessment and history',
+          type: 'assessment',
+          details: 'Duration of symptoms, HIV status, previous TB, contact history'
+        },
+        {
+          order: 2,
+          description: 'Diagnostic investigations',
+          type: 'assessment',
+          details: 'Chest X-ray, sputum microscopy, GeneXpert if available'
+        },
+        {
+          order: 3,
+          description: 'Initiate anti-TB therapy if confirmed',
+          type: 'medication',
+          details: 'RHZE regimen for 2 months, then RH for 4 months'
+        },
+        {
+          order: 4,
+          description: 'Contact tracing and infection control',
+          type: 'treatment',
+          details: 'Screen household contacts, isolate until non-infectious'
+        }
+      ],
+      medications: ['Rifampicin', 'Isoniazid', 'Ethambutol', 'Pyrazinamide'],
+      contraindications: ['Liver disease (relative)', 'Drug allergies'],
+      followUp: 'Weekly for first month, then monthly. Monitor for side effects'
+    },
+    {
       id: 'asthma-acute',
       title: 'Acute Asthma Management',
       category: 'Respiratory',
@@ -363,6 +511,117 @@ export default function ClinicalProtocols() {
       medications: ['Salbutamol nebules', 'Prednisolone 40mg', 'Oxygen'],
       contraindications: ['Beta-blocker use (relative)', 'Severe cardiac arrhythmias'],
       followUp: 'Review asthma action plan. Follow up within 24-48 hours'
+    },
+    {
+      id: 'copd-exacerbation',
+      title: 'COPD Exacerbation Management',
+      category: 'Respiratory',
+      symptoms: ['increased dyspnea', 'increased sputum', 'sputum color change', 'wheeze'],
+      diagnosis: 'COPD Exacerbation',
+      urgency: 'high',
+      steps: [
+        {
+          order: 1,
+          description: 'Assess severity and triggers',
+          type: 'assessment',
+          details: 'Respiratory rate, oxygen saturation, cyanosis, confusion'
+        },
+        {
+          order: 2,
+          description: 'Bronchodilator therapy',
+          type: 'medication',
+          details: 'Salbutamol and ipratropium nebulizers or MDI'
+        },
+        {
+          order: 3,
+          description: 'Systemic corticosteroids',
+          type: 'medication',
+          details: 'Prednisolone 30-40mg daily for 5 days'
+        },
+        {
+          order: 4,
+          description: 'Consider antibiotics if indicated',
+          type: 'medication',
+          details: 'If purulent sputum or clinical signs of infection'
+        }
+      ],
+      medications: ['Salbutamol', 'Ipratropium', 'Prednisolone', 'Amoxicillin'],
+      contraindications: ['Pneumothorax', 'Severe acidosis'],
+      followUp: 'Review in 2-3 days. Consider pulmonary rehabilitation'
+    },
+    {
+      id: 'pediatric-fever',
+      title: 'Pediatric Fever Management',
+      category: 'Pediatrics',
+      symptoms: ['fever >38°C', 'irritability', 'poor feeding', 'lethargy'],
+      diagnosis: 'Pediatric Fever',
+      urgency: 'medium',
+      steps: [
+        {
+          order: 1,
+          description: 'Assess child and identify red flags',
+          type: 'assessment',
+          details: 'Appearance, hydration, circulation, respiratory effort'
+        },
+        {
+          order: 2,
+          description: 'Look for focus of infection',
+          type: 'assessment',
+          details: 'Ears, throat, chest, abdomen, rash, meningeal signs'
+        },
+        {
+          order: 3,
+          description: 'Appropriate antipyretic therapy',
+          type: 'medication',
+          details: 'Paracetamol 15mg/kg or ibuprofen 10mg/kg every 6-8 hours'
+        },
+        {
+          order: 4,
+          description: 'Parent education and safety netting',
+          type: 'treatment',
+          details: 'When to return, fluid encouragement, comfort measures'
+        }
+      ],
+      medications: ['Paracetamol syrup', 'Ibuprofen syrup'],
+      contraindications: ['Ibuprofen in dehydration', 'Aspirin in children'],
+      followUp: 'Return if fever persists >48 hours or child deteriorates'
+    },
+    {
+      id: 'pediatric-diarrhea',
+      title: 'Pediatric Acute Diarrhea',
+      category: 'Pediatrics',
+      symptoms: ['loose stools', 'vomiting', 'dehydration', 'abdominal pain'],
+      diagnosis: 'Acute Gastroenteritis',
+      urgency: 'medium',
+      steps: [
+        {
+          order: 1,
+          description: 'Assess degree of dehydration',
+          type: 'assessment',
+          details: 'Skin turgor, mucous membranes, urine output, weight loss'
+        },
+        {
+          order: 2,
+          description: 'Oral rehydration therapy',
+          type: 'treatment',
+          details: 'ORS solution 50-100ml/kg over 4 hours if mild-moderate dehydration'
+        },
+        {
+          order: 3,
+          description: 'Continue feeding age-appropriate foods',
+          type: 'treatment',
+          details: 'Breastfeeding should continue. BRAT diet not recommended'
+        },
+        {
+          order: 4,
+          description: 'Monitor and reassess',
+          type: 'monitoring',
+          details: 'Watch for signs of worsening dehydration or complications'
+        }
+      ],
+      medications: ['ORS packets', 'Zinc supplement 10-20mg daily'],
+      contraindications: ['Severe dehydration requiring IV therapy'],
+      followUp: 'Return if unable to keep fluids down or signs of dehydration worsen'
     }
   ];
 
@@ -396,92 +655,6 @@ export default function ClinicalProtocols() {
       default: return <FileText className="h-4 w-4" />;
     }
   };
-
-  const ProtocolDialog = ({ protocol }: { protocol: ClinicalProtocol }) => (
-    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-      <DialogHeader>
-        <DialogTitle className="flex items-center gap-2">
-          <BookOpen className="h-5 w-5" />
-          {protocol.title}
-        </DialogTitle>
-        <DialogDescription>
-          {protocol.category} • {protocol.diagnosis}
-        </DialogDescription>
-      </DialogHeader>
-      
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Treatment Protocol</h3>
-          <div className="space-y-4">
-            {protocol.steps.map((step) => (
-              <div key={step.order} className="flex gap-4 p-4 border rounded-lg">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    {getStepIcon(step.type)}
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="font-medium">Step {step.order}</span>
-                    <Badge variant="outline" className="text-xs">
-                      {step.type}
-                    </Badge>
-                  </div>
-                  <p className="text-gray-900 mb-2">{step.description}</p>
-                  {step.details && (
-                    <p className="text-sm text-gray-600">{step.details}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {protocol.medications && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Recommended Medications</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {protocol.medications.map((medication, index) => (
-                <div key={index} className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
-                  <Pill className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">{medication}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {protocol.contraindications && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              Contraindications & Warnings
-            </h3>
-            <div className="space-y-2">
-              {protocol.contraindications.map((contraindication, index) => (
-                <div key={index} className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
-                  <AlertTriangle className="h-4 w-4 text-red-600" />
-                  <span className="text-sm">{contraindication}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {protocol.followUp && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              Follow-up Instructions
-            </h3>
-            <div className="p-4 bg-green-50 rounded-lg">
-              <p className="text-sm text-green-900">{protocol.followUp}</p>
-            </div>
-          </div>
-        )}
-      </div>
-    </DialogContent>
-  );
 
   return (
     <div className="space-y-6">
@@ -591,15 +764,99 @@ export default function ClinicalProtocols() {
                           View Protocol
                         </Button>
                       </DialogTrigger>
-                      <ProtocolDialog protocol={protocol} />
-                    </Dialog>
-                  </div>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <BookOpen className="h-5 w-5" />
+                          {protocol.title}
+                        </DialogTitle>
+                        <DialogDescription>
+                          {protocol.category} • {protocol.diagnosis}
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      <div className="space-y-6">
+                        {/* Protocol Steps */}
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4">Treatment Protocol</h3>
+                          <div className="space-y-4">
+                            {protocol.steps.map((step) => (
+                              <div key={step.order} className="flex gap-4 p-4 border rounded-lg">
+                                <div className="flex-shrink-0">
+                                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    {getStepIcon(step.type)}
+                                  </div>
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="font-medium">Step {step.order}</span>
+                                    <Badge variant="outline" className="text-xs">
+                                      {step.type}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-gray-900 mb-2">{step.description}</p>
+                                  {step.details && (
+                                    <p className="text-sm text-gray-600">{step.details}</p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Medications */}
+                        {protocol.medications && (
+                          <div>
+                            <h3 className="text-lg font-semibold mb-3">Recommended Medications</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              {protocol.medications.map((medication, index) => (
+                                <div key={index} className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
+                                  <Pill className="h-4 w-4 text-green-600" />
+                                  <span className="text-sm">{medication}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Contraindications */}
+                        {protocol.contraindications && (
+                          <div>
+                            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                              <AlertTriangle className="h-5 w-5 text-red-500" />
+                              Contraindications & Warnings
+                            </h3>
+                            <div className="space-y-2">
+                              {protocol.contraindications.map((contraindication, index) => (
+                                <div key={index} className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
+                                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                                  <span className="text-sm">{contraindication}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Follow-up */}
+                        {protocol.followUp && (
+                          <div>
+                            <h3 className="text-lg font-semibold mb-3">Follow-up Instructions</h3>
+                            <div className="p-4 bg-blue-50 rounded-lg">
+                              <p className="text-sm">{protocol.followUp}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
       ) : (
+        <>
         <div className="space-y-4">
           {filteredProtocols.map((protocol) => (
             <Card key={protocol.id} className="hover:shadow-md transition-shadow">
@@ -670,7 +927,93 @@ export default function ClinicalProtocols() {
                             View Full Protocol
                           </Button>
                         </DialogTrigger>
-                        <ProtocolDialog protocol={protocol} />
+                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <BookOpen className="h-5 w-5" />
+                              {protocol.title}
+                            </DialogTitle>
+                            <DialogDescription>
+                              {protocol.category} • {protocol.diagnosis}
+                            </DialogDescription>
+                          </DialogHeader>
+                          
+                          <div className="space-y-6">
+                            {/* Protocol Steps */}
+                            <div>
+                              <h3 className="text-lg font-semibold mb-4">Treatment Protocol</h3>
+                              <div className="space-y-4">
+                                {protocol.steps.map((step) => (
+                                  <div key={step.order} className="flex gap-4 p-4 border rounded-lg">
+                                    <div className="flex-shrink-0">
+                                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                        {getStepIcon(step.type)}
+                                      </div>
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <span className="font-medium">Step {step.order}</span>
+                                        <Badge variant="outline" className="text-xs">
+                                          {step.type}
+                                        </Badge>
+                                      </div>
+                                      <p className="text-gray-900 mb-2">{step.description}</p>
+                                      {step.details && (
+                                        <p className="text-sm text-gray-600">{step.details}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Medications */}
+                            {protocol.medications && (
+                              <div>
+                                <h3 className="text-lg font-semibold mb-3">Recommended Medications</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                  {protocol.medications.map((medication, index) => (
+                                    <div key={index} className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
+                                      <Pill className="h-4 w-4 text-green-600" />
+                                      <span className="text-sm">{medication}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Contraindications */}
+                            {protocol.contraindications && (
+                              <div>
+                                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                                  Contraindications & Warnings
+                                </h3>
+                                <div className="space-y-2">
+                                  {protocol.contraindications.map((contraindication, index) => (
+                                    <div key={index} className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
+                                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                                      <span className="text-sm">{contraindication}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Follow-up */}
+                            {protocol.followUp && (
+                              <div>
+                                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                  <Clock className="h-5 w-5 text-blue-500" />
+                                  Follow-up Instructions
+                                </h3>
+                                <div className="p-4 bg-blue-50 rounded-lg">
+                                  <p className="text-sm text-blue-900">{protocol.followUp}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
                       </Dialog>
                     </div>
                   </div>
@@ -679,6 +1022,7 @@ export default function ClinicalProtocols() {
             </Card>
           ))}
         </div>
+        </>
       )}
 
       {filteredProtocols.length === 0 && (
