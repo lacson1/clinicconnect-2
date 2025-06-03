@@ -37,7 +37,18 @@ export default function PatientProfile() {
     enabled: !!patientId,
   });
 
-  // Fetch lab results - force immediate execution
+  // Fetch prescriptions
+  const { data: prescriptions, isLoading: prescriptionsLoading } = useQuery<Prescription[]>({
+    queryKey: [`/api/patients/${patientId}/prescriptions`],
+    enabled: !!patientId,
+  });
+
+  // Fetch current organization
+  const { data: currentOrganization } = useQuery<Organization>({
+    queryKey: ["/api/organizations/current"],
+  });
+
+  // Fetch lab results - force immediate execution (moved before early returns)
   const [labResults, setLabResults] = useState<LabResult[]>([]);
   const [labsLoading, setLabsLoading] = useState(true);
   const [labsError, setLabsError] = useState<Error | null>(null);
@@ -82,27 +93,6 @@ export default function PatientProfile() {
       setLabsLoading(false);
     }
   }, [patientId]);
-
-  // Debug logging
-  console.log('Lab results query:', { 
-    patientId, 
-    queryKey: [`/api/patients/${patientId}/labs`],
-    labResults, 
-    labsLoading, 
-    labsError,
-    enabled: !!patientId 
-  });
-
-  // Fetch prescriptions
-  const { data: prescriptions, isLoading: prescriptionsLoading } = useQuery<Prescription[]>({
-    queryKey: [`/api/patients/${patientId}/prescriptions`],
-    enabled: !!patientId,
-  });
-
-  // Fetch current organization
-  const { data: currentOrganization } = useQuery<Organization>({
-    queryKey: ["/api/organizations/current"],
-  });
 
   if (!patientId) {
     return (
