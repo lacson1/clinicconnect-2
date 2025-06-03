@@ -150,41 +150,41 @@ export default function Dashboard() {
           </div>
 
           <div 
-            className="metric-card group relative overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300"
+            className="metric-card group relative overflow-hidden cursor-pointer hover:scale-105 hover:shadow-xl hover:border-orange-200/60 transition-all duration-300"
             onClick={() => setLocation('/lab-orders')}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-warning/5 via-transparent to-warning/10 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-50/80 via-transparent to-orange-100/40 pointer-events-none group-hover:from-orange-100/80 group-hover:to-orange-200/60 transition-all duration-300"></div>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-warning/15 to-warning/25 rounded-xl shadow-sm">
-                  <Activity className="h-6 w-6 text-warning" />
+                <div className="p-3 bg-gradient-to-br from-orange-100/80 to-orange-200/60 rounded-xl shadow-sm group-hover:shadow-md transition-all duration-200">
+                  <Activity className="h-6 w-6 text-orange-600 group-hover:scale-110 transition-transform duration-200" />
                 </div>
-                <span className="status-badge warning text-xs font-medium">Pending</span>
+                <span className="status-badge warning text-xs font-medium bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Pending</span>
               </div>
               <div className="space-y-2">
-                <p className="text-3xl font-bold text-foreground group-hover:text-warning transition-colors">{stats?.pendingLabs || 0}</p>
+                <p className="text-3xl font-bold text-foreground group-hover:text-orange-700 transition-colors">{stats?.pendingLabs || 0}</p>
                 <p className="text-sm font-medium text-muted-foreground">Lab Orders</p>
-                <p className="text-xs text-muted-foreground font-medium">Awaiting results</p>
+                <p className="text-xs text-slate-600 font-medium">Awaiting results</p>
               </div>
             </div>
           </div>
 
           <div 
-            className="metric-card group relative overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300"
+            className="metric-card group relative overflow-hidden cursor-pointer hover:scale-105 hover:shadow-xl hover:border-red-200/60 transition-all duration-300"
             onClick={() => setLocation('/pharmacy')}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-transparent to-destructive/10 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-red-50/80 via-transparent to-red-100/40 pointer-events-none group-hover:from-red-100/80 group-hover:to-red-200/60 transition-all duration-300"></div>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-gradient-to-br from-destructive/15 to-destructive/25 rounded-xl shadow-sm">
-                  <Settings className="h-6 w-6 text-destructive" />
+                <div className="p-3 bg-gradient-to-br from-red-100/80 to-red-200/60 rounded-xl shadow-sm group-hover:shadow-md transition-all duration-200">
+                  <Settings className="h-6 w-6 text-red-600 group-hover:scale-110 transition-transform duration-200" />
                 </div>
-                <span className="status-badge error text-xs font-medium">Alert</span>
+                <span className="status-badge error text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded-full">Alert</span>
               </div>
               <div className="space-y-2">
-                <p className="text-3xl font-bold text-foreground group-hover:text-destructive transition-colors">{stats?.lowStockItems || 0}</p>
+                <p className="text-3xl font-bold text-foreground group-hover:text-red-700 transition-colors">{stats?.lowStockItems || 0}</p>
                 <p className="text-sm font-medium text-muted-foreground">Low Stock Items</p>
-                <p className="text-xs text-destructive font-medium">Needs attention</p>
+                <p className="text-xs text-red-600 font-medium">Needs attention</p>
               </div>
             </div>
           </div>
