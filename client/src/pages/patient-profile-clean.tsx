@@ -123,15 +123,33 @@ export default function PatientProfile() {
                 {getPatientInitials(patient)}
               </AvatarFallback>
             </Avatar>
-            <div>
+            <div className="flex-1">
               <h1 className="text-2xl font-bold text-gray-900">
                 {formatPatientName(patient)}
               </h1>
-              <p className="text-sm text-gray-500">
-                Patient ID: HC{patient.id?.toString().padStart(6, "0")} • 
-                Age: {new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()} years • 
-                {patient.gender}
-              </p>
+              <div className="space-y-1">
+                <p className="text-sm text-gray-500">
+                  Patient ID: HC{patient.id?.toString().padStart(6, "0")} • 
+                  Age: {new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()} years • 
+                  {patient.gender}
+                </p>
+                {patient.phone && (
+                  <p className="text-sm text-gray-600 flex items-center">
+                    <Phone className="w-3 h-3 mr-1" />
+                    {patient.phone}
+                  </p>
+                )}
+                {patient.address && (
+                  <p className="text-sm text-gray-600 flex items-center">
+                    <MapPin className="w-3 h-3 mr-1" />
+                    {patient.address}
+                  </p>
+                )}
+                <p className="text-sm text-gray-600 flex items-center">
+                  <Calendar className="w-3 h-3 mr-1" />
+                  Born: {new Date(patient.dateOfBirth).toLocaleDateString()}
+                </p>
+              </div>
             </div>
           </div>
           
