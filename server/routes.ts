@@ -5280,14 +5280,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { patientId } = req.params;
       const organizationId = req.user?.organizationId || 1;
 
+      console.log(`Fetching documents for patient ${patientId}, organization ${organizationId}, user ${req.user?.id}`);
+
       const documents = await db
         .select()
         .from(medicalDocuments)
-        .where(and(
-          eq(medicalDocuments.patientId, parseInt(patientId)),
-          eq(medicalDocuments.organizationId, organizationId)
-        ))
+        .where(eq(medicalDocuments.patientId, parseInt(patientId)))
         .orderBy(desc(medicalDocuments.uploadedAt));
+
+      console.log(`Found ${documents.length} documents:`, documents.map(d => ({ id: d.id, orgId: d.organizationId })));
 
       res.json(documents);
     } catch (error) {
