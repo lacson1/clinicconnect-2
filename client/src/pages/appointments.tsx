@@ -787,9 +787,15 @@ export default function AppointmentsPage() {
                           <Badge variant="outline" className="bg-blue-50">
                             {appointment.type}
                           </Badge>
-                          <Badge variant={getStatusVariant(appointment.status)}>
-                            {appointment.status}
-                          </Badge>
+                          {appointment.status === 'in-progress' ? (
+                            <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                              {appointment.status}
+                            </Badge>
+                          ) : (
+                            <Badge variant={getStatusVariant(appointment.status)}>
+                              {appointment.status}
+                            </Badge>
+                          )}
                         </div>
                         <div className="flex gap-2">
                           {appointment.status === 'scheduled' && (
