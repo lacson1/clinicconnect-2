@@ -1600,14 +1600,14 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                   
                   {patient.email && (
                     <div className="flex items-center space-x-2">
-                      <Mail className="w-4 h-4 text-gray-400" />
+                      <MedicalIcons.email className="w-4 h-4 text-gray-400" />
                       <span className="truncate">{patient.email}</span>
                     </div>
                   )}
 
                   {patient.address && (
                     <div className="flex items-center space-x-2 md:col-span-2">
-                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <MedicalIcons.location className="w-4 h-4 text-gray-400" />
                       <span className="truncate">{patient.address}</span>
                     </div>
                   )}
@@ -1623,7 +1623,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Activity className="w-4 h-4 text-blue-500" />
+                    <MedicalIcons.vitals className="w-4 h-4 text-blue-500" />
                     <span className="text-sm">Total Visits</span>
                   </div>
                   <Badge variant="secondary">{visits.length}</Badge>
@@ -1770,7 +1770,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                     </div>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
-                      <Stethoscope className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <MedicalIcons.stethoscope className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                       <h3 className="font-medium text-gray-600 mb-1">No visits or consultations recorded yet</h3>
                       <p className="text-sm">Start by recording the first visit for this patient</p>
                     </div>
@@ -1847,7 +1847,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                       />
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 bg-purple-100 rounded-full flex items-center justify-center">
-                          <Pill className="w-2 h-2 text-purple-600" />
+                          <MedicalIcons.medication className="w-2 h-2 text-purple-600" />
                         </div>
                         <label htmlFor="filter-prescriptions" className="text-xs cursor-pointer">Prescriptions</label>
                       </div>
@@ -1916,7 +1916,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Stethoscope className="h-5 w-5 text-blue-500" />
+                <MedicalIcons.stethoscope className="h-5 w-5 text-blue-500" />
                 Record Patient Visit
               </CardTitle>
             </CardHeader>
