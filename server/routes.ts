@@ -1983,12 +1983,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/users", authenticateToken, requireRole('admin'), async (req: AuthRequest, res) => {
+  app.post("/api/users", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const { username, password, email, phone, role, organizationId } = req.body;
+      const { username, password, email, phone, role, organizationId, firstName, lastName, title } = req.body;
       
       if (!username || !password || !organizationId) {
         return res.status(400).json({ error: 'Username, password, and organization are required' });
+      }
+
+      // Role-based permission check for user creation
+      const currentUser = req.user;
+      const targetOrgId = parseInt(organizationId);
+      
+      // Check permissions based on user role
+      if (currentUser?.role === 'admin' || currentUser?.role === 'superadmin') {
+        // Admins can create users in any organization
+      } else if (currentUser?.role === 'doctor' && currentUser?.organizationId === targetOrgId) {
+        // Doctors can create users in their own organization
+        if (!['nurse', 'pharmacist', 'receptionist', 'lab_technician'].includes(role)) {
+          return res.status(403).json({ error: 'Insufficient permissions to create users with this role' });
+        }
+      } else {
+        return res.status(403).json({ error: 'Insufficient permissions to create users' });
       }
 
       const hashedPassword = await hashPassword(password);
@@ -1999,7 +2015,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email,
         phone,
         role,
-        organizationId: parseInt(organizationId)
+        firstName,
+        lastName,
+        title,
+        organizationId: targetOrgId
       };
       
       const user = await storage.createUser(userData);
