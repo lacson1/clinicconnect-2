@@ -20,6 +20,7 @@ import {
   Activity,
   Send,
   ChevronDown,
+  FileText,
   Edit,
   MoreHorizontal,
   Heart,
@@ -440,6 +441,7 @@ export default function PatientProfile() {
                   </Button>
                   
                   <Button 
+                    onClick={() => navigate('/documents')}
                     className="w-full justify-start bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
                     variant="outline"
                   >
