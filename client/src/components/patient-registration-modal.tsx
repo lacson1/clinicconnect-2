@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AutocompleteInput } from "@/components/autocomplete-input";
 import { Sparkles, Plus, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import AllergyAutocomplete from "./allergy-autocomplete";
@@ -271,9 +272,18 @@ export default function PatientRegistrationModal({
                 name="address"
                 render={({ field }) => (
                   <FormItem className="mt-4">
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-blue-500" />
+                      Address (with smart suggestions)
+                    </FormLabel>
                     <FormControl>
-                      <Textarea {...field} rows={3} />
+                      <AutocompleteInput
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                        placeholder="Enter patient address..."
+                        fieldType="address"
+                        className="min-h-[80px]"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

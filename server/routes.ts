@@ -6704,5 +6704,175 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup super admin control routes
   setupSuperAdminRoutes(app);
 
+  // Autocomplete suggestions API endpoints
+  app.get("/api/autocomplete/:fieldType", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { fieldType } = req.params;
+      const { organizationId } = req.query;
+      
+      let suggestions: any[] = [];
+      
+      switch (fieldType) {
+        case "occupation":
+          // Get most frequently used occupations from patients
+          const occupations = await db
+            .select({
+              value: patients.occupation,
+              frequency: sql<number>`count(*)`.as('frequency')
+            })
+            .from(patients)
+            .where(
+              and(
+                isNotNull(patients.occupation),
+                ne(patients.occupation, ''),
+                organizationId ? eq(patients.organizationId, Number(organizationId)) : undefined
+              )
+            )
+            .groupBy(patients.occupation)
+            .orderBy(sql`count(*) desc`)
+            .limit(20);
+          
+          suggestions = occupations.map(item => ({
+            value: item.value,
+            frequency: item.frequency
+          }));
+          break;
+
+        case "address":
+          // Get common addresses/locations
+          const addresses = await db
+            .select({
+              value: patients.address,
+              frequency: sql<number>`count(*)`.as('frequency')
+            })
+            .from(patients)
+            .where(
+              and(
+                isNotNull(patients.address),
+                ne(patients.address, ''),
+                organizationId ? eq(patients.organizationId, Number(organizationId)) : undefined
+              )
+            )
+            .groupBy(patients.address)
+            .orderBy(sql`count(*) desc`)
+            .limit(15);
+          
+          suggestions = addresses.map(item => ({
+            value: item.value,
+            frequency: item.frequency
+          }));
+          break;
+
+        case "allergies":
+          // Get common allergies from patients
+          const allergies = await db
+            .select({
+              value: patients.allergies,
+              frequency: sql<number>`count(*)`.as('frequency')
+            })
+            .from(patients)
+            .where(
+              and(
+                isNotNull(patients.allergies),
+                ne(patients.allergies, ''),
+                organizationId ? eq(patients.organizationId, Number(organizationId)) : undefined
+              )
+            )
+            .groupBy(patients.allergies)
+            .orderBy(sql`count(*) desc`)
+            .limit(15);
+          
+          suggestions = allergies.map(item => ({
+            value: item.value,
+            frequency: item.frequency
+          }));
+          break;
+
+        case "diagnosis":
+          // Get common diagnoses from visits
+          const diagnoses = await db
+            .select({
+              value: visits.diagnosis,
+              frequency: sql<number>`count(*)`.as('frequency')
+            })
+            .from(visits)
+            .where(
+              and(
+                isNotNull(visits.diagnosis),
+                ne(visits.diagnosis, ''),
+                organizationId ? eq(visits.organizationId, Number(organizationId)) : undefined
+              )
+            )
+            .groupBy(visits.diagnosis)
+            .orderBy(sql`count(*) desc`)
+            .limit(20);
+          
+          suggestions = diagnoses.map(item => ({
+            value: item.value,
+            frequency: item.frequency
+          }));
+          break;
+
+        case "symptoms":
+          // Get common symptoms from visits
+          const symptoms = await db
+            .select({
+              value: visits.symptoms,
+              frequency: sql<number>`count(*)`.as('frequency')
+            })
+            .from(visits)
+            .where(
+              and(
+                isNotNull(visits.symptoms),
+                ne(visits.symptoms, ''),
+                organizationId ? eq(visits.organizationId, Number(organizationId)) : undefined
+              )
+            )
+            .groupBy(visits.symptoms)
+            .orderBy(sql`count(*) desc`)
+            .limit(20);
+          
+          suggestions = symptoms.map(item => ({
+            value: item.value,
+            frequency: item.frequency
+          }));
+          break;
+
+        case "medication":
+          // Get frequently prescribed medications
+          const medications = await db
+            .select({
+              value: prescriptions.medicationName,
+              frequency: sql<number>`count(*)`.as('frequency')
+            })
+            .from(prescriptions)
+            .where(
+              and(
+                isNotNull(prescriptions.medicationName),
+                ne(prescriptions.medicationName, ''),
+                organizationId ? eq(prescriptions.organizationId, Number(organizationId)) : undefined
+              )
+            )
+            .groupBy(prescriptions.medicationName)
+            .orderBy(sql`count(*) desc`)
+            .limit(25);
+          
+          suggestions = medications.map(item => ({
+            value: item.value,
+            frequency: item.frequency
+          }));
+          break;
+
+        default:
+          suggestions = [];
+      }
+
+      res.json(suggestions);
+    } catch (error) {
+      console.error(`Error fetching autocomplete suggestions for ${req.params.fieldType}:`, error);
+      res.status(500).json({ message: "Failed to fetch suggestions" });
+    }
+  });
+
   return httpServer;
 }
