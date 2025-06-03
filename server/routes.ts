@@ -465,7 +465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupErrorRoutes(app);
 
   // AI Error Insights endpoints (direct registration to fix 404s)
-  const { generateAIInsights } = require('./ai-insights-endpoint');
+  const { generateAIInsights } = await import('./ai-insights-endpoint');
   app.get('/api/errors/ai-insights', authenticateToken, generateAIInsights);
 
   app.get('/api/errors/predictions', authenticateToken, async (req: AuthRequest, res) => {
