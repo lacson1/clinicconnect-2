@@ -8291,5 +8291,273 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
+  // Advanced Patient Care - Health Metrics
+  app.get('/api/patients/:id/health-metrics', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const { timeframe = '30d' } = req.query;
+      
+      // Calculate date range based on timeframe
+      let dateFilter;
+      switch (timeframe) {
+        case '7d':
+          dateFilter = sql`DATE('now', '-7 days')`;
+          break;
+        case '90d':
+          dateFilter = sql`DATE('now', '-90 days')`;
+          break;
+        case '1y':
+          dateFilter = sql`DATE('now', '-1 year')`;
+          break;
+        default:
+          dateFilter = sql`DATE('now', '-30 days')`;
+      }
+
+      // Fetch vital signs data to calculate health metrics
+      const vitalSigns = await db.select()
+        .from(vitalSigns)
+        .where(and(
+          eq(vitalSigns.patientId, patientId),
+          gte(vitalSigns.recordedAt, dateFilter),
+          eq(vitalSigns.organizationId, req.user!.organizationId!)
+        ))
+        .orderBy(desc(vitalSigns.recordedAt));
+
+      // Calculate health metrics from vital signs
+      const healthMetrics = [];
+      
+      if (vitalSigns.length > 0) {
+        const latest = vitalSigns[0];
+        const previous = vitalSigns[1];
+        
+        // Blood Pressure
+        if (latest.bloodPressureSystolic && latest.bloodPressureDiastolic) {
+          const currentBP = `${latest.bloodPressureSystolic}/${latest.bloodPressureDiastolic}`;
+          const status = latest.bloodPressureSystolic > 140 || latest.bloodPressureDiastolic > 90 ? 'warning' : 'normal';
+          let trend = 'stable';
+          
+          if (previous?.bloodPressureSystolic) {
+            trend = latest.bloodPressureSystolic > previous.bloodPressureSystolic ? 'up' : 'down';
+          }
+          
+          healthMetrics.push({
+            name: 'Blood Pressure',
+            value: `${currentBP} mmHg`,
+            trend,
+            status,
+            lastUpdated: latest.recordedAt.toISOString()
+          });
+        }
+        
+        // Heart Rate
+        if (latest.heartRate) {
+          const status = latest.heartRate < 60 || latest.heartRate > 100 ? 'warning' : 'normal';
+          let trend = 'stable';
+          
+          if (previous?.heartRate) {
+            trend = latest.heartRate > previous.heartRate ? 'up' : 'down';
+          }
+          
+          healthMetrics.push({
+            name: 'Heart Rate',
+            value: `${latest.heartRate} bpm`,
+            trend,
+            status,
+            lastUpdated: latest.recordedAt.toISOString()
+          });
+        }
+        
+        // Temperature
+        if (latest.temperature) {
+          const tempValue = parseFloat(latest.temperature.toString());
+          const status = tempValue > 37.5 || tempValue < 36.0 ? 'warning' : 'normal';
+          let trend = 'stable';
+          
+          if (previous?.temperature) {
+            const prevTemp = parseFloat(previous.temperature.toString());
+            trend = tempValue > prevTemp ? 'up' : 'down';
+          }
+          
+          healthMetrics.push({
+            name: 'Temperature',
+            value: `${tempValue}°C`,
+            trend,
+            status,
+            lastUpdated: latest.recordedAt.toISOString()
+          });
+        }
+        
+        // Weight
+        if (latest.weight) {
+          const weightValue = parseFloat(latest.weight.toString());
+          let trend = 'stable';
+          
+          if (previous?.weight) {
+            const prevWeight = parseFloat(previous.weight.toString());
+            trend = weightValue > prevWeight ? 'up' : 'down';
+          }
+          
+          healthMetrics.push({
+            name: 'Weight',
+            value: `${weightValue} kg`,
+            trend,
+            status: 'normal',
+            lastUpdated: latest.recordedAt.toISOString()
+          });
+        }
+      }
+
+      res.json(healthMetrics);
+    } catch (error) {
+      console.error('Error fetching health metrics:', error);
+      res.status(500).json({ error: 'Failed to fetch health metrics' });
+    }
+  });
+
+  // Advanced Patient Care - Vital Trends
+  app.get('/api/patients/:id/vital-trends', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const { timeframe = '30d' } = req.query;
+      
+      let dateFilter;
+      switch (timeframe) {
+        case '7d':
+          dateFilter = sql`DATE('now', '-7 days')`;
+          break;
+        case '90d':
+          dateFilter = sql`DATE('now', '-90 days')`;
+          break;
+        case '1y':
+          dateFilter = sql`DATE('now', '-1 year')`;
+          break;
+        default:
+          dateFilter = sql`DATE('now', '-30 days')`;
+      }
+
+      const vitalTrends = await db.select({
+        date: sql<string>`DATE(${vitalSigns.recordedAt})`,
+        systolic: vitalSigns.bloodPressureSystolic,
+        diastolic: vitalSigns.bloodPressureDiastolic,
+        heartRate: vitalSigns.heartRate,
+        temperature: vitalSigns.temperature,
+        weight: vitalSigns.weight
+      })
+      .from(vitalSigns)
+      .where(and(
+        eq(vitalSigns.patientId, patientId),
+        gte(vitalSigns.recordedAt, dateFilter),
+        eq(vitalSigns.organizationId, req.user!.organizationId!)
+      ))
+      .orderBy(vitalSigns.recordedAt);
+
+      res.json(vitalTrends);
+    } catch (error) {
+      console.error('Error fetching vital trends:', error);
+      res.status(500).json({ error: 'Failed to fetch vital trends' });
+    }
+  });
+
+  // Advanced Patient Care - Care Alerts
+  app.get('/api/patients/:id/care-alerts', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const careAlerts = [];
+
+      // Check for critical lab results
+      const criticalLabResults = await db.select()
+        .from(labResults)
+        .where(and(
+          eq(labResults.patientId, patientId),
+          eq(labResults.status, 'abnormal'),
+          eq(labResults.organizationId, req.user!.organizationId!)
+        ))
+        .orderBy(desc(labResults.testDate))
+        .limit(5);
+
+      criticalLabResults.forEach(result => {
+        careAlerts.push({
+          id: `lab-${result.id}`,
+          type: 'lab',
+          priority: 'high',
+          title: `Abnormal Lab Result: ${result.testName}`,
+          description: `Result: ${result.result} (Normal: ${result.normalRange || 'N/A'})`,
+          timestamp: result.testDate.toISOString(),
+          actionRequired: true
+        });
+      });
+
+      // Check for overdue appointments
+      const overdueAppointments = await db.select()
+        .from(appointments)
+        .where(and(
+          eq(appointments.patientId, patientId),
+          lt(appointments.appointmentTime, sql`DATETIME('now')`),
+          eq(appointments.status, 'scheduled'),
+          eq(appointments.organizationId, req.user!.organizationId!)
+        ));
+
+      overdueAppointments.forEach(appointment => {
+        careAlerts.push({
+          id: `appointment-${appointment.id}`,
+          type: 'appointment',
+          priority: 'medium',
+          title: 'Missed Appointment',
+          description: `Scheduled for ${new Date(appointment.appointmentTime).toLocaleDateString()}`,
+          timestamp: appointment.appointmentTime,
+          actionRequired: true
+        });
+      });
+
+      // Check for medication adherence issues
+      const activePrescriptions = await db.select()
+        .from(prescriptions)
+        .where(and(
+          eq(prescriptions.patientId, patientId),
+          eq(prescriptions.status, 'active'),
+          eq(prescriptions.organizationId, req.user!.organizationId!)
+        ));
+
+      activePrescriptions.forEach(prescription => {
+        if (prescription.endDate && new Date(prescription.endDate) < new Date()) {
+          careAlerts.push({
+            id: `medication-${prescription.id}`,
+            type: 'medication',
+            priority: 'medium',
+            title: 'Medication Review Needed',
+            description: `${prescription.medicationName || 'Medication'} prescription has expired`,
+            timestamp: prescription.endDate.toISOString(),
+            actionRequired: true
+          });
+        }
+      });
+
+      // Sort alerts by priority and timestamp
+      const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+      careAlerts.sort((a, b) => {
+        const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+        if (priorityDiff !== 0) return priorityDiff;
+        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+      });
+
+      res.json(careAlerts);
+    } catch (error) {
+      console.error('Error fetching care alerts:', error);
+      res.status(500).json({ error: 'Failed to fetch care alerts' });
+    }
+  });
+
+  // Resolve Care Alert
+  app.patch('/api/patients/:id/care-alerts/:alertId/resolve', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      // In a real implementation, you would update the status of the related record
+      // For now, we'll just return success
+      res.json({ success: true, message: 'Alert resolved successfully' });
+    } catch (error) {
+      console.error('Error resolving care alert:', error);
+      res.status(500).json({ error: 'Failed to resolve care alert' });
+    }
+  });
+
   return httpServer;
 }
