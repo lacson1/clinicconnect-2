@@ -42,6 +42,7 @@ import { PatientSummaryPrintable } from "@/components/patient-summary-printable"
 import { ModernPatientOverview } from "@/components/modern-patient-overview";
 import { FloatingActionMenu } from "@/components/floating-action-menu";
 import { useRole } from "@/components/role-guard";
+import { formatPatientName, getPatientInitials } from "@/lib/patient-utils";
 import type { Patient, Visit, LabResult, Prescription } from "@shared/schema";
 
 export default function PatientProfile() {
@@ -111,11 +112,6 @@ export default function PatientProfile() {
     return age;
   };
 
-  const getPatientInitials = (firstName: string, lastName: string) => {
-    const initials = `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`;
-    return initials ? initials.toUpperCase() : 'N/A';
-  };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
@@ -148,12 +144,12 @@ export default function PatientProfile() {
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
               <span className="text-white font-semibold text-lg">
-                {getPatientInitials(patient.firstName, patient.lastName)}
+                {getPatientInitials(patient)}
               </span>
             </div>
             <div>
               <h2 className="text-2xl font-bold text-slate-800">
-                {patient.firstName} {patient.lastName}
+                {formatPatientName(patient)}
               </h2>
               <p className="text-sm text-slate-500">
                 ID: HC{patient.id?.toString().padStart(6, "0")} | Age: {getPatientAge(patient.dateOfBirth)} | {patient.gender}
