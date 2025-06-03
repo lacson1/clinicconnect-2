@@ -894,23 +894,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const search = req.query.search as string || "";
       
-      let query = db.select().from(patients).where(eq(patients.organizationId, userOrgId));
+      let whereClause = eq(patients.organizationId, userOrgId);
       
       if (search) {
-        query = query.where(
-          and(
-            eq(patients.organizationId, userOrgId),
-            or(
-              ilike(patients.firstName, `%${search}%`),
-              ilike(patients.lastName, `%${search}%`),
-              ilike(patients.phone, `%${search}%`),
-              ilike(patients.email, `%${search}%`)
-            )
-          )
+        const searchConditions = or(
+          ilike(patients.firstName, `%${search}%`),
+          ilike(patients.lastName, `%${search}%`),
+          ilike(patients.phone, `%${search}%`),
+          ilike(patients.email, `%${search}%`)
         );
+        whereClause = and(eq(patients.organizationId, userOrgId), searchConditions);
       }
       
-      const searchResults = await query.limit(20).orderBy(desc(patients.createdAt));
+      const searchResults = await db.select()
+        .from(patients)
+        .where(whereClause)
+        .limit(20)
+        .orderBy(desc(patients.createdAt));
+        
       res.json(searchResults);
     } catch (error) {
       console.error("Error searching patients:", error);
@@ -1778,20 +1779,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const search = req.query.search as string || "";
       
-      let query = db.select().from(medicines);
+      let whereClause;
       
       if (search) {
-        query = query.where(
-          or(
-            ilike(medicines.name, `%${search}%`),
-            ilike(medicines.genericName, `%${search}%`),
-            ilike(medicines.category, `%${search}%`),
-            ilike(medicines.manufacturer, `%${search}%`)
-          )
+        whereClause = or(
+          ilike(medicines.name, `%${search}%`),
+          ilike(medicines.activeIngredient, `%${search}%`),
+          ilike(medicines.category, `%${search}%`),
+          ilike(medicines.manufacturer, `%${search}%`)
         );
       }
       
-      const searchResults = await query.limit(20).orderBy(medicines.name);
+      const searchResults = await db.select()
+        .from(medicines)
+        .where(whereClause)
+        .limit(20)
+        .orderBy(medicines.name);
+        
       res.json(searchResults);
     } catch (error) {
       console.error("Error searching medicines:", error);

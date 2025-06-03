@@ -69,8 +69,8 @@ export function usePatientAutocomplete(searchTerm?: string) {
     queryKey: ["patients", "autocomplete"],
     transform: (patients) => patients.map((patient: any) => ({
       value: patient.id.toString(),
-      label: `${patient.firstName} ${patient.lastName}`,
-      description: `${patient.title || ''} • ${patient.phone || 'No phone'} • ID: ${patient.id}`,
+      label: `${patient.title || ''} ${patient.firstName} ${patient.lastName}`.trim(),
+      description: `${patient.phone || 'No phone'} • ID: ${patient.id}`,
       category: "Patients",
       metadata: patient
     }))
