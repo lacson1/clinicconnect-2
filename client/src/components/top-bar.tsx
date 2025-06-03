@@ -94,6 +94,26 @@ export default function TopBar() {
                 </div>
               </div>
               
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex items-center space-x-1">
+                {navigation.slice(0, 4).map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        isActive(item.href)
+                          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
+                          : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="hidden lg:block">{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
 
             </div>
 
