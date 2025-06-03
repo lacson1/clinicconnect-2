@@ -14,12 +14,12 @@
     --popover: 0 0% 100%;
     --popover-foreground: 217 35% 15%;
     
-    /* Enhanced Medical Blue Palette */
-    --primary: 212 100% 50%; /* Professional medical blue #0066FF */
+    /* Enhanced Medical Blue Palette - Toned down 10% */
+    --primary: 212 90% 45%; /* Softer medical blue #0051CC */
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 212 100% 45%;
-    --primary-light: 212 100% 96%;
-    --primary-dark: 212 100% 35%;
+    --primary-hover: 212 90% 40%;
+    --primary-light: 212 90% 96%;
+    --primary-dark: 212 90% 30%;
     
     /* Sophisticated Secondary Tones */
     --secondary: 216 22% 95%; /* Premium light surface */
