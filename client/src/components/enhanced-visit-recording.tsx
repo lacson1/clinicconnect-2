@@ -351,11 +351,10 @@ export function EnhancedVisitRecording({ patientId, onSave }: EnhancedVisitRecor
                         Chief Complaint (with smart suggestions) *
                       </FormLabel>
                       <FormControl>
-                        <AutocompleteInput
+                        <Textarea
                           value={field.value || ""}
                           onChange={field.onChange}
                           placeholder="Patient's main complaint or reason for visit..."
-                          fieldType="symptoms"
                           className="min-h-[80px]"
                         />
                       </FormControl>
@@ -621,11 +620,10 @@ export function EnhancedVisitRecording({ patientId, onSave }: EnhancedVisitRecor
                           Primary Diagnosis (with smart suggestions) *
                         </FormLabel>
                         <FormControl>
-                          <AutocompleteInput
+                          <Input
                             value={field.value || ""}
                             onChange={field.onChange}
                             placeholder="Primary diagnosis..."
-                            fieldType="diagnosis"
                           />
                         </FormControl>
                         <FormMessage />
