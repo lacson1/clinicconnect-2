@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -67,6 +67,7 @@ interface Organization {
 
 export default function PatientProfile() {
   const [, params] = useRoute("/patients/:id");
+  const [, navigate] = useLocation();
   const patientId = params?.id ? parseInt(params.id) : undefined;
   const { user } = useRole();
   const [showVisitModal, setShowVisitModal] = useState(false);
@@ -401,6 +402,7 @@ export default function PatientProfile() {
                   </Button>
                   
                   <Button 
+                    onClick={() => navigate(`/lab-orders?patientId=${patientId}`)}
                     className="w-full justify-start bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200"
                     variant="outline"
                   >
