@@ -222,12 +222,17 @@ export function PerformanceDashboard() {
         <TabsContent value="performance" className="space-y-6">
           {stats ? (
             <>
+
+
               {/* Performance Overview Cards */}
               <div className="grid gap-6 md:grid-cols-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">System Status</CardTitle>
-                    {performanceStatus && React.createElement(performanceStatus.icon, { className: `h-4 w-4 ${performanceStatus.color}` })}
+                    {performanceStatus && (() => {
+                      const IconComponent = performanceStatus.icon;
+                      return <IconComponent className={`h-4 w-4 ${performanceStatus.color}`} />;
+                    })()}
                   </CardHeader>
                   <CardContent>
                     <div className={`text-2xl font-bold ${performanceStatus?.color}`}>
@@ -341,6 +346,43 @@ export function PerformanceDashboard() {
                     {(stats.slowestEndpoints || []).length === 0 && (
                       <div className="text-center py-8 text-muted-foreground">
                         No performance data available for this timeframe
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Performance Optimization Recommendations */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5" />
+                    System Optimization Recommendations
+                  </CardTitle>
+                  <CardDescription>
+                    Actionable steps to improve your clinic management system performance
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {getOptimizationRecommendations().map((rec, index) => (
+                      <div key={index} className="flex items-start justify-between p-4 border rounded-lg">
+                        <div className="space-y-1">
+                          <p className="font-medium">{rec.title}</p>
+                          <p className="text-sm text-muted-foreground">{rec.description}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={rec.priority === 'high' ? 'destructive' : 'secondary'}>
+                            {rec.priority}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                    {getOptimizationRecommendations().length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Shield className="h-12 w-12 mx-auto mb-4 text-green-500" />
+                        <h3 className="text-lg font-medium mb-2">System Running Optimally</h3>
+                        <p>No immediate optimization recommendations at this time.</p>
                       </div>
                     )}
                   </div>
