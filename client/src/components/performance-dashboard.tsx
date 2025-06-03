@@ -290,7 +290,7 @@ export function PerformanceDashboard() {
                         </div>
                       </div>
                     ))}
-                    {stats.slowestEndpoints.length === 0 && (
+                    {(stats.slowestEndpoints || []).length === 0 && (
                       <div className="text-center py-8 text-muted-foreground">
                         No performance data available for this timeframe
                       </div>
