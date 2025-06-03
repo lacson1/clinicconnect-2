@@ -303,7 +303,7 @@ export default function PatientProfile() {
                   <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center">
                       <FlaskRound className="mr-2 h-5 w-5" />
-                      Lab Results
+                      Laboratory Tests & Results
                     </span>
                     {(user?.role === 'nurse' || user?.role === 'doctor') && (
                       <Button size="sm" onClick={() => setShowLabModal(true)}>
@@ -314,52 +314,120 @@ export default function PatientProfile() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {labsLoading ? (
-                    <div className="space-y-4">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="animate-pulse">
-                          <div className="h-4 bg-slate-200 rounded w-1/4 mb-2"></div>
-                          <div className="h-3 bg-slate-200 rounded w-1/2 mb-1"></div>
-                          <div className="h-3 bg-slate-200 rounded w-3/4"></div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : labResults && labResults.length > 0 ? (
-                    <div className="space-y-4">
-                      {labResults.map((result) => (
-                        <div key={result.id} className="border border-slate-200 rounded-lg p-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="font-medium text-slate-800">{result.testName}</h4>
-                              <p className="text-sm text-slate-600 mt-1">
-                                <strong>Result:</strong> {result.result}
-                              </p>
-                              {result.normalRange && (
-                                <p className="text-sm text-slate-600">
-                                  <strong>Normal Range:</strong> {result.normalRange}
-                                </p>
-                              )}
-                              {result.notes && (
-                                <p className="text-sm text-slate-600 mt-1">
-                                  <strong>Notes:</strong> {result.notes}
-                                </p>
-                              )}
-                              <p className="text-xs text-slate-400 mt-2">
-                                {result.testDate ? new Date(result.testDate).toLocaleDateString() : 'No date recorded'}
-                              </p>
+                  <Tabs defaultValue="results" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="results" className="flex items-center gap-2">
+                        <FlaskRound className="h-4 w-4" />
+                        Results
+                      </TabsTrigger>
+                      <TabsTrigger value="pending" className="flex items-center gap-2">
+                        <History className="h-4 w-4" />
+                        Pending
+                      </TabsTrigger>
+                      <TabsTrigger value="history" className="flex items-center gap-2">
+                        <History className="h-4 w-4" />
+                        History
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="results" className="mt-4">
+                      {labsLoading ? (
+                        <div className="space-y-4">
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="animate-pulse">
+                              <div className="h-4 bg-slate-200 rounded w-1/4 mb-2"></div>
+                              <div className="h-3 bg-slate-200 rounded w-1/2 mb-1"></div>
+                              <div className="h-3 bg-slate-200 rounded w-3/4"></div>
                             </div>
-                            <div>{getStatusBadge(result.status)}</div>
-                          </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <FlaskRound className="mx-auto h-12 w-12 text-slate-400" />
-                      <h3 className="mt-4 text-sm font-medium text-slate-900">No lab results</h3>
-                      <p className="mt-2 text-sm text-slate-500">Add the first lab result for this patient.</p>
-                    </div>
-                  )}
+                      ) : labResults && labResults.length > 0 ? (
+                        <div className="space-y-4">
+                          {labResults.map((result) => (
+                            <div key={result.id} className="border border-slate-200 rounded-lg p-4">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="font-medium text-slate-800">{result.testName}</h4>
+                                  <p className="text-sm text-slate-600 mt-1">
+                                    <strong>Result:</strong> {result.result}
+                                  </p>
+                                  {result.normalRange && (
+                                    <p className="text-sm text-slate-600">
+                                      <strong>Normal Range:</strong> {result.normalRange}
+                                    </p>
+                                  )}
+                                  {result.notes && (
+                                    <p className="text-sm text-slate-600 mt-1">
+                                      <strong>Notes:</strong> {result.notes}
+                                    </p>
+                                  )}
+                                  <p className="text-xs text-slate-400 mt-2">
+                                    {result.testDate ? new Date(result.testDate).toLocaleDateString() : 'No date recorded'}
+                                  </p>
+                                </div>
+                                <div>{getStatusBadge(result.status)}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <FlaskRound className="mx-auto h-12 w-12 text-slate-400" />
+                          <h3 className="mt-4 text-sm font-medium text-slate-900">No completed results</h3>
+                          <p className="mt-2 text-sm text-slate-500">Completed lab results will appear here.</p>
+                        </div>
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="pending" className="mt-4">
+                      {labOrdersLoading ? (
+                        <div className="space-y-4">
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="animate-pulse">
+                              <div className="h-4 bg-slate-200 rounded w-1/4 mb-2"></div>
+                              <div className="h-3 bg-slate-200 rounded w-1/2 mb-1"></div>
+                              <div className="h-3 bg-slate-200 rounded w-3/4"></div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : labOrders && labOrders.length > 0 ? (
+                        <div className="space-y-4">
+                          {labOrders.map((order) => (
+                            <div key={order.id} className="border border-amber-200 bg-amber-50 rounded-lg p-4">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="font-medium text-slate-800">Lab Order #{order.id}</h4>
+                                  <p className="text-sm text-slate-600 mt-1">
+                                    <strong>Ordered:</strong> {new Date(order.createdAt).toLocaleDateString()}
+                                  </p>
+                                  <p className="text-sm text-slate-600">
+                                    <strong>Status:</strong> {order.status}
+                                  </p>
+                                </div>
+                                <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
+                                  Pending
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <History className="mx-auto h-12 w-12 text-slate-400" />
+                          <h3 className="mt-4 text-sm font-medium text-slate-900">No pending orders</h3>
+                          <p className="mt-2 text-sm text-slate-500">All lab orders have been completed.</p>
+                        </div>
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="history" className="mt-4">
+                      <div className="text-center py-8">
+                        <History className="mx-auto h-12 w-12 text-slate-400" />
+                        <h3 className="mt-4 text-sm font-medium text-slate-900">Lab History</h3>
+                        <p className="mt-2 text-sm text-slate-500">Historical lab data will be displayed here.</p>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
             </TabsContent>
