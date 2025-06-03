@@ -92,13 +92,23 @@ export const logServerError = async (params: {
   try {
     const errorId = `server_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
+    // Only include userId if it's a valid existing user
+    let validUserId = null;
+    if (req.user?.id && typeof req.user.id === 'number' && req.user.id > 0) {
+      // Verify user exists before logging
+      const userExists = await db.select({ id: users.id }).from(users).where(eq(users.id, req.user.id)).limit(1);
+      if (userExists.length > 0) {
+        validUserId = req.user.id;
+      }
+    }
+
     await db.insert(errorLogs).values({
       errorId,
       type,
       severity,
       message: error.message || 'Unknown server error',
       stack: error.stack,
-      userId: req.user?.id || null,
+      userId: validUserId,
       organizationId: req.user?.organizationId || null,
       sessionId: req.session?.id || 'unknown',
       url: req.originalUrl || req.url,

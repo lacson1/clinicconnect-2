@@ -62,16 +62,17 @@ class ErrorTracker {
       this.trackError({
         type: ErrorType.CLIENT,
         severity: ErrorSeverity.HIGH,
-        message: event.message || 'Uncaught JavaScript error',
+        message: event.message || 'JavaScript error',
         originalError: event.error,
         context: {
-          url: window.location.href,
+          url: event.filename || window.location.href,
           userAgent: navigator.userAgent,
           timestamp: new Date(),
           sessionId: this.sessionId,
-          component: 'Global'
+          component: 'global-error-handler'
         },
-        stack: event.error?.stack
+        stack: event.error?.stack,
+        retryable: false
       });
     });
 
@@ -87,215 +88,120 @@ class ErrorTracker {
           userAgent: navigator.userAgent,
           timestamp: new Date(),
           sessionId: this.sessionId,
-          component: 'Promise'
-        }
+          component: 'promise-rejection-handler'
+        },
+        stack: event.reason?.stack,
+        retryable: false
       });
     });
   }
 
-  trackError(error: Omit<AppError, 'id'>): string {
-    const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+  trackError(error: Partial<AppError>): void {
     const appError: AppError = {
-      ...error,
-      id: errorId,
+      id: error.id || `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      type: error.type || ErrorType.UNKNOWN,
+      severity: error.severity || ErrorSeverity.MEDIUM,
+      message: error.message || 'Unknown error',
+      originalError: error.originalError,
       context: {
         ...error.context,
-        sessionId: this.sessionId,
-        timestamp: error.context.timestamp || new Date()
-      }
+        timestamp: error.context?.timestamp || new Date(),
+        sessionId: error.context?.sessionId || this.sessionId,
+        url: error.context?.url || window.location.href,
+        userAgent: error.context?.userAgent || navigator.userAgent
+      },
+      stack: error.stack || error.originalError?.stack,
+      resolved: false,
+      retryable: error.retryable || false
     };
 
+    // Add to local storage
     this.errors.push(appError);
-
-    // Keep only the latest errors
     if (this.errors.length > this.maxErrors) {
-      this.errors = this.errors.slice(-this.maxErrors);
+      this.errors.shift();
     }
 
-    // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.group(`🚨 Error Tracked: ${error.type} - ${error.severity}`);
-      console.error('Message:', error.message);
-      console.error('Context:', error.context);
-      if (error.originalError) {
-        console.error('Original Error:', error.originalError);
-      }
-      if (error.stack) {
-        console.error('Stack:', error.stack);
-      }
-      console.groupEnd();
-    }
-
-    // Send to server for logging
+    // Send to server
     this.sendErrorToServer(appError);
-
-    return errorId;
   }
 
-  private async sendErrorToServer(error: AppError) {
+  private async sendErrorToServer(error: AppError): Promise<void> {
     try {
       await fetch('/api/errors/track', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...this.getAuthHeaders()
         },
-        body: JSON.stringify({
-          error: {
-            id: error.id,
-            type: error.type,
-            severity: error.severity,
-            message: error.message,
-            stack: error.stack,
-            context: error.context,
-            retryable: error.retryable
-          }
-        })
+        body: JSON.stringify({ error })
       });
-    } catch (serverError) {
-      console.error('Failed to send error to server:', serverError);
+    } catch (networkError) {
+      console.error('Failed to send error to server:', networkError);
     }
+  }
+
+  private getAuthHeaders(): Record<string, string> {
+    const token = localStorage.getItem('clinic_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
 
   getErrors(): AppError[] {
     return [...this.errors];
   }
 
-  getErrorsByType(type: ErrorType): AppError[] {
-    return this.errors.filter(error => error.type === type);
-  }
-
-  getErrorsBySeverity(severity: ErrorSeverity): AppError[] {
-    return this.errors.filter(error => error.severity === severity);
-  }
-
   clearErrors(): void {
     this.errors = [];
-  }
-
-  markErrorAsResolved(errorId: string): void {
-    const error = this.errors.find(e => e.id === errorId);
-    if (error) {
-      error.resolved = true;
-    }
   }
 }
 
 // Global error tracker instance
 export const errorTracker = new ErrorTracker();
 
-// Helper functions for common error scenarios
-export const trackAPIError = (error: any, context: Partial<ErrorContext> = {}) => {
-  let errorType = ErrorType.SERVER;
-  let severity = ErrorSeverity.MEDIUM;
-  let message = 'API request failed';
-  let retryable = false;
+// Convenience functions for manual error tracking
+export const trackError = (error: Partial<AppError>) => {
+  errorTracker.trackError(error);
+};
 
-  if (error.response) {
-    const status = error.response.status;
-    message = error.response.data?.message || error.message || 'API request failed';
-    
-    if (status >= 400 && status < 500) {
-      errorType = status === 401 ? ErrorType.AUTHENTICATION : 
-                  status === 403 ? ErrorType.AUTHORIZATION : 
-                  status === 422 ? ErrorType.VALIDATION : ErrorType.CLIENT;
-      severity = status === 401 || status === 403 ? ErrorSeverity.HIGH : ErrorSeverity.MEDIUM;
-    } else if (status >= 500) {
-      errorType = ErrorType.SERVER;
-      severity = ErrorSeverity.HIGH;
-      retryable = true;
-    }
-  } else if (error.request) {
-    errorType = ErrorType.NETWORK;
-    severity = ErrorSeverity.HIGH;
-    message = 'Network request failed';
-    retryable = true;
-  }
-
-  return errorTracker.trackError({
-    type: errorType,
-    severity,
-    message,
+export const trackNetworkError = (error: Error, url: string) => {
+  trackError({
+    type: ErrorType.NETWORK,
+    severity: ErrorSeverity.HIGH,
+    message: `Network error: ${error.message}`,
     originalError: error,
-    retryable,
     context: {
-      url: window.location.href,
-      userAgent: navigator.userAgent,
+      url,
       timestamp: new Date(),
-      ...context
+      component: 'network-request'
     }
   });
 };
 
-export const trackValidationError = (message: string, context: Partial<ErrorContext> = {}) => {
-  return errorTracker.trackError({
+export const trackValidationError = (message: string, component: string) => {
+  trackError({
     type: ErrorType.VALIDATION,
-    severity: ErrorSeverity.LOW,
-    message,
+    severity: ErrorSeverity.MEDIUM,
+    message: `Validation error: ${message}`,
     context: {
-      url: window.location.href,
-      userAgent: navigator.userAgent,
       timestamp: new Date(),
-      ...context
+      component
     }
   });
 };
 
-export const trackUserAction = (action: string, success: boolean, context: Partial<ErrorContext> = {}) => {
-  if (!success) {
-    return errorTracker.trackError({
-      type: ErrorType.CLIENT,
-      severity: ErrorSeverity.LOW,
-      message: `User action failed: ${action}`,
-      context: {
-        url: window.location.href,
-        userAgent: navigator.userAgent,
-        timestamp: new Date(),
-        action,
-        ...context
-      }
-    });
-  }
-};
-
-// React hook for error handling
-export const useErrorHandler = () => {
-  const { toast } = useToast();
-
-  const handleError = (error: any, context: Partial<ErrorContext> = {}) => {
-    const errorId = trackAPIError(error, context);
-    
-    // Show user-friendly error message
-    let title = "Something went wrong";
-    let description = "Please try again later";
-    let variant: "default" | "destructive" = "destructive";
-
-    if (error.response?.status === 401) {
-      title = "Authentication Required";
-      description = "Please log in to continue";
-    } else if (error.response?.status === 403) {
-      title = "Access Denied";
-      description = "You don't have permission to perform this action";
-    } else if (error.response?.status === 422) {
-      title = "Validation Error";
-      description = error.response.data?.message || "Please check your input";
-      variant = "default";
-    } else if (error.response?.status >= 500) {
-      title = "Server Error";
-      description = "Our servers are experiencing issues. Please try again later";
-    } else if (!error.response) {
-      title = "Connection Error";
-      description = "Please check your internet connection";
+export const trackAuthError = (message: string) => {
+  trackError({
+    type: ErrorType.AUTHENTICATION,
+    severity: ErrorSeverity.HIGH,
+    message: `Authentication error: ${message}`,
+    context: {
+      timestamp: new Date(),
+      component: 'authentication'
     }
-
-    toast({
-      title,
-      description: `${description} (Error ID: ${errorId.slice(-8)})`,
-      variant
-    });
-
-    return errorId;
-  };
-
-  return { handleError };
+  });
 };
+
+// Initialize error tracking when module loads
+if (typeof window !== 'undefined') {
+  // Error tracker is automatically initialized above
+  console.log('🔍 Error tracking system initialized');
+}
