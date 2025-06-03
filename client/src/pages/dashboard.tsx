@@ -102,59 +102,71 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Premium Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="metric-card group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <Users className="h-6 w-6 text-primary" />
+          <div className="metric-card group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-primary/15 to-primary/25 rounded-xl shadow-sm">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+                <span className="status-badge info text-xs font-medium">Active</span>
               </div>
-              <span className="status-badge info text-xs">Today</span>
-            </div>
-            <div className="space-y-1">
-              <p className="text-3xl font-bold text-foreground">{stats?.totalPatients || 0}</p>
-              <p className="text-sm text-muted-foreground">Total Patients</p>
-              <p className="text-xs text-success">+12% from last month</p>
+              <div className="space-y-2">
+                <p className="text-3xl font-bold text-foreground group-hover:text-primary transition-colors">{stats?.totalPatients || 0}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Patients</p>
+                <p className="text-xs text-success font-medium">+12% from last month</p>
+              </div>
             </div>
           </div>
 
-          <div className="metric-card group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-accent/10 rounded-lg">
-                <Calendar className="h-6 w-6 text-accent" />
+          <div className="metric-card group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-accent/10 pointer-events-none"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-accent/15 to-accent/25 rounded-xl shadow-sm">
+                  <Calendar className="h-6 w-6 text-accent" />
+                </div>
+                <span className="status-badge success text-xs font-medium">Active</span>
               </div>
-              <span className="status-badge success text-xs">Active</span>
-            </div>
-            <div className="space-y-1">
-              <p className="text-3xl font-bold text-foreground">{stats?.todayVisits || 0}</p>
-              <p className="text-sm text-muted-foreground">Today's Visits</p>
-              <p className="text-xs text-info">3 scheduled next</p>
+              <div className="space-y-2">
+                <p className="text-3xl font-bold text-foreground group-hover:text-accent transition-colors">{stats?.todayVisits || 0}</p>
+                <p className="text-sm font-medium text-muted-foreground">Today's Visits</p>
+                <p className="text-xs text-info font-medium">3 scheduled next</p>
+              </div>
             </div>
           </div>
 
-          <div className="metric-card group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-warning/10 rounded-lg">
-                <Activity className="h-6 w-6 text-warning" />
+          <div className="metric-card group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-warning/5 via-transparent to-warning/10 pointer-events-none"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-warning/15 to-warning/25 rounded-xl shadow-sm">
+                  <Activity className="h-6 w-6 text-warning" />
+                </div>
+                <span className="status-badge warning text-xs font-medium">Pending</span>
               </div>
-              <span className="status-badge warning text-xs">Pending</span>
-            </div>
-            <div className="space-y-1">
-              <p className="text-3xl font-bold text-foreground">{stats?.pendingLabs || 0}</p>
-              <p className="text-sm text-muted-foreground">Lab Orders</p>
-              <p className="text-xs text-muted-foreground">Awaiting results</p>
+              <div className="space-y-2">
+                <p className="text-3xl font-bold text-foreground group-hover:text-warning transition-colors">{stats?.pendingLabs || 0}</p>
+                <p className="text-sm font-medium text-muted-foreground">Lab Orders</p>
+                <p className="text-xs text-muted-foreground font-medium">Awaiting results</p>
+              </div>
             </div>
           </div>
 
-          <div className="metric-card group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-destructive/10 rounded-lg">
-                <Settings className="h-6 w-6 text-destructive" />
+          <div className="metric-card group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-transparent to-destructive/10 pointer-events-none"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-destructive/15 to-destructive/25 rounded-xl shadow-sm">
+                  <Settings className="h-6 w-6 text-destructive" />
+                </div>
+                <span className="status-badge error text-xs font-medium">Alert</span>
               </div>
-              <span className="status-badge error text-xs">Alert</span>
-            </div>
-            <div className="space-y-1">
-              <p className="text-3xl font-bold text-foreground">{stats?.lowStockItems || 0}</p>
-              <p className="text-sm text-muted-foreground">Low Stock Items</p>
-              <p className="text-xs text-destructive">Needs attention</p>
+              <div className="space-y-2">
+                <p className="text-3xl font-bold text-foreground group-hover:text-destructive transition-colors">{stats?.lowStockItems || 0}</p>
+                <p className="text-sm font-medium text-muted-foreground">Low Stock Items</p>
+                <p className="text-xs text-destructive font-medium">Needs attention</p>
+              </div>
             </div>
           </div>
         </div>
