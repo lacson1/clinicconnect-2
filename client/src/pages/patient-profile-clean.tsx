@@ -281,13 +281,13 @@ export default function PatientProfile() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="w-full px-2 py-2">
           {/* Quick Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             <Card className="bg-white shadow-sm border-0 hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
+              <CardContent className="p-3">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
                     <Activity className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
@@ -299,9 +299,9 @@ export default function PatientProfile() {
             </Card>
             
             <Card className="bg-white shadow-sm border-0 hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
+              <CardContent className="p-3">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-green-100 rounded-lg">
                     <Pill className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
@@ -315,9 +315,9 @@ export default function PatientProfile() {
             </Card>
             
             <Card className="bg-white shadow-sm border-0 hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-orange-100 rounded-lg">
+              <CardContent className="p-3">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-orange-100 rounded-lg">
                     <FlaskRound className="h-5 w-5 text-orange-600" />
                   </div>
                   <div>
@@ -349,9 +349,9 @@ export default function PatientProfile() {
           </div>
 
           {/* Enhanced Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
             {/* Left Column - Main Patient Overview */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-3 space-y-3">
               {/* Vital Signs Chart */}
               <PatientVitalsChart 
                 vitals={visits?.map(visit => ({
