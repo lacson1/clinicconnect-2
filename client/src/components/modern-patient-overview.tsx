@@ -1278,7 +1278,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                                       </DropdownMenuItem>
                                       <DropdownMenuSeparator />
                                       <DropdownMenuItem onClick={() => handleUpdateMedicationStatus(prescription.id, 'discontinued')}>
-                                        <XCircle className="w-3 h-3 mr-2 text-red-600" />
+                                        <MedicalIcons.cancel className="w-3 h-3 mr-2 text-red-600" />
                                         Stop Repeat
                                       </DropdownMenuItem>
                                     </DropdownMenuContent>
@@ -1498,7 +1498,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-red-500" />
+                <MedicalIcons.vitals className="h-5 w-5 text-red-500" />
                 Patient Safety Information
               </CardTitle>
             </CardHeader>
@@ -1517,7 +1517,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
           <Card className="border-blue-200 bg-blue-50/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-blue-700">
-                <Stethoscope className="h-5 w-5" />
+                <MedicalIcons.stethoscope className="h-5 w-5" />
                 Record Patient Visit
               </CardTitle>
             </CardHeader>
@@ -1531,7 +1531,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                     onClick={() => navigate(`/patients/${patient.id}/record-visit`)}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
-                    <Stethoscope className="h-4 w-4 mr-2" />
+                    <MedicalIcons.stethoscope className="h-4 w-4 mr-2" />
                     Start New Visit Recording
                   </Button>
                   <Button 
@@ -1651,7 +1651,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-red-500" />
+                  <MedicalIcons.vitals className="w-4 h-4 text-red-500" />
                   Safety Status
                 </CardTitle>
               </CardHeader>
