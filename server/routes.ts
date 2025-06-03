@@ -26,6 +26,8 @@ import { setupTenantRoutes } from "./tenant-routes";
 import { setupSuperAdminRoutes } from "./super-admin-routes";
 import { performanceMonitor, globalErrorHandler, setupErrorRoutes } from "./error-handler";
 import { getOptimizationTasks, implementOptimizationTask } from "./system-optimizer";
+import { setupNetworkValidationRoutes } from "./network-validator";
+import { setupAuthValidationRoutes } from "./auth-validator";
 
 // Helper function to generate prescription HTML for printing
 function generatePrescriptionHTML(prescriptionResult: any): string {
