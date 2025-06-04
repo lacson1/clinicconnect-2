@@ -288,7 +288,15 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [searchType, setSearchType] = useState("features");
   const [, setLocation] = useLocation();
+
+  // Live search for patient data
+  const { data: liveSearchResults } = useQuery<{results: LiveSearchResult[], totalCount: number}>({
+    queryKey: ['/api/search/global', searchTerm, searchType === "data" ? "all" : ""],
+    enabled: searchTerm.length >= 2 && searchType === "data",
+    staleTime: 1000, // 1 second
+  });
 
   useEffect(() => {
     if (!searchTerm.trim()) {
@@ -357,19 +365,49 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
     return colors[category] || "bg-gray-100 text-gray-800";
   };
 
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "patient": return Users;
+      case "vaccination": return Heart;
+      case "prescription": return Pill;
+      case "lab_result": return TestTube;
+      default: return FileText;
+    }
+  };
+
+  const navigateToLiveResult = (result: LiveSearchResult) => {
+    if (result.type === "patient") {
+      setLocation(`/patients/${result.id}`);
+    } else if (result.type === "vaccination") {
+      setLocation(`/patients/${result.metadata.patientId}?tab=vaccinations`);
+    } else if (result.type === "prescription") {
+      setLocation(`/patients/${result.metadata.patientId}?tab=prescriptions`);
+    } else if (result.type === "lab_result") {
+      setLocation(`/patients/${result.metadata.patientId}?tab=lab-results`);
+    }
+    onClose();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl p-0">
         <DialogHeader className="px-4 py-3 border-b">
           <DialogTitle className="flex items-center gap-2">
             <Search className="w-5 h-5" />
-            Global Search
+            Enhanced Global Search
           </DialogTitle>
         </DialogHeader>
         
         <div className="p-4">
+          <Tabs value={searchType} onValueChange={setSearchType} className="mb-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="features">Features & Pages</TabsTrigger>
+              <TabsTrigger value="data">Patient Data</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           <Input
-            placeholder="Search for any function, page, or feature..."
+            placeholder={searchType === "features" ? "Search for functions, pages, or features..." : "Search patients, vaccinations, prescriptions, lab results..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -377,46 +415,97 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
             autoFocus
           />
           
-          {filteredResults.length > 0 ? (
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {filteredResults.map((result, index) => {
-                const IconComponent = result.icon;
-                return (
-                  <div
-                    key={result.id}
-                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                      index === selectedIndex 
-                        ? "bg-blue-50 border-blue-200" 
-                        : "hover:bg-gray-50 border-gray-200"
-                    }`}
-                    onClick={() => navigateToResult(result)}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg ${
-                        index === selectedIndex ? "bg-blue-100" : "bg-gray-100"
-                      }`}>
-                        <IconComponent className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-sm">{result.title}</h3>
-                          <Badge variant="secondary" className={`text-xs ${getCategoryColor(result.category)}`}>
-                            {result.category}
-                          </Badge>
+{searchType === "features" ? (
+            filteredResults.length > 0 ? (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {filteredResults.map((result, index) => {
+                  const IconComponent = result.icon;
+                  return (
+                    <div
+                      key={result.id}
+                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                        index === selectedIndex 
+                          ? "bg-blue-50 border-blue-200" 
+                          : "hover:bg-gray-50 border-gray-200"
+                      }`}
+                      onClick={() => navigateToResult(result)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`p-2 rounded-lg ${
+                          index === selectedIndex ? "bg-blue-100" : "bg-gray-100"
+                        }`}>
+                          <IconComponent className="w-4 h-4" />
                         </div>
-                        <p className="text-xs text-gray-600">{result.description}</p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-medium text-sm">{result.title}</h3>
+                            <Badge variant="secondary" className={`text-xs ${getCategoryColor(result.category)}`}>
+                              {result.category}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-gray-600">{result.description}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Search className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                <p className="text-gray-500 mb-2">No results found</p>
+                <p className="text-sm text-gray-400">Try searching for features like "patients", "pharmacy", or "appointments"</p>
+              </div>
+            )
           ) : (
-            <div className="text-center py-8">
-              <Search className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-              <p className="text-gray-500 mb-2">No results found</p>
-              <p className="text-sm text-gray-400">Try searching for features like "patients", "pharmacy", or "appointments"</p>
-            </div>
+            liveSearchResults?.results.length ? (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {liveSearchResults.results.map((result, index) => {
+                  const IconComponent = getTypeIcon(result.type);
+                  return (
+                    <div
+                      key={`${result.type}-${result.id}`}
+                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                        index === selectedIndex 
+                          ? "bg-green-50 border-green-200" 
+                          : "hover:bg-gray-50 border-gray-200"
+                      }`}
+                      onClick={() => navigateToLiveResult(result)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`p-2 rounded-lg ${
+                          index === selectedIndex ? "bg-green-100" : "bg-gray-100"
+                        }`}>
+                          <IconComponent className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-medium text-sm">{result.title}</h3>
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {result.type.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-gray-600 mb-1">{result.subtitle}</p>
+                          <p className="text-xs text-gray-500">{result.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : searchTerm.length >= 2 ? (
+              <div className="text-center py-8">
+                <Heart className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p className="text-gray-500 mb-2">No patient data found</p>
+                <p className="text-sm text-gray-400">Try searching for patient names, vaccination types, or medication names</p>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Users className="w-12 h-12 mx-auto mb-3 text-blue-300" />
+                <p className="text-gray-500 mb-2">Search patient data</p>
+                <p className="text-sm text-gray-400">Find patients, vaccinations, prescriptions, and lab results</p>
+              </div>
+            )
           )}
           
           <Separator className="my-4" />
