@@ -20,64 +20,35 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-      // Development fallback - determine user based on current session or default to Rob
-      req.user = {
-        id: 15,
-        username: 'Rob',
-        role: 'doctor',
-        organizationId: 4 // Enugu organization
-      };
-      return next();
+      return res.status(401).json({ message: 'Access token required' });
     }
 
-    jwt.verify(token, JWT_SECRET, async (err: any, user: any) => {
+    jwt.verify(token, JWT_SECRET, async (err: any, decoded: any) => {
       if (err) {
-        // Handle token expiration gracefully without logging as error for system health
         if (err.name === 'TokenExpiredError') {
-          // Silently use development fallback for expired tokens
-          req.user = {
-            id: 15,
-            username: 'Rob',
-            role: 'doctor',
-            organizationId: 4
-          };
-          return next();
+          return res.status(401).json({ message: 'Token expired' });
         }
         console.error('JWT verification error:', err);
-        // Development fallback for other errors
-        req.user = {
-          id: 15,
-          username: 'Rob',
-          role: 'doctor',
-          organizationId: 4
-        };
-        return next();
+        return res.status(403).json({ message: 'Invalid token' });
       }
-      
-      try {
-        // Always fetch fresh user data to get current organization assignment
-        const userWithOrg = await storage.getUserWithOrganization(user.id);
-        req.user = {
-          ...user,
-          organizationId: userWithOrg?.organizationId || null
-        };
-      } catch (error) {
-        console.error('Failed to fetch user organization:', error);
-        req.user = user;
+
+      // Get full user details from database
+      const dbUser = await storage.getUser(decoded.id);
+      if (!dbUser) {
+        return res.status(401).json({ message: 'User not found' });
       }
-      
+
+      req.user = {
+        id: dbUser.id,
+        username: dbUser.username,
+        role: dbUser.role,
+        organizationId: dbUser.organizationId || undefined
+      };
       next();
     });
   } catch (error) {
     console.error('Authentication error:', error);
-    // Development fallback
-    req.user = {
-      id: 15,
-      username: 'Rob',
-      role: 'doctor',
-      organizationId: 4
-    };
-    next();
+    return res.status(500).json({ message: 'Authentication failed' });
   }
 };
 
@@ -85,7 +56,7 @@ export const requireRole = (role: string) => (req: AuthRequest, res: Response, n
   const user = req.user; // decoded from JWT
   
   // Super admin has access to everything
-  if (user?.role === 'superadmin') {
+  if (user?.role === 'super_admin' || user?.role === 'superadmin') {
     return next();
   }
   if (!user || user.role !== role) {
