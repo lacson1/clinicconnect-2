@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Upload, File, Search, User, Download, Trash2, Eye, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { apiRequest } from '@/lib/queryClient';
+import { DocumentPreviewCarousel } from '@/components/document-preview-carousel';
 
 interface Patient {
   id: number;
@@ -36,6 +37,8 @@ export default function DocumentsPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadCategory, setUploadCategory] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
@@ -156,11 +159,15 @@ export default function DocumentsPage() {
   };
 
   const handleView = (fileName: string) => {
-    window.open(`/api/files/medical/${fileName}`, '_blank');
+    const document = (documents as Document[]).find((doc: Document) => doc.fileName === fileName);
+    if (document) {
+      setPreviewDocument(document);
+      setIsPreviewOpen(true);
+    }
   };
 
   // Filter documents
-  const filteredDocuments = documents.filter((doc: Document) => {
+  const filteredDocuments = (documents as Document[]).filter((doc: Document) => {
     if (searchTerm && !doc.originalName.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !doc.patient?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !doc.patient?.lastName?.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -398,6 +405,19 @@ export default function DocumentsPage() {
         </CardContent>
       </Card>
       </div>
+
+      {/* Document Preview Carousel */}
+      {previewDocument && (
+        <DocumentPreviewCarousel
+          patientId={previewDocument.patientId || 0}
+          isOpen={isPreviewOpen}
+          onClose={() => {
+            setIsPreviewOpen(false);
+            setPreviewDocument(null);
+          }}
+          initialDocumentIndex={0}
+        />
+      )}
     </div>
   );
 }
