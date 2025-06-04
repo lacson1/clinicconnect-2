@@ -67,8 +67,11 @@ const resultEntrySchema = z.object({
   value: z.string().min(1, "Result value is required"),
   units: z.string().optional(),
   referenceRange: z.string().optional(),
-  status: z.enum(["normal", "abnormal", "critical"]),
-  notes: z.string().optional()
+  status: z.enum(["normal", "abnormal", "critical", "pending_review", "high", "low", "borderline", "inconclusive", "invalid", "rejected"]),
+  notes: z.string().optional(),
+  interpretation: z.string().optional(),
+  recommendations: z.string().optional(),
+  result: z.string().optional()
 });
 
 // Type definitions
