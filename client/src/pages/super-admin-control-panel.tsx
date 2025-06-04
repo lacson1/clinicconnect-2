@@ -24,10 +24,11 @@ import {
   Eye,
   Ban
 } from "lucide-react";
+import GlobalPatientStatistics from '@/components/global-patient-statistics';
 
 export default function SuperAdminControlPanel() {
   const [systemMaintenance, setSystemMaintenance] = useState(false);
-  
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">

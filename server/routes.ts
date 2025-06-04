@@ -3560,6 +3560,57 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
+  // Global patient count across all organizations (admin/superadmin only)
+  app.get("/api/patients/global-statistics", authenticateToken, requireAnyRole(['admin', 'superadmin']), async (req: AuthRequest, res) => {
+    try {
+      // Get patient count by organization
+      const patientsByOrg = await db.select({
+        organizationId: patients.organizationId,
+        organizationName: organizations.name,
+        patientCount: sql<number>`count(*)`,
+      })
+      .from(patients)
+      .leftJoin(organizations, eq(patients.organizationId, organizations.id))
+      .groupBy(patients.organizationId, organizations.name)
+      .orderBy(desc(sql`count(*)`));
+
+      // Get total count across all organizations
+      const [totalPatientsResult] = await db.select({
+        total: sql<number>`count(*)`
+      }).from(patients);
+
+      // Get recent patients across all organizations
+      const recentPatients = await db.select({
+        id: patients.id,
+        firstName: patients.firstName,
+        lastName: patients.lastName,
+        organizationId: patients.organizationId,
+        organizationName: organizations.name,
+        createdAt: patients.createdAt
+      })
+      .from(patients)
+      .leftJoin(organizations, eq(patients.organizationId, organizations.id))
+      .orderBy(desc(patients.createdAt))
+      .limit(20);
+
+      res.json({
+        totalPatients: totalPatientsResult?.total || 0,
+        organizationDistribution: patientsByOrg,
+        recentPatients: recentPatients.map(p => ({
+          id: p.id,
+          name: `${p.firstName || ''} ${p.lastName || ''}`.trim(),
+          organizationName: p.organizationName || 'Unknown Organization',
+          organizationId: p.organizationId,
+          createdAt: p.createdAt,
+          createdDate: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'Unknown'
+        }))
+      });
+    } catch (error) {
+      console.error('Error fetching global patient statistics:', error);
+      res.status(500).json({ message: "Failed to fetch global patient statistics" });
+    }
+  });
+
 
         return res.status(400).json({ message: "Organization context required" });
       }
