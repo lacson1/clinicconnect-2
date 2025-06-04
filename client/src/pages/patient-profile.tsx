@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "wouter";
-import { AlertCircle, Edit, Stethoscope, Pill, FlaskRound, Plus, History, Printer, CheckCircle, Download, Eye, TestTube } from "lucide-react";
+import { AlertCircle, Edit, Stethoscope, Pill, FlaskRound, Plus, History, Printer, CheckCircle, Download, Eye, TestTube, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +34,10 @@ export default function PatientProfile() {
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [showLabModal, setShowLabModal] = useState(false);
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [selectedOrderItem, setSelectedOrderItem] = useState<any>(null);
+  const [showResultModal, setShowResultModal] = useState(false);
+  
+  const queryClient = useQueryClient();
 
 // PatientReviewedResults component for displaying reviewed lab results for a specific patient
 interface CompletedLabResult {
@@ -230,15 +234,16 @@ function PatientReviewedResults({ patientId }: { patientId: number }) {
     enabled: !!patientId,
   });
 
+  // Fetch lab orders for this patient
+  const { data: labOrders = [], isLoading: labOrdersLoading } = useQuery({
+    queryKey: [`/api/patients/${patientId}/lab-orders`],
+    enabled: !!patientId,
+  });
+
   // Fetch prescriptions
   const { data: prescriptions, isLoading: prescriptionsLoading } = useQuery<Prescription[]>({
     queryKey: [`/api/patients/${patientId}/prescriptions`],
     enabled: !!patientId,
-  });
-
-  // Fetch current organization
-  const { data: currentOrganization } = useQuery<Organization>({
-    queryKey: ["/api/organizations/current"],
   });
 
   // Lab results using React Query (same pattern as working sidebar)
@@ -251,6 +256,29 @@ function PatientReviewedResults({ patientId }: { patientId: number }) {
   });
 
   console.log('Lab Results State:', { labResults, labsLoading, labsError });
+
+  // Mutation for adding lab results
+  const addResultMutation = useMutation({
+    mutationFn: async (resultData: any) => {
+      const response = await fetch(`/api/lab-order-items/${resultData.itemId}/result`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(resultData),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add result');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/lab-orders`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/lab-results/reviewed'] });
+      setShowResultModal(false);
+      setSelectedOrderItem(null);
+    },
+  });
 
 
 
@@ -571,44 +599,14 @@ function PatientReviewedResults({ patientId }: { patientId: number }) {
                     </TabsContent>
 
                     <TabsContent value="pending" className="mt-4">
-                      {labOrdersLoading ? (
-                        <div className="space-y-4">
-                          {[...Array(3)].map((_, i) => (
-                            <div key={i} className="animate-pulse">
-                              <div className="h-4 bg-slate-200 rounded w-1/4 mb-2"></div>
-                              <div className="h-3 bg-slate-200 rounded w-1/2 mb-1"></div>
-                              <div className="h-3 bg-slate-200 rounded w-3/4"></div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : labOrders && labOrders.length > 0 ? (
-                        <div className="space-y-4">
-                          {labOrders.map((order) => (
-                            <div key={order.id} className="border border-amber-200 bg-amber-50 rounded-lg p-4">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h4 className="font-medium text-slate-800">Lab Order #{order.id}</h4>
-                                  <p className="text-sm text-slate-600 mt-1">
-                                    <strong>Ordered:</strong> {new Date(order.createdAt).toLocaleDateString()}
-                                  </p>
-                                  <p className="text-sm text-slate-600">
-                                    <strong>Status:</strong> {order.status}
-                                  </p>
-                                </div>
-                                <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
-                                  Pending
-                                </Badge>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8">
-                          <History className="mx-auto h-12 w-12 text-slate-400" />
-                          <h3 className="mt-4 text-sm font-medium text-slate-900">No pending orders</h3>
-                          <p className="mt-2 text-sm text-slate-500">All lab orders have been completed.</p>
-                        </div>
-                      )}
+                      <PendingLabOrders 
+                        labOrders={labOrders} 
+                        labOrdersLoading={labOrdersLoading} 
+                        onProcessResult={(orderItem) => {
+                          setSelectedOrderItem(orderItem);
+                          setShowResultModal(true);
+                        }}
+                      />
                     </TabsContent>
 
                     <TabsContent value="history" className="mt-4">
