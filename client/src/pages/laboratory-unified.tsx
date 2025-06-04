@@ -1062,37 +1062,34 @@ export default function LaboratoryUnified() {
                           variant="outline" 
                           size="sm"
                           onClick={() => {
-                            // Download lab result as PDF
+                            // Generate and show preview for review
                             const resultContent = generateLabResultPrintContent(result);
-                            const printWindow = window.open('', '_blank');
+                            const printWindow = window.open('', '_blank', 'width=800,height=900,scrollbars=yes');
                             if (printWindow) {
                               printWindow.document.write(resultContent);
                               printWindow.document.close();
-                              setTimeout(() => printWindow.print(), 250);
+                              printWindow.focus();
                             }
                           }}
                         >
                           <Download className="w-4 h-4 mr-1" />
-                          Download
+                          Preview & Print
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm"
                           onClick={() => {
                             const resultContent = generateLabResultPrintContent(result);
-                            const printWindow = window.open('', '_blank');
+                            const printWindow = window.open('', '_blank', 'width=800,height=900,scrollbars=yes');
                             if (printWindow) {
                               printWindow.document.write(resultContent);
                               printWindow.document.close();
-                              setTimeout(() => {
-                                printWindow.print();
-                                printWindow.close();
-                              }, 250);
+                              printWindow.focus();
                             }
                           }}
                         >
-                          <Printer className="w-4 h-4 mr-1" />
-                          Print
+                          <Eye className="w-4 h-4 mr-1" />
+                          View Result
                         </Button>
                       </div>
                     </div>
