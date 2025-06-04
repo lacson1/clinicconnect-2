@@ -18,7 +18,7 @@ import Dashboard from "@/pages/dashboard";
 import Patients from "@/pages/patients";
 import PatientProfile from "@/pages/patient-profile-clean";
 import Visits from "@/pages/visits";
-import LabResults from "@/pages/lab-results";
+
 import EnhancedPharmacy from "@/pages/pharmacy-enhanced";
 import InventoryPage from "@/pages/inventory";
 import Referrals from "@/pages/referrals";
@@ -35,8 +35,7 @@ import PatientPortal from "@/pages/patient-portal";
 import RecordVisitPage from "@/pages/record-visit";
 import EditVisit from "@/pages/edit-visit";
 import AppointmentsPage from "@/pages/appointments";
-import LabOrdersPage from "@/pages/lab-orders";
-import LaboratoryEnhanced from "@/pages/laboratory-enhanced";
+import LaboratoryUnified from "@/pages/laboratory-unified";
 import DocumentsPage from "@/pages/documents";
 import RevenueAnalytics from "@/pages/revenue-analytics";
 import TelemedicinePage from "@/pages/telemedicine";
@@ -116,14 +115,15 @@ function AuthenticatedApp() {
                   <Route path="/patients/:patientId/visits/:visitId/edit" component={EditVisit} />
                   <Route path="/consultation-records/:id" component={ConsultationRecordDetails} />
                   <Route path="/visits" component={Visits} />
-                  <Route path="/lab-results" component={LabResults} />
+                  <Route path="/laboratory" component={LaboratoryUnified} />
+                  <Route path="/lab-results" component={LaboratoryUnified} />
+                  <Route path="/lab-orders" component={LaboratoryUnified} />
+                  <Route path="/laboratory-enhanced" component={LaboratoryUnified} />
                   <Route path="/pharmacy" component={EnhancedPharmacy} />
                   <Route path="/inventory" component={InventoryPage} />
                   <Route path="/referrals" component={Referrals} />
                   <Route path="/appointments" component={AppointmentsPage} />
                   <Route path="/consultation-dashboard" component={ConsultationDashboard} />
-                  <Route path="/lab-orders" component={LabOrdersPage} />
-                  <Route path="/laboratory-enhanced" component={LaboratoryEnhanced} />
                   <Route path="/documents" component={DocumentsPage} />
                   <Route path="/billing" component={BillingPage} />
                   <Route path="/analytics" component={RevenueAnalytics} />
