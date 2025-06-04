@@ -217,22 +217,36 @@ export default function LaboratoryUnified() {
     
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     const matchesPatient = !selectedPatient || order.patientId === selectedPatient;
+    const matchesCategory = categoryFilter === "all" || 
+      order.items.some(item => item.labTest.category === categoryFilter);
     
-    return matchesSearch && matchesStatus && matchesPatient;
+    return matchesSearch && matchesStatus && matchesPatient && matchesCategory;
   });
 
   const filteredResults = labResults.filter(result => {
     const matchesSearch = !searchTerm || 
-      `${result.orderItem.labOrder.patient.firstName} ${result.orderItem.labOrder.patient.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      result.orderItem.labTest.name.toLowerCase().includes(searchTerm.toLowerCase());
+      `${result.orderItem?.labOrder?.patient?.firstName || ''} ${result.orderItem?.labOrder?.patient?.lastName || ''}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      result.orderItem?.labTest?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesPatient = !selectedPatient || result.orderItem.labOrder.patientId === selectedPatient;
+    const matchesPatient = !selectedPatient || result.orderItem?.labOrder?.patientId === selectedPatient;
+    const matchesCategory = categoryFilter === "all" || 
+      result.orderItem?.labTest?.category === categoryFilter;
     
-    return matchesSearch && matchesPatient;
+    return matchesSearch && matchesPatient && matchesCategory;
   });
 
-  // Test categories for filtering
-  const testCategories = Array.from(new Set(labTests.map(test => test.category)));
+  // Medical specialty categories for lab tests
+  const medicalCategories = [
+    'Hematology', 'Clinical Chemistry', 'Microbiology', 'Immunology', 
+    'Endocrinology', 'Cardiology', 'Nephrology', 'Hepatology',
+    'Oncology', 'Toxicology', 'Serology', 'Parasitology'
+  ];
+
+  // Test categories for filtering (from database + medical specialties)
+  const testCategories = Array.from(new Set([
+    ...labTests.map(test => test.category).filter(Boolean),
+    ...medicalCategories
+  ]));
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -405,6 +419,20 @@ export default function LaboratoryUnified() {
                 <SelectItem value="processing">Processing</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Medical Specialty" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Specialties</SelectItem>
+                {testCategories.sort().map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
