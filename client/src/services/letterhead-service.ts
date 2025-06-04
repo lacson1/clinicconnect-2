@@ -370,9 +370,9 @@ export class LetterheadService {
       </style>
     `;
 
-    const logoContent = organization.logoUrl ? 
+    const logoContent = organization?.logoUrl ? 
       `<img src="${organization.logoUrl}" alt="${organization.name}" style="width: 55px; height: 55px; object-fit: contain; background: white; padding: 6px; border-radius: 10px;">` :
-      `<div class="org-logo">${organization.name.substring(0, 2).toUpperCase()}</div>`;
+      `<div class="org-logo">${(organization?.name || 'HC').substring(0, 2).toUpperCase()}</div>`;
 
     const contentHTML = `
       <div class="section">
