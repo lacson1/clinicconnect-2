@@ -381,6 +381,27 @@ export default function LaboratoryUnified() {
     queryKey: ['/api/lab-orders/enhanced']
   });
 
+  // Fetch items for each lab order
+  const labOrdersWithItems = useQuery({
+    queryKey: ['/api/lab-orders-with-items'],
+    queryFn: async () => {
+      const ordersWithItems = await Promise.all(
+        labOrders.map(async (order) => {
+          try {
+            const response = await fetch(`/api/lab-orders/${order.id}/items`);
+            const items = await response.json();
+            return { ...order, items };
+          } catch (error) {
+            console.error(`Failed to fetch items for order ${order.id}:`, error);
+            return { ...order, items: [] };
+          }
+        })
+      );
+      return ordersWithItems;
+    },
+    enabled: labOrders.length > 0
+  });
+
   const { data: patients = [] } = useQuery<Patient[]>({
     queryKey: ['/api/patients']
   });
@@ -460,16 +481,21 @@ export default function LaboratoryUnified() {
     }
   });
 
-  // Filter data
-  const filteredOrders = labOrders.filter(order => {
+  // Filter data using orders with items
+  const ordersToDisplay = labOrdersWithItems.data || labOrders;
+  const filteredOrders = ordersToDisplay.filter(order => {
     const matchesSearch = !searchTerm || 
       `${order.patient.firstName} ${order.patient.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.items.some(item => item.labTest.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      (order.items && order.items.some(item => 
+        (item.labTest?.name || item.testName || 'FBC').toLowerCase().includes(searchTerm.toLowerCase())
+      ));
     
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     const matchesPatient = !selectedPatient || order.patientId === selectedPatient;
     const matchesCategory = categoryFilter === "all" || 
-      (order.items && order.items.some(item => item.labTest?.category === categoryFilter));
+      (order.items && order.items.some(item => 
+        (item.labTest?.category || item.testCategory || 'Hematology') === categoryFilter
+      ));
     
     return matchesSearch && matchesStatus && matchesPatient && matchesCategory;
   });
