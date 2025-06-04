@@ -609,12 +609,12 @@ export default function LaboratoryUnified() {
 
   const filteredResults = labResults.filter(result => {
     const matchesSearch = !searchTerm || 
-      `${result.orderItem?.labOrder?.patient?.firstName || ''} ${result.orderItem?.labOrder?.patient?.lastName || ''}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      result.orderItem?.labTest?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      (result.patientName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (result.testName || '').toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesPatient = !selectedPatient || result.orderItem?.labOrder?.patientId === selectedPatient;
+    const matchesPatient = !selectedPatient || result.patientId === selectedPatient;
     const matchesCategory = categoryFilter === "all" || 
-      result.orderItem?.labTest?.category === categoryFilter;
+      result.category === categoryFilter;
     
     return matchesSearch && matchesPatient && matchesCategory;
   });
@@ -1146,7 +1146,7 @@ export default function LaboratoryUnified() {
                           </div>
                           <div>
                             <h3 className="font-semibold text-gray-900">
-                              {result.orderItem?.labOrder?.patient?.firstName || 'Unknown'} {result.orderItem?.labOrder?.patient?.lastName || 'Patient'}
+                              {result.patientName || 'Unknown Patient'}
                             </h3>
                             <p className="text-sm text-gray-600">
                               {result.orderItem?.labTest?.name || 'Unknown Test'} • Order #{result.orderItem?.labOrder?.id || 'N/A'}
