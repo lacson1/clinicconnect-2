@@ -931,36 +931,36 @@ export default function LaboratoryUnified() {
 
                         <div className="space-y-3">
                           {order.items?.map((item) => (
-                            <div key={item.id} className="flex items-center justify-between p-4 bg-blue-50 border-2 border-blue-200 rounded-lg shadow-sm">
+                            <div key={item.id} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-md shadow-sm">
                               <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <div className="p-2 bg-blue-100 rounded-full">
-                                    <TestTube className="w-5 h-5 text-blue-600" />
+                                <div className="flex items-center gap-2 mb-1">
+                                  <div className="p-1.5 bg-blue-100 rounded-full">
+                                    <TestTube className="w-4 h-4 text-blue-600" />
                                   </div>
                                   <div>
-                                    <p className="font-bold text-lg text-gray-900">{item.labTest?.name || item.testName || 'Full Blood Count (FBC)'}</p>
-                                    <p className="text-sm text-blue-600 font-medium">{item.labTest?.category || item.testCategory || 'Hematology'}</p>
+                                    <p className="font-semibold text-base text-gray-900">{item.labTest?.name || item.testName || 'Full Blood Count (FBC)'}</p>
+                                    <p className="text-xs text-blue-600 font-medium">{item.labTest?.category || item.testCategory || 'Hematology'}</p>
                                   </div>
                                 </div>
                                 {item.labTest?.referenceRange || item.referenceRange ? (
-                                  <p className="text-sm text-gray-700 mt-2 bg-white p-2 rounded">
-                                    <strong>Reference Range:</strong> {item.labTest?.referenceRange || item.referenceRange}
+                                  <p className="text-xs text-gray-700 mt-1 bg-white p-1.5 rounded">
+                                    <strong>Range:</strong> {item.labTest?.referenceRange || item.referenceRange}
                                   </p>
                                 ) : null}
                               </div>
                               
-                              <div className="flex items-center gap-4">
-                                <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300 px-3 py-1 text-sm font-medium">
+                              <div className="flex items-center gap-3">
+                                <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300 px-2 py-0.5 text-xs font-medium">
                                   {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                                 </Badge>
                                 
                                 {item.status === 'pending' && (
                                   <Button
-                                    size="lg"
+                                    size="sm"
                                     onClick={() => openResultDialog(item)}
-                                    className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 text-base shadow-lg"
+                                    className="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 text-sm shadow-md"
                                   >
-                                    <Plus className="w-5 h-5 mr-3" />
+                                    <Plus className="w-4 h-4 mr-2" />
                                     Add Result
                                   </Button>
                                 )}
@@ -971,12 +971,12 @@ export default function LaboratoryUnified() {
                                   onClick={() => handlePrintOrder(order)}
                                   className="text-blue-600 hover:text-blue-800 border-blue-300"
                                 >
-                                  <Printer className="w-4 h-4 mr-1" />
+                                  <Printer className="w-3 h-3 mr-1" />
                                   Print
                                 </Button>
                                 
                                 {item.result && (
-                                  <div className="text-right bg-white p-3 rounded">
+                                  <div className="text-right bg-white p-2 rounded">
                                     <p className="text-sm font-medium text-gray-900">{item.result}</p>
                                     {item.resultDate && (
                                       <p className="text-xs text-gray-500">
