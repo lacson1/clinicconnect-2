@@ -24,6 +24,7 @@ import InventoryPage from "@/pages/inventory";
 import Referrals from "@/pages/referrals";
 import ProfilePage from "@/pages/profile";
 import UserManagementEnhanced from "@/pages/user-management-enhanced";
+import UserManagement from "@/pages/user-management";
 import AuditLogs from "@/pages/audit-logs";
 import FormBuilder from "@/pages/form-builder";
 import ClinicalPerformance from "@/pages/clinical-performance";
@@ -140,7 +141,7 @@ function AuthenticatedApp() {
                   <Route path="/profile" component={ProfilePage} />
                   <Route path="/my-profile" component={Profile} />
                   <Route path="/settings" component={Settings} />
-                  <Route path="/user-management" component={UserManagementEnhanced} />
+                  <Route path="/user-management" component={UserManagement} />
                   <Route path="/audit-logs" component={AuditLogs} />
                   <Route path="/error-monitoring" component={ErrorMonitoring} />
                   <Route path="/performance" component={PerformancePage} />
