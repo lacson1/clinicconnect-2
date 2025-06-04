@@ -66,10 +66,7 @@ export default function VaccinationManagement({ patientId, canEdit }: Vaccinatio
 
   const addVaccinationMutation = useMutation({
     mutationFn: (data: VaccinationForm) =>
-      apiRequest(`/api/patients/${patientId}/vaccinations`, {
-        method: 'POST',
-        body: data,
-      }),
+      apiRequest('POST', `/api/patients/${patientId}/vaccinations`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/vaccinations`] });
       setIsAddModalOpen(false);

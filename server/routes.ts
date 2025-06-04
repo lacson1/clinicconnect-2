@@ -1717,6 +1717,43 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
+  // Get patient vaccinations
+  app.get("/api/patients/:id/vaccinations", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      
+      const patientVaccinations = await db.select()
+        .from(vaccinations)
+        .where(eq(vaccinations.patientId, patientId))
+        .orderBy(desc(vaccinations.dateAdministered));
+      
+      res.json(patientVaccinations || []);
+    } catch (error) {
+      console.error("Error fetching patient vaccinations:", error);
+      res.status(500).json({ message: "Failed to fetch vaccinations" });
+    }
+  });
+
+  // Add patient vaccination
+  app.post("/api/patients/:id/vaccinations", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const validatedData = insertVaccinationSchema.parse({
+        ...req.body,
+        patientId
+      });
+      
+      const [newVaccination] = await db.insert(vaccinations)
+        .values(validatedData)
+        .returning();
+      
+      res.json(newVaccination);
+    } catch (error) {
+      console.error("Error adding vaccination:", error);
+      res.status(500).json({ message: "Failed to add vaccination" });
+    }
+  });
+
   // Recent patients for dashboard
   app.get("/api/patients/recent", authenticateToken, async (req: AuthRequest, res) => {
     try {
