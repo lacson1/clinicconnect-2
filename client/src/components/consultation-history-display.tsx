@@ -73,11 +73,6 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
       }
     }
     
-    // Filter by form type
-    if (filters.formType !== 'all' && record.formName !== filters.formType) {
-      return false;
-    }
-    
     return true;
   });
 
