@@ -2688,6 +2688,73 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
+  // Upload existing lab results from database
+  app.post('/api/lab-results/upload-existing', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+
+      // Fetch all existing lab results from database and connect them to the system
+      const existingResults = await db.select({
+        id: labResults.id,
+        orderItemId: labResults.orderItemId,
+        value: labResults.value,
+        units: labResults.units,
+        referenceRange: labResults.referenceRange,
+        status: labResults.status,
+        notes: labResults.notes,
+        reviewedBy: labResults.reviewedBy,
+        reviewedAt: labResults.reviewedAt,
+        createdAt: labResults.createdAt,
+        orderItem: {
+          id: labOrderItems.id,
+          labTestId: labOrderItems.labTestId,
+          status: labOrderItems.status,
+          priority: labOrderItems.priority,
+          labTest: {
+            id: labTests.id,
+            name: labTests.name,
+            category: labTests.category,
+            units: labTests.units,
+            referenceRange: labTests.referenceRange
+          },
+          labOrder: {
+            id: labOrders.id,
+            patientId: labOrders.patientId,
+            status: labOrders.status,
+            createdAt: labOrders.createdAt,
+            patient: {
+              id: patients.id,
+              firstName: patients.firstName,
+              lastName: patients.lastName,
+              dateOfBirth: patients.dateOfBirth,
+              gender: patients.gender,
+              phone: patients.phone
+            }
+          }
+        }
+      })
+      .from(labResults)
+      .leftJoin(labOrderItems, eq(labResults.orderItemId, labOrderItems.id))
+      .leftJoin(labTests, eq(labOrderItems.labTestId, labTests.id))
+      .leftJoin(labOrders, eq(labOrderItems.labOrderId, labOrders.id))
+      .leftJoin(patients, eq(labOrders.patientId, patients.id))
+      .where(eq(labOrders.organizationId, userOrgId))
+      .orderBy(desc(labResults.createdAt));
+
+      res.json({
+        message: "Existing lab results retrieved successfully",
+        count: existingResults.length,
+        results: existingResults
+      });
+    } catch (error) {
+      console.error('Error uploading existing lab results:', error);
+      res.status(500).json({ message: "Failed to upload existing lab results" });
+    }
+  });
+
   // Enhanced Laboratory Management API Endpoints
   app.get('/api/lab-orders/enhanced', authenticateToken, async (req: AuthRequest, res) => {
     try {

@@ -28,6 +28,7 @@ import {
   Activity,
   BarChart3,
   Settings,
+  Upload,
   Plus,
   FileText,
   Microscope,
@@ -137,6 +138,34 @@ export default function LaboratoryUnified() {
   const [selectedOrderItem, setSelectedOrderItem] = useState<LabOrderItem | null>(null);
 
   const queryClient = useQueryClient();
+
+  // Upload existing results mutation
+  const uploadExistingMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('/api/lab-results/upload-existing', 'POST', {});
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/lab-results/reviewed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/lab-orders/enhanced'] });
+      toast({ 
+        title: "Existing lab results uploaded successfully", 
+        description: `${data.count} results connected to the system` 
+      });
+    },
+    onError: (error) => {
+      console.error('Upload error:', error);
+      toast({ 
+        title: "Upload failed", 
+        description: "Failed to upload existing lab results", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  // Upload existing results function
+  const uploadExistingResults = () => {
+    uploadExistingMutation.mutate();
+  };
 
   // Data queries
   const { data: labOrders = [], isLoading: ordersLoading } = useQuery<LabOrder[]>({
@@ -314,6 +343,14 @@ export default function LaboratoryUnified() {
           >
             <Plus className="w-4 h-4 mr-2" />
             New Lab Order
+          </Button>
+          <Button 
+            onClick={uploadExistingResults}
+            variant="outline"
+            className="border-green-600 text-green-600 hover:bg-green-50"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Existing Results
           </Button>
         </div>
       </div>
