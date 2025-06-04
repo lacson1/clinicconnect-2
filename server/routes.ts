@@ -3007,29 +3007,37 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       }
 
       const managementUsers = await db
-        .select({
-          id: users.id,
-          username: users.username,
-          title: users.title,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          email: users.email,
-          phone: users.phone,
-          role: users.role,
-          roleId: users.roleId,
-          organizationId: users.organizationId,
-          createdAt: users.createdAt,
-          roleName: roles.name,
-          organizationName: organizations.name,
-          isActive: sql<boolean>`COALESCE(users.is_active, true)`
-        })
+        .select()
         .from(users)
-        .leftJoin(roles, eq(users.roleId, roles.id))
-        .leftJoin(organizations, eq(users.organizationId, organizations.id))
         .where(eq(users.organizationId, userOrgId))
         .orderBy(users.createdAt);
 
-      res.json(managementUsers);
+      // Add role and organization names
+      const enrichedUsers = await Promise.all(
+        managementUsers.map(async (user) => {
+          let roleName = null;
+          let organizationName = null;
+
+          if (user.roleId) {
+            const [role] = await db.select().from(roles).where(eq(roles.id, user.roleId));
+            roleName = role?.name;
+          }
+
+          if (user.organizationId) {
+            const [org] = await db.select().from(organizations).where(eq(organizations.id, user.organizationId));
+            organizationName = org?.name;
+          }
+
+          return {
+            ...user,
+            roleName,
+            organizationName,
+            isActive: user.isActive ?? true
+          };
+        })
+      );
+
+      res.json(enrichedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
