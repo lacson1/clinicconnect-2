@@ -480,20 +480,20 @@ export default function LaboratoryUnified() {
                             </Badge>
                           )}
                           <Badge variant="secondary">
-                            {order.items.length} test{order.items.length !== 1 ? 's' : ''}
+                            {order.items?.length || 0} test{(order.items?.length || 0) !== 1 ? 's' : ''}
                           </Badge>
                         </div>
 
                         <div className="space-y-2">
-                          {order.items.map((item) => (
+                          {order.items?.map((item) => (
                             <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                               <div className="flex-1">
-                                <p className="font-medium text-gray-900">{item.labTest.name}</p>
-                                <p className="text-sm text-gray-600">{item.labTest.category}</p>
+                                <p className="font-medium text-gray-900">{item.labTest?.name || 'Unknown Test'}</p>
+                                <p className="text-sm text-gray-600">{item.labTest?.category || 'Unknown Category'}</p>
                               </div>
                               
                               <div className="flex items-center gap-2">
-                                <Badge className={getStatusColor(item.status)} variant="outline" size="sm">
+                                <Badge className={getStatusColor(item.status)} variant="outline">
                                   {item.status}
                                 </Badge>
                                 
@@ -573,10 +573,10 @@ export default function LaboratoryUnified() {
                           </div>
                           <div>
                             <h3 className="font-semibold text-gray-900">
-                              {result.orderItem.labOrder.patient.firstName} {result.orderItem.labOrder.patient.lastName}
+                              {result.orderItem?.labOrder?.patient?.firstName || 'Unknown'} {result.orderItem?.labOrder?.patient?.lastName || 'Patient'}
                             </h3>
                             <p className="text-sm text-gray-600">
-                              {result.orderItem.labTest.name} • Order #{result.orderItem.labOrder.id}
+                              {result.orderItem?.labTest?.name || 'Unknown Test'} • Order #{result.orderItem?.labOrder?.id || 'N/A'}
                             </p>
                           </div>
                         </div>
@@ -649,7 +649,7 @@ export default function LaboratoryUnified() {
                 <div className="space-y-4">
                   {testCategories.slice(0, 5).map((category) => {
                     const categoryCount = labOrders.reduce((count, order) => 
-                      count + order.items.filter(item => item.labTest.category === category).length, 0
+                      count + (order.items?.filter(item => item.labTest?.category === category)?.length || 0), 0
                     );
                     const percentage = labOrders.length > 0 ? (categoryCount / labOrders.length * 100) : 0;
                     
