@@ -3630,6 +3630,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       
       res.json(orders);
     } catch (error) {
+      console.error('Error fetching patient lab orders:', error);
       res.status(500).json({ message: "Failed to fetch lab orders" });
     }
   });
