@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { fileStorage } from "./storage-service";
-import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, insertSafetyAlertSchema, insertPharmacyActivitySchema, insertMedicationReviewSchema, insertProceduralReportSchema, insertConsentFormSchema, insertPatientConsentSchema, insertMessageSchema, insertAppointmentReminderSchema, insertAvailabilitySlotSchema, insertBlackoutDateSchema, insertInvoiceSchema, insertInvoiceItemSchema, insertPaymentSchema, insertInsuranceClaimSchema, insertServicePriceSchema, users, auditLogs, labTests, medications, medicines, labOrders, labOrderItems, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, appointments, safetyAlerts, pharmacyActivities, medicationReviews, prescriptions, pharmacies, proceduralReports, consentForms, patientConsents, messages, appointmentReminders, availabilitySlots, blackoutDates, invoices, invoiceItems, payments, insuranceClaims, servicePrices, medicalDocuments, vaccinations, roles, permissions, rolePermissions } from "@shared/schema";
+import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, insertSafetyAlertSchema, insertPharmacyActivitySchema, insertMedicationReviewSchema, insertProceduralReportSchema, insertConsentFormSchema, insertPatientConsentSchema, insertMessageSchema, insertAppointmentReminderSchema, insertAvailabilitySlotSchema, insertBlackoutDateSchema, insertInvoiceSchema, insertInvoiceItemSchema, insertPaymentSchema, insertInsuranceClaimSchema, insertServicePriceSchema, users, auditLogs, labTests, medications, medicines, labOrders, labOrderItems, labResults, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, appointments, safetyAlerts, pharmacyActivities, medicationReviews, prescriptions, pharmacies, proceduralReports, consentForms, patientConsents, messages, appointmentReminders, availabilitySlots, blackoutDates, invoices, invoiceItems, payments, insuranceClaims, servicePrices, medicalDocuments, vaccinations, roles, permissions, rolePermissions } from "@shared/schema";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { db } from "./db";
@@ -1141,13 +1141,13 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
 
       // Search lab results
       if (type === "all" || type === "labs") {
-        const labResults = await db.select({
+        const labResultsData = await db.select({
           id: labResults.id,
           type: sql<string>`'lab_result'`,
           title: labResults.testName,
           subtitle: sql<string>`${patients.firstName} || ' ' || ${patients.lastName}`,
-          description: sql<string>`'Result: ' || ${labResults.result} || ' ' || COALESCE(${labResults.units}, '')`,
-          metadata: sql<any>`json_object('patientId', ${labResults.patientId}, 'status', ${labResults.status}, 'completedDate', ${labResults.completedDate})`
+          description: sql<string>`'Result: ' || ${labResults.result}`,
+          metadata: sql<any>`json_object('patientId', ${labResults.patientId}, 'status', ${labResults.status})`
         })
         .from(labResults)
         .innerJoin(patients, eq(labResults.patientId, patients.id))
@@ -1155,13 +1155,12 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
           eq(patients.organizationId, userOrgId),
           or(
             ilike(labResults.testName, `%${search}%`),
-            ilike(labResults.result, `%${search}%`),
-            ilike(labResults.category, `%${search}%`)
+            ilike(labResults.result, `%${search}%`)
           )
         ))
         .limit(10);
         
-        results.push(...labResults);
+        results.push(...labResultsData);
       }
 
       // Sort results by relevance (exact matches first, then partial matches)
@@ -2699,50 +2698,21 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       // Fetch all existing lab results from database and connect them to the system
       const existingResults = await db.select({
         id: labResults.id,
-        orderItemId: labResults.orderItemId,
-        value: labResults.value,
-        units: labResults.units,
-        referenceRange: labResults.referenceRange,
+        patientId: labResults.patientId,
+        testName: labResults.testName,
+        result: labResults.result,
+        normalRange: labResults.normalRange,
         status: labResults.status,
         notes: labResults.notes,
-        reviewedBy: labResults.reviewedBy,
-        reviewedAt: labResults.reviewedAt,
+        testDate: labResults.testDate,
         createdAt: labResults.createdAt,
-        orderItem: {
-          id: labOrderItems.id,
-          labTestId: labOrderItems.labTestId,
-          status: labOrderItems.status,
-          priority: labOrderItems.priority,
-          labTest: {
-            id: labTests.id,
-            name: labTests.name,
-            category: labTests.category,
-            units: labTests.units,
-            referenceRange: labTests.referenceRange
-          },
-          labOrder: {
-            id: labOrders.id,
-            patientId: labOrders.patientId,
-            status: labOrders.status,
-            createdAt: labOrders.createdAt,
-            patient: {
-              id: patients.id,
-              firstName: patients.firstName,
-              lastName: patients.lastName,
-              dateOfBirth: patients.dateOfBirth,
-              gender: patients.gender,
-              phone: patients.phone
-            }
-          }
-        }
+        patientName: sql<string>`CONCAT(${patients.firstName}, ' ', ${patients.lastName})`
       })
       .from(labResults)
-      .leftJoin(labOrderItems, eq(labResults.orderItemId, labOrderItems.id))
-      .leftJoin(labTests, eq(labOrderItems.labTestId, labTests.id))
-      .leftJoin(labOrders, eq(labOrderItems.labOrderId, labOrders.id))
-      .leftJoin(patients, eq(labOrders.patientId, patients.id))
-      .where(eq(labOrders.organizationId, userOrgId))
-      .orderBy(desc(labResults.createdAt));
+      .leftJoin(patients, eq(labResults.patientId, patients.id))
+      .where(eq(labResults.organizationId, userOrgId))
+      .orderBy(desc(labResults.createdAt))
+      .limit(50);
 
       res.json({
         message: "Existing lab results retrieved successfully",
@@ -3521,7 +3491,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   }
 
-  // Get reviewed lab results for the "Reviewed Results" tab
+  // Get reviewed lab results for the "Reviewed Results" tab - Optimized
   app.get('/api/lab-results/reviewed', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
       const userOrgId = req.user?.organizationId;
@@ -3539,7 +3509,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         whereConditions.push(eq(labResults.patientId, parseInt(patientId as string)));
       }
       
-      // Get authentic lab results from lab_results table
+      // Optimized query with indexed columns
       const reviewedResults = await db.select({
         id: labResults.id,
         patientId: labResults.patientId,
@@ -3555,7 +3525,8 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       .from(labResults)
       .innerJoin(patients, eq(labResults.patientId, patients.id))
       .where(and(...whereConditions))
-      .orderBy(desc(labResults.createdAt));
+      .orderBy(desc(labResults.createdAt))
+      .limit(100); // Limit results for performance
       
       // Transform the data to match frontend expectations
       const transformedResults = reviewedResults.map(result => ({
@@ -3573,6 +3544,12 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         units: '',
         remarks: result.notes
       }));
+      
+      // Add caching headers for performance
+      res.set({
+        'Cache-Control': 'private, max-age=60',
+        'ETag': `"lab-results-${userOrgId}-${Date.now()}"`
+      });
       
       res.json(transformedResults);
     } catch (error) {
