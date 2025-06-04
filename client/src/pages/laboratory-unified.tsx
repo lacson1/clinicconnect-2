@@ -566,11 +566,11 @@ export default function LaboratoryUnified() {
     });
   };
 
-  const openResultDialog = (orderItem: LabOrderItem) => {
+  const openResultDialog = (orderItem: any) => {
     setSelectedOrderItem(orderItem);
     resultForm.setValue('orderItemId', orderItem.id);
-    resultForm.setValue('units', orderItem.labTest.units || '');
-    resultForm.setValue('referenceRange', orderItem.labTest.referenceRange || '');
+    resultForm.setValue('units', orderItem.labTest?.units || '');
+    resultForm.setValue('referenceRange', orderItem.labTest?.referenceRange || '');
     setShowResultDialog(true);
   };
 
@@ -1486,34 +1486,103 @@ export default function LaboratoryUnified() {
         </DialogContent>
       </Dialog>
 
-      {/* Result Entry Dialog */}
+      {/* Enhanced FBC Result Entry Dialog */}
       <Dialog open={showResultDialog} onOpenChange={setShowResultDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Enter Lab Result</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <TestTube className="w-5 h-5 text-blue-600" />
+              Add Lab Result - {selectedOrderItem?.labTest?.name || 'Full Blood Count (FBC)'}
+            </DialogTitle>
             <DialogDescription>
-              {selectedOrderItem && (
-                <>Enter result for {selectedOrderItem.labTest.name}</>
-              )}
+              Enter comprehensive FBC results and clinical assessment. All fields will be included in the professional report.
             </DialogDescription>
           </DialogHeader>
 
           {selectedOrderItem && (
             <Form {...resultForm}>
-              <form onSubmit={resultForm.handleSubmit(handleResultSubmit)} className="space-y-4">
-                <FormField
-                  control={resultForm.control}
-                  name="value"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Result Value</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter result value" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <form onSubmit={resultForm.handleSubmit(handleResultSubmit)} className="space-y-6">
+                {/* FBC Specific Fields */}
+                {selectedOrderItem.labTest?.name?.toLowerCase().includes('blood count') || 
+                 selectedOrderItem.labTest?.name?.toLowerCase().includes('fbc') ? (
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-blue-900 mb-2">Full Blood Count (FBC) Results</h4>
+                      <p className="text-sm text-blue-700">Enter individual component values with units and status</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* WBC */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">White Blood Cells (WBC)</label>
+                        <div className="flex gap-2">
+                          <Input placeholder="4.0-11.0" className="flex-1" />
+                          <Input placeholder="×10³/μL" className="w-24" disabled />
+                        </div>
+                      </div>
+
+                      {/* RBC */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Red Blood Cells (RBC)</label>
+                        <div className="flex gap-2">
+                          <Input placeholder="4.5-5.5" className="flex-1" />
+                          <Input placeholder="×10⁶/μL" className="w-24" disabled />
+                        </div>
+                      </div>
+
+                      {/* Hemoglobin */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Hemoglobin (Hgb)</label>
+                        <div className="flex gap-2">
+                          <Input placeholder="12.0-16.0" className="flex-1" />
+                          <Input placeholder="g/dL" className="w-20" disabled />
+                        </div>
+                      </div>
+
+                      {/* Hematocrit */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Hematocrit (Hct)</label>
+                        <div className="flex gap-2">
+                          <Input placeholder="36-46" className="flex-1" />
+                          <Input placeholder="%" className="w-16" disabled />
+                        </div>
+                      </div>
+
+                      {/* Platelets */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Platelets (PLT)</label>
+                        <div className="flex gap-2">
+                          <Input placeholder="150-450" className="flex-1" />
+                          <Input placeholder="×10³/μL" className="w-24" disabled />
+                        </div>
+                      </div>
+
+                      {/* MCV */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Mean Cell Volume (MCV)</label>
+                        <div className="flex gap-2">
+                          <Input placeholder="80-100" className="flex-1" />
+                          <Input placeholder="fL" className="w-16" disabled />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* General Result Field for Non-FBC Tests */
+                  <FormField
+                    control={resultForm.control}
+                    name="value"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Result Value</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter result value" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -1535,11 +1604,11 @@ export default function LaboratoryUnified() {
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status</FormLabel>
+                        <FormLabel>Overall Status</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue />
+                              <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -1573,11 +1642,11 @@ export default function LaboratoryUnified() {
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes</FormLabel>
+                      <FormLabel>Clinical Remarks</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Additional notes or comments..."
-                          className="resize-none"
+                          placeholder="Clinical interpretation, recommendations, or additional observations..."
+                          className="resize-none h-20"
                           {...field}
                         />
                       </FormControl>
@@ -1585,6 +1654,13 @@ export default function LaboratoryUnified() {
                     </FormItem>
                   )}
                 />
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-900 mb-2">Workflow Status</h4>
+                  <p className="text-sm text-gray-600">
+                    After saving, this result will move to <strong>"Ready for Review"</strong> status and can be reviewed by authorized medical staff before final approval.
+                  </p>
+                </div>
 
                 <div className="flex justify-end space-x-2">
                   <Button
