@@ -794,6 +794,16 @@ export default function LaboratoryUnified() {
                                   {item.status}
                                 </Badge>
                                 
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handlePrintOrder(order)}
+                                  className="text-blue-600 hover:text-blue-800"
+                                >
+                                  <Printer className="w-3 h-3 mr-1" />
+                                  Print
+                                </Button>
+                                
                                 {item.status === 'pending' && (
                                   <Button
                                     size="sm"
@@ -1279,6 +1289,159 @@ export default function LaboratoryUnified() {
               </form>
             </Form>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Custom View Dialog */}
+      <Dialog open={showCustomViewDialog} onOpenChange={setShowCustomViewDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Customize Laboratory View
+            </DialogTitle>
+            <DialogDescription>
+              Configure which information to display in the laboratory interface
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="show-patient-info" className="text-sm font-medium">
+                  Patient Information
+                </Label>
+                <Checkbox
+                  id="show-patient-info"
+                  checked={customViewSettings.showPatientInfo}
+                  onCheckedChange={(checked) => 
+                    setCustomViewSettings(prev => ({ ...prev, showPatientInfo: !!checked }))
+                  }
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="show-test-details" className="text-sm font-medium">
+                  Test Details
+                </Label>
+                <Checkbox
+                  id="show-test-details"
+                  checked={customViewSettings.showTestDetails}
+                  onCheckedChange={(checked) => 
+                    setCustomViewSettings(prev => ({ ...prev, showTestDetails: !!checked }))
+                  }
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="show-timestamps" className="text-sm font-medium">
+                  Timestamps
+                </Label>
+                <Checkbox
+                  id="show-timestamps"
+                  checked={customViewSettings.showTimestamps}
+                  onCheckedChange={(checked) => 
+                    setCustomViewSettings(prev => ({ ...prev, showTimestamps: !!checked }))
+                  }
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="show-status" className="text-sm font-medium">
+                  Status Badges
+                </Label>
+                <Checkbox
+                  id="show-status"
+                  checked={customViewSettings.showStatus}
+                  onCheckedChange={(checked) => 
+                    setCustomViewSettings(prev => ({ ...prev, showStatus: !!checked }))
+                  }
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="show-priority" className="text-sm font-medium">
+                  Priority Indicators
+                </Label>
+                <Checkbox
+                  id="show-priority"
+                  checked={customViewSettings.showPriority}
+                  onCheckedChange={(checked) => 
+                    setCustomViewSettings(prev => ({ ...prev, showPriority: !!checked }))
+                  }
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="show-notes" className="text-sm font-medium">
+                  Clinical Notes
+                </Label>
+                <Checkbox
+                  id="show-notes"
+                  checked={customViewSettings.showNotes}
+                  onCheckedChange={(checked) => 
+                    setCustomViewSettings(prev => ({ ...prev, showNotes: !!checked }))
+                  }
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="compact-view" className="text-sm font-medium">
+                  Compact View
+                </Label>
+                <Checkbox
+                  id="compact-view"
+                  checked={customViewSettings.compactView}
+                  onCheckedChange={(checked) => 
+                    setCustomViewSettings(prev => ({ ...prev, compactView: !!checked }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Items per Page</Label>
+              <Select 
+                value={customViewSettings.itemsPerPage.toString()} 
+                onValueChange={(value) => 
+                  setCustomViewSettings(prev => ({ ...prev, itemsPerPage: parseInt(value) }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 items</SelectItem>
+                  <SelectItem value="10">10 items</SelectItem>
+                  <SelectItem value="20">20 items</SelectItem>
+                  <SelectItem value="50">50 items</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex justify-between pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setCustomViewSettings({
+                  showPatientInfo: true,
+                  showTestDetails: true,
+                  showTimestamps: true,
+                  showStatus: true,
+                  showPriority: true,
+                  showNotes: true,
+                  compactView: false,
+                  itemsPerPage: 10
+                });
+              }}
+            >
+              Reset to Default
+            </Button>
+            <Button onClick={() => setShowCustomViewDialog(false)}>
+              Apply Changes
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
