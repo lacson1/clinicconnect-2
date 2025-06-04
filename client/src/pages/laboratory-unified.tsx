@@ -473,12 +473,42 @@ export default function LaboratoryUnified() {
   const submitResult = useMutation({
     mutationFn: async (data: any) => {
       const { orderItemId, ...resultData } = data;
-      return apiRequest(`/api/lab-order-items/${orderItemId}`, 'PATCH', {
-        result: resultData.result || resultData.value,
-        remarks: resultData.notes || resultData.interpretation || resultData.recommendations || ''
+      
+      console.log('📊 Submitting lab result:', {
+        orderItemId,
+        data: resultData,
+        endpoint: `/api/lab-order-items/${orderItemId}`
       });
+      
+      const payload = {
+        result: resultData.result || resultData.value || '',
+        remarks: resultData.notes || resultData.interpretation || resultData.recommendations || ''
+      };
+      
+      console.log('📋 Request payload:', payload);
+      
+      const response = await fetch(`/api/lab-order-items/${orderItemId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      
+      console.log('🔄 Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('❌ API Error:', errorData);
+        throw new Error(`HTTP ${response.status}: ${errorData}`);
+      }
+      
+      const result = await response.json();
+      console.log('✅ Save successful:', result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('🎉 Result saved successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/lab-orders/enhanced'] });
       queryClient.invalidateQueries({ queryKey: ['/api/lab-results/reviewed'] });
       queryClient.invalidateQueries({ queryKey: ['/api/lab-orders-with-items'] });
@@ -488,10 +518,10 @@ export default function LaboratoryUnified() {
       toast({ title: "Lab result saved successfully" });
     },
     onError: (error) => {
-      console.error('Failed to save result:', error);
+      console.error('❌ Failed to save result:', error);
       toast({ 
         title: "Failed to save result", 
-        description: "Please try again", 
+        description: error.message || "Please try again", 
         variant: "destructive" 
       });
     }
