@@ -4655,6 +4655,446 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
+  // Enhanced Laboratory Management API Endpoints
+
+  // Lab Tests Management
+  app.get('/api/lab-tests', authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const tests = await storage.getLabTests(req.organizationId);
+      res.json(tests);
+    } catch (error) {
+      console.error('Error fetching lab tests:', error);
+      res.status(500).json({ message: "Failed to fetch lab tests" });
+    }
+  });
+
+  app.post('/api/lab-tests', authenticateToken, requireAnyRole(['admin', 'lab_manager']), tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const validatedData = insertLabTestSchema.parse({
+        ...req.body,
+        organizationId: req.organizationId
+      });
+      
+      const test = await storage.createLabTest(validatedData);
+      
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction("Lab Test Created", {
+        testId: test.id,
+        testName: test.name,
+        category: test.category
+      });
+      
+      res.status(201).json(test);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid test data", errors: error.errors });
+      }
+      console.error('Error creating lab test:', error);
+      res.status(500).json({ message: "Failed to create lab test" });
+    }
+  });
+
+  app.patch('/api/lab-tests/:id', authenticateToken, requireAnyRole(['admin', 'lab_manager']), async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const test = await storage.updateLabTest(id, updates);
+      
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction("Lab Test Updated", {
+        testId: test.id,
+        testName: test.name,
+        updates: Object.keys(updates)
+      });
+      
+      res.json(test);
+    } catch (error) {
+      console.error('Error updating lab test:', error);
+      res.status(500).json({ message: "Failed to update lab test" });
+    }
+  });
+
+  // Enhanced Lab Orders Management
+  app.get('/api/lab-orders/enhanced', authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const { patientId, status, priority, startDate, endDate } = req.query;
+      
+      const filters: any = { organizationId: req.organizationId };
+      if (patientId) filters.patientId = parseInt(patientId as string);
+      if (status) filters.status = status as string;
+      if (priority) filters.priority = priority as string;
+      if (startDate) filters.startDate = new Date(startDate as string);
+      if (endDate) filters.endDate = new Date(endDate as string);
+      
+      const orders = await storage.getLabOrders(filters);
+      
+      // Enhanced response with patient and test details
+      const enhancedOrders = await Promise.all(orders.map(async (order) => {
+        const [patient] = await db.select({
+          firstName: patients.firstName,
+          lastName: patients.lastName,
+          dateOfBirth: patients.dateOfBirth,
+          phone: patients.phone
+        }).from(patients).where(eq(patients.id, order.patientId));
+        
+        const [orderedByUser] = await db.select({
+          username: users.username,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          role: users.role
+        }).from(users).where(eq(users.id, order.orderedBy));
+        
+        const orderItems = await storage.getLabOrderItems(order.id);
+        
+        return {
+          ...order,
+          patient,
+          orderedByUser,
+          itemCount: orderItems.length,
+          completedItems: orderItems.filter(item => item.status === 'completed').length
+        };
+      }));
+      
+      res.json(enhancedOrders);
+    } catch (error) {
+      console.error('Error fetching enhanced lab orders:', error);
+      res.status(500).json({ message: "Failed to fetch lab orders" });
+    }
+  });
+
+  app.post('/api/lab-orders/enhanced', authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const { patientId, tests, clinicalNotes, diagnosis, priority } = req.body;
+      
+      if (!tests || tests.length === 0) {
+        return res.status(400).json({ message: "At least one test is required" });
+      }
+      
+      // Calculate total cost
+      const testIds = tests.map((test: any) => test.id);
+      const testPrices = await db.select({
+        id: labTests.id,
+        cost: labTests.cost
+      }).from(labTests).where(inArray(labTests.id, testIds));
+      
+      const totalCost = testPrices.reduce((sum, test) => {
+        const cost = test.cost ? parseFloat(test.cost.toString()) : 0;
+        return sum + cost;
+      }, 0);
+      
+      // Create lab order
+      const orderData = insertLabOrderSchema.parse({
+        patientId: parseInt(patientId),
+        orderedBy: req.user!.id,
+        organizationId: req.organizationId,
+        clinicalNotes,
+        diagnosis,
+        priority: priority || 'routine',
+        totalCost: totalCost.toString(),
+        status: 'pending'
+      });
+      
+      const order = await storage.createLabOrder(orderData);
+      
+      // Create order items
+      const orderItems = await Promise.all(tests.map(async (test: any) => {
+        const itemData = insertLabOrderItemSchema.parse({
+          labOrderId: order.id,
+          labTestId: test.id,
+          status: 'pending'
+        });
+        return await storage.createLabOrderItem(itemData);
+      }));
+      
+      // Send notification to lab staff
+      await sendNotificationToRole('lab_technician', {
+        title: 'New Lab Order',
+        message: `New lab order #${order.id} received for patient ${patientId}`,
+        type: NotificationTypes.LAB_ORDER,
+        organizationId: req.organizationId
+      });
+      
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction("Lab Order Created", {
+        orderId: order.id,
+        patientId,
+        testCount: tests.length,
+        totalCost
+      });
+      
+      res.status(201).json({ order, orderItems });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid order data", errors: error.errors });
+      }
+      console.error('Error creating enhanced lab order:', error);
+      res.status(500).json({ message: "Failed to create lab order" });
+    }
+  });
+
+  // Lab Departments Management
+  app.get('/api/lab-departments', authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const departments = await storage.getLabDepartments(req.organizationId);
+      res.json(departments);
+    } catch (error) {
+      console.error('Error fetching lab departments:', error);
+      res.status(500).json({ message: "Failed to fetch lab departments" });
+    }
+  });
+
+  app.post('/api/lab-departments', authenticateToken, requireAnyRole(['admin', 'lab_manager']), tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const validatedData = insertLabDepartmentSchema.parse({
+        ...req.body,
+        organizationId: req.organizationId
+      });
+      
+      const department = await storage.createLabDepartment(validatedData);
+      
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction("Lab Department Created", {
+        departmentId: department.id,
+        departmentName: department.name
+      });
+      
+      res.status(201).json(department);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid department data", errors: error.errors });
+      }
+      console.error('Error creating lab department:', error);
+      res.status(500).json({ message: "Failed to create lab department" });
+    }
+  });
+
+  // Lab Equipment Management
+  app.get('/api/lab-equipment', authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const { departmentId, status } = req.query;
+      
+      const filters: any = { organizationId: req.organizationId };
+      if (departmentId) filters.departmentId = parseInt(departmentId as string);
+      if (status) filters.status = status as string;
+      
+      const equipment = await storage.getLabEquipment(filters);
+      res.json(equipment);
+    } catch (error) {
+      console.error('Error fetching lab equipment:', error);
+      res.status(500).json({ message: "Failed to fetch lab equipment" });
+    }
+  });
+
+  app.post('/api/lab-equipment', authenticateToken, requireAnyRole(['admin', 'lab_manager']), tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const validatedData = insertLabEquipmentSchema.parse({
+        ...req.body,
+        organizationId: req.organizationId
+      });
+      
+      const equipment = await storage.createLabEquipment(validatedData);
+      
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction("Lab Equipment Added", {
+        equipmentId: equipment.id,
+        equipmentName: equipment.name,
+        departmentId: equipment.departmentId
+      });
+      
+      res.status(201).json(equipment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid equipment data", errors: error.errors });
+      }
+      console.error('Error creating lab equipment:', error);
+      res.status(500).json({ message: "Failed to create lab equipment" });
+    }
+  });
+
+  // Lab Worksheets Management
+  app.get('/api/lab-worksheets', authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const { departmentId, status, technicianId } = req.query;
+      
+      const filters: any = { organizationId: req.organizationId };
+      if (departmentId) filters.departmentId = parseInt(departmentId as string);
+      if (status) filters.status = status as string;
+      if (technicianId) filters.technicianId = parseInt(technicianId as string);
+      
+      const worksheets = await storage.getLabWorksheets(filters);
+      
+      // Enhanced response with department and technician details
+      const enhancedWorksheets = await Promise.all(worksheets.map(async (worksheet) => {
+        const [department] = await db.select({
+          name: labDepartments.name
+        }).from(labDepartments).where(eq(labDepartments.id, worksheet.departmentId!));
+        
+        const [technician] = await db.select({
+          username: users.username,
+          firstName: users.firstName,
+          lastName: users.lastName
+        }).from(users).where(eq(users.id, worksheet.technicianId!));
+        
+        const worksheetItems = await storage.getWorksheetItems(worksheet.id);
+        
+        return {
+          ...worksheet,
+          department,
+          technician,
+          itemCount: worksheetItems.length
+        };
+      }));
+      
+      res.json(enhancedWorksheets);
+    } catch (error) {
+      console.error('Error fetching lab worksheets:', error);
+      res.status(500).json({ message: "Failed to fetch lab worksheets" });
+    }
+  });
+
+  app.post('/api/lab-worksheets', authenticateToken, requireAnyRole(['lab_technician', 'lab_manager', 'admin']), tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const validatedData = insertLabWorksheetSchema.parse({
+        ...req.body,
+        organizationId: req.organizationId,
+        technicianId: req.user!.id
+      });
+      
+      const worksheet = await storage.createLabWorksheet(validatedData);
+      
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction("Lab Worksheet Created", {
+        worksheetId: worksheet.id,
+        worksheetName: worksheet.name,
+        departmentId: worksheet.departmentId
+      });
+      
+      res.status(201).json(worksheet);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid worksheet data", errors: error.errors });
+      }
+      console.error('Error creating lab worksheet:', error);
+      res.status(500).json({ message: "Failed to create lab worksheet" });
+    }
+  });
+
+  // Batch Results Entry
+  app.patch('/api/lab-worksheets/:id/batch-results', authenticateToken, requireAnyRole(['lab_technician', 'lab_manager']), async (req: AuthRequest, res) => {
+    try {
+      const worksheetId = parseInt(req.params.id);
+      const { results } = req.body;
+      
+      if (!results || !Array.isArray(results)) {
+        return res.status(400).json({ message: "Results array is required" });
+      }
+      
+      // Update all lab order items with results
+      const updatedItems = await Promise.all(results.map(async (result: any) => {
+        const { itemId, value, remarks, isAbnormal } = result;
+        
+        return await storage.updateLabOrderItem(itemId, {
+          result: value,
+          numericResult: isNaN(parseFloat(value)) ? null : parseFloat(value),
+          remarks,
+          isAbnormal: isAbnormal || false,
+          status: 'completed',
+          completedBy: req.user!.id,
+          completedAt: new Date()
+        });
+      }));
+      
+      // Update worksheet status
+      await storage.updateLabWorksheet(worksheetId, {
+        status: 'completed',
+        completedAt: new Date()
+      });
+      
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction("Batch Results Entered", {
+        worksheetId,
+        resultsCount: results.length,
+        technicianId: req.user!.id
+      });
+      
+      res.json({ 
+        message: "Batch results updated successfully", 
+        updatedItems: updatedItems.length 
+      });
+    } catch (error) {
+      console.error('Error updating batch results:', error);
+      res.status(500).json({ message: "Failed to update batch results" });
+    }
+  });
+
+  // Lab Analytics Dashboard
+  app.get('/api/lab-analytics', authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const { timeframe = '30d' } = req.query;
+      
+      const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      
+      // Get analytics data
+      const [totalOrders] = await db.select({
+        count: sql<number>`count(*)`
+      }).from(labOrders).where(
+        and(
+          eq(labOrders.organizationId, req.organizationId!),
+          gte(labOrders.createdAt, startDate)
+        )
+      );
+      
+      const [completedOrders] = await db.select({
+        count: sql<number>`count(*)`
+      }).from(labOrders).where(
+        and(
+          eq(labOrders.organizationId, req.organizationId!),
+          eq(labOrders.status, 'completed'),
+          gte(labOrders.createdAt, startDate)
+        )
+      );
+      
+      const [urgentOrders] = await db.select({
+        count: sql<number>`count(*)`
+      }).from(labOrders).where(
+        and(
+          eq(labOrders.organizationId, req.organizationId!),
+          eq(labOrders.priority, 'urgent'),
+          gte(labOrders.createdAt, startDate)
+        )
+      );
+      
+      // Average turnaround time
+      const [avgTurnaround] = await db.select({
+        avgHours: sql<number>`AVG(EXTRACT(EPOCH FROM (${labOrders.completedAt} - ${labOrders.createdAt})) / 3600)`
+      }).from(labOrders).where(
+        and(
+          eq(labOrders.organizationId, req.organizationId!),
+          eq(labOrders.status, 'completed'),
+          gte(labOrders.createdAt, startDate),
+          isNotNull(labOrders.completedAt)
+        )
+      );
+      
+      res.json({
+        timeframe,
+        metrics: {
+          totalOrders: totalOrders.count || 0,
+          completedOrders: completedOrders.count || 0,
+          urgentOrders: urgentOrders.count || 0,
+          completionRate: totalOrders.count ? ((completedOrders.count / totalOrders.count) * 100).toFixed(1) : '0.0',
+          avgTurnaroundHours: avgTurnaround.avgHours ? parseFloat(avgTurnaround.avgHours.toFixed(1)) : 0
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching lab analytics:', error);
+      res.status(500).json({ message: "Failed to fetch lab analytics" });
+    }
+  });
+
   // Register system health validation routes
   setupSystemHealthRoutes(app);
   setupNetworkValidationRoutes(app);

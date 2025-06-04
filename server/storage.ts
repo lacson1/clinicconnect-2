@@ -12,6 +12,13 @@ import {
   vaccinations,
   allergies,
   medicalHistory,
+  labTests,
+  labOrders,
+  labOrderItems,
+  labDepartments,
+  labEquipment,
+  labWorksheets,
+  worksheetItems,
   type Patient, 
   type InsertPatient,
   type Visit,
@@ -35,7 +42,21 @@ import {
   type Allergy,
   type InsertAllergy,
   type MedicalHistory,
-  type InsertMedicalHistory
+  type InsertMedicalHistory,
+  type LabTest,
+  type InsertLabTest,
+  type LabOrder,
+  type InsertLabOrder,
+  type LabOrderItem,
+  type InsertLabOrderItem,
+  type LabDepartment,
+  type InsertLabDepartment,
+  type LabEquipment,
+  type InsertLabEquipment,
+  type LabWorksheet,
+  type InsertLabWorksheet,
+  type WorksheetItem,
+  type InsertWorksheetItem
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, gte, lte, and, ilike, or, sql } from "drizzle-orm";
@@ -112,6 +133,60 @@ export interface IStorage {
   getMedicalHistoryByPatient(patientId: number): Promise<MedicalHistory[]>;
   createMedicalHistory(history: InsertMedicalHistory): Promise<MedicalHistory>;
   deleteMedicalHistory(id: number): Promise<void>;
+
+  // Laboratory Operations
+  // Lab Tests
+  getLabTests(organizationId?: number): Promise<LabTest[]>;
+  getLabTest(id: number): Promise<LabTest | undefined>;
+  createLabTest(test: InsertLabTest): Promise<LabTest>;
+  updateLabTest(id: number, updates: Partial<InsertLabTest>): Promise<LabTest>;
+  
+  // Lab Orders
+  getLabOrders(filters?: { 
+    organizationId?: number; 
+    patientId?: number; 
+    status?: string; 
+    priority?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<LabOrder[]>;
+  getLabOrder(id: number): Promise<LabOrder | undefined>;
+  createLabOrder(order: InsertLabOrder): Promise<LabOrder>;
+  updateLabOrder(id: number, updates: Partial<InsertLabOrder>): Promise<LabOrder>;
+  
+  // Lab Order Items
+  getLabOrderItems(labOrderId: number): Promise<LabOrderItem[]>;
+  getLabOrderItem(id: number): Promise<LabOrderItem | undefined>;
+  createLabOrderItem(item: InsertLabOrderItem): Promise<LabOrderItem>;
+  updateLabOrderItem(id: number, updates: Partial<InsertLabOrderItem>): Promise<LabOrderItem>;
+  
+  // Lab Departments
+  getLabDepartments(organizationId?: number): Promise<LabDepartment[]>;
+  getLabDepartment(id: number): Promise<LabDepartment | undefined>;
+  createLabDepartment(dept: InsertLabDepartment): Promise<LabDepartment>;
+  updateLabDepartment(id: number, updates: Partial<InsertLabDepartment>): Promise<LabDepartment>;
+  
+  // Lab Equipment
+  getLabEquipment(filters?: { departmentId?: number; organizationId?: number; status?: string }): Promise<LabEquipment[]>;
+  getLabEquipmentItem(id: number): Promise<LabEquipment | undefined>;
+  createLabEquipment(equipment: InsertLabEquipment): Promise<LabEquipment>;
+  updateLabEquipment(id: number, updates: Partial<InsertLabEquipment>): Promise<LabEquipment>;
+  
+  // Lab Worksheets
+  getLabWorksheets(filters?: { 
+    departmentId?: number; 
+    organizationId?: number; 
+    status?: string;
+    technicianId?: number;
+  }): Promise<LabWorksheet[]>;
+  getLabWorksheet(id: number): Promise<LabWorksheet | undefined>;
+  createLabWorksheet(worksheet: InsertLabWorksheet): Promise<LabWorksheet>;
+  updateLabWorksheet(id: number, updates: Partial<InsertLabWorksheet>): Promise<LabWorksheet>;
+  
+  // Worksheet Items
+  getWorksheetItems(worksheetId: number): Promise<WorksheetItem[]>;
+  createWorksheetItem(item: InsertWorksheetItem): Promise<WorksheetItem>;
+  removeWorksheetItem(id: number): Promise<void>;
 
   // Dashboard stats
   getDashboardStats(organizationId: number): Promise<{
@@ -616,6 +691,289 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMedicalHistory(id: number): Promise<void> {
     await db.delete(medicalHistory).where(eq(medicalHistory.id, id));
+  }
+
+  // Laboratory Operations Implementation
+  // Lab Tests
+  async getLabTests(organizationId?: number): Promise<LabTest[]> {
+    let query = db.select().from(labTests);
+    
+    if (organizationId) {
+      query = query.where(and(
+        eq(labTests.organizationId, organizationId),
+        eq(labTests.isActive, true)
+      ));
+    } else {
+      query = query.where(eq(labTests.isActive, true));
+    }
+    
+    return await query.orderBy(labTests.category, labTests.name);
+  }
+
+  async getLabTest(id: number): Promise<LabTest | undefined> {
+    const [test] = await db.select().from(labTests).where(eq(labTests.id, id));
+    return test || undefined;
+  }
+
+  async createLabTest(insertTest: InsertLabTest): Promise<LabTest> {
+    const [test] = await db
+      .insert(labTests)
+      .values(insertTest)
+      .returning();
+    return test;
+  }
+
+  async updateLabTest(id: number, updates: Partial<InsertLabTest>): Promise<LabTest> {
+    const [test] = await db
+      .update(labTests)
+      .set(updates)
+      .where(eq(labTests.id, id))
+      .returning();
+    return test;
+  }
+
+  // Lab Orders
+  async getLabOrders(filters?: { 
+    organizationId?: number; 
+    patientId?: number; 
+    status?: string; 
+    priority?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<LabOrder[]> {
+    const conditions = [];
+
+    if (filters?.organizationId) {
+      conditions.push(eq(labOrders.organizationId, filters.organizationId));
+    }
+    if (filters?.patientId) {
+      conditions.push(eq(labOrders.patientId, filters.patientId));
+    }
+    if (filters?.status) {
+      conditions.push(eq(labOrders.status, filters.status));
+    }
+    if (filters?.priority) {
+      conditions.push(eq(labOrders.priority, filters.priority));
+    }
+    if (filters?.startDate) {
+      conditions.push(gte(labOrders.createdAt, filters.startDate));
+    }
+    if (filters?.endDate) {
+      conditions.push(lte(labOrders.createdAt, filters.endDate));
+    }
+
+    let query = db.select().from(labOrders);
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(desc(labOrders.createdAt));
+  }
+
+  async getLabOrder(id: number): Promise<LabOrder | undefined> {
+    const [order] = await db.select().from(labOrders).where(eq(labOrders.id, id));
+    return order || undefined;
+  }
+
+  async createLabOrder(insertOrder: InsertLabOrder): Promise<LabOrder> {
+    const [order] = await db
+      .insert(labOrders)
+      .values(insertOrder)
+      .returning();
+    return order;
+  }
+
+  async updateLabOrder(id: number, updates: Partial<InsertLabOrder>): Promise<LabOrder> {
+    const [order] = await db
+      .update(labOrders)
+      .set(updates)
+      .where(eq(labOrders.id, id))
+      .returning();
+    return order;
+  }
+
+  // Lab Order Items
+  async getLabOrderItems(labOrderId: number): Promise<LabOrderItem[]> {
+    return await db.select()
+      .from(labOrderItems)
+      .where(eq(labOrderItems.labOrderId, labOrderId))
+      .orderBy(labOrderItems.id);
+  }
+
+  async getLabOrderItem(id: number): Promise<LabOrderItem | undefined> {
+    const [item] = await db.select().from(labOrderItems).where(eq(labOrderItems.id, id));
+    return item || undefined;
+  }
+
+  async createLabOrderItem(insertItem: InsertLabOrderItem): Promise<LabOrderItem> {
+    const [item] = await db
+      .insert(labOrderItems)
+      .values(insertItem)
+      .returning();
+    return item;
+  }
+
+  async updateLabOrderItem(id: number, updates: Partial<InsertLabOrderItem>): Promise<LabOrderItem> {
+    const [item] = await db
+      .update(labOrderItems)
+      .set(updates)
+      .where(eq(labOrderItems.id, id))
+      .returning();
+    return item;
+  }
+
+  // Lab Departments
+  async getLabDepartments(organizationId?: number): Promise<LabDepartment[]> {
+    let query = db.select().from(labDepartments);
+    
+    if (organizationId) {
+      query = query.where(and(
+        eq(labDepartments.organizationId, organizationId),
+        eq(labDepartments.isActive, true)
+      ));
+    } else {
+      query = query.where(eq(labDepartments.isActive, true));
+    }
+    
+    return await query.orderBy(labDepartments.name);
+  }
+
+  async getLabDepartment(id: number): Promise<LabDepartment | undefined> {
+    const [dept] = await db.select().from(labDepartments).where(eq(labDepartments.id, id));
+    return dept || undefined;
+  }
+
+  async createLabDepartment(insertDept: InsertLabDepartment): Promise<LabDepartment> {
+    const [dept] = await db
+      .insert(labDepartments)
+      .values(insertDept)
+      .returning();
+    return dept;
+  }
+
+  async updateLabDepartment(id: number, updates: Partial<InsertLabDepartment>): Promise<LabDepartment> {
+    const [dept] = await db
+      .update(labDepartments)
+      .set(updates)
+      .where(eq(labDepartments.id, id))
+      .returning();
+    return dept;
+  }
+
+  // Lab Equipment
+  async getLabEquipment(filters?: { departmentId?: number; organizationId?: number; status?: string }): Promise<LabEquipment[]> {
+    const conditions = [];
+
+    if (filters?.departmentId) {
+      conditions.push(eq(labEquipment.departmentId, filters.departmentId));
+    }
+    if (filters?.organizationId) {
+      conditions.push(eq(labEquipment.organizationId, filters.organizationId));
+    }
+    if (filters?.status) {
+      conditions.push(eq(labEquipment.status, filters.status));
+    }
+
+    let query = db.select().from(labEquipment);
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(labEquipment.name);
+  }
+
+  async getLabEquipmentItem(id: number): Promise<LabEquipment | undefined> {
+    const [equipment] = await db.select().from(labEquipment).where(eq(labEquipment.id, id));
+    return equipment || undefined;
+  }
+
+  async createLabEquipment(insertEquipment: InsertLabEquipment): Promise<LabEquipment> {
+    const [equipment] = await db
+      .insert(labEquipment)
+      .values(insertEquipment)
+      .returning();
+    return equipment;
+  }
+
+  async updateLabEquipment(id: number, updates: Partial<InsertLabEquipment>): Promise<LabEquipment> {
+    const [equipment] = await db
+      .update(labEquipment)
+      .set(updates)
+      .where(eq(labEquipment.id, id))
+      .returning();
+    return equipment;
+  }
+
+  // Lab Worksheets
+  async getLabWorksheets(filters?: { 
+    departmentId?: number; 
+    organizationId?: number; 
+    status?: string;
+    technicianId?: number;
+  }): Promise<LabWorksheet[]> {
+    const conditions = [];
+
+    if (filters?.departmentId) {
+      conditions.push(eq(labWorksheets.departmentId, filters.departmentId));
+    }
+    if (filters?.organizationId) {
+      conditions.push(eq(labWorksheets.organizationId, filters.organizationId));
+    }
+    if (filters?.status) {
+      conditions.push(eq(labWorksheets.status, filters.status));
+    }
+    if (filters?.technicianId) {
+      conditions.push(eq(labWorksheets.technicianId, filters.technicianId));
+    }
+
+    let query = db.select().from(labWorksheets);
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(desc(labWorksheets.createdAt));
+  }
+
+  async getLabWorksheet(id: number): Promise<LabWorksheet | undefined> {
+    const [worksheet] = await db.select().from(labWorksheets).where(eq(labWorksheets.id, id));
+    return worksheet || undefined;
+  }
+
+  async createLabWorksheet(insertWorksheet: InsertLabWorksheet): Promise<LabWorksheet> {
+    const [worksheet] = await db
+      .insert(labWorksheets)
+      .values(insertWorksheet)
+      .returning();
+    return worksheet;
+  }
+
+  async updateLabWorksheet(id: number, updates: Partial<InsertLabWorksheet>): Promise<LabWorksheet> {
+    const [worksheet] = await db
+      .update(labWorksheets)
+      .set(updates)
+      .where(eq(labWorksheets.id, id))
+      .returning();
+    return worksheet;
+  }
+
+  // Worksheet Items
+  async getWorksheetItems(worksheetId: number): Promise<WorksheetItem[]> {
+    return await db.select()
+      .from(worksheetItems)
+      .where(eq(worksheetItems.worksheetId, worksheetId))
+      .orderBy(worksheetItems.position);
+  }
+
+  async createWorksheetItem(insertItem: InsertWorksheetItem): Promise<WorksheetItem> {
+    const [item] = await db
+      .insert(worksheetItems)
+      .values(insertItem)
+      .returning();
+    return item;
+  }
+
+  async removeWorksheetItem(id: number): Promise<void> {
+    await db.delete(worksheetItems).where(eq(worksheetItems.id, id));
   }
 }
 
