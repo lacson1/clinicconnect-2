@@ -2772,10 +2772,8 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       // Create lab order items for each test
       const orderItems = tests.map((test: any) => ({
         labOrderId: newOrder.id,
-        testId: test.id,
-        status: 'pending',
-        organizationId: userOrgId,
-        createdAt: new Date()
+        labTestId: test.id,
+        status: 'pending'
       }));
 
       await db.insert(labOrderItems).values(orderItems);
