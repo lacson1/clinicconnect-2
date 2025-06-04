@@ -247,7 +247,15 @@ export default function Login() {
                   <div className="flex justify-between items-center bg-slate-700/40 p-3 rounded-lg backdrop-blur-sm">
                     <span className="text-cyan-300 font-medium flex items-center">
                       <Shield className="w-3 h-3 mr-2" />
-                      Admin - Lagos
+                      Admin - Grace Clinic
+                    </span>
+                    <span className="text-cyan-100 font-mono">grace_admin / admin123</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center bg-slate-700/40 p-3 rounded-lg backdrop-blur-sm">
+                    <span className="text-cyan-300 font-medium flex items-center">
+                      <Shield className="w-3 h-3 mr-2" />
+                      Admin - Lagos Island Hospital
                     </span>
                     <span className="text-cyan-100 font-mono">lagos_admin / admin123</span>
                   </div>
@@ -255,9 +263,17 @@ export default function Login() {
                   <div className="flex justify-between items-center bg-slate-700/40 p-3 rounded-lg backdrop-blur-sm">
                     <span className="text-cyan-300 font-medium flex items-center">
                       <Shield className="w-3 h-3 mr-2" />
-                      Admin - Banko
+                      Admin - Lagos Highland Hospital
                     </span>
-                    <span className="text-cyan-100 font-mono">Bankolumo / admin123</span>
+                    <span className="text-cyan-100 font-mono">highland_admin / admin123</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center bg-slate-700/40 p-3 rounded-lg backdrop-blur-sm">
+                    <span className="text-cyan-300 font-medium flex items-center">
+                      <Shield className="w-3 h-3 mr-2" />
+                      Admin - Enugu Health Center
+                    </span>
+                    <span className="text-cyan-100 font-mono">enugu_admin / admin123</span>
                   </div>
                   
                   <div className="flex justify-between items-center bg-gradient-to-r from-blue-700/40 to-indigo-700/40 p-3 rounded-lg backdrop-blur-sm border border-blue-400/20">
