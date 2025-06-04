@@ -469,15 +469,31 @@ export default function LaboratoryUnified() {
 
   const submitResult = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest('/api/lab-results', 'POST', data);
+      const { orderItemId, ...resultData } = data;
+      return apiRequest(`/api/lab-order-items/${orderItemId}`, 'PATCH', {
+        result: resultData.result || resultData.value,
+        status: resultData.status,
+        units: resultData.units,
+        referenceRange: resultData.referenceRange,
+        notes: resultData.notes || resultData.interpretation || resultData.recommendations
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/lab-orders/enhanced'] });
       queryClient.invalidateQueries({ queryKey: ['/api/lab-results/reviewed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/lab-orders-with-items'] });
       setShowResultDialog(false);
       resultForm.reset();
       setSelectedOrderItem(null);
-      toast({ title: "Lab result submitted successfully" });
+      toast({ title: "Lab result saved successfully" });
+    },
+    onError: (error) => {
+      console.error('Failed to save result:', error);
+      toast({ 
+        title: "Failed to save result", 
+        description: "Please try again", 
+        variant: "destructive" 
+      });
     }
   });
 
@@ -1656,6 +1672,12 @@ export default function LaboratoryUnified() {
                                 <SelectItem value="abnormal">Abnormal - Outside reference ranges</SelectItem>
                                 <SelectItem value="critical">Critical - Requires immediate attention</SelectItem>
                                 <SelectItem value="pending_review">Pending Review - Needs specialist review</SelectItem>
+                                <SelectItem value="high">High - Above normal range</SelectItem>
+                                <SelectItem value="low">Low - Below normal range</SelectItem>
+                                <SelectItem value="borderline">Borderline - Near reference limits</SelectItem>
+                                <SelectItem value="inconclusive">Inconclusive - Requires repeat testing</SelectItem>
+                                <SelectItem value="invalid">Invalid - Technical issues with sample</SelectItem>
+                                <SelectItem value="rejected">Rejected - Sample quality insufficient</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -1737,6 +1759,12 @@ export default function LaboratoryUnified() {
                               <SelectItem value="abnormal">Abnormal</SelectItem>
                               <SelectItem value="critical">Critical</SelectItem>
                               <SelectItem value="pending_review">Pending Review</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="borderline">Borderline</SelectItem>
+                              <SelectItem value="inconclusive">Inconclusive</SelectItem>
+                              <SelectItem value="invalid">Invalid</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
