@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, File, Search, User, Download, Trash2, Eye, Calendar } from 'lucide-react';
+import { Upload, File, Search, User, Download, Trash2, Eye, Calendar, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { apiRequest } from '@/lib/queryClient';
 import { DocumentPreviewCarousel } from '@/components/document-preview-carousel';
@@ -27,6 +27,7 @@ interface Document {
   uploadedBy: string;
   uploadedAt: string;
   size: number;
+  mimeType: string;
   patient?: Patient;
 }
 
@@ -406,17 +407,54 @@ export default function DocumentsPage() {
       </Card>
       </div>
 
-      {/* Document Preview Carousel */}
+      {/* Document Preview Modal */}
       {previewDocument && (
-        <DocumentPreviewCarousel
-          patientId={previewDocument.patientId || 0}
-          isOpen={isPreviewOpen}
-          onClose={() => {
-            setIsPreviewOpen(false);
-            setPreviewDocument(null);
-          }}
-          initialDocumentIndex={0}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl max-h-[80vh] w-full mx-4 overflow-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">{previewDocument.originalName}</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsPreviewOpen(false);
+                  setPreviewDocument(null);
+                }}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            {previewDocument.mimeType === 'application/pdf' ? (
+              <div className="w-full h-96">
+                <iframe
+                  src={`/api/files/medical/${previewDocument.fileName}`}
+                  className="w-full h-full border rounded"
+                  title={previewDocument.originalName}
+                />
+              </div>
+            ) : previewDocument.mimeType.startsWith('image/') ? (
+              <div className="text-center">
+                <img
+                  src={`/api/files/medical/${previewDocument.fileName}`}
+                  alt={previewDocument.originalName}
+                  className="max-w-full max-h-96 mx-auto"
+                />
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <File className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-600 mb-4">This file type cannot be previewed</p>
+                <Button
+                  onClick={() => handleDownload(previewDocument.fileName, previewDocument.originalName)}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download to View
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
