@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Search, 
   Users, 
@@ -46,6 +48,15 @@ interface SearchResult {
   icon: any;
   path: string;
   keywords: string[];
+}
+
+interface LiveSearchResult {
+  id: number;
+  type: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  metadata: any;
 }
 
 const searchableItems: SearchResult[] = [

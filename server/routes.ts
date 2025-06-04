@@ -1047,6 +1047,142 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
+  // Enhanced global search endpoint - includes patients, vaccinations, prescriptions, lab results
+  app.get("/api/search/global", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin', 'pharmacist']), async (req: AuthRequest, res) => {
+    try {
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      const search = req.query.q as string || "";
+      const type = req.query.type as string || "all"; // all, patients, vaccinations, prescriptions, labs
+      
+      if (!search || search.length < 2) {
+        return res.json({ results: [], totalCount: 0 });
+      }
+
+      const results: any[] = [];
+
+      // Search patients
+      if (type === "all" || type === "patients") {
+        const patientResults = await db.select({
+          id: patients.id,
+          type: sql<string>`'patient'`,
+          title: patients.firstName,
+          subtitle: patients.lastName,
+          description: patients.phone,
+          metadata: sql<any>`json_object('email', ${patients.email}, 'gender', ${patients.gender}, 'dateOfBirth', ${patients.dateOfBirth})`
+        })
+        .from(patients)
+        .where(and(
+          eq(patients.organizationId, userOrgId),
+          or(
+            ilike(patients.firstName, `%${search}%`),
+            ilike(patients.lastName, `%${search}%`),
+            ilike(patients.phone, `%${search}%`),
+            ilike(patients.email, `%${search}%`)
+          )
+        ))
+        .limit(10);
+        
+        results.push(...patientResults);
+      }
+
+      // Search vaccinations
+      if (type === "all" || type === "vaccinations") {
+        const vaccinationResults = await db.select({
+          id: vaccinations.id,
+          type: sql<string>`'vaccination'`,
+          title: vaccinations.vaccineName,
+          subtitle: sql<string>`${patients.firstName} || ' ' || ${patients.lastName}`,
+          description: sql<string>`'Administered: ' || ${vaccinations.dateAdministered}`,
+          metadata: sql<any>`json_object('patientId', ${vaccinations.patientId}, 'manufacturer', ${vaccinations.manufacturer}, 'batchNumber', ${vaccinations.batchNumber})`
+        })
+        .from(vaccinations)
+        .innerJoin(patients, eq(vaccinations.patientId, patients.id))
+        .where(and(
+          eq(patients.organizationId, userOrgId),
+          or(
+            ilike(vaccinations.vaccineName, `%${search}%`),
+            ilike(vaccinations.manufacturer, `%${search}%`),
+            ilike(vaccinations.batchNumber, `%${search}%`)
+          )
+        ))
+        .limit(10);
+        
+        results.push(...vaccinationResults);
+      }
+
+      // Search prescriptions
+      if (type === "all" || type === "prescriptions") {
+        const prescriptionResults = await db.select({
+          id: prescriptions.id,
+          type: sql<string>`'prescription'`,
+          title: prescriptions.medicationName,
+          subtitle: sql<string>`${patients.firstName} || ' ' || ${patients.lastName}`,
+          description: sql<string>`${prescriptions.dosage} || ' - ' || ${prescriptions.frequency}`,
+          metadata: sql<any>`json_object('patientId', ${prescriptions.patientId}, 'status', ${prescriptions.status}, 'prescribedDate', ${prescriptions.prescribedDate})`
+        })
+        .from(prescriptions)
+        .innerJoin(patients, eq(prescriptions.patientId, patients.id))
+        .where(and(
+          eq(patients.organizationId, userOrgId),
+          or(
+            ilike(prescriptions.medicationName, `%${search}%`),
+            ilike(prescriptions.dosage, `%${search}%`),
+            ilike(prescriptions.instructions, `%${search}%`)
+          )
+        ))
+        .limit(10);
+        
+        results.push(...prescriptionResults);
+      }
+
+      // Search lab results
+      if (type === "all" || type === "labs") {
+        const labResults = await db.select({
+          id: labResults.id,
+          type: sql<string>`'lab_result'`,
+          title: labResults.testName,
+          subtitle: sql<string>`${patients.firstName} || ' ' || ${patients.lastName}`,
+          description: sql<string>`'Result: ' || ${labResults.result} || ' ' || COALESCE(${labResults.units}, '')`,
+          metadata: sql<any>`json_object('patientId', ${labResults.patientId}, 'status', ${labResults.status}, 'completedDate', ${labResults.completedDate})`
+        })
+        .from(labResults)
+        .innerJoin(patients, eq(labResults.patientId, patients.id))
+        .where(and(
+          eq(patients.organizationId, userOrgId),
+          or(
+            ilike(labResults.testName, `%${search}%`),
+            ilike(labResults.result, `%${search}%`),
+            ilike(labResults.category, `%${search}%`)
+          )
+        ))
+        .limit(10);
+        
+        results.push(...labResults);
+      }
+
+      // Sort results by relevance (exact matches first, then partial matches)
+      const sortedResults = results.sort((a, b) => {
+        const aExact = a.title.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+        const bExact = b.title.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+        return bExact - aExact;
+      });
+
+      res.json({
+        results: sortedResults.slice(0, 20),
+        totalCount: sortedResults.length,
+        searchTerm: search,
+        searchType: type
+      });
+    } catch (error) {
+      console.error("Error in global search:", error);
+      res.status(500).json({ message: "Search failed" });
+    }
+  });
+
   // Search patients for autocomplete
   app.get("/api/patients/search", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin', 'pharmacist']), async (req: AuthRequest, res) => {
     try {
