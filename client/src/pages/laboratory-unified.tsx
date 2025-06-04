@@ -136,6 +136,17 @@ export default function LaboratoryUnified() {
   const [showOrderDialog, setShowOrderDialog] = useState(false);
   const [showResultDialog, setShowResultDialog] = useState(false);
   const [selectedOrderItem, setSelectedOrderItem] = useState<LabOrderItem | null>(null);
+  const [showCustomViewDialog, setShowCustomViewDialog] = useState(false);
+  const [customViewSettings, setCustomViewSettings] = useState({
+    showPatientInfo: true,
+    showTestDetails: true,
+    showTimestamps: true,
+    showStatus: true,
+    showPriority: true,
+    showNotes: true,
+    compactView: false,
+    itemsPerPage: 10
+  });
 
   const queryClient = useQueryClient();
 
@@ -165,6 +176,125 @@ export default function LaboratoryUnified() {
   // Upload existing results function
   const uploadExistingResults = () => {
     uploadExistingMutation.mutate();
+  };
+
+  // Print functionality
+  const handlePrintOrder = (order: LabOrder) => {
+    const printContent = generateLabOrderPrintContent(order);
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 250);
+    }
+  };
+
+  const generateLabOrderPrintContent = (order: LabOrder) => {
+    const patient = patients.find(p => p.id === order.patientId);
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Lab Order #${order.id}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+            .patient-info { background: #f5f5f5; padding: 15px; margin-bottom: 20px; }
+            .test-list { margin-bottom: 20px; }
+            .test-item { border: 1px solid #ddd; padding: 10px; margin-bottom: 5px; }
+            .footer { margin-top: 30px; border-top: 1px solid #333; padding-top: 10px; }
+            @media print { .no-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Laboratory Order</h1>
+            <p>Order #${order.id} | Date: ${format(new Date(order.createdAt), 'PPP')}</p>
+          </div>
+          
+          <div class="patient-info">
+            <h3>Patient Information</h3>
+            <p><strong>Name:</strong> ${patient?.firstName} ${patient?.lastName}</p>
+            <p><strong>Phone:</strong> ${patient?.phone}</p>
+            <p><strong>Date of Birth:</strong> ${patient?.dateOfBirth ? format(new Date(patient.dateOfBirth), 'PP') : 'N/A'}</p>
+            <p><strong>Status:</strong> ${order.status.toUpperCase()}</p>
+          </div>
+          
+          <div class="test-list">
+            <h3>Ordered Tests</h3>
+            ${order.items?.map(item => `
+              <div class="test-item">
+                <strong>${item.labTest?.name || 'Unknown Test'}</strong><br>
+                <small>Category: ${item.labTest?.category || 'N/A'}</small><br>
+                <small>Status: ${item.status}</small>
+              </div>
+            `).join('') || '<p>No tests found</p>'}
+          </div>
+          
+          <div class="footer">
+            <p><small>Generated on ${format(new Date(), 'PPP')} at ${format(new Date(), 'p')}</small></p>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
+  const generateLabResultPrintContent = (result: any) => {
+    const patient = result.orderItem?.labOrder?.patient;
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Lab Result - ${result.orderItem?.labTest?.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+            .patient-info { background: #f5f5f5; padding: 15px; margin-bottom: 20px; }
+            .result-box { border: 2px solid #333; padding: 20px; margin: 20px 0; text-align: center; }
+            .abnormal { border-color: #dc2626; background: #fef2f2; }
+            .normal { border-color: #16a34a; background: #f0fdf4; }
+            .footer { margin-top: 30px; border-top: 1px solid #333; padding-top: 10px; }
+            @media print { .no-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Laboratory Result</h1>
+            <p>Test: ${result.orderItem?.labTest?.name || 'Unknown Test'}</p>
+            <p>Date: ${format(new Date(result.createdAt), 'PPP')}</p>
+          </div>
+          
+          <div class="patient-info">
+            <h3>Patient Information</h3>
+            <p><strong>Name:</strong> ${patient?.firstName} ${patient?.lastName}</p>
+            <p><strong>Order ID:</strong> #${result.orderItem?.labOrder?.id}</p>
+            <p><strong>Test Category:</strong> ${result.orderItem?.labTest?.category}</p>
+          </div>
+          
+          <div class="result-box ${result.status === 'normal' ? 'normal' : 'abnormal'}">
+            <h2>Test Result</h2>
+            <p style="font-size: 24px; font-weight: bold;">${result.value} ${result.units}</p>
+            <p><strong>Reference Range:</strong> ${result.referenceRange || 'N/A'}</p>
+            <p><strong>Status:</strong> ${result.status.toUpperCase()}</p>
+          </div>
+          
+          ${result.notes ? `
+            <div style="margin: 20px 0; padding: 15px; background: #f9f9f9; border-left: 4px solid #333;">
+              <h4>Clinical Notes</h4>
+              <p>${result.notes}</p>
+            </div>
+          ` : ''}
+          
+          <div class="footer">
+            <p><strong>Reviewed by:</strong> ${result.reviewedBy || 'Pending Review'}</p>
+            <p><small>Generated on ${format(new Date(), 'PPP')} at ${format(new Date(), 'p')}</small></p>
+          </div>
+        </body>
+      </html>
+    `;
   };
 
   // Data queries
@@ -424,19 +554,30 @@ export default function LaboratoryUnified() {
               <Filter className="w-5 h-5 text-blue-600" />
               <CardTitle className="text-lg">Laboratory Filters</CardTitle>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedPatient(null);
-                setStatusFilter('all');
-                setCategoryFilter('all');
-              }}
-              className="text-gray-600 hover:text-gray-800"
-            >
-              Clear All
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowCustomViewDialog(true)}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                <Settings className="w-4 h-4 mr-1" />
+                Custom View
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedPatient(null);
+                  setStatusFilter('all');
+                  setCategoryFilter('all');
+                }}
+                className="text-gray-600 hover:text-gray-800"
+              >
+                Clear All
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -774,11 +915,39 @@ export default function LaboratoryUnified() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            // Download lab result as PDF
+                            const resultContent = generateLabResultPrintContent(result);
+                            const printWindow = window.open('', '_blank');
+                            if (printWindow) {
+                              printWindow.document.write(resultContent);
+                              printWindow.document.close();
+                              setTimeout(() => printWindow.print(), 250);
+                            }
+                          }}
+                        >
                           <Download className="w-4 h-4 mr-1" />
                           Download
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            const resultContent = generateLabResultPrintContent(result);
+                            const printWindow = window.open('', '_blank');
+                            if (printWindow) {
+                              printWindow.document.write(resultContent);
+                              printWindow.document.close();
+                              setTimeout(() => {
+                                printWindow.print();
+                                printWindow.close();
+                              }, 250);
+                            }
+                          }}
+                        >
                           <Printer className="w-4 h-4 mr-1" />
                           Print
                         </Button>
