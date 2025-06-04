@@ -23,6 +23,14 @@ export async function apiRequest(
   method: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  // Validate HTTP method
+  const validMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
+  const upperMethod = method?.toUpperCase();
+  
+  if (!upperMethod || !validMethods.includes(upperMethod)) {
+    throw new Error(`Invalid HTTP method: ${method}. Must be one of: ${validMethods.join(', ')}`);
+  }
+
   const headers = {
     ...getAuthHeaders(),
     ...(data ? { "Content-Type": "application/json" } : {}),
@@ -35,7 +43,7 @@ export async function apiRequest(
   }
 
   const res = await fetchFn(url, {
-    method,
+    method: upperMethod,
     headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
