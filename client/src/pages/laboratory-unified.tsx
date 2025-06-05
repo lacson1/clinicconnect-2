@@ -47,8 +47,8 @@ import {
   ChevronRight
 } from "lucide-react";
 import { format } from "date-fns";
-import { apiRequest } from "@/lib/queryClient";
 import LetterheadService from "@/services/letterhead-service";
+import { apiRequest } from "@/lib/queryClient";
 
 // Form schemas
 const labOrderSchema = z.object({
@@ -391,7 +391,7 @@ export default function LaboratoryUnified() {
       const ordersWithItems = await Promise.all(
         labOrders.map(async (order) => {
           try {
-            const response = await fetch(`/api/lab-orders/${order.id}/items`);
+            const response = await apiRequest(`/api/lab-orders/${order.id}/items`, 'GET');
             const items = await response.json();
             return { ...order, items };
           } catch (error) {
@@ -958,18 +958,18 @@ export default function LaboratoryUnified() {
                           <Badge className={getStatusColor(order.status)} variant="outline">
                             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                           </Badge>
-                          {order.items && order.items.length > 0 && order.items[0] && order.items[0].priority && (
+                          {Array.isArray(order.items) && order.items.length > 0 && order.items[0] && order.items[0].priority && (
                             <Badge className={getPriorityColor(order.items[0].priority)} variant="outline">
                               {order.items[0].priority.charAt(0).toUpperCase() + order.items[0].priority.slice(1)}
                             </Badge>
                           )}
                           <Badge variant="secondary">
-                            {order.items?.length || 0} test{(order.items?.length || 0) !== 1 ? 's' : ''}
+                            {Array.isArray(order.items) ? order.items.length : 0} test{(Array.isArray(order.items) ? order.items.length : 0) !== 1 ? 's' : ''}
                           </Badge>
                         </div>
 
                         <div className="space-y-3">
-                          {order.items?.map((item) => (
+                          {Array.isArray(order.items) && order.items.map((item) => (
                             <div key={item.id} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-md shadow-sm">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
