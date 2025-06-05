@@ -346,15 +346,17 @@ export function MedicationReviewAssignmentsList({
                         )}
 
                         {/* Timestamps */}
-                        <div className="text-xs text-muted-foreground space-y-1">
-                          <div>Created: {format(new Date(assignment.assignment.createdAt), "MMM dd, yyyy 'at' HH:mm")}</div>
-                          {assignment.assignment.startedAt && (
-                            <div>Started: {format(new Date(assignment.assignment.startedAt), "MMM dd, yyyy 'at' HH:mm")}</div>
-                          )}
-                          {assignment.assignment.completedAt && (
-                            <div>Completed: {format(new Date(assignment.assignment.completedAt), "MMM dd, yyyy 'at' HH:mm")}</div>
-                          )}
-                        </div>
+                        {assignment.assignment?.createdAt && (
+                          <div className="text-xs text-muted-foreground space-y-1">
+                            <div>Created: {format(new Date(assignment.assignment.createdAt), "MMM dd, yyyy 'at' HH:mm")}</div>
+                            {assignment.assignment.startedAt && (
+                              <div>Started: {format(new Date(assignment.assignment.startedAt), "MMM dd, yyyy 'at' HH:mm")}</div>
+                            )}
+                            {assignment.assignment.completedAt && (
+                              <div>Completed: {format(new Date(assignment.assignment.completedAt), "MMM dd, yyyy 'at' HH:mm")}</div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>
