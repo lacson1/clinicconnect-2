@@ -424,6 +424,7 @@ interface ModernPatientOverviewProps {
   visits: Visit[];
   recentLabs?: any[];
   activePrescriptions?: any[];
+  activityTrail?: any[];
   onAddPrescription?: () => void;
   onRecordVisit?: () => void;
   onEditPatient?: () => void;
@@ -2282,7 +2283,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                   
                   <div className="pt-2 border-t border-gray-200">
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>Showing {activityTrail.filter((event: any) => {
+                      <span>Showing {(activityTrail || []).filter((event: any) => {
                         switch (event.type) {
                           case 'visit':
                             return timelineFilters.visits;
@@ -2318,7 +2319,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
 
             {/* Timeline Content - Main Area */}
             <div className="lg:col-span-3">
-              <PatientTimeline events={activityTrail.filter((event: any) => {
+              <PatientTimeline events={(activityTrail || []).filter((event: any) => {
                 switch (event.type) {
                   case 'visit':
                     return timelineFilters.visits;
