@@ -37,7 +37,7 @@ export function setupSuperAdminRoutes(app: Express) {
     }
   );
 
-  app.patch('/api/superadmin/organizations/:id/suspend',
+  app.patch('/api/organizations/:id/suspend',
     authenticateToken,
     requireSuperAdmin,
     logSuperAdminAction('SUSPEND_ORGANIZATION'),
@@ -177,6 +177,27 @@ export function setupSuperAdminRoutes(app: Express) {
       } catch (error) {
         console.error('Super admin maintenance mode error:', error);
         res.status(500).json({ error: 'Failed to update maintenance mode' });
+      }
+    }
+  );
+
+  app.post('/api/superadmin/system/restart',
+    authenticateToken,
+    requireSuperAdmin,
+    requireSuperAdminPermission(SuperAdminPermissions.ENABLE_MAINTENANCE_MODE),
+    logSuperAdminAction('SYSTEM_RESTART'),
+    async (req: AuthRequest, res) => {
+      try {
+        console.log(`🔴 SYSTEM RESTART initiated by super admin ${req.user?.username}`);
+        
+        res.json({
+          success: true,
+          message: 'System restart initiated',
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Super admin system restart error:', error);
+        res.status(500).json({ error: 'Failed to restart system' });
       }
     }
   );

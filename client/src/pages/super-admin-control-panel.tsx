@@ -234,6 +234,175 @@ export default function SuperAdminControlPanel() {
     suspendOrgMutation.mutate({ orgId, suspended });
   };
 
+  // System maintenance handlers
+  const handleMaintenanceMode = () => {
+    maintenanceMutation.mutate({ 
+      enabled: !systemMaintenance, 
+      message: "System is under maintenance. Please check back later.",
+      estimatedDuration: "30 minutes"
+    });
+  };
+
+  const handleSystemRestart = () => {
+    if (window.confirm("Are you sure you want to restart the system? This will disconnect all users.")) {
+      apiRequest('/api/superadmin/system/restart', 'POST', {})
+        .then(() => {
+          toast({
+            title: "System Restart",
+            description: "System restart initiated successfully",
+          });
+        })
+        .catch(() => {
+          toast({
+            title: "Restart Failed",
+            description: "Failed to restart system",
+            variant: "destructive",
+          });
+        });
+    }
+  };
+
+  const handleManageFeatures = () => {
+    toast({
+      title: "Feature Management",
+      description: "Feature toggle interface is already available in the Features section",
+    });
+  };
+
+  const handleCreateAnnouncement = () => {
+    const title = prompt("Enter announcement title:");
+    const message = prompt("Enter announcement message:");
+    
+    if (title && message) {
+      apiRequest('/api/superadmin/system/announcements', 'POST', {
+        title,
+        message,
+        priority: 'normal',
+        targetOrganizations: []
+      })
+      .then(() => {
+        toast({
+          title: "Announcement Sent",
+          description: "System announcement has been sent to all organizations",
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Send Failed",
+          description: "Failed to send system announcement",
+          variant: "destructive",
+        });
+      });
+    }
+  };
+
+  // Security and monitoring handlers
+  const handleViewSessions = () => {
+    apiRequest('/api/superadmin/sessions', 'GET')
+      .then(() => {
+        toast({
+          title: "Session Monitor",
+          description: "Active user sessions interface would open here",
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Access Failed",
+          description: "Failed to access session monitoring",
+          variant: "destructive",
+        });
+      });
+  };
+
+  const handleSecuritySettings = () => {
+    toast({
+      title: "Security Configuration",
+      description: "Global security policy settings interface would open here",
+    });
+  };
+
+  const handleAuditConfiguration = () => {
+    toast({
+      title: "Audit Configuration",
+      description: "System-wide audit logging settings interface would open here",
+    });
+  };
+
+  const handleCreateBackup = () => {
+    apiRequest('/api/superadmin/data/backup', 'POST', {
+      backupType: 'full',
+      includeFiles: true
+    })
+    .then(() => {
+      toast({
+        title: "Backup Started",
+        description: "System backup process has been initiated",
+      });
+    })
+    .catch(() => {
+      toast({
+        title: "Backup Failed",
+        description: "Failed to create system backup",
+        variant: "destructive",
+      });
+    });
+  };
+
+  const handleMigrationTools = () => {
+    setDataModalType('export');
+    setShowDataModal(true);
+  };
+
+  const handleDatabaseAdmin = () => {
+    if (window.confirm("Are you sure you want to access database administration? This requires advanced technical knowledge.")) {
+      toast({
+        title: "Database Admin",
+        description: "Direct database management interface would open here",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCleanupTools = () => {
+    if (window.confirm("Are you sure you want to run data cleanup? This will remove orphaned and old data.")) {
+      apiRequest('/api/superadmin/data/cleanup', 'POST', {})
+        .then(() => {
+          toast({
+            title: "Cleanup Started",
+            description: "Data cleanup process has been initiated",
+          });
+        })
+        .catch(() => {
+          toast({
+            title: "Cleanup Failed",
+            description: "Failed to start data cleanup",
+            variant: "destructive",
+          });
+        });
+    }
+  };
+
+  const handleHealthDashboard = () => {
+    toast({
+      title: "System Health",
+      description: "System health monitoring is already displayed on this page",
+    });
+  };
+
+  const handleActivityMonitor = () => {
+    toast({
+      title: "Activity Monitor",
+      description: "User activity monitoring interface would open here",
+    });
+  };
+
+  const handleLogViewer = () => {
+    toast({
+      title: "Log Viewer",
+      description: "System log analysis interface would open here",
+    });
+  };
+
   // User management state
   const [showUserModal, setShowUserModal] = useState(false);
   const [userModalType, setUserModalType] = useState<'lock' | 'reset' | 'impersonate'>('lock');
@@ -998,7 +1167,7 @@ export default function SuperAdminControlPanel() {
                     onCheckedChange={setSystemMaintenance}
                   />
                 </div>
-                <Button variant="destructive" className="w-full" disabled={!systemMaintenance}>
+                <Button onClick={handleMaintenanceMode} variant="destructive" className="w-full" disabled={!systemMaintenance}>
                   Activate Maintenance
                 </Button>
               </CardContent>
@@ -1013,7 +1182,7 @@ export default function SuperAdminControlPanel() {
                 <CardDescription>Restart system services and clear caches</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="destructive" className="w-full">Restart System</Button>
+                <Button onClick={handleSystemRestart} variant="destructive" className="w-full">Restart System</Button>
               </CardContent>
             </Card>
 
@@ -1026,7 +1195,7 @@ export default function SuperAdminControlPanel() {
                 <CardDescription>Enable/disable features system-wide</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full">Manage Features</Button>
+                <Button onClick={handleManageFeatures} variant="outline" className="w-full">Manage Features</Button>
               </CardContent>
             </Card>
 
@@ -1039,7 +1208,7 @@ export default function SuperAdminControlPanel() {
                 <CardDescription>Send notifications to all organizations</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">Create Announcement</Button>
+                <Button onClick={handleCreateAnnouncement} className="w-full">Create Announcement</Button>
               </CardContent>
             </Card>
           </div>
