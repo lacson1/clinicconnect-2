@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Shield, 
   Database, 
@@ -149,63 +151,299 @@ export default function SuperAdminControlPanel() {
     featureMutation.mutate({ featureId, enabled });
   };
 
+  // Organization management state
+  const [showCreateOrg, setShowCreateOrg] = useState(false);
+  const [showSuspensions, setShowSuspensions] = useState(false);
+  const [showPolicies, setShowPolicies] = useState(false);
+  const [newOrgData, setNewOrgData] = useState({
+    name: '',
+    type: 'clinic',
+    email: '',
+    phone: '',
+    address: ''
+  });
+
+  // Organization creation mutation
+  const createOrgMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('/api/organizations', 'POST', data),
+    onSuccess: () => {
+      toast({
+        title: "Organization Created",
+        description: "New healthcare organization has been created successfully",
+      });
+      setShowCreateOrg(false);
+      setNewOrgData({ name: '', type: 'clinic', email: '', phone: '', address: '' });
+      queryClient.invalidateQueries({ queryKey: ['/api/organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/superadmin/analytics'] });
+    },
+    onError: () => {
+      toast({
+        title: "Creation Failed",
+        description: "Failed to create organization",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Organization suspension mutation
+  const suspendOrgMutation = useMutation({
+    mutationFn: ({ orgId, suspended }: { orgId: number; suspended: boolean }) => 
+      apiRequest(`/api/organizations/${orgId}/suspend`, 'PATCH', { suspended }),
+    onSuccess: () => {
+      toast({
+        title: "Organization Updated",
+        description: "Organization status has been updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/organizations'] });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update organization status",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Organization management handlers
   const handleCreateOrganization = () => {
-    toast({
-      title: "Create Organization",
-      description: "Organization creation modal would open here",
-    });
+    setShowCreateOrg(true);
   };
 
   const handleManageSuspensions = () => {
-    toast({
-      title: "Manage Suspensions",
-      description: "Organization suspension management interface would open here",
-    });
+    setShowSuspensions(true);
   };
 
   const handleGlobalPolicies = () => {
-    toast({
-      title: "Global Policies",
-      description: "Global policy configuration panel would open here",
-    });
+    setShowPolicies(true);
   };
+
+  const handleCreateOrgSubmit = () => {
+    if (!newOrgData.name || !newOrgData.email) {
+      toast({
+        title: "Validation Error",
+        description: "Organization name and email are required",
+        variant: "destructive",
+      });
+      return;
+    }
+    createOrgMutation.mutate(newOrgData);
+  };
+
+  const handleSuspendOrganization = (orgId: number, suspended: boolean) => {
+    suspendOrgMutation.mutate({ orgId, suspended });
+  };
+
+  // User management state
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [userModalType, setUserModalType] = useState<'lock' | 'reset' | 'impersonate'>('lock');
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [userSearchResults, setUserSearchResults] = useState([]);
+
+  // Fetch all users for management
+  const { data: allUsers = [], isLoading: usersLoading } = useQuery({
+    queryKey: ['/api/superadmin/users'],
+    enabled: searchTerm.length > 2,
+  });
+
+  // User management mutations
+  const lockUserMutation = useMutation({
+    mutationFn: ({ userId, locked }: { userId: number; locked: boolean }) => 
+      apiRequest(`/api/superadmin/users/${userId}/lock`, 'PATCH', { locked }),
+    onSuccess: () => {
+      toast({
+        title: "Account Updated",
+        description: "User account status has been updated successfully",
+      });
+      setShowUserModal(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/superadmin/users'] });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update user account status",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (userId: number) => 
+      apiRequest(`/api/superadmin/users/${userId}/reset-password`, 'POST', {}),
+    onSuccess: () => {
+      toast({
+        title: "Password Reset",
+        description: "Password reset email has been sent to the user",
+      });
+      setShowUserModal(false);
+    },
+    onError: () => {
+      toast({
+        title: "Reset Failed",
+        description: "Failed to reset user password",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const impersonateUserMutation = useMutation({
+    mutationFn: (userId: number) => 
+      apiRequest(`/api/superadmin/users/${userId}/impersonate`, 'POST', {}),
+    onSuccess: (data: any) => {
+      toast({
+        title: "Impersonation Started",
+        description: "You are now logged in as the selected user",
+      });
+      // Redirect or update auth context
+      window.location.reload();
+    },
+    onError: () => {
+      toast({
+        title: "Impersonation Failed",
+        description: "Failed to impersonate user",
+        variant: "destructive",
+      });
+    },
+  });
 
   // User management handlers
   const handleLockAccount = () => {
-    toast({
-      title: "Account Control",
-      description: "User account locking interface would open here",
-    });
+    setUserModalType('lock');
+    setShowUserModal(true);
   };
 
   const handleResetPassword = () => {
-    toast({
-      title: "Password Reset",
-      description: "Password reset interface would open here",
-    });
+    setUserModalType('reset');
+    setShowUserModal(true);
   };
 
   const handleImpersonateUser = () => {
-    toast({
-      title: "User Impersonation",
-      description: "User impersonation interface would open here",
-    });
+    setUserModalType('impersonate');
+    setShowUserModal(true);
   };
+
+  const handleUserAction = () => {
+    if (!selectedUserId) {
+      toast({
+        title: "No User Selected",
+        description: "Please search and select a user first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    switch (userModalType) {
+      case 'lock':
+        lockUserMutation.mutate({ userId: selectedUserId, locked: true });
+        break;
+      case 'reset':
+        resetPasswordMutation.mutate(selectedUserId);
+        break;
+      case 'impersonate':
+        impersonateUserMutation.mutate(selectedUserId);
+        break;
+    }
+  };
+
+  const handleUserSearch = async () => {
+    if (searchTerm.length < 2) {
+      toast({
+        title: "Search Term Too Short",
+        description: "Please enter at least 2 characters to search",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      const response = await apiRequest(`/api/superadmin/users/search?q=${encodeURIComponent(searchTerm)}`, 'GET');
+      setUserSearchResults(response || []);
+    } catch (error) {
+      toast({
+        title: "Search Failed",
+        description: "Failed to search users",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Data management state
+  const [showDataModal, setShowDataModal] = useState(false);
+  const [dataModalType, setDataModalType] = useState<'import' | 'export'>('import');
+  const [importFile, setImportFile] = useState<File | null>(null);
+
+  // Data management mutations
+  const importDataMutation = useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      return apiRequest('/api/superadmin/data/import', 'POST', formData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Data Import Started",
+        description: "Data import process has been initiated successfully",
+      });
+      setShowDataModal(false);
+      setImportFile(null);
+    },
+    onError: () => {
+      toast({
+        title: "Import Failed",
+        description: "Failed to import data",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const exportDataMutation = useMutation({
+    mutationFn: (exportType: string) => 
+      apiRequest(`/api/superadmin/data/export?type=${exportType}`, 'GET'),
+    onSuccess: (data: any) => {
+      toast({
+        title: "Export Started",
+        description: "Data export has been initiated",
+      });
+      // Handle download
+      if (data.downloadUrl) {
+        window.open(data.downloadUrl, '_blank');
+      }
+      setShowDataModal(false);
+    },
+    onError: () => {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export data",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Data management handlers
   const handleImportData = () => {
-    toast({
-      title: "Import Data",
-      description: "Data import interface would open here",
-    });
+    setDataModalType('import');
+    setShowDataModal(true);
   };
 
   const handleExportData = () => {
-    toast({
-      title: "Export Data", 
-      description: "Data export interface would open here",
-    });
+    setDataModalType('export');
+    setShowDataModal(true);
+  };
+
+  const handleDataAction = () => {
+    if (dataModalType === 'import') {
+      if (!importFile) {
+        toast({
+          title: "No File Selected",
+          description: "Please select a file to import",
+          variant: "destructive",
+        });
+        return;
+      }
+      importDataMutation.mutate(importFile);
+    } else {
+      exportDataMutation.mutate('full');
+    }
   };
 
   return (
@@ -952,6 +1190,207 @@ export default function SuperAdminControlPanel() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Organization Creation Modal */}
+      <Dialog open={showCreateOrg} onOpenChange={setShowCreateOrg}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Organization</DialogTitle>
+            <DialogDescription>
+              Add a new healthcare organization to the system
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                value={newOrgData.name}
+                onChange={(e) => setNewOrgData({ ...newOrgData, name: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="type" className="text-right">
+                Type
+              </Label>
+              <Select 
+                value={newOrgData.type} 
+                onValueChange={(value) => setNewOrgData({ ...newOrgData, type: value })}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="clinic">Clinic</SelectItem>
+                  <SelectItem value="hospital">Hospital</SelectItem>
+                  <SelectItem value="health_center">Health Center</SelectItem>
+                  <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={newOrgData.email}
+                onChange={(e) => setNewOrgData({ ...newOrgData, email: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="phone" className="text-right">
+                Phone
+              </Label>
+              <Input
+                id="phone"
+                value={newOrgData.phone}
+                onChange={(e) => setNewOrgData({ ...newOrgData, phone: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={handleCreateOrgSubmit}
+              disabled={createOrgMutation.isPending}
+            >
+              {createOrgMutation.isPending ? "Creating..." : "Create Organization"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Management Modal */}
+      <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {userModalType === 'lock' && 'Lock User Account'}
+              {userModalType === 'reset' && 'Reset User Password'}
+              {userModalType === 'impersonate' && 'Impersonate User'}
+            </DialogTitle>
+            <DialogDescription>
+              {userModalType === 'lock' && 'Lock or unlock user account access'}
+              {userModalType === 'reset' && 'Send password reset email to user'}
+              {userModalType === 'impersonate' && 'Login as this user for troubleshooting'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="userSearch" className="text-right">
+                Search User
+              </Label>
+              <div className="col-span-3 space-y-2">
+                <Input
+                  id="userSearch"
+                  placeholder="Enter username or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <Button 
+                  onClick={handleUserSearch}
+                  variant="outline" 
+                  size="sm"
+                  className="w-full"
+                >
+                  Search Users
+                </Button>
+              </div>
+            </div>
+            {userSearchResults.length > 0 && (
+              <div className="max-h-40 overflow-y-auto space-y-2">
+                {userSearchResults.map((user: any) => (
+                  <div 
+                    key={user.id}
+                    className={`p-2 border rounded cursor-pointer ${
+                      selectedUserId === user.id ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
+                    }`}
+                    onClick={() => setSelectedUserId(user.id)}
+                  >
+                    <div className="font-medium">{user.username}</div>
+                    <div className="text-sm text-gray-500">{user.email}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={handleUserAction}
+              disabled={!selectedUserId || lockUserMutation.isPending || resetPasswordMutation.isPending || impersonateUserMutation.isPending}
+              variant={userModalType === 'lock' ? 'destructive' : 'default'}
+            >
+              {userModalType === 'lock' && 'Lock Account'}
+              {userModalType === 'reset' && 'Reset Password'}
+              {userModalType === 'impersonate' && 'Start Impersonation'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Data Management Modal */}
+      <Dialog open={showDataModal} onOpenChange={setShowDataModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {dataModalType === 'import' ? 'Import Data' : 'Export Data'}
+            </DialogTitle>
+            <DialogDescription>
+              {dataModalType === 'import' 
+                ? 'Upload and import data into the system'
+                : 'Export system data for backup or migration'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {dataModalType === 'import' ? (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="file" className="text-right">
+                  File
+                </Label>
+                <Input
+                  id="file"
+                  type="file"
+                  accept=".json,.csv,.sql"
+                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                  className="col-span-3"
+                />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Select what data to export:
+                </p>
+                <div className="space-y-2">
+                  <Button variant="outline" className="w-full justify-start">
+                    Full System Export
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    Organizations Only
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    Users Only
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={handleDataAction}
+              disabled={importDataMutation.isPending || exportDataMutation.isPending}
+            >
+              {dataModalType === 'import' ? 'Import Data' : 'Export Data'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
