@@ -445,6 +445,7 @@ export function ModernPatientOverview({
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { handleError } = useApiErrorHandler();
   const [isConsultationHistoryOpen, setIsConsultationHistoryOpen] = useState(false);
   const [showEditPatientModal, setShowEditPatientModal] = useState(false);
   const [showMedicationReviewAssignmentModal, setShowMedicationReviewAssignmentModal] = useState(false);
@@ -542,29 +543,19 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
 
   const handleUpdateMedicationStatus = async (prescriptionId: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/prescriptions/${prescriptionId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
+      await apiRequest(`/api/prescriptions/${prescriptionId}/status`, 'PATCH', { status: newStatus });
 
-      if (response.ok) {
-        queryClient.invalidateQueries(['/api/patients', patient.id, 'prescriptions']);
-        
-        const statusText = newStatus === 'completed' ? 'completed' : 
-                          newStatus === 'discontinued' ? 'discontinued' : 'reactivated';
-        
-        toast({
-          title: "Medication Status Updated",
-          description: `Medication has been ${statusText}`,
-        });
-      } else {
-        throw new Error('Failed to update status');
-      }
+      queryClient.invalidateQueries({ queryKey: ['/api/patients', patient.id, 'prescriptions'] });
+      
+      const statusText = newStatus === 'completed' ? 'completed' : 
+                        newStatus === 'discontinued' ? 'discontinued' : 'reactivated';
+      
+      toast({
+        title: "Medication Status Updated",
+        description: `Medication has been ${statusText}`,
+      });
     } catch (error) {
+      handleError(error);
       toast({
         title: "Error",
         description: "Failed to update medication status",
@@ -588,7 +579,7 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
       });
 
       if (response.ok) {
-        queryClient.invalidateQueries(['/api/patients', patient.id, 'prescriptions']);
+        queryClient.invalidateQueries({ queryKey: ['/api/patients', patient.id, 'prescriptions'] });
         toast({
           title: "Added to Repeat Medications",
           description: `${prescription.medicationName} is now available in repeat medications tab`,
@@ -597,6 +588,7 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
         throw new Error('Failed to add to repeat medications');
       }
     } catch (error) {
+      handleError(error);
       toast({
         title: "Error",
         description: "Failed to add medication to repeat list",

@@ -49,6 +49,7 @@ import {
 import { format } from "date-fns";
 import LetterheadService from "@/services/letterhead-service";
 import { apiRequest } from "@/lib/queryClient";
+import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 
 // Form schemas
 const labOrderSchema = z.object({
@@ -137,6 +138,7 @@ export default function LaboratoryUnified() {
   const [activeTab, setActiveTab] = useState("orders");
   const [selectedPatient, setSelectedPatient] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const { handleError } = useApiErrorHandler();
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [showOrderDialog, setShowOrderDialog] = useState(false);
