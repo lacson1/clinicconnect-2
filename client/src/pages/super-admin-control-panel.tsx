@@ -149,6 +149,65 @@ export default function SuperAdminControlPanel() {
     featureMutation.mutate({ featureId, enabled });
   };
 
+  // Organization management handlers
+  const handleCreateOrganization = () => {
+    toast({
+      title: "Create Organization",
+      description: "Organization creation modal would open here",
+    });
+  };
+
+  const handleManageSuspensions = () => {
+    toast({
+      title: "Manage Suspensions",
+      description: "Organization suspension management interface would open here",
+    });
+  };
+
+  const handleGlobalPolicies = () => {
+    toast({
+      title: "Global Policies",
+      description: "Global policy configuration panel would open here",
+    });
+  };
+
+  // User management handlers
+  const handleLockAccount = () => {
+    toast({
+      title: "Account Control",
+      description: "User account locking interface would open here",
+    });
+  };
+
+  const handleResetPassword = () => {
+    toast({
+      title: "Password Reset",
+      description: "Password reset interface would open here",
+    });
+  };
+
+  const handleImpersonateUser = () => {
+    toast({
+      title: "User Impersonation",
+      description: "User impersonation interface would open here",
+    });
+  };
+
+  // Data management handlers
+  const handleImportData = () => {
+    toast({
+      title: "Import Data",
+      description: "Data import interface would open here",
+    });
+  };
+
+  const handleExportData = () => {
+    toast({
+      title: "Export Data", 
+      description: "Data export interface would open here",
+    });
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -236,7 +295,7 @@ export default function SuperAdminControlPanel() {
                 <CardDescription>Add new healthcare organizations to the system</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">Create New Organization</Button>
+                <Button onClick={handleCreateOrganization} className="w-full">Create New Organization</Button>
               </CardContent>
             </Card>
 
@@ -249,7 +308,7 @@ export default function SuperAdminControlPanel() {
                 <CardDescription>Temporarily disable organization access</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="destructive" className="w-full">Manage Suspensions</Button>
+                <Button onClick={handleManageSuspensions} variant="destructive" className="w-full">Manage Suspensions</Button>
               </CardContent>
             </Card>
 
@@ -262,7 +321,7 @@ export default function SuperAdminControlPanel() {
                 <CardDescription>Configure global organization policies</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full">Global Policies</Button>
+                <Button onClick={handleGlobalPolicies} variant="outline" className="w-full">Global Policies</Button>
               </CardContent>
             </Card>
           </div>
@@ -479,12 +538,12 @@ export default function SuperAdminControlPanel() {
                 <CardDescription>Import and export system data</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button variant="outline" className="w-full">
+                <Button onClick={handleImportData} variant="outline" className="w-full">
                   <Upload className="w-4 h-4 mr-2" />
                   Import Data
                 </Button>
                 
-                <Button variant="outline" className="w-full">
+                <Button onClick={handleExportData} variant="outline" className="w-full">
                   <Download className="w-4 h-4 mr-2" />
                   Export Data
                 </Button>
@@ -615,7 +674,7 @@ export default function SuperAdminControlPanel() {
                 <CardDescription>Lock or unlock user accounts</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="destructive" className="w-full">
+                <Button onClick={handleLockAccount} variant="destructive" className="w-full">
                   <Lock className="w-4 h-4 mr-2" />
                   Lock Account
                 </Button>
@@ -631,7 +690,7 @@ export default function SuperAdminControlPanel() {
                 <CardDescription>Force password reset for user accounts</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full">
+                <Button onClick={handleResetPassword} variant="outline" className="w-full">
                   <Key className="w-4 h-4 mr-2" />
                   Reset Password
                 </Button>
@@ -647,7 +706,10 @@ export default function SuperAdminControlPanel() {
                 <CardDescription>Login as any user for troubleshooting</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full">User Impersonation</Button>
+                <Button onClick={handleImpersonateUser} variant="outline" className="w-full">
+                  <UserX className="w-4 h-4 mr-2" />
+                  Impersonate User
+                </Button>
               </CardContent>
             </Card>
 
