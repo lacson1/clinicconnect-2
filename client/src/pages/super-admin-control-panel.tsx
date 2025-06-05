@@ -1353,7 +1353,7 @@ export default function SuperAdminControlPanel() {
                 <CardDescription>View and analyze system logs</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full">Log Viewer</Button>
+                <Button onClick={handleLogViewer} variant="outline" className="w-full">Log Viewer</Button>
               </CardContent>
             </Card>
           </div>
