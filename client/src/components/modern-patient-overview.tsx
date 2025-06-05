@@ -733,7 +733,6 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
     retry: 3,
     staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Cache for 10 minutes (updated from cacheTime)
-    retry: 3,
     refetchOnWindowFocus: false, // Prevent refetch on window focus to maintain data
     enabled: !!patient.id
   });
