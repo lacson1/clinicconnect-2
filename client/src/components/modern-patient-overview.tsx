@@ -1300,7 +1300,6 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
   // Fetch activity trail using React Query with proper error handling
   const { data: fetchedActivityTrail = [], error: activityTrailError } = useQuery({
     queryKey: ['/api/patients', patient.id, 'activity-trail'],
-    queryFn: () => fetch(`/api/patients/${patient.id}/activity-trail`).then(res => res.json()),
     retry: false
   });
 
@@ -2059,7 +2058,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <QuickSafetyIndicator patient={patient} />
+                <QuickSafetyIndicator patientId={patient.id} />
               </CardContent>
             </Card>
           </div>

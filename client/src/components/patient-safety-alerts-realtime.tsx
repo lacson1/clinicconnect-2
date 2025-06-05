@@ -32,21 +32,20 @@ export function PatientSafetyAlertsRealtime({
   const queryClient = useQueryClient();
 
   // Fetch real-time safety alerts from backend
-  const { data: alerts = [], isLoading, refetch } = useQuery({
+  const { data: alertsData, isLoading, refetch } = useQuery({
     queryKey: ['/api/patients', patientId, 'safety-alerts'],
-    queryFn: () => fetch(`/api/patients/${patientId}/safety-alerts`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    }).then(res => res.json()),
     enabled: !!patientId,
     refetchInterval: 30000, // Refresh every 30 seconds for real-time updates
+    retry: 1, // Reduce retries to prevent excessive errors
   });
+
+  // Ensure alerts is always an array
+  const alerts = Array.isArray(alertsData) ? alertsData : [];
 
   // Mutation to resolve alerts
   const resolveAlert = useMutation({
     mutationFn: (alertId: string | number) => 
-      apiRequest('PATCH', `/api/safety-alerts/${alertId}/resolve`),
+      apiRequest(`/api/safety-alerts/${alertId}/resolve`, 'PATCH'),
     onSuccess: () => {
       toast({
         title: "Alert Resolved",
