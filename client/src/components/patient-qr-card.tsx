@@ -25,9 +25,19 @@ interface PatientQRCardProps {
 export default function PatientQRCard({ patient, baseUrl = window.location.origin }: PatientQRCardProps) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const patientUrl = `${baseUrl}/patients/${patient.id}`;
   const patientAge = new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear();
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const copyToClipboard = async () => {
     try {
@@ -37,7 +47,14 @@ export default function PatientQRCard({ patient, baseUrl = window.location.origi
         title: "✅ Link Copied",
         description: "Patient profile link copied to clipboard",
       });
-      setTimeout(() => setCopied(false), 2000);
+      
+      // Clear existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      // Set new timeout with proper cleanup
+      timeoutRef.current = setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       toast({
         title: "❌ Copy Failed",
