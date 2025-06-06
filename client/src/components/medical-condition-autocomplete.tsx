@@ -32,12 +32,6 @@ export default function MedicalConditionAutocomplete({
   // Fetch medical condition suggestions
   const { data: conditions = [] } = useQuery<MedicalCondition[]>({
     queryKey: ["/api/suggestions/medical-conditions", searchQuery],
-    queryFn: async () => {
-      if (!searchQuery || searchQuery.length < 2) return [];
-      const response = await fetch(`/api/suggestions/medical-conditions?q=${encodeURIComponent(searchQuery)}`);
-      if (!response.ok) throw new Error("Failed to fetch medical condition suggestions");
-      return response.json();
-    },
     enabled: searchQuery.length >= 2,
   });
 

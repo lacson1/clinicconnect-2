@@ -48,12 +48,6 @@ export default function MedicationAutocomplete({
   // Fetch medication suggestions from comprehensive database
   const { data: medications = [] } = useQuery<Medication[]>({
     queryKey: ["/api/suggestions/medications", searchQuery],
-    queryFn: async () => {
-      if (!searchQuery || searchQuery.length < 2) return [];
-      const response = await fetch(`/api/suggestions/medications?q=${encodeURIComponent(searchQuery)}`);
-      if (!response.ok) throw new Error("Failed to fetch medication suggestions");
-      return response.json();
-    },
     enabled: searchQuery.length >= 2,
   });
 

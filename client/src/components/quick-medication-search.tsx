@@ -55,7 +55,13 @@ export function QuickMedicationSearch({
     const timeoutId = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/suggestions/medications?q=${encodeURIComponent(query.trim())}`);
+        const token = localStorage.getItem('clinic_token');
+        const response = await fetch(`/api/suggestions/medications?q=${encodeURIComponent(query.trim())}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         if (response.ok) {
           const data = await response.json();
           setMedications(data.slice(0, 8)); // Limit to 8 results for quick search

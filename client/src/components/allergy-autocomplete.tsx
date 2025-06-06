@@ -32,12 +32,6 @@ export default function AllergyAutocomplete({
   // Fetch allergy suggestions
   const { data: allergies = [] } = useQuery<Allergy[]>({
     queryKey: ["/api/suggestions/allergies", searchQuery],
-    queryFn: async () => {
-      if (!searchQuery || searchQuery.length < 2) return [];
-      const response = await fetch(`/api/suggestions/allergies?q=${encodeURIComponent(searchQuery)}`);
-      if (!response.ok) throw new Error("Failed to fetch allergy suggestions");
-      return response.json();
-    },
     enabled: searchQuery.length >= 2,
   });
 
