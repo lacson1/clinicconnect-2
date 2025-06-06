@@ -38,6 +38,7 @@ import VaccinationManagement from './vaccination-management';
 import { useAuth } from '@/contexts/AuthContext';
 import { CheckCircle, MoreVertical, Eye, Download, Share, FileText, Printer, X, Heart } from 'lucide-react';
 import { LabResultPersonalityIntegration } from './LabResultPersonalityIntegration';
+import ConsentCapture from './consent-capture';
 // All icons now imported via MedicalIcons system
 
 // CompletedLabResult interface for reviewed results
@@ -2537,10 +2538,22 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                       <MedicalIcons.document className="mx-auto h-16 w-16 text-gray-300 mb-4" />
                       <h3 className="text-lg font-medium text-gray-700 mb-2">Consent Forms</h3>
                       <p className="text-sm text-gray-500 mb-4">Manage patient consent and authorization forms</p>
-                      <Button className="bg-blue-600 hover:bg-blue-700">
-                        <MedicalIcons.add className="w-4 h-4 mr-2" />
-                        New Consent Form
-                      </Button>
+                      <ConsentCapture
+                        patientId={patient.id}
+                        patientName={formatPatientName(patient)}
+                        trigger={
+                          <Button className="bg-blue-600 hover:bg-blue-700">
+                            <MedicalIcons.add className="w-4 h-4 mr-2" />
+                            New Consent Form
+                          </Button>
+                        }
+                        onConsentCaptured={() => {
+                          toast({
+                            title: "Success",
+                            description: "Consent form captured successfully",
+                          });
+                        }}
+                      />
                     </div>
                   </TabsContent>
 
