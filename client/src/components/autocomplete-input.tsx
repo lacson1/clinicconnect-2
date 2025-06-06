@@ -214,7 +214,9 @@ export function AutocompleteInput({
               )}
               disabled={disabled}
               onFocus={() => setOpen(true)}
-              onBlur={() => setTimeout(() => setOpen(false), 200)}
+              onBlur={() => {
+                setTimeout(() => setOpen(false), 200);
+              }}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
               {filteredSuggestions.length > 0 && (
