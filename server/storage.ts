@@ -376,6 +376,7 @@ export class DatabaseStorage implements IStorage {
       startDate: prescriptions.startDate,
       endDate: prescriptions.endDate,
       organizationId: prescriptions.organizationId,
+      pharmacyId: prescriptions.pharmacyId,
       createdAt: prescriptions.createdAt
     })
     .from(prescriptions)
@@ -385,9 +386,22 @@ export class DatabaseStorage implements IStorage {
 
     // Combine medication names: use manual name if available, otherwise use database name
     return results.map(result => ({
-      ...result,
+      id: result.id,
+      patientId: result.patientId,
+      visitId: result.visitId,
+      medicationId: result.medicationId,
       medicationName: result.medicationName || result.medicationDbName || 'Unknown Medication',
-      pharmacyId: result.pharmacyId || null
+      dosage: result.dosage,
+      frequency: result.frequency,
+      duration: result.duration,
+      instructions: result.instructions,
+      prescribedBy: result.prescribedBy,
+      status: result.status,
+      startDate: result.startDate,
+      endDate: result.endDate,
+      organizationId: result.organizationId,
+      pharmacyId: result.pharmacyId,
+      createdAt: result.createdAt
     }));
   }
 
