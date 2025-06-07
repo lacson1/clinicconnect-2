@@ -27,7 +27,9 @@ import { Separator } from "@/components/ui/separator";
 import { 
   Stethoscope, 
   Plus,
-  Sparkles
+  Sparkles,
+  X,
+  FileText
 } from "lucide-react";
 import { GlobalMedicationSearch } from "@/components/global-medication-search";
 
@@ -551,6 +553,65 @@ export function ModernPatientOverview({
       additionalNotes: "",
     },
   });
+
+  // Visit form helper functions
+  const addDiagnosis = () => {
+    const newDiagnosis = visitForm.getValues("secondaryDiagnoses");
+    if (newDiagnosis && !additionalDiagnoses.includes(newDiagnosis)) {
+      setAdditionalDiagnoses([...additionalDiagnoses, newDiagnosis]);
+      visitForm.setValue("secondaryDiagnoses", "");
+    }
+  };
+
+  const removeDiagnosis = (diagnosisToRemove: string) => {
+    setAdditionalDiagnoses(additionalDiagnoses.filter(d => d !== diagnosisToRemove));
+  };
+
+  // Visit form submission
+  const onSubmitVisit = async (data: VisitFormData) => {
+    try {
+      const visitData = {
+        ...data,
+        patientId: patient.id,
+        medications: medicationList.join(", "),
+        secondaryDiagnoses: additionalDiagnoses.join(", "),
+        doctorId: user?.id,
+      };
+
+      const response = await fetch(`/api/patients/${patient.id}/visits`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(visitData),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Visit Recorded Successfully",
+          description: "Patient visit has been documented and saved.",
+        });
+        
+        // Reset form and close
+        visitForm.reset();
+        setAdditionalDiagnoses([]);
+        setMedicationList([]);
+        setIsVisitFormVisible(false);
+        
+        // Refresh patient data
+        queryClient.invalidateQueries({ queryKey: [`/api/patients/${patient.id}`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/patients/${patient.id}/visits`] });
+      } else {
+        throw new Error("Failed to record visit");
+      }
+    } catch (error) {
+      toast({
+        title: "Error Recording Visit",
+        description: "Unable to save the visit record. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Combine visits only (exclude consultation records to prevent phantom entries)
   const combinedVisits = React.useMemo(() => {
@@ -2439,16 +2500,531 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MedicalIcons.stethoscope className="h-5 w-5" />
-                  Record Patient Visit
+                  <Stethoscope className="h-5 w-5" />
+                  Record Patient Visit - {formatPatientName(patient)}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600 mb-4">
-                    Document a new visit for {formatPatientName(patient)}
-                  </p>
-                </div>
+                <Form {...visitForm}>
+                  <form onSubmit={visitForm.handleSubmit(onSubmitVisit)} className="space-y-6">
+                    
+                    {/* Visit Type and Basic Info */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={visitForm.control}
+                        name="visitType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Visit Type</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select visit type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="consultation">General Consultation</SelectItem>
+                                <SelectItem value="follow-up">Follow-up Visit</SelectItem>
+                                <SelectItem value="emergency">Emergency Visit</SelectItem>
+                                <SelectItem value="routine-checkup">Routine Checkup</SelectItem>
+                                <SelectItem value="specialist-referral">Specialist Referral</SelectItem>
+                                <SelectItem value="vaccination">Vaccination</SelectItem>
+                                <SelectItem value="pre-operative">Pre-operative Assessment</SelectItem>
+                                <SelectItem value="post-operative">Post-operative Follow-up</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Chief Complaint */}
+                    <FormField
+                      control={visitForm.control}
+                      name="chiefComplaint"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Chief Complaint</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Patient's main concern or reason for visit"
+                              className="min-h-[80px]"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* History of Present Illness */}
+                    <FormField
+                      control={visitForm.control}
+                      name="historyOfPresentIllness"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>History of Present Illness</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Detailed description of the current illness or symptoms"
+                              className="min-h-[100px]"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Vital Signs */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Vital Signs</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <FormField
+                          control={visitForm.control}
+                          name="bloodPressure"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Blood Pressure</FormLabel>
+                              <FormControl>
+                                <Input placeholder="120/80" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={visitForm.control}
+                          name="heartRate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Heart Rate (bpm)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="72" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={visitForm.control}
+                          name="temperature"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Temperature (°C)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="36.5" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={visitForm.control}
+                          name="weight"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Weight (kg)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="70" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <FormField
+                          control={visitForm.control}
+                          name="height"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Height (cm)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="170" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={visitForm.control}
+                          name="respiratoryRate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Respiratory Rate</FormLabel>
+                              <FormControl>
+                                <Input placeholder="16" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={visitForm.control}
+                          name="oxygenSaturation"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Oxygen Saturation (%)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="98" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Physical Examination */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Physical Examination</h3>
+                      
+                      <FormField
+                        control={visitForm.control}
+                        name="generalAppearance"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>General Appearance</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Overall appearance and condition of the patient"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={visitForm.control}
+                          name="cardiovascularSystem"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cardiovascular System</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Heart sounds, pulses, etc."
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={visitForm.control}
+                          name="respiratorySystem"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Respiratory System</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Breath sounds, chest movement, etc."
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={visitForm.control}
+                          name="gastrointestinalSystem"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Gastrointestinal System</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Abdomen examination findings"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={visitForm.control}
+                          name="neurologicalSystem"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Neurological System</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Neurological examination findings"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <FormField
+                        control={visitForm.control}
+                        name="musculoskeletalSystem"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Musculoskeletal System</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Joint, muscle, and bone examination findings"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Assessment and Diagnosis */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Assessment & Diagnosis</h3>
+                      
+                      <FormField
+                        control={visitForm.control}
+                        name="assessment"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Clinical Assessment</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Clinical reasoning and assessment"
+                                className="min-h-[80px]"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={visitForm.control}
+                        name="diagnosis"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Primary Diagnosis</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Primary diagnosis"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {/* Additional Diagnoses */}
+                      <div className="space-y-3">
+                        <FormLabel>Additional Diagnoses</FormLabel>
+                        <div className="flex gap-2">
+                          <FormField
+                            control={visitForm.control}
+                            name="secondaryDiagnoses"
+                            render={({ field }) => (
+                              <FormItem className="flex-1">
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Add secondary diagnosis"
+                                    {...field} 
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <Button 
+                            type="button" 
+                            onClick={addDiagnosis}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        {additionalDiagnoses.length > 0 && (
+                          <div className="space-y-2">
+                            {additionalDiagnoses.map((diagnosis, index) => (
+                              <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                                <span className="text-sm">{diagnosis}</span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeDiagnosis(diagnosis)}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Treatment Plan */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Treatment Plan</h3>
+                      
+                      <FormField
+                        control={visitForm.control}
+                        name="treatmentPlan"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Treatment Plan</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Detailed treatment plan and interventions"
+                                className="min-h-[100px]"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="space-y-3">
+                        <FormLabel>Medications</FormLabel>
+                        <GlobalMedicationSearch
+                          onMedicationSelect={(medication) => {
+                            setMedicationList(prev => [...prev, medication.name]);
+                          }}
+                          placeholder="Search and add medications..."
+                        />
+                        
+                        {medicationList.length > 0 && (
+                          <div className="space-y-2">
+                            {medicationList.map((medication, index) => (
+                              <div key={index} className="flex items-center justify-between bg-blue-50 p-2 rounded">
+                                <span className="text-sm">{medication}</span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setMedicationList(prev => prev.filter((_, i) => i !== index))}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <FormField
+                        control={visitForm.control}
+                        name="patientInstructions"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Patient Instructions</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Instructions and advice for the patient"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Follow-up */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Follow-up</h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={visitForm.control}
+                          name="followUpDate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Follow-up Date</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="date"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={visitForm.control}
+                          name="followUpInstructions"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Follow-up Instructions</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Specific follow-up instructions"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Additional Notes */}
+                    <FormField
+                      control={visitForm.control}
+                      name="additionalNotes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Additional Notes</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Any additional observations or notes"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Submit Button */}
+                    <div className="flex justify-end space-x-4 pt-6 border-t">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => visitForm.reset()}
+                      >
+                        Clear Form
+                      </Button>
+                      <Button type="submit">
+                        <Stethoscope className="w-4 h-4 mr-2" />
+                        Save Visit Record
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </TabsContent>
@@ -2755,7 +3331,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-green-500" />
+                  <MedicalIcons.vitals className="h-5 w-5 text-green-500" />
                   Vaccination History & Management
                 </CardTitle>
               </CardHeader>
