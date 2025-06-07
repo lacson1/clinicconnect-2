@@ -43,13 +43,30 @@ interface MedicationReview {
   id: number;
   patientId: number;
   prescriptionId: number;
-  reviewType: 'general' | 'safety' | 'efficacy' | 'adherence' | 'interaction';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  reviewType: 'routine' | 'urgent' | 'medication_safety' | 'dosage_adjustment';
+  priority: 'low' | 'normal' | 'high' | 'urgent';
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   assignedBy: number;
   assignedTo?: number;
   dueDate: string;
   notes?: string;
+  assignedAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  prescription?: Prescription;
+  assignedByUser?: {
+    id: number;
+    username: string;
+    firstName?: string;
+    lastName?: string;
+  };
+  assignedToUser?: {
+    id: number;
+    username: string;
+    firstName?: string;
+    lastName?: string;
+    role: string;
+  };
   findings?: string;
   recommendations?: string;
   createdAt: string;

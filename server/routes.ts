@@ -7808,7 +7808,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
   });
 
   // Medication Review endpoints
-  app.get("/api/patients/:patientId/medication-reviews", authenticateToken, requireAnyRole(['pharmacist', 'doctor', 'admin']), async (req: AuthRequest, res) => {
+  app.get("/api/patients/:patientId/medication-reviews", authenticateToken, requireAnyRole(['pharmacist', 'doctor', 'admin', 'super_admin', 'nurse']), async (req: AuthRequest, res) => {
     try {
       const patientId = parseInt(req.params.patientId);
       
@@ -7821,20 +7821,25 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         ))
         .orderBy(desc(medicationReviewAssignments.createdAt));
 
-      // Enrich with prescription and user data
+      // Get all patient prescriptions for comprehensive review context
+      const patientPrescriptions = await db
+        .select()
+        .from(prescriptions)
+        .where(and(
+          eq(prescriptions.patientId, patientId),
+          eq(prescriptions.organizationId, req.user!.organizationId)
+        ))
+        .orderBy(desc(prescriptions.createdAt));
+
+      // Enrich assignments with prescription and user data
       const enrichedAssignments = await Promise.all(assignments.map(async (assignment) => {
         let prescription = null;
         let assignedByUser = null;
         let assignedToUser = null;
 
-        // Get prescription if exists
+        // Get specific prescription if linked to assignment
         if (assignment.prescriptionId) {
-          const prescriptionResult = await db
-            .select()
-            .from(prescriptions)
-            .where(eq(prescriptions.id, assignment.prescriptionId))
-            .limit(1);
-          prescription = prescriptionResult[0] || null;
+          prescription = patientPrescriptions.find(p => p.id === assignment.prescriptionId) || null;
         }
 
         // Get assigned by user
@@ -7883,7 +7888,32 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         };
       }));
 
-      res.json(enrichedAssignments);
+      // Include unassigned prescriptions for potential review assignment
+      const unassignedPrescriptions = patientPrescriptions.filter(prescription => 
+        !assignments.some(assignment => assignment.prescriptionId === prescription.id)
+      );
+
+      const response = {
+        assignments: enrichedAssignments,
+        availablePrescriptions: unassignedPrescriptions.map(prescription => ({
+          id: prescription.id,
+          medicationName: prescription.medicationName,
+          dosage: prescription.dosage,
+          frequency: prescription.frequency,
+          instructions: prescription.instructions,
+          prescribedDate: prescription.createdAt,
+          duration: prescription.duration,
+          status: prescription.status
+        })),
+        summary: {
+          totalAssignments: assignments.length,
+          pendingReviews: assignments.filter(a => a.status === 'pending').length,
+          completedReviews: assignments.filter(a => a.status === 'completed').length,
+          unassignedPrescriptions: unassignedPrescriptions.length
+        }
+      };
+
+      res.json(response);
     } catch (error) {
       console.error('Error fetching medication reviews:', error);
       res.status(500).json({ error: 'Failed to fetch medication reviews' });
