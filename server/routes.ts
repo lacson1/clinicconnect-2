@@ -2018,8 +2018,59 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
   app.get("/api/patients/:id/prescriptions", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const patientId = parseInt(req.params.id);
-      const prescriptions = await storage.getPrescriptionsByPatient(patientId);
-      res.json(prescriptions);
+      const userOrgId = req.user?.organizationId;
+      
+      // Get prescriptions with organization filtering
+      const prescriptionQuery = db.select({
+        id: prescriptions.id,
+        patientId: prescriptions.patientId,
+        visitId: prescriptions.visitId,
+        medicationId: prescriptions.medicationId,
+        medicationName: prescriptions.medicationName,
+        medicationDbName: medications.name,
+        dosage: prescriptions.dosage,
+        frequency: prescriptions.frequency,
+        duration: prescriptions.duration,
+        instructions: prescriptions.instructions,
+        prescribedBy: prescriptions.prescribedBy,
+        status: prescriptions.status,
+        startDate: prescriptions.startDate,
+        endDate: prescriptions.endDate,
+        organizationId: prescriptions.organizationId,
+        pharmacyId: prescriptions.pharmacyId,
+        createdAt: prescriptions.createdAt
+      })
+      .from(prescriptions)
+      .leftJoin(medications, eq(prescriptions.medicationId, medications.id))
+      .where(and(
+        eq(prescriptions.patientId, patientId),
+        userOrgId ? eq(prescriptions.organizationId, userOrgId) : undefined
+      ))
+      .orderBy(desc(prescriptions.createdAt));
+
+      const results = await prescriptionQuery;
+      
+      // Combine medication names: use manual name if available, otherwise use database name
+      const processedPrescriptions = results.map(result => ({
+        id: result.id,
+        patientId: result.patientId,
+        visitId: result.visitId,
+        medicationId: result.medicationId,
+        medicationName: result.medicationName || result.medicationDbName || 'Unknown Medication',
+        dosage: result.dosage,
+        frequency: result.frequency,
+        duration: result.duration,
+        instructions: result.instructions,
+        prescribedBy: result.prescribedBy,
+        status: result.status,
+        startDate: result.startDate,
+        endDate: result.endDate,
+        organizationId: result.organizationId,
+        pharmacyId: result.pharmacyId,
+        createdAt: result.createdAt
+      }));
+      
+      res.json(processedPrescriptions);
     } catch (error) {
       console.error('Fetch prescriptions error:', error);
       res.status(500).json({ message: "Failed to fetch prescriptions" });
