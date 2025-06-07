@@ -118,10 +118,8 @@ export default function ConsultationFormSelector({
       patientId,
       visitId,
       formId: selectedForm.id,
-      formName: selectedForm.name,
-      formDescription: selectedForm.description,
-      specialistRole: selectedForm.specialistRole,
       formData: formData,
+      status: 'completed'
     };
 
     createConsultationMutation.mutate(consultationData);
