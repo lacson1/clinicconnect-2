@@ -175,7 +175,7 @@ export function EnhancedVisitRecording({ patientId, open, onOpenChange, onSave }
     }
   }, [open, form]);
 
-  // Submit visit record
+  // Submit visit record with medication review integration
   const submitVisit = useMutation({
     mutationFn: async (data: VisitFormData) => {
       const visitData = {
@@ -190,6 +190,7 @@ export function EnhancedVisitRecording({ patientId, open, onOpenChange, onSave }
         temperature: data.temperature ? parseFloat(data.temperature) : null,
         weight: data.weight ? parseFloat(data.weight) : null,
         height: data.height ? parseFloat(data.height) : null,
+        medications: medicationList.join(', '), // Include prescribed medications
         notes: JSON.stringify({
           historyOfPresentIllness: data.historyOfPresentIllness,
           vitalSigns: {
@@ -216,15 +217,41 @@ export function EnhancedVisitRecording({ patientId, open, onOpenChange, onSave }
 
       return apiRequest("POST", `/api/patients/${patientId}/visits`, visitData);
     },
-    onSuccess: () => {
+    onSuccess: async (createdVisit) => {
       toast({
         title: "Visit Recorded",
         description: "Patient visit has been successfully recorded and saved to the timeline.",
       });
+
+      // If medications were prescribed, suggest medication review assignment
+      if (medicationList.length > 0) {
+        try {
+          // Check if any medication review assignments should be created
+          const shouldCreateReview = medicationList.some(medication => 
+            // Suggest review for complex medications or those requiring monitoring
+            medication.toLowerCase().includes('warfarin') ||
+            medication.toLowerCase().includes('insulin') ||
+            medication.toLowerCase().includes('digoxin') ||
+            medication.toLowerCase().includes('lithium') ||
+            medicationList.length >= 3 // Multiple medications
+          );
+
+          if (shouldCreateReview) {
+            toast({
+              title: "Medication Review Suggested",
+              description: `Consider assigning medication review for ${medicationList.length} prescribed medications. Visit the patient's medication review tab to create assignments.`,
+              duration: 8000,
+            });
+          }
+        } catch (error) {
+          console.log('Medication review suggestion check failed:', error);
+        }
+      }
       
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/visits`] });
       queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/activity-trail`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/medication-reviews`] });
       queryClient.invalidateQueries({ queryKey: ["/api/patients"] });
       
       // Reset form
@@ -792,6 +819,39 @@ export function EnhancedVisitRecording({ patientId, open, onOpenChange, onSave }
                   )}
                 />
               </div>
+
+              {/* Medication Review Assignment Section */}
+              {medicationList.length > 0 && (
+                <div className="space-y-4 border-t pt-6">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Plus className="h-4 w-4 text-blue-500" />
+                    Medication Review Assignment
+                  </h3>
+                  
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-700 mb-3">
+                      You have prescribed {medicationList.length} medication(s). Consider assigning a medication review for optimal patient safety and outcomes.
+                    </p>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-blue-800">Prescribed Medications:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {medicationList.map((medication, index) => (
+                          <Badge key={index} variant="secondary" className="bg-white text-blue-700 border border-blue-300">
+                            {medication}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                      <p className="text-sm text-yellow-800">
+                        💡 <strong>Suggestion:</strong> After saving this visit, navigate to the patient's medication review tab to create specific review assignments for complex medications or multiple drug regimens.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Submit Button */}
               <div className="flex justify-end space-x-2 pt-4">
