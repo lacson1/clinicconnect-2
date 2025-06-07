@@ -29,11 +29,7 @@ import {
   Plus,
   Sparkles,
   X,
-  FileText,
-  ChevronLeft,
-  ChevronRight,
-  PanelLeftClose,
-  PanelLeftOpen
+  FileText
 } from "lucide-react";
 import { GlobalMedicationSearch } from "@/components/global-medication-search";
 
@@ -805,9 +801,6 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
     prescriptions: true
   });
 
-  // Sidebar collapse state
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
   // Document upload state
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -927,13 +920,6 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
   const { data: patientLabOrders = [], isLoading: labOrdersLoading } = useQuery({
     queryKey: ['/api/patients', patient.id, 'lab-orders'],
     enabled: !!patient.id
-  });
-
-  // Fetch patient safety alerts for the sidebar
-  const { data: safetyAlerts = [] } = useQuery({
-    queryKey: [`/api/patients/${patient.id}/safety-alerts`],
-    enabled: !!patient.id,
-    refetchInterval: 60000, // Refresh every minute
   });
 
   // Filter prescriptions by status for better organization
@@ -1504,153 +1490,9 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
   }) : [];
 
   return (
-    <div className="flex min-h-screen w-full relative">
-      {/* Collapsible Sidebar Toggle Button */}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-        className={`fixed top-4 z-50 transition-all duration-300 ${
-          sidebarCollapsed ? 'left-4' : 'left-80'
-        } bg-white shadow-lg border-slate-300 hover:bg-slate-50`}
-      >
-        {sidebarCollapsed ? (
-          <PanelLeftOpen className="h-4 w-4" />
-        ) : (
-          <PanelLeftClose className="h-4 w-4" />
-        )}
-      </Button>
-
-      {/* Collapsible Sidebar */}
-      <div className={`transition-all duration-300 bg-slate-50 border-r border-slate-200 ${
-        sidebarCollapsed ? 'w-0 overflow-hidden' : 'w-80'
-      }`}>
-        <div className="p-4 space-y-4 h-full overflow-y-auto">
-          {/* Patient Quick Summary */}
-          <Card className="bg-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <MedicalIcons.patient className="h-5 w-5 text-blue-500" />
-                Quick Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="text-sm">
-                <p className="font-medium text-slate-700">
-                  {formatPatientName(patient)}
-                </p>
-                <p className="text-slate-500">
-                  {patient.gender} • {patient.phone}
-                </p>
-                <p className="text-slate-500">
-                  DOB: {new Date(patient.dateOfBirth).toLocaleDateString()}
-                </p>
-              </div>
-              
-              {/* Safety Alerts Preview */}
-              {safetyAlerts && safetyAlerts.length > 0 && (
-                <div className="border-t pt-2">
-                  <p className="text-xs font-medium text-red-600 mb-1">Safety Alerts</p>
-                  {safetyAlerts.slice(0, 2).map((alert: any) => (
-                    <div key={alert.id} className="text-xs p-2 bg-red-50 border border-red-200 rounded text-red-700 mb-1">
-                      {alert.description || alert.title}
-                    </div>
-                  ))}
-                  {safetyAlerts.length > 2 && (
-                    <p className="text-xs text-slate-500">+{safetyAlerts.length - 2} more alerts</p>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card className="bg-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-500" />
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button 
-                size="sm" 
-                className="w-full justify-start"
-                onClick={() => setShowAddPrescription(true)}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Prescription
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="w-full justify-start"
-                onClick={onRecordVisit}
-              >
-                <Stethoscope className="h-4 w-4 mr-2" />
-                Record Visit
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="w-full justify-start"
-                onClick={() => setShowDocumentCarousel(true)}
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                View Documents
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="w-full justify-start"
-                onClick={onPrintRecord}
-              >
-                <MedicalIcons.print className="h-4 w-4 mr-2" />
-                Print Record
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity Preview */}
-          <Card className="bg-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <MedicalIcons.vitals className="h-5 w-5 text-teal-500" />
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {filteredActivityTrail.slice(0, 3).map((event: any) => (
-                  <div key={event.id} className="text-xs p-2 bg-slate-50 rounded border">
-                    <p className="font-medium text-slate-700">
-                      {event.type === 'visit' ? 'Visit' : 
-                       event.type === 'prescription' ? 'Prescription' :
-                       event.type === 'lab' ? 'Lab Test' : 'Activity'}
-                    </p>
-                    <p className="text-slate-500">
-                      {new Date(event.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-                {filteredActivityTrail.length > 3 && (
-                  <p className="text-xs text-slate-500 text-center">
-                    +{filteredActivityTrail.length - 3} more activities
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className={`flex-1 transition-all duration-300 ${
-        sidebarCollapsed ? 'ml-0' : 'ml-0'
-      }`}>
-        <div className="p-4 space-y-4">
-          {/* Enhanced Tabbed Interface - Full Width */}
-          <Tabs defaultValue="overview" className="w-full h-full">
+    <div className="space-y-4 min-h-screen w-full">
+      {/* Enhanced Tabbed Interface - Full Width */}
+      <Tabs defaultValue="overview" className="w-full h-full">
         <TabsList className="grid w-full grid-cols-12 mb-8 h-20 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 border-2 border-blue-200/60 rounded-2xl p-3 shadow-2xl backdrop-blur-lg ring-1 ring-blue-100/50">
           <TabsTrigger value="overview" className="flex flex-col items-center gap-1.5 text-xs font-bold px-3 py-4 rounded-xl transition-all duration-300 data-[state=active]:bg-white data-[state=active]:shadow-xl data-[state=active]:text-blue-900 data-[state=active]:border-2 data-[state=active]:border-blue-300 data-[state=active]:scale-105 hover:bg-white/80 hover:shadow-lg hover:scale-102 text-blue-800 group">
             <MedicalIcons.patient className="w-6 h-6 group-data-[state=active]:text-blue-600" />
@@ -3551,8 +3393,6 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
           patient={patient}
           selectedPrescription={selectedPrescriptionForReview}
         />
-        </div>
-      </div>
     </div>
   );
 }
