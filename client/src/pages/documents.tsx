@@ -31,18 +31,21 @@ function SimplePDFViewer({ pdfUrl, documentName }: { pdfUrl: string; documentNam
   );
 }
 
-// Enhanced PDF Viewer with multiple viewing options
-function AuthenticatedPDFViewer({ document, onDownload }: { 
+// Enhanced Document Viewer for PDF and Image files
+function AuthenticatedDocumentViewer({ document, onDownload }: { 
   document: Document; 
   onDownload: (fileName: string, originalName: string) => void; 
 }) {
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'iframe' | 'object' | 'embed' | 'pdfjs' | 'text'>('iframe');
   const [retryCount, setRetryCount] = useState(0);
+  
+  const isImage = document.mimeType?.startsWith('image/');
+  const isPDF = document.mimeType === 'application/pdf';
 
-  const loadPDF = async () => {
+  const loadDocument = async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -63,7 +66,7 @@ function AuthenticatedPDFViewer({ document, onDownload }: {
       if (response.ok) {
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
-        setPdfUrl(url);
+        setFileUrl(url);
         setRetryCount(0);
       } else if (response.status === 401 && retryCount < 2) {
         // Retry with fresh auth
