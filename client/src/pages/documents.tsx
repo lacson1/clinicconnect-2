@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,35 +12,21 @@ import { format } from 'date-fns';
 import { apiRequest } from '@/lib/queryClient';
 import { DocumentPreviewCarousel } from '@/components/document-preview-carousel';
 
-// PDF.js based viewer for maximum compatibility
-function PDFJSViewer({ pdfUrl, documentName }: { pdfUrl: string; documentName: string }) {
-  const [pdfError, setPdfError] = useState(false);
-  
-  // PDF.js viewer URL with the blob URL
-  const pdfJsUrl = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`;
-  
+// Simple PDF viewer with direct URL
+function SimplePDFViewer({ pdfUrl, documentName }: { pdfUrl: string; documentName: string }) {
+  const openPDFDirectly = () => {
+    window.open(pdfUrl, '_blank');
+  };
+
   return (
     <div className="w-full h-full">
-      {!pdfError ? (
-        <iframe
-          src={pdfJsUrl}
-          className="w-full h-full border-0"
-          title={documentName}
-          onError={() => setPdfError(true)}
-        />
-      ) : (
-        <div className="flex flex-col items-center justify-center h-full p-8 bg-gray-50">
-          <File className="w-16 h-16 text-gray-400 mb-4" />
-          <p className="text-gray-600 mb-4">PDF.js viewer failed to load</p>
-          <Button
-            onClick={() => window.open(pdfUrl, '_blank')}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Eye className="w-4 h-4 mr-2" />
-            Open PDF Directly
-          </Button>
-        </div>
-      )}
+      <iframe
+        src={pdfUrl}
+        className="w-full h-full border-0"
+        title={documentName}
+        style={{ height: 'calc(600px - 48px)' }}
+        onError={openPDFDirectly}
+      />
     </div>
   );
 }
@@ -133,12 +119,14 @@ function AuthenticatedPDFViewer({ document, onDownload }: {
     }
   };
 
+  // Simple PDF rendering without complex blob handling
+
   const renderPDFViewer = () => {
     if (!pdfUrl) return null;
 
     switch (viewMode) {
       case 'pdfjs':
-        return <PDFJSViewer pdfUrl={pdfUrl} documentName={document.originalName} />;
+        return <SimplePDFViewer pdfUrl={pdfUrl} documentName={document.originalName} />;
       case 'object':
         return (
           <object
@@ -147,7 +135,14 @@ function AuthenticatedPDFViewer({ document, onDownload }: {
             className="w-full h-full"
             style={{ height: 'calc(600px - 48px)' }}
           >
-            <p>PDF cannot be displayed. <button onClick={openInNewTab} className="text-blue-600 underline">Open in new tab</button></p>
+            <div className="flex flex-col items-center justify-center h-full p-8">
+              <File className="w-16 h-16 text-gray-400 mb-4" />
+              <p className="text-gray-600 mb-4">PDF cannot be displayed with Object tag</p>
+              <Button onClick={openInNewTab} size="sm">
+                <Eye className="w-4 h-4 mr-2" />
+                Open in New Tab
+              </Button>
+            </div>
           </object>
         );
       case 'embed':
@@ -188,6 +183,7 @@ function AuthenticatedPDFViewer({ document, onDownload }: {
           </div>
         );
       default:
+        // Standard iframe PDF viewer
         return (
           <iframe
             src={pdfUrl}
