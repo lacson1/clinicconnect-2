@@ -415,9 +415,12 @@ export default function LaboratoryUnified() {
     queryKey: ['/api/lab-tests']
   });
 
-  const { data: labResults = [] } = useQuery<LabResult[]>({
+  const { data: labResultsResponse } = useQuery({
     queryKey: ['/api/lab-results/reviewed']
   });
+
+  // Extract the data array from the API response
+  const labResults = labResultsResponse?.data || [];
 
   const { data: analytics } = useQuery({
     queryKey: ['/api/lab-analytics']
