@@ -132,18 +132,41 @@ export function DocumentPreviewCarousel({
     }
   };
 
+  const getAuthenticatedFileUrl = async (fileName: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`/api/files/medical/${fileName}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+      }
+    } catch (error) {
+      console.error('Error loading file:', error);
+    }
+    return null;
+  };
+
   const renderDocumentPreview = (doc: Document) => {
-    const fileUrl = `/api/files/medical/${doc.fileName}`;
-    
     if (doc.mimeType.startsWith('image/')) {
       return (
         <div className="flex items-center justify-center h-full bg-gray-50 rounded-lg">
-          <img
-            src={fileUrl}
-            alt={doc.originalName}
-            className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-            style={{ maxHeight: isFullscreen ? '80vh' : '400px' }}
-          />
+          <div className="text-center p-8">
+            <MedicalIcons.image className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{doc.originalName}</h3>
+            <p className="text-sm text-gray-500 mb-4">Image preview requires authentication</p>
+            <Button
+              onClick={() => downloadDocument(doc)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <MedicalIcons.download className="w-4 h-4 mr-2" />
+              Download Image
+            </Button>
+          </div>
         </div>
       );
     } else if (doc.mimeType === 'application/pdf') {
@@ -155,14 +178,7 @@ export function DocumentPreviewCarousel({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = `${fileUrl}?download=true`;
-                  link.download = doc.originalName;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
+                onClick={() => downloadDocument(doc)}
                 className="text-xs"
               >
                 Download
@@ -170,7 +186,25 @@ export function DocumentPreviewCarousel({
               <Button
                 size="sm"
                 variant="default"
-                onClick={() => window.open(fileUrl, '_blank')}
+                onClick={async () => {
+                  try {
+                    const token = localStorage.getItem('authToken');
+                    const response = await fetch(`/api/files/medical/${doc.fileName}`, {
+                      headers: {
+                        'Authorization': `Bearer ${token}`
+                      }
+                    });
+                    
+                    if (response.ok) {
+                      const blob = await response.blob();
+                      const url = URL.createObjectURL(blob);
+                      window.open(url, '_blank');
+                      setTimeout(() => URL.revokeObjectURL(url), 10000);
+                    }
+                  } catch (error) {
+                    console.error('Error opening PDF:', error);
+                  }
+                }}
                 className="text-xs"
               >
                 View PDF
