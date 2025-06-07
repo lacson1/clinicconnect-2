@@ -24,8 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 const proceduralReportSchema = z.object({
-  patientId: z.number().min(1, "Patient is required"),
-  performedBy: z.number().min(1, "Performing physician is required"),
+  patientId: z.coerce.number().min(1, "Patient is required"),
+  performedBy: z.coerce.number().min(1, "Performing physician is required"),
   assistedBy: z.array(z.number()).default([]),
   procedureType: z.string().min(1, "Procedure type is required"),
   procedureName: z.string().min(1, "Procedure name is required"),
@@ -37,15 +37,15 @@ const proceduralReportSchema = z.object({
   complications: z.string().optional(),
   specimens: z.string().optional(),
   anesthesia: z.string().optional(),
-  duration: z.number().optional(),
-  bloodLoss: z.number().optional(),
+  duration: z.coerce.number().optional(),
+  bloodLoss: z.coerce.number().optional(),
   status: z.string().default("completed"),
-  scheduledDate: z.date().optional(),
-  startTime: z.date().optional(),
-  endTime: z.date().optional(),
+  scheduledDate: z.coerce.date().optional(),
+  startTime: z.coerce.date().optional(),
+  endTime: z.coerce.date().optional(),
   postOpInstructions: z.string().optional(),
   followUpRequired: z.boolean().default(false),
-  followUpDate: z.date().optional(),
+  followUpDate: z.coerce.date().optional(),
 });
 
 type ProceduralReportForm = z.infer<typeof proceduralReportSchema>;
@@ -103,22 +103,28 @@ export default function ProceduralReports() {
   const form = useForm<ProceduralReportForm>({
     resolver: zodResolver(proceduralReportSchema),
     defaultValues: {
-      patientId: "",
-      performedBy: "",
+      patientId: 0,
+      performedBy: 0,
       procedureType: "",
-      procedureDate: "",
-      procedureLocation: "",
-      anesthesiaType: "",
+      procedureName: "",
+      indication: "",
+      preOpDiagnosis: "",
+      postOpDiagnosis: "",
       procedureDetails: "",
       findings: "",
       complications: "",
       specimens: "",
-      bloodLoss: "",
-      duration: "",
+      anesthesia: "",
+      duration: undefined,
+      bloodLoss: undefined,
       assistedBy: [],
       status: "completed",
       followUpRequired: false,
       postOpInstructions: "",
+      scheduledDate: undefined,
+      startTime: undefined,
+      endTime: undefined,
+      followUpDate: undefined,
     },
   });
 
@@ -147,7 +153,31 @@ export default function ProceduralReports() {
   });
 
   const onSubmit = (data: ProceduralReportForm) => {
-    createReportMutation.mutate(data);
+    // Transform the data to match backend expectations
+    const transformedData = {
+      ...data,
+      // Ensure numbers are properly converted
+      patientId: Number(data.patientId),
+      performedBy: Number(data.performedBy),
+      duration: data.duration ? Number(data.duration) : undefined,
+      bloodLoss: data.bloodLoss ? Number(data.bloodLoss) : undefined,
+      // Convert dates to ISO strings if they exist
+      scheduledDate: data.scheduledDate ? new Date(data.scheduledDate).toISOString() : undefined,
+      startTime: data.startTime ? new Date(data.startTime).toISOString() : undefined,
+      endTime: data.endTime ? new Date(data.endTime).toISOString() : undefined,
+      followUpDate: data.followUpDate ? new Date(data.followUpDate).toISOString().split('T')[0] : undefined,
+      // Remove empty strings and replace with undefined for optional fields
+      preOpDiagnosis: data.preOpDiagnosis || undefined,
+      postOpDiagnosis: data.postOpDiagnosis || undefined,
+      findings: data.findings || undefined,
+      complications: data.complications || undefined,
+      specimens: data.specimens || undefined,
+      anesthesia: data.anesthesia || undefined,
+      postOpInstructions: data.postOpInstructions || undefined,
+    };
+
+    console.log('Submitting procedural report:', transformedData);
+    createReportMutation.mutate(transformedData);
   };
 
   const getStatusBadge = (status: string) => {
