@@ -4848,10 +4848,10 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         id: consultationForms.id,
         name: consultationForms.name,
         description: consultationForms.description,
-        sections: consultationForms.sections,
+        formStructure: consultationForms.formStructure,
         specialistRole: consultationForms.specialistRole,
-        organizationId: consultationForms.organizationId,
         createdBy: consultationForms.createdBy,
+        isActive: consultationForms.isActive,
         createdAt: consultationForms.createdAt,
         updatedAt: consultationForms.updatedAt,
         isPinned: sql<boolean>`CASE WHEN ${pinnedConsultationForms.id} IS NOT NULL THEN true ELSE false END`
@@ -4862,7 +4862,6 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         eq(pinnedConsultationForms.userId, userId!)
       ))
       .where(and(
-        userOrgId ? eq(consultationForms.organizationId, userOrgId) : sql`1=1`,
         specialistRole ? eq(consultationForms.specialistRole, specialistRole as string) : sql`1=1`
       ))
       .orderBy(desc(consultationForms.createdAt));
