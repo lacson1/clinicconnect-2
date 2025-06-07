@@ -1903,12 +1903,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                       <Button 
                         size="sm" 
                         className="bg-blue-600 hover:bg-blue-700"
-                        onClick={() => {
-                          toast({
-                            title: "Review Assigned",
-                            description: "Medication review has been assigned successfully",
-                          });
-                        }}
+                        onClick={() => setShowMedicationReviewAssignmentModal(true)}
                       >
                         <MedicalIcons.patientProfile className="w-4 h-4 mr-2" />
                         Assign Review
@@ -1926,6 +1921,15 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                         <MedicalIcons.appointment className="w-4 h-4 mr-2" />
                         Schedule Follow-up
                       </Button>
+                    </div>
+
+                    {/* Medication Review Assignments Section */}
+                    <div className="mt-6">
+                      <MedicationReviewAssignmentsList
+                        patientId={patient.id}
+                        patient={patient}
+                        onCreateAssignment={() => setShowMedicationReviewAssignmentModal(true)}
+                      />
                     </div>
                   </div>
                 </TabsContent>
@@ -2720,9 +2724,6 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
           <TabsContent value="communication" className="space-y-6">
             <PatientCommunicationHub
               patientId={patient.id}
-              patientName={formatPatientName(patient)}
-              patientPhone={patient.phone}
-              patientEmail={patient.email}
             />
           </TabsContent>
         </Tabs>
