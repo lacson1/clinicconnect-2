@@ -505,7 +505,11 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
                                     🩺 {consultation.formName || 'Consultation'}
                                   </h4>
                                   <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                    #{consultation.id}
+                                    {new Date(consultation.createdAt).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric'
+                                    })}
                                   </Badge>
                                 </div>
                                 
@@ -533,10 +537,10 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
                                     <User className="h-4 w-4 text-green-500" />
                                     <div>
                                       <span className="font-medium text-gray-700">
-                                        👤 {consultation.conductedByFullName || 'Healthcare Staff'}
+                                        👤 {consultation.conductedByFullName || `${consultation.conductedBy || 'Healthcare Staff'}`}
                                       </span>
                                       <div className="text-xs text-gray-500">
-                                        {consultation.roleDisplayName || 'Staff'}
+                                        {consultation.roleDisplayName || consultation.conductedByRole || 'Staff'}
                                       </div>
                                     </div>
                                   </div>
