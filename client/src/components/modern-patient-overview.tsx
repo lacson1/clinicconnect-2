@@ -929,6 +929,13 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
     enabled: !!patient.id
   });
 
+  // Fetch patient safety alerts for the sidebar
+  const { data: safetyAlerts = [] } = useQuery({
+    queryKey: [`/api/patients/${patient.id}/safety-alerts`],
+    enabled: !!patient.id,
+    refetchInterval: 60000, // Refresh every minute
+  });
+
   // Filter prescriptions by status for better organization
   const activeMedications = React.useMemo(() => {
     return Array.isArray(displayPrescriptions) ? displayPrescriptions.filter((p: any) => 
@@ -1546,7 +1553,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                   <p className="text-xs font-medium text-red-600 mb-1">Safety Alerts</p>
                   {safetyAlerts.slice(0, 2).map((alert: any) => (
                     <div key={alert.id} className="text-xs p-2 bg-red-50 border border-red-200 rounded text-red-700 mb-1">
-                      {alert.message}
+                      {alert.description || alert.title}
                     </div>
                   ))}
                   {safetyAlerts.length > 2 && (
