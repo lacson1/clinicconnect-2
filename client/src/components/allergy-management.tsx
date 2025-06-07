@@ -91,7 +91,7 @@ export default function AllergyManagement({ patientId, canEdit }: AllergyManagem
 
   const addAllergyMutation = useMutation({
     mutationFn: (data: AllergyForm) =>
-      apiRequest('POST', `/api/patients/${patientId}/allergies`, data),
+      apiRequest(`/api/patients/${patientId}/allergies`, 'POST', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/allergies`] });
       setIsAddModalOpen(false);
@@ -101,7 +101,7 @@ export default function AllergyManagement({ patientId, canEdit }: AllergyManagem
 
   const deleteAllergyMutation = useMutation({
     mutationFn: (allergyId: number) =>
-      apiRequest('DELETE', `/api/patients/${patientId}/allergies/${allergyId}`),
+      apiRequest(`/api/patients/${patientId}/allergies/${allergyId}`, 'DELETE'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/allergies`] });
     },

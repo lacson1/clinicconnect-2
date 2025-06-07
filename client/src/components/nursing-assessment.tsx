@@ -40,7 +40,7 @@ export default function NursingAssessment({ patientId, visitId }: NursingAssessm
   });
 
   const saveMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', `/api/patients/${patientId}/nursing-assessment`, data),
+    mutationFn: (data: any) => apiRequest(`/api/patients/${patientId}/nursing-assessment`, 'POST', data),
     onSuccess: () => {
       toast({
         title: "Success",
