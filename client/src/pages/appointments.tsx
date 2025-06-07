@@ -162,17 +162,27 @@ export default function AppointmentsPage() {
 
   // Create appointment mutation
   const createAppointmentMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/appointments', data),
-    onSuccess: () => {
+    mutationFn: (data: any) => {
+      console.log('Sending appointment data:', data);
+      return apiRequest('POST', '/api/appointments', data);
+    },
+    onSuccess: (data) => {
+      console.log('Appointment created successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/appointments'] });
       toast({ title: 'Success', description: 'Appointment scheduled successfully' });
       resetForm();
       setIsCreating(false);
     },
     onError: (error: any) => {
+      console.error('Appointment creation failed:', error);
+      const errorMessage = error?.response?.data?.message || 
+                          error?.response?.data?.error || 
+                          error?.message || 
+                          'Failed to schedule appointment';
+      
       toast({
         title: 'Error',
-        description: error?.response?.data?.error || 'Failed to schedule appointment',
+        description: errorMessage,
         variant: 'destructive'
       });
     },
