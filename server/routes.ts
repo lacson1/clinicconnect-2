@@ -5426,12 +5426,12 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
-  // Unified Patient Activity Trail - Consultations + Visits + Vital Signs
+  // Unified Patient Activity Trail - Consultations + Visits + Vital Signs + Lab Results + Prescriptions
   app.get("/api/patients/:patientId/activity-trail", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const patientId = parseInt(req.params.patientId);
       
-      // Get visit records only for now to avoid complex join issues
+      // Get visit records
       const visitsData = await db
         .select({
           id: visits.id,
@@ -5454,10 +5454,94 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         })
         .from(visits)
         .leftJoin(users, eq(visits.doctorId, users.id))
-        .where(eq(visits.patientId, patientId))
-        .orderBy(sql`${visits.visitDate} DESC`);
+        .where(and(
+          eq(visits.patientId, patientId),
+          eq(visits.organizationId, req.user!.organizationId)
+        ));
 
-      res.json(visitsData);
+      // Get lab results
+      const labResultsData = await db
+        .select({
+          id: labResults.id,
+          type: sql<string>`'lab_result'`,
+          date: labResults.resultDate,
+          title: sql<string>`CONCAT('Lab Result: ', ${labResults.testName})`,
+          description: sql<string>`CONCAT(${labResults.result}, ' ', COALESCE(${labResults.units}, ''))`,
+          conductedBy: sql<string>`COALESCE(${labResults.reviewedBy}, 'Lab Technician')`,
+          conductedByRole: sql<string>`'lab_technician'`,
+          data: sql<any>`json_build_object(
+            'testName', ${labResults.testName},
+            'result', ${labResults.result},
+            'units', ${labResults.units},
+            'normalRange', ${labResults.normalRange},
+            'status', ${labResults.status},
+            'category', ${labResults.category}
+          )`
+        })
+        .from(labResults)
+        .where(and(
+          eq(labResults.patientId, patientId),
+          eq(labResults.organizationId, req.user!.organizationId)
+        ));
+
+      // Get prescriptions
+      const prescriptionsData = await db
+        .select({
+          id: prescriptions.id,
+          type: sql<string>`'prescription'`,
+          date: prescriptions.createdAt,
+          title: sql<string>`CONCAT('Prescription: ', ${prescriptions.medicationName})`,
+          description: sql<string>`CONCAT(${prescriptions.dosage}, ' - ', ${prescriptions.frequency})`,
+          conductedBy: prescriptions.prescribedBy,
+          conductedByRole: sql<string>`'doctor'`,
+          data: sql<any>`json_build_object(
+            'medicationName', ${prescriptions.medicationName},
+            'dosage', ${prescriptions.dosage},
+            'frequency', ${prescriptions.frequency},
+            'duration', ${prescriptions.duration},
+            'status', ${prescriptions.status},
+            'instructions', ${prescriptions.instructions}
+          )`
+        })
+        .from(prescriptions)
+        .where(and(
+          eq(prescriptions.patientId, patientId),
+          eq(prescriptions.organizationId, req.user!.organizationId)
+        ));
+
+      // Get consultations
+      const consultationsData = await db
+        .select({
+          id: consultationRecords.id,
+          type: sql<string>`'consultation'`,
+          date: consultationRecords.createdAt,
+          title: sql<string>`CONCAT('Consultation: ', COALESCE(${consultationForms.name}, 'General'))`,
+          description: sql<string>`COALESCE(${consultationForms.description}, 'Specialist consultation completed')`,
+          conductedBy: sql<string>`COALESCE(${users.firstName}, 'Specialist')`,
+          conductedByRole: sql<string>`COALESCE(${consultationForms.specialistRole}, 'doctor')`,
+          data: sql<any>`json_build_object(
+            'formName', ${consultationForms.name},
+            'specialistRole', ${consultationForms.specialistRole},
+            'filledBy', ${consultationRecords.filledBy}
+          )`
+        })
+        .from(consultationRecords)
+        .leftJoin(consultationForms, eq(consultationRecords.formId, consultationForms.id))
+        .leftJoin(users, eq(consultationRecords.filledBy, users.id))
+        .where(and(
+          eq(consultationRecords.patientId, patientId),
+          eq(consultationRecords.organizationId, req.user!.organizationId)
+        ));
+
+      // Combine all activity data and sort by date
+      const allActivities = [
+        ...visitsData,
+        ...labResultsData,
+        ...prescriptionsData,
+        ...consultationsData
+      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      res.json(allActivities);
     } catch (error) {
       console.error('Error fetching patient activity trail:', error);
       res.status(500).json({ message: "Failed to fetch patient activity trail" });

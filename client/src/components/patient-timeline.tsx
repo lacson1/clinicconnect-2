@@ -4,10 +4,13 @@ import { Calendar, Stethoscope, FlaskRound, Pill, FileText, Activity } from 'luc
 
 interface TimelineEvent {
   id: number;
-  type: 'visit' | 'lab' | 'prescription' | 'consultation';
+  type: 'visit' | 'lab' | 'lab_result' | 'prescription' | 'consultation';
   date: string;
   title: string;
   description?: string;
+  conductedBy?: string;
+  conductedByRole?: string;
+  data?: Record<string, any>;
   status?: string;
   details?: Record<string, any>;
 }
@@ -22,6 +25,7 @@ export function PatientTimeline({ events }: PatientTimelineProps) {
       case 'visit':
         return <Stethoscope className="w-4 h-4" />;
       case 'lab':
+      case 'lab_result':
         return <FlaskRound className="w-4 h-4" />;
       case 'prescription':
         return <Pill className="w-4 h-4" />;
@@ -35,15 +39,16 @@ export function PatientTimeline({ events }: PatientTimelineProps) {
   const getEventColor = (type: string) => {
     switch (type) {
       case 'visit':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'lab':
-        return 'bg-green-100 text-green-800';
+      case 'lab_result':
+        return 'bg-green-100 text-green-800 border-green-200';
       case 'prescription':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'consultation':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-orange-100 text-orange-800 border-orange-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 

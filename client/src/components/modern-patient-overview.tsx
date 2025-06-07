@@ -1465,7 +1465,7 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
 
   // Fetch activity trail using React Query with proper error handling
   const { data: fetchedActivityTrail = [], error: activityTrailError } = useQuery({
-    queryKey: ['/api/patients', patient.id, 'activity-trail'],
+    queryKey: [`/api/patients/${patient.id}/activity-trail`],
     retry: false
   });
 
