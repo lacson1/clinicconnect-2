@@ -161,6 +161,10 @@ export default function LaboratoryUnified() {
     itemsPerPage: 10
   });
 
+  // Selection state for results
+  const [selectedResults, setSelectedResults] = useState<Set<number>>(new Set());
+  const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set());
+
   const queryClient = useQueryClient();
 
   // Upload existing results mutation
@@ -189,6 +193,87 @@ export default function LaboratoryUnified() {
   // Upload existing results function
   const uploadExistingResults = () => {
     uploadExistingMutation.mutate();
+  };
+
+  // Selection helper functions
+  const toggleResultSelection = (resultId: number) => {
+    const newSelected = new Set(selectedResults);
+    if (newSelected.has(resultId)) {
+      newSelected.delete(resultId);
+    } else {
+      newSelected.add(resultId);
+    }
+    setSelectedResults(newSelected);
+  };
+
+  const toggleOrderSelection = (orderId: number) => {
+    const newSelected = new Set(selectedOrders);
+    if (newSelected.has(orderId)) {
+      newSelected.delete(orderId);
+    } else {
+      newSelected.add(orderId);
+    }
+    setSelectedOrders(newSelected);
+  };
+
+  const selectAllResults = () => {
+    setSelectedResults(new Set(filteredResults.map(result => result.id)));
+  };
+
+  const selectAllOrders = () => {
+    setSelectedOrders(new Set(filteredOrders.map(order => order.id)));
+  };
+
+  const clearResultSelection = () => {
+    setSelectedResults(new Set());
+  };
+
+  const clearOrderSelection = () => {
+    setSelectedOrders(new Set());
+  };
+
+  // Print selected results
+  const printSelectedResults = () => {
+    if (selectedResults.size === 0) {
+      toast({
+        title: "No results selected",
+        description: "Please select at least one result to print",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const selectedResultData = filteredResults.filter(result => selectedResults.has(result.id));
+    const combinedPrintContent = generateCombinedResultsPrintContent(selectedResultData);
+    
+    const printWindow = window.open('', '_blank', 'width=800,height=900,scrollbars=yes');
+    if (printWindow) {
+      printWindow.document.write(combinedPrintContent);
+      printWindow.document.close();
+      printWindow.focus();
+    }
+  };
+
+  // Print selected orders
+  const printSelectedOrders = () => {
+    if (selectedOrders.size === 0) {
+      toast({
+        title: "No orders selected",
+        description: "Please select at least one order to print",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const selectedOrderData = filteredOrders.filter(order => selectedOrders.has(order.id));
+    const combinedPrintContent = generateCombinedOrdersPrintContent(selectedOrderData);
+    
+    const printWindow = window.open('', '_blank', 'width=800,height=900,scrollbars=yes');
+    if (printWindow) {
+      printWindow.document.write(combinedPrintContent);
+      printWindow.document.close();
+      printWindow.focus();
+    }
   };
 
   // Print functionality
