@@ -76,6 +76,7 @@ export default function PatientProfile() {
   const [showLabModal, setShowLabModal] = useState(false);
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [showEditPatientModal, setShowEditPatientModal] = useState(false);
+  const [showStats, setShowStats] = useState(true);
 
   const { data: patient, isLoading: patientLoading } = useQuery<Patient>({
     queryKey: [`/api/patients/${patientId}`],
@@ -284,8 +285,23 @@ export default function PatientProfile() {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto bg-gray-50">
         <div className="w-full px-1 py-1">
-          {/* Compact Stats Row */}
-          <div className="grid grid-cols-4 gap-1 mb-2">
+          {/* Stats Toggle Button */}
+          <div className="flex justify-end mb-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowStats(!showStats)}
+              className="h-6 w-6 p-0 hover:bg-gray-100"
+            >
+              <Plus 
+                className={`h-3 w-3 transition-transform duration-200 ${showStats ? 'rotate-45' : ''}`} 
+              />
+            </Button>
+          </div>
+          
+          {/* Compact Stats Row - Collapsible */}
+          {showStats && (
+            <div className="grid grid-cols-4 gap-1 mb-2">
             <Card className="bg-white shadow-sm border-0 hover:shadow-md transition-all duration-200">
               <CardContent className="p-2">
                 <div className="text-center">
@@ -341,6 +357,7 @@ export default function PatientProfile() {
               </CardContent>
             </Card>
           </div>
+          )}
 
 
 
