@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { ConsultationDropdownMenu } from "./consultation-dropdown-menu";
 import { formatStaffName } from "@/lib/patient-utils";
-import { FileText, Clock, User, Activity, Pill, Calendar, ChevronDown, ChevronRight, Filter, X, Search } from "lucide-react";
+import { FileText, Clock, User, Activity, Pill, Calendar, ChevronDown, ChevronRight, Filter, X, Search, CalendarDays } from "lucide-react";
+import { format, subDays, subWeeks, subMonths, isAfter, isBefore, isEqual } from "date-fns";
 
 interface ConsultationHistoryDisplayProps {
   patientId: number;
@@ -26,6 +29,11 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
   const [selectedFormType, setSelectedFormType] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  
+  // Custom date range state
+  const [customDateFrom, setCustomDateFrom] = useState<Date>();
+  const [customDateTo, setCustomDateTo] = useState<Date>();
+  const [showDatePicker, setShowDatePicker] = useState(false);
   
   // Fetch actual consultation records
   const { data: consultationRecords = [], isLoading: historyLoading } = useQuery({
@@ -98,18 +106,40 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
     
     // Filter by date range
     if (dateRange !== 'all') {
-      const recordDate = new Date(record.createdAt);
+      const recordDate = new Date(record.date || record.createdAt);
       const now = new Date();
       
       switch (dateRange) {
         case 'today':
           return recordDate.toDateString() === now.toDateString();
+        case 'yesterday':
+          const yesterday = subDays(now, 1);
+          return recordDate.toDateString() === yesterday.toDateString();
         case 'week':
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          return recordDate >= weekAgo;
+          const weekAgo = subDays(now, 7);
+          return isAfter(recordDate, weekAgo) || isEqual(recordDate, weekAgo);
         case 'month':
-          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          return recordDate >= monthAgo;
+          const monthAgo = subMonths(now, 1);
+          return isAfter(recordDate, monthAgo) || isEqual(recordDate, monthAgo);
+        case '3months':
+          const threeMonthsAgo = subMonths(now, 3);
+          return isAfter(recordDate, threeMonthsAgo) || isEqual(recordDate, threeMonthsAgo);
+        case '6months':
+          const sixMonthsAgo = subMonths(now, 6);
+          return isAfter(recordDate, sixMonthsAgo) || isEqual(recordDate, sixMonthsAgo);
+        case 'year':
+          const yearAgo = subMonths(now, 12);
+          return isAfter(recordDate, yearAgo) || isEqual(recordDate, yearAgo);
+        case 'custom':
+          if (customDateFrom && customDateTo) {
+            return (isAfter(recordDate, customDateFrom) || isEqual(recordDate, customDateFrom)) &&
+                   (isBefore(recordDate, customDateTo) || isEqual(recordDate, customDateTo));
+          } else if (customDateFrom) {
+            return isAfter(recordDate, customDateFrom) || isEqual(recordDate, customDateFrom);
+          } else if (customDateTo) {
+            return isBefore(recordDate, customDateTo) || isEqual(recordDate, customDateTo);
+          }
+          return true;
         default:
           return true;
       }
@@ -268,19 +298,108 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
               </div>
 
               <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-600">Period:</label>
-                <Select value={dateRange} onValueChange={setDateRange}>
-                  <SelectTrigger className="w-28 h-8">
+                <label className="text-sm font-medium text-gray-600">Timeline:</label>
+                <Select value={dateRange} onValueChange={(value) => {
+                  setDateRange(value);
+                  if (value !== 'custom') {
+                    setCustomDateFrom(undefined);
+                    setCustomDateTo(undefined);
+                  }
+                }}>
+                  <SelectTrigger className="w-32 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="all">All Time</SelectItem>
                     <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
+                    <SelectItem value="yesterday">Yesterday</SelectItem>
+                    <SelectItem value="week">Last 7 Days</SelectItem>
+                    <SelectItem value="month">Last Month</SelectItem>
+                    <SelectItem value="3months">Last 3 Months</SelectItem>
+                    <SelectItem value="6months">Last 6 Months</SelectItem>
+                    <SelectItem value="year">Last Year</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Custom Date Range Picker */}
+              {dateRange === 'custom' && (
+                <div className="flex items-center gap-2">
+                  <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs"
+                      >
+                        <CalendarDays className="h-3 w-3 mr-1" />
+                        {customDateFrom && customDateTo
+                          ? `${format(customDateFrom, 'MMM d')} - ${format(customDateTo, 'MMM d')}`
+                          : customDateFrom
+                          ? `From ${format(customDateFrom, 'MMM d')}`
+                          : customDateTo
+                          ? `Until ${format(customDateTo, 'MMM d')}`
+                          : 'Select Dates'
+                        }
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <div className="p-3 space-y-3">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">From Date:</label>
+                          <CalendarComponent
+                            mode="single"
+                            selected={customDateFrom}
+                            onSelect={setCustomDateFrom}
+                            disabled={(date) => {
+                              if (date > new Date()) return true;
+                              if (customDateTo && date > customDateTo) return true;
+                              return false;
+                            }}
+                            initialFocus
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">To Date:</label>
+                          <CalendarComponent
+                            mode="single"
+                            selected={customDateTo}
+                            onSelect={setCustomDateTo}
+                            disabled={(date) => {
+                              const today = new Date();
+                              today.setHours(23, 59, 59, 999);
+                              if (date > today) return true;
+                              if (customDateFrom && date < customDateFrom) return true;
+                              return false;
+                            }}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setCustomDateFrom(undefined);
+                              setCustomDateTo(undefined);
+                            }}
+                            variant="outline"
+                            className="flex-1"
+                          >
+                            Clear
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => setShowDatePicker(false)}
+                            className="flex-1"
+                          >
+                            Apply
+                          </Button>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
 
               <div className="flex items-center gap-2">
                 <label className="text-sm font-medium text-gray-600">Type:</label>
@@ -300,7 +419,7 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
                 </Select>
               </div>
 
-              {(selectedRole !== 'all' || dateRange !== 'all' || selectedFormType !== 'all') && (
+              {(selectedRole !== 'all' || dateRange !== 'all' || selectedFormType !== 'all' || customDateFrom || customDateTo) && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -308,11 +427,14 @@ export default function ConsultationHistoryDisplay({ patientId, patient }: Consu
                     setSelectedRole('all');
                     setDateRange('all');
                     setSelectedFormType('all');
+                    setCustomDateFrom(undefined);
+                    setCustomDateTo(undefined);
+                    setSearchTerm('');
                   }}
                   className="h-8 px-2 text-gray-500 hover:text-gray-700"
                 >
                   <X className="h-3 w-3 mr-1" />
-                  Clear
+                  Clear All
                 </Button>
               )}
             </div>
