@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MedicalIcons } from '@/lib/medical-icons';
-import { FileText } from 'lucide-react';
+import { FileText, Download, ExternalLink } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 
@@ -134,7 +134,7 @@ export function DocumentPreviewCarousel({
 
   const getAuthenticatedFileUrl = async (fileName: string) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('clinic_token');
       const response = await fetch(`/api/files/medical/${fileName}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -149,6 +149,112 @@ export function DocumentPreviewCarousel({
       console.error('Error loading file:', error);
     }
     return null;
+  };
+
+  const PDFViewer = ({ doc }: { doc: Document }) => {
+    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+      const loadPDF = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const url = await getAuthenticatedFileUrl(doc.fileName);
+          if (url) {
+            setPdfUrl(url);
+          } else {
+            setError('Failed to load PDF');
+          }
+        } catch (err) {
+          setError('Error loading PDF');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      loadPDF();
+
+      return () => {
+        if (pdfUrl) {
+          URL.revokeObjectURL(pdfUrl);
+        }
+      };
+    }, [doc.fileName]);
+
+    if (isLoading) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded">
+          <div className="text-center">
+            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+            <p className="text-sm text-gray-600">Loading PDF...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (error || !pdfUrl) {
+      return (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 rounded border-2 border-dashed border-gray-300">
+          <div className="text-center p-8">
+            <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{doc.originalName}</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              PDF Document • {(doc.size / 1024 / 1024).toFixed(2)} MB
+            </p>
+            <p className="text-xs text-gray-400 mb-6">
+              Uploaded {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button
+                onClick={async () => {
+                  try {
+                    const token = localStorage.getItem('clinic_token');
+                    const response = await fetch(`/api/files/medical/${doc.fileName}`, {
+                      headers: {
+                        'Authorization': `Bearer ${token}`
+                      }
+                    });
+                    
+                    if (response.ok) {
+                      const blob = await response.blob();
+                      const url = URL.createObjectURL(blob);
+                      window.open(url, '_blank');
+                      setTimeout(() => URL.revokeObjectURL(url), 10000);
+                    }
+                  } catch (error) {
+                    console.error('Error opening PDF:', error);
+                  }
+                }}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Open in New Tab
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => downloadDocument(doc)}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full h-full bg-white rounded border">
+        <iframe
+          src={pdfUrl}
+          className="w-full h-full border-0 rounded"
+          title={doc.originalName}
+          style={{ minHeight: '500px' }}
+        />
+      </div>
+    );
   };
 
   const renderDocumentPreview = (doc: Document) => {
