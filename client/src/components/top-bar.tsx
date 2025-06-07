@@ -91,8 +91,34 @@ export default function TopBar() {
     },
   });
 
+  // Delete individual notification mutation
+  const deleteNotificationMutation = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const response = await fetch(`/api/notifications/${notificationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete notification');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      // Refresh notifications data
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+    },
+  });
+
   const handleClearNotifications = () => {
     clearNotificationsMutation.mutate();
+  };
+
+  const handleDeleteNotification = (notificationId: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    deleteNotificationMutation.mutate(notificationId);
   };
 
   const navigation = getNavigationForRole(user?.role || '');
@@ -326,7 +352,7 @@ export default function TopBar() {
                       notifications.map((notification, index) => (
                         <div 
                           key={notification.id} 
-                          className={`p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
+                          className={`group p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
                             index < notifications.length - 1 ? 'border-b border-slate-100 dark:border-slate-700' : ''
                           }`}
                         >
@@ -340,6 +366,16 @@ export default function TopBar() {
                                 {notification.description}
                               </p>
                             </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => handleDeleteNotification(notification.id, e)}
+                              disabled={deleteNotificationMutation.isPending}
+                              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                              title="Delete notification"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
                           </div>
                         </div>
                       ))
