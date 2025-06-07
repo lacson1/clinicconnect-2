@@ -739,7 +739,7 @@ Heart Rate: ${visit.heartRate || 'N/A'}`;
 
   // Fetch patient prescriptions from the API with proper error handling and caching
   const { data: patientPrescriptions = [], isLoading: prescriptionsLoading, error: prescriptionsError } = useQuery({
-    queryKey: ['/api/patients', patient.id, 'prescriptions'],
+    queryKey: [`/api/patients/${patient.id}/prescriptions`],
     retry: 3,
     staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Cache for 10 minutes (updated from cacheTime)
