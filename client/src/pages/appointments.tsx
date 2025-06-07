@@ -84,6 +84,12 @@ export default function AppointmentsPage() {
   // Fetch appointments
   const { data: appointments = [], isLoading: appointmentsLoading } = useQuery({
     queryKey: ['/api/appointments'],
+    onError: (error) => {
+      console.error('Failed to fetch appointments:', error);
+    },
+    onSuccess: (data) => {
+      console.log('Appointments loaded successfully:', data);
+    }
   });
 
   // Filtered and sorted appointments
@@ -333,10 +339,27 @@ export default function AppointmentsPage() {
   };
 
   const handleCreateAppointment = () => {
+    console.log('=== APPOINTMENT CREATION DEBUG ===');
+    console.log('selectedDate:', selectedDate);
+    console.log('selectedTime:', selectedTime);
+    console.log('selectedPatient:', selectedPatient);
+    console.log('selectedStaff:', selectedStaff);
+    console.log('appointmentType:', appointmentType);
+    console.log('duration:', duration);
+    console.log('notes:', notes);
+
     if (!selectedDate || !selectedTime || !selectedPatient || !selectedStaff || !appointmentType) {
+      const missingFields = [];
+      if (!selectedDate) missingFields.push('Date');
+      if (!selectedTime) missingFields.push('Time');
+      if (!selectedPatient) missingFields.push('Patient');
+      if (!selectedStaff) missingFields.push('Healthcare Provider');
+      if (!appointmentType) missingFields.push('Appointment Type');
+      
+      console.log('Missing required fields:', missingFields);
       toast({
         title: 'Validation Error',
-        description: 'Please fill in all required fields',
+        description: `Please fill in: ${missingFields.join(', ')}`,
         variant: 'destructive'
       });
       return;
@@ -357,8 +380,15 @@ export default function AppointmentsPage() {
       notes: notes || undefined
     };
 
-    console.log('Creating appointment with data:', appointmentData);
-    createAppointmentMutation.mutate(appointmentData);
+    console.log('Final appointment data being sent:', appointmentData);
+    console.log('About to call createAppointmentMutation.mutate');
+    
+    try {
+      createAppointmentMutation.mutate(appointmentData);
+      console.log('Mutation called successfully');
+    } catch (error) {
+      console.error('Error calling mutation:', error);
+    }
   };
 
   const updateAppointmentStatus = (appointmentId: number, status: string) => {
