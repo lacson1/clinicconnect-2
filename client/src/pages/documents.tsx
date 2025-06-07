@@ -12,6 +12,123 @@ import { format } from 'date-fns';
 import { apiRequest } from '@/lib/queryClient';
 import { DocumentPreviewCarousel } from '@/components/document-preview-carousel';
 
+// AuthenticatedPDFViewer component for secure PDF viewing
+function AuthenticatedPDFViewer({ document, onDownload }: { 
+  document: Document; 
+  onDownload: (fileName: string, originalName: string) => void; 
+}) {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    const loadPDF = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const token = localStorage.getItem('clinic_token');
+        const response = await fetch(`/api/files/medical/${document.fileName}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          setPdfUrl(url);
+        } else {
+          setError('Failed to load PDF');
+        }
+      } catch (err) {
+        setError('Error loading PDF');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPDF();
+
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [document.fileName]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-[600px] flex items-center justify-center bg-gray-50 rounded">
+        <div className="text-center">
+          <File className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+          <p className="text-sm text-gray-600">Loading PDF...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !pdfUrl) {
+    return (
+      <div className="w-full h-[600px] flex flex-col items-center justify-center bg-gray-50 rounded border-2 border-dashed border-gray-300">
+        <div className="text-center p-8">
+          <File className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{document.originalName}</h3>
+          <p className="text-sm text-gray-500 mb-4">
+            PDF Document • {(document.size / 1024 / 1024).toFixed(2)} MB
+          </p>
+          <p className="text-xs text-gray-400 mb-6">
+            Uploaded {format(new Date(document.uploadedAt), 'MMM d, yyyy')}
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Button
+              onClick={async () => {
+                try {
+                  const token = localStorage.getItem('clinic_token');
+                  const response = await fetch(`/api/files/medical/${document.fileName}`, {
+                    headers: {
+                      'Authorization': `Bearer ${token}`
+                    }
+                  });
+                  
+                  if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                    setTimeout(() => URL.revokeObjectURL(url), 10000);
+                  }
+                } catch (error) {
+                  console.error('Error opening PDF:', error);
+                }
+              }}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Open in New Tab
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => onDownload(document.fileName, document.originalName)}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-[600px] bg-white rounded border">
+      <iframe
+        src={pdfUrl}
+        className="w-full h-full border-0 rounded"
+        title={document.originalName}
+      />
+    </div>
+  );
+}
+
 interface Patient {
   id: number;
   firstName: string;
@@ -148,13 +265,36 @@ export default function DocumentsPage() {
     uploadDocumentMutation.mutate(formData);
   };
 
-  const handleDownload = (fileName: string, originalName: string) => {
-    const link = document.createElement('a');
-    link.href = `/api/files/medical/${fileName}?download=true`;
-    link.download = originalName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async (fileName: string, originalName: string) => {
+    try {
+      const token = localStorage.getItem('clinic_token');
+      const response = await fetch(`/api/files/medical/${fileName}?download=true`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to download document');
+      }
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = originalName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast({
+        title: 'Download Failed',
+        description: 'Could not download the document',
+        variant: 'destructive'
+      });
+    }
   };
 
   const handleDelete = (fileName: string) => {
@@ -441,34 +581,7 @@ export default function DocumentsPage() {
             
             <div className="flex-1 p-4">
               {previewDocument.mimeType === 'application/pdf' ? (
-                <div className="w-full h-full">
-                  <object
-                    data={`/api/files/medical/${previewDocument.fileName}`}
-                    type="application/pdf"
-                    width="100%"
-                    height="600px"
-                    className="border rounded"
-                  >
-                    <iframe
-                      src={`/api/files/medical/${previewDocument.fileName}`}
-                      width="100%"
-                      height="600px"
-                      className="border rounded"
-                      title={previewDocument.originalName}
-                    >
-                      <div className="text-center py-8">
-                        <File className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                        <p className="text-gray-600 mb-4">PDF cannot be displayed in this browser</p>
-                        <Button
-                          onClick={() => handleDownload(previewDocument.fileName, previewDocument.originalName)}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download PDF
-                        </Button>
-                      </div>
-                    </iframe>
-                  </object>
-                </div>
+                <AuthenticatedPDFViewer document={previewDocument} onDownload={handleDownload} />
               ) : previewDocument.mimeType.startsWith('image/') ? (
                 <div className="text-center">
                   <img
