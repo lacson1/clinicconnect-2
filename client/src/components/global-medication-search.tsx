@@ -19,8 +19,9 @@ interface Medication {
 }
 
 interface GlobalMedicationSearchProps {
-  selectedMedications: string[];
-  onMedicationsChange: (medications: string[]) => void;
+  selectedMedications?: string[];
+  onMedicationsChange?: (medications: string[]) => void;
+  onMedicationSelect?: (medication: Medication) => void;
   label?: string;
   placeholder?: string;
   maxHeight?: string;
@@ -28,8 +29,9 @@ interface GlobalMedicationSearchProps {
 }
 
 export function GlobalMedicationSearch({
-  selectedMedications,
+  selectedMedications = [],
   onMedicationsChange,
+  onMedicationSelect,
   label = "Medications",
   placeholder = "Search and select medications...",
   maxHeight = "200px",
@@ -49,8 +51,18 @@ export function GlobalMedicationSearch({
   // Use the medications directly from the API (already filtered server-side)
   const filteredMedications = medications;
 
-  const addMedication = (medicationName: string) => {
-    if (medicationName && !selectedMedications.includes(medicationName)) {
+  const addMedication = (medicationName: string, medication?: Medication) => {
+    // If onMedicationSelect is provided, use it (for single medication selection)
+    if (onMedicationSelect && medication) {
+      onMedicationSelect(medication);
+      setSearchTerm('');
+      setCustomMedication('');
+      setIsPopoverOpen(false);
+      return;
+    }
+    
+    // Otherwise use the traditional multi-medication selection
+    if (medicationName && onMedicationsChange && !selectedMedications.includes(medicationName)) {
       const updatedMedications = [...selectedMedications, medicationName];
       onMedicationsChange(updatedMedications);
       setSearchTerm('');
@@ -60,8 +72,10 @@ export function GlobalMedicationSearch({
   };
 
   const removeMedication = (medicationName: string) => {
-    const updatedMedications = selectedMedications.filter(med => med !== medicationName);
-    onMedicationsChange(updatedMedications);
+    if (onMedicationsChange) {
+      const updatedMedications = selectedMedications.filter(med => med !== medicationName);
+      onMedicationsChange(updatedMedications);
+    }
   };
 
   const addCustomMedication = () => {
@@ -124,7 +138,7 @@ export function GlobalMedicationSearch({
                       <CommandItem
                         key={medication.id}
                         value={medication.name}
-                        onSelect={() => addMedication(medication.name)}
+                        onSelect={() => addMedication(medication.name, medication)}
                         className="cursor-pointer"
                       >
                         <Check
@@ -208,8 +222,8 @@ export function GlobalMedicationSearch({
         </div>
       )}
 
-      {/* Selected medications display */}
-      {selectedMedications.length > 0 && (
+      {/* Selected medications display - only show for multi-selection mode */}
+      {selectedMedications.length > 0 && onMedicationsChange && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium text-gray-700">
