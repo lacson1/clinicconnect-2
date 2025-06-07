@@ -347,27 +347,27 @@ export default function PatientProfile() {
           {/* Optimized Content Layout */}
           <div className="flex flex-col xl:flex-row gap-2">
             {/* Compact Sidebar - Actions & Summary */}
-            <div className="xl:w-64 space-y-2 xl:order-2">
+            <div className="xl:w-48 space-y-1 xl:order-2">
               {/* Compact Quick Actions */}
               <Card className="bg-white/90 backdrop-blur-sm shadow-lg border-0 ring-1 ring-gray-200/50">
-                <CardHeader className="pb-1 px-3 pt-3">
-                  <CardTitle className="text-sm font-semibold text-gray-900 flex items-center">
-                    <Plus className="h-3 w-3 mr-1" style={{ color: '#0051CC' }} />
-                    Quick Actions
+                <CardHeader className="pb-1 px-2 pt-2">
+                  <CardTitle className="text-xs font-semibold text-gray-900 flex items-center">
+                    <Plus className="h-2 w-2 mr-1" style={{ color: '#0051CC' }} />
+                    Actions
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="px-3 pb-3">
+                <CardContent className="px-2 pb-2">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button 
-                        className="w-full justify-between h-8 text-xs bg-blue-50/80 hover:bg-blue-100/90 text-blue-700 border-blue-200/60 transition-all duration-200"
+                        className="w-full justify-between h-6 text-xs bg-blue-50/80 hover:bg-blue-100/90 text-blue-700 border-blue-200/60 transition-all duration-200"
                         variant="outline"
                       >
                         <div className="flex items-center">
-                          <Plus className="h-3 w-3 mr-1" />
-                          Actions
+                          <Plus className="h-2 w-2 mr-1" />
+                          Menu
                         </div>
-                        <ChevronDown className="h-3 w-3" />
+                        <ChevronDown className="h-2 w-2" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-48">
