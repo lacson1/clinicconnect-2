@@ -3892,7 +3892,6 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   }
 
-  // Get reviewed lab results for the "Reviewed Results" tab - Optimized
   // Optimized lab results endpoint with caching and pagination
   app.get('/api/lab-results/reviewed', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
@@ -3965,7 +3964,15 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         'X-Per-Page': limitNum.toString()
       });
       
-      res.json(transformedResults);
+      res.json({
+        data: transformedResults,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: totalCount,
+          pages: Math.ceil(totalCount / limitNum)
+        }
+      });
     } catch (error) {
       console.error("Error fetching reviewed lab results:", error);
       res.status(500).json({ message: "Failed to fetch reviewed lab results" });
@@ -4200,37 +4207,55 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       .innerJoin(patients, eq(labResults.patientId, patients.id))
       .where(and(...whereConditions))
       .orderBy(desc(labResults.createdAt))
-      .limit(100); // Limit results for performance
+      .limit(limitNum)
+      .offset(offset),
       
-      // Transform the data to match frontend expectations
-      const transformedResults = reviewedResults.map(result => ({
-        id: result.id,
-        orderId: null,
-        patientId: result.patientId,
-        patientName: result.patientName,
-        testName: result.testName,
-        result: result.result,
-        normalRange: result.normalRange || 'See lab standards',
-        status: result.status,
-        completedDate: result.testDate,
-        reviewedBy: 'Lab Staff',
-        category: 'General',
-        units: '',
-        remarks: result.notes
-      }));
-      
-      // Add caching headers for performance
-      res.set({
-        'Cache-Control': 'private, max-age=60',
-        'ETag': `"lab-results-${userOrgId}-${Date.now()}"`
-      });
-      
-      res.json(transformedResults);
-    } catch (error) {
-      console.error("Error fetching reviewed lab results:", error);
-      res.status(500).json({ message: "Failed to fetch reviewed lab results" });
-    }
-  });
+      db.select({ count: sql<number>`count(*)` })
+      .from(labResults)
+      .innerJoin(patients, eq(labResults.patientId, patients.id))
+      .where(and(...whereConditions))
+      .then(result => result[0]?.count || 0)
+    ]);
+
+    // Transform data efficiently
+    const transformedResults = reviewedResults.map(result => ({
+      id: result.id,
+      orderId: null,
+      patientId: result.patientId,
+      patientName: result.patientName,
+      testName: result.testName,
+      result: result.result,
+      normalRange: result.normalRange || 'See lab standards',
+      status: result.status,
+      completedDate: result.testDate,
+      reviewedBy: 'Lab Staff',
+      category: 'General',
+      units: '',
+      remarks: result.notes
+    }));
+
+    // Add performance headers
+    res.set({
+      'Cache-Control': 'private, max-age=30',
+      'X-Total-Count': totalCount.toString(),
+      'X-Page': pageNum.toString(),
+      'X-Per-Page': limitNum.toString()
+    });
+
+    res.json({
+      data: transformedResults,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: totalCount,
+        pages: Math.ceil(totalCount / limitNum)
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching reviewed lab results:", error);
+    res.status(500).json({ message: "Failed to fetch reviewed lab results" });
+  }
+});
 
   app.get('/api/patients/:id/lab-orders', authenticateToken, async (req: AuthRequest, res) => {
     try {
