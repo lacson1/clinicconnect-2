@@ -72,14 +72,14 @@ export function GlobalMedicationSearch({
   };
 
   const removeMedication = (medicationName: string) => {
-    if (onMedicationsChange) {
+    if (onMedicationsChange && selectedMedications) {
       const updatedMedications = selectedMedications.filter(med => med !== medicationName);
       onMedicationsChange(updatedMedications);
     }
   };
 
   const addCustomMedication = () => {
-    if (customMedication.trim() && !selectedMedications.includes(customMedication.trim())) {
+    if (customMedication.trim() && selectedMedications && !selectedMedications.includes(customMedication.trim())) {
       addMedication(customMedication.trim());
     }
   };
