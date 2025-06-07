@@ -48,8 +48,7 @@ export default function ReferralModal({ open, onOpenChange, patientId }: Referra
 
   const createReferralMutation = useMutation({
     mutationFn: async (data: ReferralFormData & { fromUserId: number }) => {
-      const response = await apiRequest('POST', '/api/referrals', data);
-      return response.json();
+      return apiRequest('/api/referrals', 'POST', data);
     },
     onSuccess: () => {
       toast({

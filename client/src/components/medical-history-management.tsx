@@ -98,10 +98,7 @@ export default function MedicalHistoryManagement({ patientId, canEdit }: Medical
 
   const addHistoryMutation = useMutation({
     mutationFn: (data: MedicalHistoryForm) =>
-      apiRequest(`/api/patients/${patientId}/medical-history`, {
-        method: 'POST',
-        body: data,
-      }),
+      apiRequest(`/api/patients/${patientId}/medical-history`, 'POST', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/medical-history`] });
       setIsAddModalOpen(false);
@@ -111,9 +108,7 @@ export default function MedicalHistoryManagement({ patientId, canEdit }: Medical
 
   const deleteHistoryMutation = useMutation({
     mutationFn: (historyId: number) =>
-      apiRequest(`/api/patients/${patientId}/medical-history/${historyId}`, {
-        method: 'DELETE',
-      }),
+      apiRequest(`/api/patients/${patientId}/medical-history/${historyId}`, 'DELETE'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/medical-history`] });
     },
