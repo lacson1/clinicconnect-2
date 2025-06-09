@@ -616,10 +616,10 @@ const PatientPortalContent = ({ patient, onLogout }: { patient: any; onLogout: (
             </CardHeader>
             <CardContent>
               {patient ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Personal Information</h4>
-                    <div className="space-y-2 text-sm">
+                    <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Personal Information</h4>
+                    <div className="space-y-2 text-xs sm:text-sm">
                       <p><strong>Name:</strong> {patient.title} {patient.firstName} {patient.lastName}</p>
                       <p><strong>Date of Birth:</strong> {new Date(patient.dateOfBirth).toLocaleDateString()}</p>
                       <p><strong>Gender:</strong> {patient.gender}</p>
@@ -627,25 +627,25 @@ const PatientPortalContent = ({ patient, onLogout }: { patient: any; onLogout: (
                     </div>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Contact Information</h4>
-                    <div className="space-y-2 text-sm">
+                    <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Contact Information</h4>
+                    <div className="space-y-2 text-xs sm:text-sm">
                       <p className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
+                        <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
                         {patient.phone || "Not provided"}
                       </p>
                       <p className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
+                        <Mail className="h-3 w-3 sm:h-4 sm:w-4" />
                         {patient.email || "Not provided"}
                       </p>
                       <p className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
+                        <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
                         {patient.address || "Not provided"}
                       </p>
                     </div>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Medical Information</h4>
-                    <div className="space-y-2 text-sm">
+                    <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Medical Information</h4>
+                    <div className="space-y-2 text-xs sm:text-sm">
                       <p><strong>Allergies:</strong> {patient.allergies || "None reported"}</p>
                       <p><strong>Medical History:</strong> {patient.medicalHistory || "None reported"}</p>
                       <p><strong>Emergency Contact:</strong> {patient.emergencyContact || "Not provided"}</p>
@@ -662,51 +662,51 @@ const PatientPortalContent = ({ patient, onLogout }: { patient: any; onLogout: (
           </Card>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Upcoming Appointments</p>
-                    <p className="text-2xl font-bold text-gray-900">{appointments.filter((apt: any) => apt.status === 'confirmed').length}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Upcoming Appointments</p>
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">{appointments.filter((apt: any) => apt.status === 'confirmed').length}</p>
                   </div>
-                  <Calendar className="h-8 w-8 text-blue-600" />
+                  <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Active Prescriptions</p>
-                    <p className="text-2xl font-bold text-gray-900">{prescriptions.filter((rx: any) => rx.status === 'active').length}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Active Prescriptions</p>
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">{prescriptions.filter((rx: any) => rx.status === 'active').length}</p>
                   </div>
-                  <Pill className="h-8 w-8 text-green-600" />
+                  <Pill className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Recent Lab Results</p>
-                    <p className="text-2xl font-bold text-gray-900">{labResults.length}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Recent Lab Results</p>
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">{labResults.length}</p>
                   </div>
-                  <TestTube className="h-8 w-8 text-purple-600" />
+                  <TestTube className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Unread Messages</p>
-                    <p className="text-2xl font-bold text-gray-900">{messages.filter((msg: any) => !msg.read).length}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Unread Messages</p>
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">{messages.filter((msg: any) => !msg.read).length}</p>
                   </div>
-                  <MessageCircle className="h-8 w-8 text-orange-600" />
+                  <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8 text-orange-600" />
                 </div>
               </CardContent>
             </Card>
