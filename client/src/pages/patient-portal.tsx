@@ -154,16 +154,16 @@ const PatientLogin = ({ onLogin }: { onLogin: (data: any) => void }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-50 p-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-50 p-4 px-6 sm:px-4">
+      <div className="w-full max-w-md space-y-4 sm:space-y-6">
         <div className="text-center space-y-2">
           <div className="flex justify-center">
-            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-              <Shield className="h-8 w-8 text-white" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 rounded-full flex items-center justify-center">
+              <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Patient Portal</h1>
-          <p className="text-gray-600">Access your healthcare information securely</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Patient Portal</h1>
+          <p className="text-sm sm:text-base text-gray-600">Access your healthcare information securely</p>
         </div>
 
         <Card>
@@ -186,7 +186,7 @@ const PatientLogin = ({ onLogin }: { onLogin: (data: any) => void }) => {
                         <Input
                           {...field}
                           placeholder="Enter your Patient ID"
-                          className="h-12"
+                          className="h-10 sm:h-12 text-base"
                         />
                       </FormControl>
                       <FormMessage />
