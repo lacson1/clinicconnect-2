@@ -147,50 +147,50 @@ export default function EnhancedMedicationManager({ prescriptions, className = '
 
     return (
       <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedMedication(medication)}>
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className={`p-3 rounded-lg ${category.bgColor}`}>
-                <IconComponent className="h-6 w-6" style={{ color: category.color }} />
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex items-start justify-between mb-3 sm:mb-4">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div className={`p-2 sm:p-3 rounded-lg ${category.bgColor} flex-shrink-0`}>
+                <IconComponent className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: category.color }} />
               </div>
-              <div>
-                <h3 className="font-semibold text-lg text-gray-900">{medication.medicationName}</h3>
-                <p className="text-sm text-gray-600">{category.title}</p>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-base sm:text-lg text-gray-900 truncate">{medication.medicationName}</h3>
+                <p className="text-xs sm:text-sm text-gray-600">{category.title}</p>
               </div>
             </div>
-            <Badge className={`${status.color} border flex items-center gap-1`}>
+            <Badge className={`${status.color} border flex items-center gap-1 text-xs flex-shrink-0 ml-2`}>
               <StatusIcon className="h-3 w-3" />
-              {status.label}
+              <span className="hidden sm:inline">{status.label}</span>
             </Badge>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
             <div className="space-y-2">
               <div>
-                <span className="text-sm font-medium text-gray-600">Dosage:</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Dosage:</span>
                 <p className="text-sm font-semibold">{medication.dosage}</p>
               </div>
               <div>
-                <span className="text-sm font-medium text-gray-600">Frequency:</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Frequency:</span>
                 <p className="text-sm font-semibold">{medication.frequency}</p>
               </div>
             </div>
             <div className="space-y-2">
               <div>
-                <span className="text-sm font-medium text-gray-600">Prescribed By:</span>
-                <p className="text-sm font-semibold">{medication.prescribedBy || 'Dr. Johnson'}</p>
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Prescribed By:</span>
+                <p className="text-sm font-semibold truncate">{medication.prescribedBy || 'Dr. Johnson'}</p>
               </div>
               <div>
-                <span className="text-sm font-medium text-gray-600">Pharmacy:</span>
-                <p className="text-sm font-semibold">{medication.pharmacyName}</p>
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Pharmacy:</span>
+                <p className="text-sm font-semibold truncate">{medication.pharmacyName}</p>
               </div>
             </div>
           </div>
 
           {medication.instructions && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-1">Instructions</h4>
-              <p className="text-sm text-blue-800">{medication.instructions}</p>
+            <div className="mb-3 sm:mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-1 text-sm">Instructions</h4>
+              <p className="text-xs sm:text-sm text-blue-800">{medication.instructions}</p>
             </div>
           )}
 
@@ -198,8 +198,8 @@ export default function EnhancedMedicationManager({ prescriptions, className = '
             {/* Refill Progress */}
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-600">Refills Used</span>
-                <span className="text-sm text-gray-500">
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Refills Used</span>
+                <span className="text-xs sm:text-sm text-gray-500">
                   {medication.totalRefills! - medication.refillsRemaining!} of {medication.totalRefills}
                 </span>
               </div>
@@ -214,7 +214,7 @@ export default function EnhancedMedicationManager({ prescriptions, className = '
 
             {/* Time Remaining */}
             {daysRemaining !== null && (
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-gray-600">Days remaining:</span>
                 <span className={`font-semibold ${daysRemaining <= 7 ? 'text-orange-600' : 'text-green-600'}`}>
                   {daysRemaining > 0 ? `${daysRemaining} days` : 'Expired'}
@@ -223,18 +223,20 @@ export default function EnhancedMedicationManager({ prescriptions, className = '
             )}
 
             {/* Action Buttons */}
-            <div className="flex gap-2 pt-2 border-t">
-              <Button variant="outline" size="sm" className="flex-1">
-                <Phone className="h-4 w-4 mr-2" />
-                Call Pharmacy
+            <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t">
+              <Button variant="outline" size="sm" className="flex-1 text-xs sm:text-sm">
+                <Phone className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Call Pharmacy</span>
+                <span className="sm:hidden">Call</span>
               </Button>
-              <Button variant="outline" size="sm" className="flex-1">
-                <Download className="h-4 w-4 mr-2" />
-                Download
+              <Button variant="outline" size="sm" className="flex-1 text-xs sm:text-sm">
+                <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Download</span>
+                <span className="sm:hidden">Download</span>
               </Button>
               {medication.refillsRemaining! > 0 && (
-                <Button size="sm" className="flex-1">
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button size="sm" className="flex-1 text-xs sm:text-sm">
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   Refill
                 </Button>
               )}
@@ -248,61 +250,63 @@ export default function EnhancedMedicationManager({ prescriptions, className = '
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header with Statistics */}
-      <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-lg">
+      <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-4 sm:p-6 rounded-lg">
         <div className="flex flex-col sm:flex-row justify-between items-start mb-4">
           <div>
-            <h2 className="text-2xl font-bold mb-2">My Medications</h2>
-            <p className="text-green-100">Manage your prescriptions and track medication schedules</p>
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">My Medications</h2>
+            <p className="text-green-100 text-sm sm:text-base">Manage your prescriptions and track medication schedules</p>
           </div>
-          <div className="flex gap-2 mt-4 sm:mt-0">
-            <Button variant="outline" size="sm" className="text-green-600 border-white">
-              <Bell className="h-4 w-4 mr-2" />
-              Set Reminders
+          <div className="flex gap-2 mt-4 sm:mt-0 w-full sm:w-auto">
+            <Button variant="outline" size="sm" className="text-green-600 border-white flex-1 sm:flex-none">
+              <Bell className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Set Reminders</span>
+              <span className="sm:hidden">Alerts</span>
             </Button>
-            <Button variant="outline" size="sm" className="text-green-600 border-white">
-              <Share2 className="h-4 w-4 mr-2" />
-              Share List
+            <Button variant="outline" size="sm" className="text-green-600 border-white flex-1 sm:flex-none">
+              <Share2 className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Share List</span>
+              <span className="sm:hidden">Share</span>
             </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <Pill className="h-8 w-8 text-green-300" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-white/10 backdrop-blur rounded-lg p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Pill className="h-6 w-6 sm:h-8 sm:w-8 text-green-300" />
               <div>
-                <p className="text-sm text-green-100">Active</p>
-                <p className="text-2xl font-bold">{activeMedications}</p>
+                <p className="text-xs sm:text-sm text-green-100">Active</p>
+                <p className="text-lg sm:text-2xl font-bold">{activeMedications}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <FileText className="h-8 w-8 text-green-300" />
+          <div className="bg-white/10 backdrop-blur rounded-lg p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-green-300" />
               <div>
-                <p className="text-sm text-green-100">Total</p>
-                <p className="text-2xl font-bold">{totalMedications}</p>
+                <p className="text-xs sm:text-sm text-green-100">Total</p>
+                <p className="text-lg sm:text-2xl font-bold">{totalMedications}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-8 w-8 text-yellow-300" />
+          <div className="bg-white/10 backdrop-blur rounded-lg p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300" />
               <div>
-                <p className="text-sm text-green-100">Need Refill</p>
-                <p className="text-2xl font-bold">{refillsNeeded}</p>
+                <p className="text-xs sm:text-sm text-green-100">Need Refill</p>
+                <p className="text-lg sm:text-2xl font-bold">{refillsNeeded}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <Timer className="h-8 w-8 text-orange-300" />
+          <div className="bg-white/10 backdrop-blur rounded-lg p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Timer className="h-6 w-6 sm:h-8 sm:w-8 text-orange-300" />
               <div>
-                <p className="text-sm text-green-100">Expiring Soon</p>
-                <p className="text-2xl font-bold">{expiringSoon}</p>
+                <p className="text-xs sm:text-sm text-green-100">Expiring Soon</p>
+                <p className="text-lg sm:text-2xl font-bold">{expiringSoon}</p>
               </div>
             </div>
           </div>
@@ -310,51 +314,65 @@ export default function EnhancedMedicationManager({ prescriptions, className = '
       </div>
 
       {/* Search and Filter Controls */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
-            <Input
-              placeholder="Search medications..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
+              <Input
+                placeholder="Search medications..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 text-sm"
+              />
+            </div>
           </div>
-        </div>
-        <div className="flex gap-2">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-          >
-            <option value="all">All Categories</option>
-            {Object.entries(medicationCategories).map(([key, category]) => (
-              <option key={key} value={key}>{category.title}</option>
-            ))}
-          </select>
+          <div className="w-full sm:w-auto">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+            >
+              <option value="all">All Categories</option>
+              {Object.entries(medicationCategories).map(([key, category]) => (
+                <option key={key} value={key}>{category.title}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
       <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as any)}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="current">Current ({activeMedications})</TabsTrigger>
-          <TabsTrigger value="all">All Medications</TabsTrigger>
-          <TabsTrigger value="schedule">Today's Schedule</TabsTrigger>
-          <TabsTrigger value="reminders">Alerts</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+          <TabsTrigger value="current" className="text-xs sm:text-sm px-2 py-2">
+            <span className="hidden sm:inline">Current ({activeMedications})</span>
+            <span className="sm:hidden">Active</span>
+          </TabsTrigger>
+          <TabsTrigger value="all" className="text-xs sm:text-sm px-2 py-2">
+            <span className="hidden sm:inline">All Medications</span>
+            <span className="sm:hidden">All</span>
+          </TabsTrigger>
+          <TabsTrigger value="schedule" className="text-xs sm:text-sm px-2 py-2">
+            <span className="hidden sm:inline">Today's Schedule</span>
+            <span className="sm:hidden">Today</span>
+          </TabsTrigger>
+          <TabsTrigger value="reminders" className="text-xs sm:text-sm px-2 py-2">
+            <span className="hidden sm:inline">Alerts</span>
+            <span className="sm:hidden">Alerts</span>
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="current" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="current" className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {filteredPrescriptions.map((medication) => (
               <MedicationCard key={medication.id} medication={medication} />
             ))}
           </div>
         </TabsContent>
 
-        <TabsContent value="all" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="all" className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {filteredPrescriptions.map((medication) => (
               <MedicationCard key={medication.id} medication={medication} />
             ))}
@@ -445,19 +463,19 @@ export default function EnhancedMedicationManager({ prescriptions, className = '
 
       {/* Medication Details Modal */}
       {selectedMedication && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{selectedMedication.medicationName}</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => setSelectedMedication(null)}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-3 sm:p-4">
+          <Card className="max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <CardHeader className="flex flex-row items-center justify-between p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl pr-4 truncate">{selectedMedication.medicationName}</CardTitle>
+              <Button variant="outline" size="sm" onClick={() => setSelectedMedication(null)} className="flex-shrink-0">
                 ×
               </Button>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+            <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <h4 className="font-medium mb-2">Prescription Details</h4>
-                  <div className="space-y-2 text-sm">
+                  <h4 className="font-medium mb-2 text-sm sm:text-base">Prescription Details</h4>
+                  <div className="space-y-2 text-xs sm:text-sm">
                     <p><strong>Dosage:</strong> {selectedMedication.dosage}</p>
                     <p><strong>Frequency:</strong> {selectedMedication.frequency}</p>
                     <p><strong>Duration:</strong> {selectedMedication.duration || 'Ongoing'}</p>
@@ -465,8 +483,8 @@ export default function EnhancedMedicationManager({ prescriptions, className = '
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-medium mb-2">Pharmacy Information</h4>
-                  <div className="space-y-2 text-sm">
+                  <h4 className="font-medium mb-2 text-sm sm:text-base">Pharmacy Information</h4>
+                  <div className="space-y-2 text-xs sm:text-sm">
                     <p><strong>Pharmacy:</strong> {selectedMedication.pharmacyName}</p>
                     <p><strong>Phone:</strong> {selectedMedication.pharmacyPhone}</p>
                     <p><strong>Refills Left:</strong> {selectedMedication.refillsRemaining}</p>
@@ -475,13 +493,13 @@ export default function EnhancedMedicationManager({ prescriptions, className = '
               </div>
               
               <div>
-                <h4 className="font-medium mb-2">Instructions</h4>
-                <p className="text-sm bg-blue-50 p-3 rounded-lg">{selectedMedication.instructions}</p>
+                <h4 className="font-medium mb-2 text-sm sm:text-base">Instructions</h4>
+                <p className="text-xs sm:text-sm bg-blue-50 p-3 rounded-lg">{selectedMedication.instructions}</p>
               </div>
 
               {selectedMedication.sideEffects && selectedMedication.sideEffects.length > 0 && (
                 <div>
-                  <h4 className="font-medium mb-2">Possible Side Effects</h4>
+                  <h4 className="font-medium mb-2 text-sm sm:text-base">Possible Side Effects</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedMedication.sideEffects.map((effect, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
@@ -492,12 +510,12 @@ export default function EnhancedMedicationManager({ prescriptions, className = '
                 </div>
               )}
 
-              <div className="flex gap-3">
-                <Button className="flex-1">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button className="flex-1 text-sm">
                   <Phone className="h-4 w-4 mr-2" />
                   Call Pharmacy
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1 text-sm">
                   <Download className="h-4 w-4 mr-2" />
                   Download Prescription
                 </Button>
