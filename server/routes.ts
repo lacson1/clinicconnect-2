@@ -9420,19 +9420,19 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       }
       
       const patientLabResults = await db.select({
-        id: labOrders.id,
-        testName: labOrders.testName,
-        status: labOrders.status,
-        result: labOrders.result,
-        units: labOrders.units,
-        referenceRange: labOrders.referenceRange,
-        orderedDate: labOrders.orderedDate,
-        resultDate: labOrders.resultDate,
-        orderedBy: labOrders.orderedBy
+        id: labResults.id,
+        testName: labResults.testName,
+        result: labResults.result,
+        normalRange: labResults.normalRange,
+        status: labResults.status,
+        notes: labResults.notes,
+        testDate: labResults.testDate,
+        unit: sql<string>`''`.as('unit'), // Add empty unit field for compatibility
+        date: labResults.testDate
       })
-        .from(labOrders)
-        .where(eq(labOrders.patientId, patientId))
-        .orderBy(desc(labOrders.orderedDate));
+        .from(labResults)
+        .where(eq(labResults.patientId, patientId))
+        .orderBy(desc(labResults.testDate));
       
       res.json(patientLabResults);
     } catch (error) {
