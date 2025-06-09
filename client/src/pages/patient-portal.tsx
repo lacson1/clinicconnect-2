@@ -609,7 +609,7 @@ const PatientPortalContent = ({ patient, onLogout }: { patient: any; onLogout: (
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {patientProfile ? (
+              {patient ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Personal Information</h4>
