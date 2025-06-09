@@ -408,6 +408,19 @@ const PatientPortalContent = ({ patient, onLogout }: { patient: any; onLogout: (
     sendMessageMutation.mutate(data);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('patientToken');
+    localStorage.removeItem('patientData');
+    
+    toast({
+      title: 'Logged Out',
+      description: 'You have been successfully logged out',
+    });
+    
+    // Reload the page to reset the authentication state
+    window.location.reload();
+  };
+
   return (
     <div className="container mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
@@ -598,6 +611,15 @@ const PatientPortalContent = ({ patient, onLogout }: { patient: any; onLogout: (
               </Form>
             </DialogContent>
           </Dialog>
+          
+          <Button 
+            variant="outline" 
+            onClick={handleLogout}
+            className="text-xs sm:text-sm px-3 sm:px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+          >
+            <LogOut className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Log </span>Out
+          </Button>
         </div>
       </div>
 
