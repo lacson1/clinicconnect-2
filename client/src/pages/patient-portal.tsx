@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import BloodTestDashboard from "@/components/BloodTestDashboard";
 import {
   User,
   Calendar,
@@ -363,6 +364,25 @@ const PatientPortalContent = ({ patient, onLogout }: { patient: any; onLogout: (
       });
     }
   });
+
+  const handleLabAction = (action: string, data?: any) => {
+    switch (action) {
+      case 'download':
+        toast({ title: "Download Started", description: "Your lab results PDF is being generated." });
+        // TODO: Implement PDF generation
+        break;
+      case 'share':
+        toast({ title: "Share", description: "Lab results sharing feature coming soon." });
+        // TODO: Implement sharing functionality
+        break;
+      case 'alerts':
+        toast({ title: "Alerts", description: "Lab alerts feature coming soon." });
+        // TODO: Implement alerts functionality
+        break;
+      default:
+        console.log('Lab action:', action, data);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -811,54 +831,14 @@ const PatientPortalContent = ({ patient, onLogout }: { patient: any; onLogout: (
           </div>
         </TabsContent>
 
-        {/* Lab Results Tab */}
+        {/* Lab Results Tab - Enhanced Blood Test Dashboard */}
         <TabsContent value="lab-results" className="space-y-4">
-          <div className="grid gap-4">
-            {labResults.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <TestTube className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">No lab results available</p>
-                </CardContent>
-              </Card>
-            ) : (
-              labResults.map((result: any) => (
-                <Card key={result.id}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-gray-900">{result.testName}</h3>
-                        <p className="text-sm text-gray-600">Ordered by: Dr. {result.doctorName}</p>
-                        <div className="grid grid-cols-3 gap-4 mt-3">
-                          <div>
-                            <p className="text-xs text-gray-500">Result</p>
-                            <p className="font-medium">{result.value} {result.unit}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500">Reference Range</p>
-                            <p className="text-sm">{result.referenceRange}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500">Date</p>
-                            <p className="text-sm">{new Date(result.date).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge className={getStatusColor(result.status)}>
-                          {result.status}
-                        </Badge>
-                        <Button variant="outline" size="sm" className="mt-2">
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+          <BloodTestDashboard 
+            patientId={patient?.id?.toString() || ''}
+            onActionClick={handleLabAction}
+            className="min-h-screen"
+            showHeader={true}
+          />
         </TabsContent>
 
         {/* Medical Records Tab */}
