@@ -401,7 +401,7 @@ const PatientPortalContent = ({ patient, onLogout }: { patient: any; onLogout: (
                 <DialogTitle>Send Message to Healthcare Provider</DialogTitle>
               </DialogHeader>
               <Form {...messageForm}>
-                <form onSubmit={messageForm.handleSubmit(onSendMessage)} className="space-y-4">
+                <form onSubmit={messageForm.handleSubmit((data) => sendMessageMutation.mutate(data))} className="space-y-4">
                   <FormField
                     control={messageForm.control}
                     name="category"
@@ -471,7 +471,7 @@ const PatientPortalContent = ({ patient, onLogout }: { patient: any; onLogout: (
                 <DialogTitle>Request New Appointment</DialogTitle>
               </DialogHeader>
               <Form {...appointmentForm}>
-                <form onSubmit={appointmentForm.handleSubmit(onRequestAppointment)} className="space-y-4">
+                <form onSubmit={appointmentForm.handleSubmit((data) => appointmentRequestMutation.mutate(data))} className="space-y-4">
                   <FormField
                     control={appointmentForm.control}
                     name="type"
