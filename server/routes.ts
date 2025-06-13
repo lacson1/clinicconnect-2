@@ -2918,10 +2918,29 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
 
   app.post("/api/users", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const { username, password, email, phone, role, organizationId, firstName, lastName, title } = req.body;
+      const { username, password, email, phone, role, roleId, organizationId, firstName, lastName, title } = req.body;
       
       if (!username || !password || !organizationId) {
         return res.status(400).json({ error: 'Username, password, and organization are required' });
+      }
+
+      // Handle role mapping - frontend sends roleId, backend expects role string
+      let userRole = role;
+      if (!userRole && roleId) {
+        const roleMap = {
+          '1': 'admin',
+          '2': 'doctor', 
+          '3': 'nurse',
+          '4': 'pharmacist',
+          '5': 'receptionist',
+          '6': 'lab_technician',
+          '7': 'physiotherapist'
+        };
+        userRole = roleMap[roleId.toString()];
+      }
+
+      if (!userRole) {
+        return res.status(400).json({ error: 'Valid role is required' });
       }
 
       // Role-based permission check for user creation
@@ -2976,7 +2995,20 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         } else if (error.message === 'Email already exists') {
           res.status(400).json({ message: "Email already exists. Please use a different email address." });
         } else if (error.message.includes('duplicate key') || error.message.includes('UNIQUE constraint')) {
-          res.status(400).json({ message: "Username or email already exists" });
+          // Parse the specific constraint that failed
+          if (error.message.includes('users_username_unique') || error.message.includes('username')) {
+            const usernameMatch = error.message.match(/Key \(username\)=\(([^)]+)\)/);
+            const username = usernameMatch ? usernameMatch[1] : 'specified username';
+            res.status(400).json({ 
+              message: `Username "${username}" already exists. Please choose a different username.`
+            });
+          } else if (error.message.includes('users_email_unique') || error.message.includes('email')) {
+            res.status(400).json({ 
+              message: "Email address already exists. Please use a different email address."
+            });
+          } else {
+            res.status(400).json({ message: "Username or email already exists" });
+          }
         } else {
           res.status(500).json({ message: "Failed to create user", error: error.message });
         }
