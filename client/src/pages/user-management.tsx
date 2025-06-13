@@ -20,6 +20,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -45,9 +46,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   UserPlus,
   Settings,
+  Loader2,
   Shield,
   Users,
   Building,
@@ -152,27 +155,32 @@ export default function UserManagement() {
   const queryClient = useQueryClient();
 
   // Queries
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/users/management"],
     refetchInterval: 30000
   });
 
-  const { data: roles = [] } = useQuery({
+  const { data: roles = [] } = useQuery<Role[]>({
     queryKey: ["/api/roles"]
   });
 
-  const { data: permissions = [] } = useQuery({
+  const { data: permissions = [] } = useQuery<Permission[]>({
     queryKey: ["/api/permissions"]
   });
 
-  const { data: organizations = [] } = useQuery({
+  const { data: organizations = [] } = useQuery<Organization[]>({
     queryKey: ["/api/organizations"]
   });
 
   // Mutations
   const createUserMutation = useMutation({
     mutationFn: async (data: z.infer<typeof userSchema>) => {
-      return apiRequest("/api/users", "POST", data);
+      const userData = {
+        ...data,
+        roleId: parseInt(data.roleId),
+        organizationId: parseInt(data.organizationId)
+      };
+      return apiRequest("/api/users", "POST", userData);
     },
     onSuccess: () => {
       toast({ title: "User Created", description: "User has been successfully created." });
