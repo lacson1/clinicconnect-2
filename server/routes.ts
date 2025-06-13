@@ -2132,11 +2132,24 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       const { username, password } = req.body;
       
       if (!username || !password) {
-        return res.status(400).json({ message: "Username and password required" });
+        return res.status(400).json({ 
+          message: "Username and password are required",
+          code: 'MISSING_CREDENTIALS'
+        });
       }
-      
 
+      // Import security manager here to avoid import issues
+      const { SecurityManager } = await import('./middleware/security');
       
+      // Check login attempts for rate limiting
+      const attemptCheck = SecurityManager.checkLoginAttempts(username);
+      if (!attemptCheck.allowed) {
+        return res.status(423).json({ 
+          message: attemptCheck.message,
+          code: 'ACCOUNT_LOCKED'
+        });
+      }
+
       // Try to find user in database first
       const [user] = await db.select()
         .from(users)
@@ -2144,12 +2157,27 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         .limit(1);
 
       if (user) {
-        // For demo purposes, accept simple passwords
+        // Check if user is active
+        if (!user.isActive) {
+          SecurityManager.recordLoginAttempt(username, false);
+          return res.status(401).json({ 
+            message: 'Account is disabled. Contact administrator.',
+            code: 'ACCOUNT_DISABLED'
+          });
+        }
+
+        // For demo purposes, accept simple passwords (enhanced password validation for production)
         const validPasswords = ['admin123', 'doctor123', 'super123', 'nurse123', 'receptionist123', 'password123', 'pharmacy123', 'physio123'];
-        if (validPasswords.includes(password)) {
+        const passwordValid = validPasswords.includes(password);
+        
+        if (passwordValid) {
+          // Successful login - record and update user
+          SecurityManager.recordLoginAttempt(username, true);
+          await SecurityManager.updateLastLogin(user.id);
+          
           const org = user.organizationId ? await getOrganizationDetails(user.organizationId) : null;
           
-          // Set user session
+          // Set user session with activity tracking
           (req.session as any).user = {
             id: user.id,
             username: user.username,
@@ -2157,21 +2185,34 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
             organizationId: user.organizationId
           };
           
+          // Initialize session activity tracking
+          (req.session as any).lastActivity = new Date();
+          
           return res.json({
+            success: true,
             user: {
               id: user.id,
               username: user.username,
               role: user.role,
               organizationId: user.organizationId,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              title: user.title,
+              email: user.email,
               organization: org ? {
                 id: org.id,
                 name: org.name,
                 type: org.type || 'clinic',
                 themeColor: org.themeColor || '#3B82F6'
               } : null
-            }
+            },
+            message: 'Login successful'
           });
+        } else {
+          SecurityManager.recordLoginAttempt(username, false);
         }
+      } else {
+        SecurityManager.recordLoginAttempt(username, false);
       }
 
       // Fallback Super Admin - Global access across all organizations
@@ -2303,12 +2344,130 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         });
       }
       
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ 
+        message: "Invalid username or password",
+        code: 'INVALID_CREDENTIALS'
+      });
       
     } catch (error) {
       console.error('Login error:', error);
-      res.status(500).json({ message: "Login failed" });
+      res.status(500).json({ 
+        message: "Authentication service temporarily unavailable",
+        code: 'SERVER_ERROR'
+      });
     }
+  });
+
+  // Enhanced password change endpoint
+  app.post('/api/auth/change-password', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ 
+          message: 'Authentication required',
+          code: 'NOT_AUTHENTICATED'
+        });
+      }
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ 
+          message: 'Current password and new password are required',
+          code: 'MISSING_FIELDS'
+        });
+      }
+
+      // Import security manager
+      const { SecurityManager } = await import('./middleware/security');
+
+      // Validate new password strength
+      const passwordValidation = SecurityManager.validatePassword(newPassword);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({ 
+          message: passwordValidation.message,
+          code: 'WEAK_PASSWORD'
+        });
+      }
+
+      // Get current user
+      const [user] = await db.select()
+        .from(users)
+        .where(eq(users.id, userId));
+
+      if (!user) {
+        return res.status(404).json({ 
+          message: 'User not found',
+          code: 'USER_NOT_FOUND'
+        });
+      }
+
+      // For demo, verify against known passwords
+      const validCurrentPasswords = ['admin123', 'doctor123', 'super123', 'nurse123', 'password123', 'pharmacy123', 'physio123'];
+      if (!validCurrentPasswords.includes(currentPassword)) {
+        return res.status(401).json({ 
+          message: 'Current password is incorrect',
+          code: 'INVALID_CURRENT_PASSWORD'
+        });
+      }
+
+      // Hash new password (for production implementation)
+      const bcrypt = await import('bcrypt');
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update password
+      await db.update(users)
+        .set({ 
+          password: hashedNewPassword,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+
+      res.json({ 
+        success: true,
+        message: 'Password changed successfully' 
+      });
+
+    } catch (error) {
+      console.error('Password change error:', error);
+      res.status(500).json({ 
+        message: 'Failed to change password',
+        code: 'SERVER_ERROR'
+      });
+    }
+  });
+
+  // Session health check endpoint
+  app.get('/api/auth/session-status', authenticateToken, (req: AuthRequest, res) => {
+    const sessionData = req.session as any;
+    const user = req.user;
+    
+    if (!user || !sessionData.user) {
+      return res.status(401).json({ 
+        valid: false,
+        message: 'Session invalid',
+        code: 'INVALID_SESSION'
+      });
+    }
+
+    const lastActivity = sessionData.lastActivity ? new Date(sessionData.lastActivity) : new Date();
+    const now = new Date();
+    const timeSinceActivity = (now.getTime() - lastActivity.getTime()) / (1000 * 60); // minutes
+
+    res.json({
+      valid: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        organizationId: user.organizationId
+      },
+      session: {
+        lastActivity: lastActivity.toISOString(),
+        minutesSinceActivity: Math.round(timeSinceActivity),
+        expiresIn: Math.max(0, 60 - timeSinceActivity) // 60 minute timeout
+      }
+    });
   });
 
   // Logout endpoint
