@@ -2881,10 +2881,18 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       
       res.json({ ...user, password: undefined }); // Don't return password
     } catch (error) {
+      console.error("Error creating user:", error);
       if (error instanceof z.ZodError) {
         res.status(400).json({ message: "Invalid user data", errors: error.errors });
+      } else if (error instanceof Error) {
+        // Check for specific database errors
+        if (error.message.includes('duplicate key') || error.message.includes('UNIQUE constraint')) {
+          res.status(400).json({ message: "Username or email already exists" });
+        } else {
+          res.status(500).json({ message: "Failed to create user", error: error.message });
+        }
       } else {
-        res.status(500).json({ message: "Failed to create user" });
+        res.status(500).json({ message: "Failed to create user", error: String(error) });
       }
     }
   });
@@ -3624,7 +3632,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       const { username, password, roleId, title, firstName, lastName, email, phone, organizationId } = req.body;
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await hashPassword(password);
 
       const [newUser] = await db
         .insert(users)

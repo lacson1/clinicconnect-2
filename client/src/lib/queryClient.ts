@@ -13,6 +13,9 @@ function getAuthHeaders(): Record<string, string> {
   
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+    console.log('Auth token found and added to headers');
+  } else {
+    console.warn('No auth token found in localStorage');
   }
   
   return headers;
