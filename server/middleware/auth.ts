@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { Request, Response, NextFunction } from 'express';
 import { storage } from '../storage';
-import { SecurityManager, checkSessionTimeout } from './security';
+import { SecurityManager } from './security';
 
 // Extend session types
 declare module 'express-session' {

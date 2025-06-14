@@ -19,6 +19,7 @@ interface PatientAuthRequest extends AuthRequest {
 import { checkPermission, getUserPermissions } from "./middleware/permissions";
 import { initializeFirebase, sendNotificationToRole, sendUrgentNotification, NotificationTypes } from "./notifications";
 import { AuditLogger, AuditActions } from "./audit";
+import { securityHeaders, updateSessionActivity } from "./middleware/security";
 import { format } from 'date-fns';
 import fs from 'fs';
 import path from 'path';
@@ -474,6 +475,12 @@ const getOrganizationDetails = async (orgId: number) => {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Firebase for push notifications
   initializeFirebase();
+  
+  // Apply security headers to all routes
+  app.use(securityHeaders);
+  
+  // Apply session activity tracking to all authenticated routes
+  app.use(updateSessionActivity);
   
   // Setup error tracking and performance monitoring
   app.use(performanceMonitor);
