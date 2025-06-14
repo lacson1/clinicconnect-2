@@ -29,23 +29,31 @@ export interface AuthRequest extends Request {
 
 export const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    // Apply session timeout check
-    checkSessionTimeout(req, res, () => {
-      // Check if user is authenticated via session
-      const sessionUser = (req.session as any)?.user;
-      if (!sessionUser) {
-        return res.status(401).json({ message: 'Authentication required' });
-      }
+    // Check if user is authenticated via session
+    const sessionUser = (req.session as any)?.user;
+    if (!sessionUser) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
 
-      // Set user from session
-      req.user = {
-        id: sessionUser.id,
-        username: sessionUser.username,
-        role: sessionUser.role,
-        organizationId: sessionUser.organizationId || undefined
-      };
-      next();
-    });
+    // Check session timeout using SecurityManager
+    const user = await storage.getUser(sessionUser.id);
+    if (user?.lastLoginAt && !SecurityManager.isSessionValid(user.lastLoginAt)) {
+      // Session has expired, clear it
+      req.session.destroy((err) => {
+        if (err) console.error('Session destruction error:', err);
+      });
+      return res.status(401).json({ message: 'Session expired' });
+    }
+
+    // Set user from session
+    req.user = {
+      id: sessionUser.id,
+      username: sessionUser.username,
+      role: sessionUser.role,
+      organizationId: sessionUser.organizationId || undefined
+    };
+    
+    next();
   } catch (error) {
     console.error('Authentication error:', error);
     return res.status(500).json({ message: 'Authentication failed' });
