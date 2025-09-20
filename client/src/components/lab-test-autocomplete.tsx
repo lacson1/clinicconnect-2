@@ -32,14 +32,11 @@ export default function LabTestAutocomplete({
   const [searchQuery, setSearchQuery] = useState("");
   const [labTests, setLabTests] = useState<LabTest[]>([]);
 
-  // Fetch lab test suggestions with authentication
+  // Fetch lab test suggestions with session-based authentication
   const fetchLabTests = async (q: string) => {
     try {
-      const token = localStorage.getItem('clinic_token');
       const res = await axios.get(`/api/suggestions/lab-tests?q=${q}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        withCredentials: true
       });
       setLabTests(res.data);
     } catch (error) {
