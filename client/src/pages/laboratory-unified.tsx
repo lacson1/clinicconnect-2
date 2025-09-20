@@ -889,8 +889,9 @@ export default function LaboratoryUnified() {
   const handleOrderSubmit = (data: any) => {
     createOrder.mutate({
       patientId: parseInt(data.patientId),
-      testIds: data.tests.map((test: any) => test.id),
+      tests: data.tests, // Send full test objects as backend expects
       clinicalNotes: data.clinicalNotes,
+      diagnosis: data.diagnosis || '', // Add diagnosis field
       priority: data.priority
     });
   };
