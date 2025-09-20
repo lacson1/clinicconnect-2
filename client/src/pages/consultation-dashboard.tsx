@@ -66,9 +66,9 @@ export default function ConsultationDashboard() {
   };
 
   // Filter appointments by status
-  const scheduledAppointments = appointments.filter((apt: Appointment) => apt.status === 'scheduled');
-  const inProgressAppointments = appointments.filter((apt: Appointment) => apt.status === 'in-progress');
-  const completedTodayAppointments = appointments.filter((apt: Appointment) => 
+  const scheduledAppointments = (appointments as Appointment[]).filter((apt: Appointment) => apt.status === 'scheduled');
+  const inProgressAppointments = (appointments as Appointment[]).filter((apt: Appointment) => apt.status === 'in-progress');
+  const completedTodayAppointments = (appointments as Appointment[]).filter((apt: Appointment) => 
     apt.status === 'completed' && 
     new Date(apt.appointmentDate).toDateString() === new Date().toDateString()
   );
