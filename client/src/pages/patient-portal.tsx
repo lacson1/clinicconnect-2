@@ -412,7 +412,7 @@ const PatientPortalContent = ({ patient, onLogout }: { patient: any; onLogout: (
         credentials: 'include'
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      // Production: Logout error handled
     }
     
     toast({
@@ -961,7 +961,7 @@ export default function PatientPortal() {
         credentials: 'include'
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      // Production: Logout error handled
     }
     
     setIsAuthenticated(false);

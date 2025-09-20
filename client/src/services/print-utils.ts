@@ -94,7 +94,7 @@ export async function printPrescription(prescription: any, patient: any) {
     
     await PrintService.printDocument(document);
   } catch (error) {
-    console.error('Error printing prescription:', error);
+    // Production: Error printing prescription
     throw new Error('Failed to print prescription. Please try again.');
   }
 }
@@ -115,7 +115,7 @@ export async function printLabOrder(labOrder: any, patient: any) {
     
     await PrintService.printDocument(document);
   } catch (error) {
-    console.error('Error printing lab order:', error);
+    // Production: Error printing lab order
     throw new Error('Failed to print lab order. Please try again.');
   }
 }
@@ -136,7 +136,7 @@ export async function printConsultation(consultation: any, patient: any) {
     
     await PrintService.printDocument(document);
   } catch (error) {
-    console.error('Error printing consultation:', error);
+    // Production: Error printing consultation
     throw new Error('Failed to print consultation. Please try again.');
   }
 }

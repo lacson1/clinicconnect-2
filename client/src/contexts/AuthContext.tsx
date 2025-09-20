@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: 'include',
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      // Production: Logout error handled
     }
     setUser(null);
   };
@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
       }
     } catch (error) {
-      console.error('Failed to refresh user data:', error);
+      // Production: Failed to refresh user data
       // Don't clear user on network errors, only on auth failures
     } finally {
       setIsLoading(false);

@@ -49,18 +49,14 @@ function AuthenticatedDocumentViewer({ document, onDownload }: {
     setIsLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('clinic_token');
-      if (!token) {
-        setError('Authentication required');
-        setIsLoading(false);
-        return;
-      }
+      // Using session-based authentication via cookies
+      // Session authentication is automatically handled
 
       const response = await fetch(`/api/files/medical/${document.fileName}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Cache-Control': 'no-cache'
-        }
+        },
+        credentials: 'include' // Use secure session cookies
       });
       
       if (response.ok) {
@@ -106,9 +102,9 @@ function AuthenticatedDocumentViewer({ document, onDownload }: {
 
   const openInNewTab = async () => {
     try {
-      const token = localStorage.getItem('clinic_token');
+      // Using session-based authentication via cookies
       const response = await fetch(`/api/files/medical/${document.fileName}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        credentials: 'include' // Use secure session cookies
       });
       
       if (response.ok) {
@@ -118,7 +114,7 @@ function AuthenticatedDocumentViewer({ document, onDownload }: {
         setTimeout(() => URL.revokeObjectURL(url), 10000);
       }
     } catch (error) {
-      console.error('Error opening document:', error);
+      // Production: Error opening document
     }
   };
 
@@ -359,13 +355,11 @@ export default function DocumentsPage() {
   // Upload document mutation
   const uploadDocumentMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const token = localStorage.getItem('clinic_token');
+      // Using session-based authentication via cookies
       const response = await fetch('/api/upload/medical', {
         method: 'POST',
         body: data,
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include' // Use secure session cookies
       });
       if (!response.ok) {
         const errorText = await response.text();
@@ -448,11 +442,9 @@ export default function DocumentsPage() {
 
   const handleDownload = async (fileName: string, originalName: string) => {
     try {
-      const token = localStorage.getItem('clinic_token');
+      // Using session-based authentication via cookies
       const response = await fetch(`/api/files/medical/${fileName}?download=true`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include' // Use secure session cookies
       });
       
       if (!response.ok) {
@@ -469,7 +461,7 @@ export default function DocumentsPage() {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading document:', error);
+      // Production: Error downloading document
       toast({
         title: 'Download Failed',
         description: 'Could not download the document',
@@ -526,7 +518,7 @@ export default function DocumentsPage() {
   ];
 
   // Get unique categories from documents
-  const documentCategories = [...new Set(documents.map((doc: Document) => doc.category))];
+  const documentCategories = Array.from(new Set((documents as Document[]).map((doc: Document) => doc.category)));
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -599,7 +591,7 @@ export default function DocumentsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">No specific patient</SelectItem>
-                    {patients.map((patient: Patient) => (
+                    {(patients as Patient[]).map((patient: Patient) => (
                       <SelectItem key={patient.id} value={patient.id.toString()}>
                         {patient.firstName} {patient.lastName}
                       </SelectItem>
