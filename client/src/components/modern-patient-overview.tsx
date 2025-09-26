@@ -154,7 +154,17 @@ interface CompletedLabResult {
 }
 
 // PatientReviewedResults Component
-function PatientReviewedResults({ patientId }: { patientId: number }) {
+function PatientReviewedResults({ 
+  patientId, 
+  showDeleteVisitConfirm, 
+  setShowDeleteVisitConfirm,
+  confirmDeleteVisit 
+}: { 
+  patientId: number;
+  showDeleteVisitConfirm: boolean;
+  setShowDeleteVisitConfirm: (value: boolean) => void;
+  confirmDeleteVisit: () => void;
+}) {
   const { toast } = useToast();
   const { data: reviewedResults = [], isLoading } = useQuery<CompletedLabResult[]>({
     queryKey: ['/api/lab-results/reviewed', patientId],
@@ -3368,7 +3378,12 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
                   </TabsContent>
 
                   <TabsContent value="reviewed" className="space-y-4">
-                    <PatientReviewedResults patientId={patient.id} />
+                    <PatientReviewedResults 
+                      patientId={patient.id} 
+                      showDeleteVisitConfirm={showDeleteVisitConfirm}
+                      setShowDeleteVisitConfirm={setShowDeleteVisitConfirm}
+                      confirmDeleteVisit={confirmDeleteVisit}
+                    />
                   </TabsContent>
 
                   <TabsContent value="pending" className="space-y-4">
