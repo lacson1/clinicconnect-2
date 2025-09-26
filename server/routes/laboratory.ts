@@ -1,47 +1,607 @@
 import type { Express } from "express";
-import { authenticateToken, requireAnyRole, type AuthRequest } from "../middleware/auth";
+import { authenticateToken, requireAnyRole, requireRole, type AuthRequest } from "../middleware/auth";
+import { tenantMiddleware, type TenantRequest } from "../middleware/tenant";
 import { storage } from "../storage";
+import { insertLabTestSchema, insertLabResultSchema, labTests, labOrders, labOrderItems, labResults, patients, users, organizations } from "@shared/schema";
+import { z } from "zod";
+import { db } from "../db";
+import { eq, desc, and, isNotNull, sql } from "drizzle-orm";
+import { AuditLogger } from "../audit";
 
 /**
  * Laboratory management routes
  * Handles: lab orders, test results, AI analysis, FHIR exports
  */
 export function setupLaboratoryRoutes(app: Express): void {
-  // Lab test management
-  app.get('/api/lab-tests-old', authenticateToken, async (req: AuthRequest, res) => {
-    // Implementation will be moved from main routes.ts
-    res.status(501).json({ message: "Lab tests listing - implementation pending" });
-  });
 
+  // === PATIENT LAB RESULTS ===
+
+  // Create lab result for patient
   app.post("/api/patients/:id/labs", async (req, res) => {
-    // Implementation will be moved from main routes.ts
-    res.status(501).json({ message: "Lab order creation - implementation pending" });
+    try {
+      const patientId = parseInt(req.params.id);
+      const labData = insertLabResultSchema.parse({ ...req.body, patientId });
+      const labResult = await storage.createLabResult(labData);
+      res.json(labResult);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid lab result data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create lab result" });
+      }
+    }
   });
 
-  app.get("/api/patients/:id/labs", async (req, res) => {
-    // Implementation will be moved from main routes.ts
-    res.status(501).json({ message: "Patient lab results - implementation pending" });
+  // Get patient lab results
+  app.get("/api/patients/:id/labs", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const organizationId = req.user?.organizationId;
+
+      console.log('Lab Results Query Debug:', { patientId, organizationId, userId: req.user?.id });
+
+      if (!organizationId) {
+        return res.status(403).json({ message: "Organization access required" });
+      }
+
+      // Get completed lab results from lab order items with results
+      const labResults = await db
+        .select({
+          id: labOrderItems.id,
+          patientId: labOrders.patientId,
+          testName: labTests.name,
+          testDate: labOrderItems.completedAt,
+          result: labOrderItems.result,
+          normalRange: labTests.referenceRange,
+          status: labOrderItems.status,
+          notes: labOrderItems.remarks,
+          organizationId: labOrders.organizationId,
+          createdAt: labOrders.createdAt
+        })
+        .from(labOrderItems)
+        .innerJoin(labOrders, eq(labOrderItems.labOrderId, labOrders.id))
+        .innerJoin(labTests, eq(labOrderItems.labTestId, labTests.id))
+        .where(
+          and(
+            eq(labOrders.patientId, patientId),
+            eq(labOrders.organizationId, organizationId),
+            isNotNull(labOrderItems.result) // Only get items with actual results
+          )
+        )
+        .orderBy(desc(labOrderItems.completedAt));
+
+      console.log('Lab Results Found:', labResults.length, labResults);
+      res.json(labResults);
+    } catch (error) {
+      console.error("Error fetching lab results:", error);
+      res.status(500).json({ message: "Failed to fetch lab results" });
+    }
   });
 
-  // AI-powered lab analysis
-  app.post('/api/lab-results/ai-analysis', authenticateToken, async (req: AuthRequest, res) => {
-    // Implementation will be moved from main routes.ts
-    res.status(501).json({ message: "AI lab analysis - implementation pending" });
+  // === LAB TESTS MANAGEMENT ===
+
+  // Get lab tests (old endpoint)
+  app.get('/api/lab-tests-old', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const labTestResults = await db.select().from(labTests);
+      const convertedResults = labTestResults.map(test => ({
+        id: test.id,
+        name: test.name,
+        category: test.category || 'General',
+        referenceRange: test.referenceRange || 'See lab standards',
+        units: test.units || '',
+        cost: test.cost || 0,
+        turnaroundTime: test.turnaroundTime || '1-2 days',
+        description: test.description || ''
+      }));
+      res.json(convertedResults);
+    } catch (error) {
+      console.error("Error fetching lab tests:", error);
+      res.status(500).json({ message: "Failed to fetch lab tests" });
+    }
   });
 
-  app.post('/api/patients/integrate-lab-results', authenticateToken, async (req: AuthRequest, res) => {
-    // Implementation will be moved from main routes.ts
-    res.status(501).json({ message: "Lab results integration - implementation pending" });
+  // Get lab tests (modern endpoint)
+  app.get('/api/lab-tests', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const tests = await db.select().from(labTests).orderBy(labTests.name);
+      res.json(tests);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch lab tests" });
+    }
   });
 
-  // FHIR compliance
-  app.get('/api/fhir/patient/:patientId', authenticateToken, async (req: AuthRequest, res) => {
-    // Implementation will be moved from main routes.ts
-    res.status(501).json({ message: "FHIR patient export - implementation pending" });
+  // Create lab test (admin only)
+  app.post('/api/lab-tests', authenticateToken, requireRole('admin'), async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertLabTestSchema.parse(req.body);
+      
+      const [labTest] = await db.insert(labTests)
+        .values(validatedData)
+        .returning();
+      
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logSystemAction("Lab Test Created", {
+        labTestId: labTest.id,
+        labTestName: labTest.name,
+        category: labTest.category
+      });
+      
+      res.status(201).json(labTest);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid lab test data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create lab test" });
+    }
   });
 
-  app.post('/api/fhir/patient/:patientId', authenticateToken, async (req: AuthRequest, res) => {
-    // Implementation will be moved from main routes.ts
-    res.status(501).json({ message: "FHIR patient data - implementation pending" });
+  // Update lab test (admin only)
+  app.patch('/api/lab-tests/:id', authenticateToken, requireAnyRole(['admin', 'lab_manager']), async (req: AuthRequest, res) => {
+    try {
+      const labTestId = parseInt(req.params.id);
+      const updateData = req.body;
+
+      // Remove undefined/empty fields
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined || updateData[key] === '') {
+          delete updateData[key];
+        }
+      });
+
+      const [updatedTest] = await db.update(labTests)
+        .set({ ...updateData, updatedAt: new Date() })
+        .where(eq(labTests.id, labTestId))
+        .returning();
+
+      if (!updatedTest) {
+        return res.status(404).json({ message: "Lab test not found" });
+      }
+
+      res.json(updatedTest);
+    } catch (error) {
+      console.error('Error updating lab test:', error);
+      res.status(500).json({ message: "Failed to update lab test" });
+    }
+  });
+
+  // === LAB ORDERS MANAGEMENT ===
+
+  // Create lab order for patient
+  app.post('/api/patients/:id/lab-orders', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      console.log('🔬 Lab order creation request:', {
+        patientId: req.params.id,
+        body: req.body,
+        user: req.user
+      });
+
+      const patientId = parseInt(req.params.id);
+      const { tests, labTestIds, notes, priority } = req.body;
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      console.log('🔬 Processing lab order:', { patientId, tests, labTestIds, userOrgId });
+      
+      // Verify patient exists (organization alignment already handled)
+      const [patient] = await db.select().from(patients).where(
+        eq(patients.id, patientId)
+      ).limit(1);
+      
+      if (!patient) {
+        console.log('❌ Patient not found:', patientId);
+        return res.status(404).json({ message: "Patient not found" });
+      }
+      
+      console.log('✅ Patient found:', patient);
+      
+      // Handle both 'tests' and 'labTestIds' fields for compatibility
+      const testIds = tests || labTestIds;
+      
+      if (!testIds || !Array.isArray(testIds) || testIds.length === 0) {
+        console.log('❌ Invalid test IDs:', testIds);
+        return res.status(400).json({ message: "Tests array is required" });
+      }
+      
+      console.log('🧪 Creating lab order with tests:', testIds);
+      
+      // Create the lab order with organization context
+      const [labOrder] = await db.insert(labOrders)
+        .values({
+          patientId,
+          orderedBy: req.user!.id,
+          organizationId: userOrgId,
+          status: 'pending'
+        })
+        .returning();
+      
+      // Create lab order items for each test
+      const orderItems = testIds.map((testId: number) => ({
+        labOrderId: labOrder.id,
+        labTestId: testId,
+        status: 'pending'
+      }));
+      
+      await db.insert(labOrderItems).values(orderItems);
+      
+      // Create audit log
+      const auditLogger = new AuditLogger(req);
+      await auditLogger.logPatientAction("Lab Order Created", patientId, {
+        labOrderId: labOrder.id,
+        testCount: testIds.length,
+        testIds: testIds,
+        notes: notes
+      });
+      
+      res.status(201).json(labOrder);
+    } catch (error) {
+      console.error('Lab order creation error:', error);
+      res.status(500).json({ message: "Failed to create lab order" });
+    }
+  });
+
+  // Get pending lab orders
+  app.get('/api/lab-orders/pending', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      const pendingOrders = await db.select({
+        id: labOrders.id,
+        patientId: labOrders.patientId,
+        orderedBy: labOrders.orderedBy,
+        createdAt: labOrders.createdAt,
+        status: labOrders.status,
+        patientFirstName: patients.firstName,
+        patientLastName: patients.lastName,
+        patientDateOfBirth: patients.dateOfBirth,
+        orderedByUsername: users.username,
+        orderedByRole: users.role
+      })
+      .from(labOrders)
+      .leftJoin(patients, eq(labOrders.patientId, patients.id))
+      .leftJoin(users, eq(labOrders.orderedBy, users.id))
+      .where(eq(labOrders.status, 'pending'))
+      .orderBy(labOrders.createdAt);
+      
+      // Transform the data to match frontend expectations
+      const transformedOrders = pendingOrders.map(order => ({
+        id: order.id,
+        patientId: order.patientId,
+        orderedBy: order.orderedByUsername || `User #${order.orderedBy}`,
+        orderedByRole: order.orderedByRole,
+        createdAt: order.createdAt,
+        status: order.status,
+        patient: {
+          firstName: order.patientFirstName,
+          lastName: order.patientLastName,
+          dateOfBirth: order.patientDateOfBirth
+        }
+      }));
+      
+      res.json(transformedOrders);
+    } catch (error) {
+      console.error("Error fetching pending lab orders:", error);
+      res.status(500).json({ message: "Failed to fetch pending lab orders" });
+    }
+  });
+
+  // Get patient lab orders
+  app.get('/api/patients/:id/lab-orders', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      const patientId = parseInt(req.params.id);
+      
+      const orders = await db.select({
+        id: labOrders.id,
+        patientId: labOrders.patientId,
+        orderedBy: labOrders.orderedBy,
+        status: labOrders.status,
+        priority: labOrders.priority,
+        notes: labOrders.notes,
+        organizationId: labOrders.organizationId,
+        totalCost: labOrders.totalCost,
+        specimenCollectedAt: labOrders.specimenCollectedAt,
+        specimenCollectedBy: labOrders.specimenCollectedBy,
+        reportedAt: labOrders.reportedAt,
+        reviewedBy: labOrders.reviewedBy,
+        reviewedAt: labOrders.reviewedAt,
+        createdAt: labOrders.createdAt,
+        completedAt: labOrders.completedAt
+      })
+        .from(labOrders)
+        .where(and(
+          eq(labOrders.patientId, patientId),
+          eq(labOrders.organizationId, userOrgId)
+        ))
+        .orderBy(labOrders.createdAt);
+      
+      // Set no-cache headers to ensure fresh data
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
+      res.json(orders);
+    } catch (error) {
+      console.error('Error fetching patient lab orders:', error);
+      res.status(500).json({ message: "Failed to fetch lab orders" });
+    }
+  });
+
+  // Get lab order items
+  app.get('/api/lab-orders/:id/items', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      const labOrderId = parseInt(req.params.id);
+      
+      // Verify lab order belongs to user's organization
+      const labOrder = await db.select().from(labOrders).where(
+        and(
+          eq(labOrders.id, labOrderId),
+          eq(labOrders.organizationId, userOrgId)
+        )
+      ).limit(1);
+      
+      if (labOrder.length === 0) {
+        return res.status(404).json({ message: "Lab order not found in your organization" });
+      }
+      
+      const orderItems = await db.select({
+        id: labOrderItems.id,
+        labOrderId: labOrderItems.labOrderId,
+        labTestId: labOrderItems.labTestId,
+        result: labOrderItems.result,
+        remarks: labOrderItems.remarks,
+        status: labOrderItems.status,
+        completedBy: labOrderItems.completedBy,
+        completedAt: labOrderItems.completedAt,
+        testName: labTests.name,
+        testCategory: labTests.category,
+        referenceRange: labTests.referenceRange,
+        units: labTests.units
+      })
+      .from(labOrderItems)
+      .leftJoin(labTests, eq(labOrderItems.labTestId, labTests.id))
+      .where(eq(labOrderItems.labOrderId, labOrderId))
+      .orderBy(labTests.name);
+      
+      // Set no-cache headers to ensure fresh data
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
+      res.json(orderItems);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch lab order items" });
+    }
+  });
+
+  // === LAB RESULTS MANAGEMENT ===
+
+  // Helper function to determine if a lab result is normal
+  function isResultNormal(result: string, normalRange: string): boolean {
+    try {
+      // Simple logic for common ranges like "3.5-5.0" or "< 10"
+      if (normalRange.includes('-')) {
+        const [min, max] = normalRange.split('-').map(s => parseFloat(s.trim()));
+        const value = parseFloat(result);
+        return !isNaN(value) && !isNaN(min) && !isNaN(max) && value >= min && value <= max;
+      }
+      if (normalRange.startsWith('<')) {
+        const max = parseFloat(normalRange.substring(1).trim());
+        const value = parseFloat(result);
+        return !isNaN(value) && !isNaN(max) && value < max;
+      }
+      if (normalRange.startsWith('>')) {
+        const min = parseFloat(normalRange.substring(1).trim());
+        const value = parseFloat(result);
+        return !isNaN(value) && !isNaN(min) && value > min;
+      }
+      // Default to normal if we can't parse
+      return true;
+    } catch {
+      return true;
+    }
+  }
+
+  // Get reviewed lab results with pagination
+  app.get('/api/lab-results/reviewed', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      const { patientId, page = '1', limit = '25' } = req.query;
+      const pageNum = parseInt(page as string);
+      const limitNum = Math.min(parseInt(limit as string), 100); // Max 100 items per page
+      const offset = (pageNum - 1) * limitNum;
+      
+      // Build optimized query with indexed columns
+      let whereConditions = [eq(labResults.organizationId, userOrgId)];
+      if (patientId) {
+        whereConditions.push(eq(labResults.patientId, parseInt(patientId as string)));
+      }
+      
+      // Use Promise.all for parallel execution
+      const [reviewedResults, totalCount] = await Promise.all([
+        db.select({
+          id: labResults.id,
+          patientId: labResults.patientId,
+          patientName: sql<string>`CONCAT(${patients.firstName}, ' ', ${patients.lastName})`,
+          testName: labResults.testName,
+          result: labResults.result,
+          normalRange: labResults.normalRange,
+          status: labResults.status,
+          testDate: labResults.testDate,
+          notes: labResults.notes,
+          createdAt: labResults.createdAt
+        })
+        .from(labResults)
+        .innerJoin(patients, eq(labResults.patientId, patients.id))
+        .where(and(...whereConditions))
+        .orderBy(desc(labResults.createdAt))
+        .limit(limitNum)
+        .offset(offset),
+        
+        db.select({ count: sql<number>`count(*)` })
+        .from(labResults)
+        .innerJoin(patients, eq(labResults.patientId, patients.id))
+        .where(and(...whereConditions))
+        .then(result => result[0]?.count || 0)
+      ]);
+      
+      // Transform data efficiently
+      const transformedResults = reviewedResults.map(result => ({
+        id: result.id,
+        orderId: null,
+        patientId: result.patientId,
+        patientName: result.patientName,
+        testName: result.testName,
+        result: result.result,
+        normalRange: result.normalRange || 'See lab standards',
+        status: result.status,
+        completedDate: result.testDate,
+        reviewedBy: 'Lab Staff',
+        category: 'General',
+        units: '',
+        remarks: result.notes
+      }));
+      
+      // Add performance headers
+      res.set({
+        'Cache-Control': 'private, max-age=30',
+        'X-Total-Count': totalCount.toString(),
+        'X-Page': pageNum.toString(),
+        'X-Per-Page': limitNum.toString()
+      });
+      
+      res.json({
+        data: transformedResults,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: totalCount,
+          pages: Math.ceil(totalCount / limitNum)
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching reviewed lab results:", error);
+      res.status(500).json({ message: "Failed to fetch reviewed lab results" });
+    }
+  });
+
+  // Bulk save lab results
+  app.post('/api/lab-results/bulk-save', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const userOrgId = req.user?.organizationId;
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      const { results } = req.body;
+      if (!Array.isArray(results) || results.length === 0) {
+        return res.status(400).json({ message: "Results array is required" });
+      }
+
+      // Process bulk save
+      const savedResults = [];
+      for (const result of results) {
+        try {
+          const savedResult = await storage.createLabResult({
+            ...result,
+            organizationId: userOrgId
+          });
+          savedResults.push(savedResult);
+        } catch (error) {
+          console.error(`Failed to save result ${result.id}:`, error);
+        }
+      }
+
+      res.json({
+        success: true,
+        saved: savedResults.length,
+        total: results.length,
+        results: savedResults
+      });
+    } catch (error) {
+      console.error("Error bulk saving lab results:", error);
+      res.status(500).json({ message: "Failed to bulk save lab results" });
+    }
+  });
+
+  // Update lab order item
+  app.patch('/api/lab-order-items/:id', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const itemId = parseInt(req.params.id);
+      const updateData = req.body;
+
+      // Remove undefined/empty fields
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined || updateData[key] === '') {
+          delete updateData[key];
+        }
+      });
+
+      // Add completion timestamp if result is being set
+      if (updateData.result && !updateData.completedAt) {
+        updateData.completedAt = new Date();
+        updateData.completedBy = req.user?.id;
+      }
+
+      const [updatedItem] = await db.update(labOrderItems)
+        .set(updateData)
+        .where(eq(labOrderItems.id, itemId))
+        .returning();
+
+      if (!updatedItem) {
+        return res.status(404).json({ message: "Lab order item not found" });
+      }
+
+      res.json(updatedItem);
+    } catch (error) {
+      console.error('Error updating lab order item:', error);
+      res.status(500).json({ message: "Failed to update lab order item" });
+    }
+  });
+
+  // Search lab tests
+  app.get("/api/lab-tests/search", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { q } = req.query;
+      const searchTerm = (q as string) || "";
+      
+      if (!searchTerm || searchTerm.length < 2) {
+        return res.json([]);
+      }
+
+      const tests = await db.select()
+        .from(labTests)
+        .where(sql`${labTests.name} ILIKE ${'%' + searchTerm + '%'}`)
+        .limit(10)
+        .orderBy(labTests.name);
+
+      res.json(tests);
+    } catch (error) {
+      console.error("Error searching lab tests:", error);
+      res.status(500).json({ message: "Failed to search lab tests" });
+    }
   });
 }
