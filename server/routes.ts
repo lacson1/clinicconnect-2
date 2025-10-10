@@ -8343,108 +8343,38 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     try {
       const patientId = parseInt(req.params.patientId);
       
-      const assignments = await db
+      // Get medication reviews from medication_reviews table
+      const reviews = await db
         .select()
-        .from(medicationReviewAssignments)
+        .from(medicationReviews)
         .where(and(
-          eq(medicationReviewAssignments.patientId, patientId),
-          eq(medicationReviewAssignments.organizationId, req.user!.organizationId)
+          eq(medicationReviews.patientId, patientId),
+          eq(medicationReviews.organizationId, req.user!.organizationId)
         ))
-        .orderBy(desc(medicationReviewAssignments.createdAt));
+        .orderBy(desc(medicationReviews.createdAt));
 
-      // Get all patient prescriptions for comprehensive review context
-      const patientPrescriptions = await db
-        .select()
-        .from(prescriptions)
-        .where(and(
-          eq(prescriptions.patientId, patientId),
-          eq(prescriptions.organizationId, req.user!.organizationId)
-        ))
-        .orderBy(desc(prescriptions.createdAt));
-
-      // Enrich assignments with prescription and user data
-      const enrichedAssignments = await Promise.all(assignments.map(async (assignment) => {
-        let prescription = null;
-        let assignedByUser = null;
-        let assignedToUser = null;
-
-        // Get specific prescription if linked to assignment
-        if (assignment.prescriptionId) {
-          prescription = patientPrescriptions.find(p => p.id === assignment.prescriptionId) || null;
-        }
-
-        // Get assigned by user
-        const assignedByResult = await db
+      // Enrich reviews with pharmacist information
+      const enrichedReviews = await Promise.all(reviews.map(async (review) => {
+        const pharmacistResult = await db
           .select()
           .from(users)
-          .where(eq(users.id, assignment.assignedBy))
+          .where(eq(users.id, review.pharmacistId))
           .limit(1);
-        assignedByUser = assignedByResult[0] || null;
-
-        // Get assigned to user if exists
-        if (assignment.assignedTo) {
-          const assignedToResult = await db
-            .select()
-            .from(users)
-            .where(eq(users.id, assignment.assignedTo))
-            .limit(1);
-          assignedToUser = assignedToResult[0] || null;
-        }
+        const pharmacist = pharmacistResult[0] || null;
 
         return {
-          ...assignment,
-          prescription: prescription ? {
-            id: prescription.id,
-            medicationName: prescription.medicationName,
-            dosage: prescription.dosage,
-            frequency: prescription.frequency,
-            instructions: prescription.instructions,
-            prescribedDate: prescription.createdAt,
-            duration: prescription.duration,
-            status: prescription.status
-          } : null,
-          assignedByUser: assignedByUser ? {
-            id: assignedByUser.id,
-            username: assignedByUser.username,
-            firstName: assignedByUser.firstName,
-            lastName: assignedByUser.lastName
-          } : null,
-          assignedToUser: assignedToUser ? {
-            id: assignedToUser.id,
-            username: assignedToUser.username,
-            firstName: assignedToUser.firstName,
-            lastName: assignedToUser.lastName,
-            role: assignedToUser.role
+          ...review,
+          pharmacist: pharmacist ? {
+            id: pharmacist.id,
+            username: pharmacist.username,
+            firstName: pharmacist.firstName,
+            lastName: pharmacist.lastName,
+            role: pharmacist.role
           } : null
         };
       }));
 
-      // Include unassigned prescriptions for potential review assignment
-      const unassignedPrescriptions = patientPrescriptions.filter(prescription => 
-        !assignments.some(assignment => assignment.prescriptionId === prescription.id)
-      );
-
-      const response = {
-        assignments: enrichedAssignments,
-        availablePrescriptions: unassignedPrescriptions.map(prescription => ({
-          id: prescription.id,
-          medicationName: prescription.medicationName,
-          dosage: prescription.dosage,
-          frequency: prescription.frequency,
-          instructions: prescription.instructions,
-          prescribedDate: prescription.createdAt,
-          duration: prescription.duration,
-          status: prescription.status
-        })),
-        summary: {
-          totalAssignments: assignments.length,
-          pendingReviews: assignments.filter(a => a.status === 'pending').length,
-          completedReviews: assignments.filter(a => a.status === 'completed').length,
-          unassignedPrescriptions: unassignedPrescriptions.length
-        }
-      };
-
-      res.json(response);
+      res.json(enrichedReviews);
     } catch (error) {
       console.error('Error fetching medication reviews:', error);
       res.status(500).json({ error: 'Failed to fetch medication reviews' });

@@ -74,19 +74,19 @@ export function EnhancedMedicationReview({ selectedPatientId, onReviewCompleted 
 
   // Fetch patient's prescriptions for review
   const { data: prescriptions = [] } = useQuery({
-    queryKey: ['/api/patients', activePatientId, 'prescriptions'],
+    queryKey: [`/api/patients/${activePatientId}/prescriptions`],
     enabled: !!activePatientId,
   });
 
   // Fetch patient details
   const { data: selectedPatient } = useQuery({
-    queryKey: ['/api/patients', activePatientId],
+    queryKey: [`/api/patients/${activePatientId}`],
     enabled: !!activePatientId,
   });
 
   // Fetch medication reviews for the patient
   const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
-    queryKey: ['/api/patients', activePatientId, 'medication-reviews'],
+    queryKey: [`/api/patients/${activePatientId}/medication-reviews`],
     enabled: !!activePatientId,
   });
 
@@ -103,13 +103,13 @@ export function EnhancedMedicationReview({ selectedPatientId, onReviewCompleted 
   // Mutation for creating medication review
   const createReview = useMutation({
     mutationFn: (data: MedicationReviewForm) => 
-      apiRequest('POST', `/api/patients/${activePatientId}/medication-reviews`, data),
+      apiRequest(`/api/patients/${activePatientId}/medication-reviews`, 'POST', data),
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Medication review completed successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/patients', activePatientId, 'medication-reviews'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/patients/${activePatientId}/medication-reviews`] });
       setShowReviewDialog(false);
       form.reset();
       onReviewCompleted?.();

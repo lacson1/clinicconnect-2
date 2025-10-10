@@ -508,9 +508,8 @@ export const medicationReviewAssignments = pgTable('medication_review_assignment
 // Enhanced Medication Reviews
 export const medicationReviews = pgTable('medication_reviews', {
   id: serial('id').primaryKey(),
-  assignmentId: integer('assignment_id').references(() => medicationReviewAssignments.id),
   patientId: integer('patient_id').references(() => patients.id).notNull(),
-  reviewedBy: integer('reviewed_by').references(() => users.id).notNull(),
+  pharmacistId: integer('pharmacist_id').references(() => users.id).notNull(),
   visitId: integer('visit_id').references(() => visits.id),
   reviewType: varchar('review_type', { length: 50 }).default('comprehensive').notNull(), // comprehensive, drug_interaction, allergy_check, adherence
   
