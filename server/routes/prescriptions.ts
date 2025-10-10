@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticateToken, requireAnyRole, type AuthRequest } from "../middleware/auth";
 import { storage } from "../storage";
-import { insertMedicineSchema, insertPrescriptionSchema, medicines, prescriptions, patients, users, organizations } from "@shared/schema";
+import { insertMedicineSchema, insertPrescriptionSchema, medicines, medications, prescriptions, patients, users, organizations } from "@shared/schema";
 import { z } from "zod";
 import { db } from "../db";
 import { eq, desc, sql, and } from "drizzle-orm";
@@ -328,8 +328,25 @@ export function setupPrescriptionRoutes(): Router {
         return res.status(400).json({ message: "Organization context required" });
       }
 
-      const patientPrescriptions = await db.select()
+      const patientPrescriptions = await db.select({
+        id: prescriptions.id,
+        patientId: prescriptions.patientId,
+        visitId: prescriptions.visitId,
+        medicationId: prescriptions.medicationId,
+        medicationName: sql<string>`COALESCE(${prescriptions.medicationName}, ${medications.name})`.as('medicationName'),
+        dosage: prescriptions.dosage,
+        frequency: prescriptions.frequency,
+        duration: prescriptions.duration,
+        instructions: prescriptions.instructions,
+        prescribedBy: prescriptions.prescribedBy,
+        startDate: prescriptions.startDate,
+        endDate: prescriptions.endDate,
+        status: prescriptions.status,
+        organizationId: prescriptions.organizationId,
+        createdAt: prescriptions.createdAt,
+      })
         .from(prescriptions)
+        .leftJoin(medications, eq(prescriptions.medicationId, medications.id))
         .where(and(
           eq(prescriptions.patientId, patientId),
           eq(prescriptions.organizationId, userOrgId)
@@ -348,8 +365,25 @@ export function setupPrescriptionRoutes(): Router {
     try {
       const patientId = parseInt(req.params.id);
       
-      const activePrescriptions = await db.select()
+      const activePrescriptions = await db.select({
+        id: prescriptions.id,
+        patientId: prescriptions.patientId,
+        visitId: prescriptions.visitId,
+        medicationId: prescriptions.medicationId,
+        medicationName: sql<string>`COALESCE(${prescriptions.medicationName}, ${medications.name})`.as('medicationName'),
+        dosage: prescriptions.dosage,
+        frequency: prescriptions.frequency,
+        duration: prescriptions.duration,
+        instructions: prescriptions.instructions,
+        prescribedBy: prescriptions.prescribedBy,
+        startDate: prescriptions.startDate,
+        endDate: prescriptions.endDate,
+        status: prescriptions.status,
+        organizationId: prescriptions.organizationId,
+        createdAt: prescriptions.createdAt,
+      })
         .from(prescriptions)
+        .leftJoin(medications, eq(prescriptions.medicationId, medications.id))
         .where(and(
           eq(prescriptions.patientId, patientId),
           eq(prescriptions.status, 'active')

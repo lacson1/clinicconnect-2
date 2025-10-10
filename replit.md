@@ -12,7 +12,11 @@ A comprehensive digital health platform specializing in advanced medical communi
 - Comprehensive patient communication and data management system
 
 ## Recent Changes
-**October 10, 2025 - Patient Portal Authentication Fixed & Route Modernization ✅**
+**October 10, 2025 - Medication Display Fixed, Patient Portal & Route Modernization ✅**
+- Fixed critical medication name display bug in patient overview:
+  - Updated prescription endpoints to join with correct "medications" table
+  - Implemented COALESCE logic to show medication names from catalog or manual entries
+  - Medication names now display correctly in all prescription cards
 - Fixed critical patient portal JWT authentication bug:
   - Updated authenticatedFetch to use Bearer token from localStorage (was using session cookies)
   - Login now properly stores JWT token and patient data in localStorage
