@@ -112,6 +112,7 @@ const getNavigationGroupsForRole = (role: string) => {
       items: [
         { name: "My Profile", href: "/profile", icon: User, roles: ["super_admin", "superadmin", "admin", "doctor", "nurse", "pharmacist", "physiotherapist"] },
         { name: "Settings", href: "/settings", icon: Settings, roles: ["super_admin", "superadmin", "admin", "doctor", "nurse", "pharmacist", "physiotherapist"] },
+        { name: "Help & Support", href: "/help", icon: HelpCircle, roles: ["super_admin", "superadmin", "admin", "doctor", "nurse", "pharmacist", "physiotherapist", "receptionist", "lab_technician"] },
       ]
     }
   ];

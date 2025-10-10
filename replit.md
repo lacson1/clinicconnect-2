@@ -12,6 +12,22 @@ A comprehensive digital health platform specializing in advanced medical communi
 - Comprehensive patient communication and data management system
 
 ## Recent Changes
+**October 10, 2025 - Help & Support System Built ✅**
+- **Comprehensive Help & Support center implemented:**
+  - Accessible from sidebar → Personal → Help & Support
+  - 4-tab interface: FAQs, Guides, Contact Support, Resources
+  - 12 role-specific FAQs covering all major features
+  - Real-time FAQ search and filtering
+  - Expandable/collapsible FAQ cards with category badges
+  - 8 quick access guides (Patient Management, Clinical Workflow, Laboratory, etc.)
+  - Full contact support form with priority levels and categories
+  - Contact information panel (email, phone, live chat)
+  - Emergency support hotline information
+  - Resource library (videos, PDFs, training materials, compliance docs)
+  - All resource buttons functional with "Coming Soon" notifications
+  - Healthcare-card styling for consistent design
+  - Fully tested and operational
+
 **October 10, 2025 - Patient Management Redesign & Medication Bug Fixes ✅**
 - **Completely redesigned Patient Management interface for better usability:**
   - Removed cluttered collapsible sections for cleaner always-visible layout

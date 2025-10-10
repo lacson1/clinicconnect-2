@@ -66,6 +66,7 @@ import BillingPage from "@/pages/billing";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import ConsultationRecordDetails from "@/pages/consultation-record-details";
+import HelpAndSupport from "@/pages/help-support";
 
 function AuthenticatedApp() {
   const { user } = useAuth();
@@ -150,6 +151,7 @@ function AuthenticatedApp() {
                   <Route path="/profile" component={ProfilePage} />
                   <Route path="/my-profile" component={Profile} />
                   <Route path="/settings" component={Settings} />
+                  <Route path="/help" component={HelpAndSupport} />
                   <Route path="/user-management" component={UserManagementSimple} />
                   <Route path="/ai-clinical-insights" component={AIClinicalInsights} />
                   <Route path="/audit-logs" component={AuditLogs} />
