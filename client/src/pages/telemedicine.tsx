@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -69,6 +69,15 @@ export default function TelemedicinePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Sync session notes when selected session changes
+  useEffect(() => {
+    if (selectedSession?.notes) {
+      setSessionNotes(selectedSession.notes);
+    } else {
+      setSessionNotes('');
+    }
+  }, [selectedSession]);
+
   const { data: sessions = [], isLoading } = useQuery<TeleconsultationSession[]>({
     queryKey: ['/api/telemedicine/sessions'],
     enabled: true
@@ -137,7 +146,7 @@ export default function TelemedicinePage() {
 
   const saveNotesMutation = useMutation({
     mutationFn: ({ id, notes }: { id: number; notes: string }) => 
-      apiRequest('PATCH', `/api/telemedicine/sessions/${id}`, { notes }),
+      apiRequest(`/api/telemedicine/sessions/${id}`, 'PATCH', { notes }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/telemedicine/sessions'] });
       toast({
@@ -406,12 +415,21 @@ export default function TelemedicinePage() {
                     </Button>
                   )}
                   {session.status === 'completed' && (
-                    <div className="flex items-center gap-2 text-green-600">
-                      <CheckCircle className="h-4 w-4" />
-                      <span className="text-sm">
-                        {session.duration ? `${session.duration} min` : 'Completed'}
-                      </span>
-                    </div>
+                    <>
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedSession(session)}
+                      >
+                        View Session
+                      </Button>
+                      <div className="flex items-center gap-2 text-green-600">
+                        <CheckCircle className="h-4 w-4" />
+                        <span className="text-sm">
+                          {session.duration ? `${session.duration} min` : 'Completed'}
+                        </span>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>

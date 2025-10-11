@@ -7633,7 +7633,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
           patientId: telemedicineSessions.patientId,
           patientName: sql<string>`${patients.firstName} || ' ' || ${patients.lastName}`,
           doctorId: telemedicineSessions.doctorId,
-          doctorName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+          doctorName: sql<string>`COALESCE(NULLIF(TRIM(${users.firstName} || ' ' || ${users.lastName}), ''), ${users.username})`,
           scheduledTime: telemedicineSessions.scheduledTime,
           status: telemedicineSessions.status,
           type: telemedicineSessions.type,
