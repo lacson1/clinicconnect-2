@@ -3169,20 +3169,36 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="medical-records" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4 max-w-2xl mb-6">
-                    <TabsTrigger value="medical-records" className="flex items-center gap-2">
+                  <TabsList className="grid w-full grid-cols-4 max-w-2xl mb-6 bg-gradient-to-r from-slate-50 to-blue-50">
+                    <TabsTrigger 
+                      value="medical-records" 
+                      className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all duration-200"
+                      data-testid="tab-medical-records"
+                    >
                       <MedicalRecord className="w-4 h-4" />
                       Medical Records
                     </TabsTrigger>
-                    <TabsTrigger value="consent-forms" className="flex items-center gap-2">
+                    <TabsTrigger 
+                      value="consent-forms" 
+                      className="flex items-center gap-2 data-[state=active]:bg-violet-500 data-[state=active]:text-white transition-all duration-200"
+                      data-testid="tab-consent-forms"
+                    >
                       <Document className="w-4 h-4" />
                       Consent Forms
                     </TabsTrigger>
-                    <TabsTrigger value="insurance" className="flex items-center gap-2">
+                    <TabsTrigger 
+                      value="insurance" 
+                      className="flex items-center gap-2 data-[state=active]:bg-amber-500 data-[state=active]:text-white transition-all duration-200"
+                      data-testid="tab-insurance"
+                    >
                       <FileText className="w-4 h-4" />
                       Insurance
                     </TabsTrigger>
-                    <TabsTrigger value="referrals" className="flex items-center gap-2">
+                    <TabsTrigger 
+                      value="referrals" 
+                      className="flex items-center gap-2 data-[state=active]:bg-emerald-500 data-[state=active]:text-white transition-all duration-200"
+                      data-testid="tab-referrals"
+                    >
                       <Referral className="w-4 h-4" />
                       Referrals
                     </TabsTrigger>
