@@ -1530,3 +1530,28 @@ export type AvailabilitySlot = typeof availabilitySlots.$inferSelect;
 export type InsertAvailabilitySlot = z.infer<typeof insertAvailabilitySlotSchema>;
 export type BlackoutDate = typeof blackoutDates.$inferSelect;
 export type InsertBlackoutDate = z.infer<typeof insertBlackoutDateSchema>;
+
+// Telemedicine Sessions
+export const telemedicineSessions = pgTable('telemedicine_sessions', {
+  id: serial('id').primaryKey(),
+  patientId: integer('patient_id').references(() => patients.id).notNull(),
+  doctorId: integer('doctor_id').references(() => users.id).notNull(),
+  scheduledTime: timestamp('scheduled_time').notNull(),
+  status: varchar('status', { length: 20 }).default('scheduled').notNull(), // 'scheduled', 'active', 'completed', 'cancelled'
+  type: varchar('type', { length: 20 }).default('video').notNull(), // 'video', 'audio', 'chat'
+  sessionUrl: varchar('session_url', { length: 500 }),
+  notes: text('notes'),
+  duration: integer('duration'), // in minutes
+  organizationId: integer('organization_id').references(() => organizations.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  completedAt: timestamp('completed_at')
+});
+
+export const insertTelemedicineSessionSchema = createInsertSchema(telemedicineSessions).omit({
+  id: true,
+  createdAt: true,
+  completedAt: true
+});
+
+export type TelemedicineSession = typeof telemedicineSessions.$inferSelect;
+export type InsertTelemedicineSession = z.infer<typeof insertTelemedicineSessionSchema>;

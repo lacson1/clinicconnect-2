@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { fileStorage } from "./storage-service";
-import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, insertSafetyAlertSchema, insertPharmacyActivitySchema, insertMedicationReviewSchema, insertMedicationReviewAssignmentSchema, insertProceduralReportSchema, insertConsentFormSchema, insertPatientConsentSchema, insertMessageSchema, insertAppointmentReminderSchema, insertAvailabilitySlotSchema, insertBlackoutDateSchema, insertInvoiceSchema, insertInvoiceItemSchema, insertPaymentSchema, insertInsuranceClaimSchema, insertServicePriceSchema, insertPatientInsuranceSchema, insertPatientReferralSchema, insertPinnedConsultationFormSchema, users, auditLogs, labTests, medications, medicines, labOrders, labOrderItems, labResults, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, appointments, safetyAlerts, pharmacyActivities, medicationReviews, medicationReviewAssignments, prescriptions, pharmacies, proceduralReports, consentForms, patientConsents, messages, appointmentReminders, availabilitySlots, blackoutDates, invoices, invoiceItems, payments, insuranceClaims, servicePrices, medicalDocuments, vaccinations, roles, permissions, rolePermissions, patientInsurance, patientReferrals, pinnedConsultationForms } from "@shared/schema";
+import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, insertSafetyAlertSchema, insertPharmacyActivitySchema, insertMedicationReviewSchema, insertMedicationReviewAssignmentSchema, insertProceduralReportSchema, insertConsentFormSchema, insertPatientConsentSchema, insertMessageSchema, insertAppointmentReminderSchema, insertAvailabilitySlotSchema, insertBlackoutDateSchema, insertInvoiceSchema, insertInvoiceItemSchema, insertPaymentSchema, insertInsuranceClaimSchema, insertServicePriceSchema, insertPatientInsuranceSchema, insertPatientReferralSchema, insertPinnedConsultationFormSchema, insertTelemedicineSessionSchema, users, auditLogs, labTests, medications, medicines, labOrders, labOrderItems, labResults, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, appointments, safetyAlerts, pharmacyActivities, medicationReviews, medicationReviewAssignments, prescriptions, pharmacies, proceduralReports, consentForms, patientConsents, messages, appointmentReminders, availabilitySlots, blackoutDates, invoices, invoiceItems, payments, insuranceClaims, servicePrices, medicalDocuments, vaccinations, roles, permissions, rolePermissions, patientInsurance, patientReferrals, pinnedConsultationForms, telemedicineSessions } from "@shared/schema";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { db } from "./db";
@@ -7617,6 +7617,103 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     } catch (error) {
       console.error('Error updating appointment:', error);
       res.status(500).json({ message: "Failed to update appointment" });
+    }
+  });
+
+  // Telemedicine Sessions API endpoints
+  app.get("/api/telemedicine/sessions", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user?.id;
+      const role = req.user?.role;
+      const organizationId = req.user?.organizationId;
+
+      let query = db
+        .select({
+          id: telemedicineSessions.id,
+          patientId: telemedicineSessions.patientId,
+          patientName: sql<string>`${patients.firstName} || ' ' || ${patients.lastName}`,
+          doctorId: telemedicineSessions.doctorId,
+          doctorName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+          scheduledTime: telemedicineSessions.scheduledTime,
+          status: telemedicineSessions.status,
+          type: telemedicineSessions.type,
+          sessionUrl: telemedicineSessions.sessionUrl,
+          notes: telemedicineSessions.notes,
+          duration: telemedicineSessions.duration,
+          createdAt: telemedicineSessions.createdAt,
+          completedAt: telemedicineSessions.completedAt
+        })
+        .from(telemedicineSessions)
+        .leftJoin(patients, eq(telemedicineSessions.patientId, patients.id))
+        .leftJoin(users, eq(telemedicineSessions.doctorId, users.id))
+        .orderBy(desc(telemedicineSessions.scheduledTime));
+
+      // Filter by organization
+      if (organizationId) {
+        query = query.where(eq(telemedicineSessions.organizationId, organizationId));
+      }
+
+      // Filter by user role
+      if (role === 'doctor') {
+        query = query.where(eq(telemedicineSessions.doctorId, userId));
+      }
+
+      const sessions = await query;
+      res.json(sessions);
+    } catch (error) {
+      console.error('Error fetching telemedicine sessions:', error);
+      res.status(500).json({ message: "Failed to fetch telemedicine sessions" });
+    }
+  });
+
+  app.post("/api/telemedicine/sessions", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const sessionData = insertTelemedicineSessionSchema.parse(req.body);
+      
+      // Add doctor ID and organization ID
+      const enrichedData = {
+        ...sessionData,
+        doctorId: req.user?.id || sessionData.doctorId,
+        organizationId: req.user?.organizationId
+      };
+
+      const [newSession] = await db
+        .insert(telemedicineSessions)
+        .values(enrichedData)
+        .returning();
+
+      res.status(201).json(newSession);
+    } catch (error) {
+      console.error('Error creating telemedicine session:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Validation error", 
+          details: error.issues 
+        });
+      }
+      res.status(500).json({ message: "Failed to create telemedicine session" });
+    }
+  });
+
+  app.patch("/api/telemedicine/sessions/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const sessionId = parseInt(req.params.id);
+      const updateData = req.body;
+
+      const [updatedSession] = await db
+        .update(telemedicineSessions)
+        .set({ ...updateData })
+        .where(eq(telemedicineSessions.id, sessionId))
+        .returning();
+
+      if (!updatedSession) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+
+      res.json(updatedSession);
+    } catch (error) {
+      console.error('Error updating telemedicine session:', error);
+      res.status(500).json({ message: "Failed to update session" });
     }
   });
 
