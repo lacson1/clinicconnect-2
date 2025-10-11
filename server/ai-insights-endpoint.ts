@@ -2,15 +2,7 @@ import { Request, Response } from 'express';
 import { db } from './db';
 import { errorLogs } from '@shared/schema';
 import { eq, desc, and, gte } from 'drizzle-orm';
-
-interface AuthRequest extends Request {
-  user?: {
-    id: number;
-    organizationId: number;
-    username: string;
-    role: string;
-  };
-}
+import { AuthRequest } from './middleware/auth';
 
 export async function generateAIInsights(req: AuthRequest, res: Response) {
   try {

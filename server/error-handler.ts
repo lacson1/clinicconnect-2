@@ -2,16 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { db } from './db';
 import { errorLogs, systemHealth, users } from '@shared/schema';
 import { eq, desc, and, gte, count, avg } from 'drizzle-orm';
-import { authenticateToken } from './middleware/auth';
-
-export interface AuthRequest extends Request {
-  user?: {
-    id: number;
-    organizationId: number;
-    username: string;
-    role: string;
-  };
-}
+import { authenticateToken, AuthRequest } from './middleware/auth';
 
 // Performance monitoring middleware
 export const performanceMonitor = (req: Request, res: Response, next: NextFunction) => {
