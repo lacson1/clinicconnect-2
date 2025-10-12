@@ -69,6 +69,7 @@ import ConsultationRecordDetails from "@/pages/consultation-record-details";
 import HelpAndSupport from "@/pages/help-support";
 import RoleManagement from "@/pages/role-management";
 import StaffAccessControl from "@/pages/staff-access-control";
+import OrganizationSelector from "@/pages/organization-selector";
 
 function AuthenticatedApp() {
   const { user } = useAuth();
@@ -114,6 +115,7 @@ function AuthenticatedApp() {
               <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-500 ease-out relative">
                 <Switch>
                   <Route path="/" component={Dashboard} />
+                  <Route path="/select-organization" component={OrganizationSelector} />
                   <Route path="/dashboard" component={Dashboard} />
                   <Route path="/clinical-activity" component={ConsultationDashboard} />
                   <Route path="/patients" component={Patients} />

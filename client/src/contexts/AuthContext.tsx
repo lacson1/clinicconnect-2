@@ -67,8 +67,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // No token storage needed - session is managed by cookies
       setUser(data.user);
       
-      // Automatically redirect to dashboard after successful login
-      setLocation('/dashboard');
+      // Check if user needs to select organization
+      if (data.requiresOrgSelection) {
+        setLocation('/select-organization');
+      } else {
+        // Automatically redirect to dashboard after successful login
+        setLocation('/dashboard');
+      }
     } catch (error) {
       throw error;
     } finally {

@@ -2202,6 +2202,12 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
           SecurityManager.recordLoginAttempt(username, true);
           await SecurityManager.updateLastLogin(user.id);
           
+          // Check if user has multiple organizations
+          const userOrgs = await db
+            .select()
+            .from(userOrganizations)
+            .where(eq(userOrganizations.userId, user.id));
+          
           const org = user.organizationId ? await getOrganizationDetails(user.organizationId) : null;
           
           // Set user session with activity tracking
@@ -2209,7 +2215,8 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
             id: user.id,
             username: user.username,
             role: user.role,
-            organizationId: user.organizationId
+            organizationId: user.organizationId,
+            currentOrganizationId: userOrgs.length > 0 ? (userOrgs.find(o => o.isDefault)?.organizationId || userOrgs[0].organizationId) : user.organizationId
           };
           
           // Initialize session activity tracking
@@ -2233,7 +2240,8 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
                 themeColor: org.themeColor || '#3B82F6'
               } : null
             },
-            message: 'Login successful'
+            message: 'Login successful',
+            requiresOrgSelection: userOrgs.length > 1  // Flag if user needs to select org
           });
         } else {
           SecurityManager.recordLoginAttempt(username, false);
