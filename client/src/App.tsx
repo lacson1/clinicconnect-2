@@ -70,6 +70,7 @@ import HelpAndSupport from "@/pages/help-support";
 import RoleManagement from "@/pages/role-management";
 import StaffAccessControl from "@/pages/staff-access-control";
 import OrganizationSelector from "@/pages/organization-selector";
+import OrganizationStaff from "@/pages/organization-staff";
 
 function AuthenticatedApp() {
   const { user } = useAuth();
@@ -162,6 +163,7 @@ function AuthenticatedApp() {
                   <Route path="/error-monitoring" component={ErrorMonitoring} />
                   <Route path="/performance" component={PerformancePage} />
                   <Route path="/organization-management" component={OrganizationManagement} />
+                  <Route path="/organization-staff" component={OrganizationStaff} />
                   <Route path="/patient-access-cards" component={PatientAccessCards} />
                   <Route path="/procedural-reports" component={ProceduralReports} />
                   <Route path="/consent-management" component={ConsentManagement} />
