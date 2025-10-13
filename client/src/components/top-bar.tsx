@@ -170,26 +170,22 @@ export default function TopBar() {
             {/* Center Section: Organization Context */}
             {user?.organization && (
               <div className="hidden lg:flex items-center">
-                <div className="flex items-center gap-4 px-5 py-2.5 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-800 dark:to-blue-900/20 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: user.organization.themeColor || '#3B82F6' }}
-                    />
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                      <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                        {user.organization.name}
-                      </span>
-                    </div>
-                    <Badge 
-                      variant="secondary" 
-                      className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700"
-                    >
-                      {user.organization.type}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                <div className="flex items-center px-5 py-2.5 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-800 dark:to-blue-900/20 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <div 
+                    className="w-3 h-3 rounded-full flex-shrink-0 mr-3"
+                    style={{ backgroundColor: user.organization.themeColor || '#3B82F6' }}
+                  />
+                  <MapPin className="h-4 w-4 text-slate-600 dark:text-slate-400 flex-shrink-0 mr-2" />
+                  <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap mr-3">
+                    {user.organization.name}
+                  </span>
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700 flex-shrink-0 mr-4"
+                  >
+                    {user.organization.type}
+                  </Badge>
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex-shrink-0">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                     <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
                       Online
