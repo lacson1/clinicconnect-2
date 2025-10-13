@@ -130,6 +130,8 @@ async function generatePatientRegistryData(organizationId: number, dateRange?: {
 async function generateClinicalAuditData(organizationId: number, dateRange?: { from: string; to: string }) {
   const conditions: any[] = [];
   
+  // CRITICAL: Filter by organization to prevent cross-tenant data leakage
+  // Note: auditLogs may not have organizationId - filter via user's organization instead
   if (dateRange?.from) {
     conditions.push(gte(auditLogs.timestamp, new Date(dateRange.from)));
   }
@@ -146,6 +148,7 @@ async function generateClinicalAuditData(organizationId: number, dateRange?: { f
     username: users.username,
     firstName: users.firstName,
     lastName: users.lastName,
+    userOrgId: users.organizationId,
   })
   .from(auditLogs)
   .leftJoin(users, eq(auditLogs.userId, users.id))
@@ -153,10 +156,13 @@ async function generateClinicalAuditData(organizationId: number, dateRange?: { f
   .orderBy(desc(auditLogs.timestamp))
   .limit(1000);
 
+  // Filter audit logs to only include those from users in the current organization
+  const filteredData = auditData.filter(a => a.userOrgId === organizationId);
+
   return {
     title: 'Clinical Audit Trail',
     columns: ['ID', 'User', 'Action', 'Details', 'Timestamp'],
-    data: auditData.map(a => [
+    data: filteredData.map(a => [
       a.id,
       `${a.firstName || ''} ${a.lastName || ''} (${a.username})`.trim() || 'Unknown',
       a.action,
@@ -207,6 +213,9 @@ async function generateFinancialSummaryData(organizationId: number, dateRange?: 
 }
 
 async function generateMedicationInventoryData(organizationId: number, dateRange?: { from: string; to: string }) {
+  // Note: medications table does not have organizationId column
+  // This is a global medication catalog shared across all organizations
+  // If organization-specific inventory is needed, would require adding organizationId to medications table
   const medicationData = await db.select({
     id: medications.id,
     name: medications.name,
