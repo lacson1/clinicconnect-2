@@ -68,7 +68,7 @@ export default function PhysiotherapyCareCoordination({ patientId, currentUser }
 
   // Mutations for care coordination
   const createReferralMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/referrals', data),
+    mutationFn: (data: any) => apiRequest('/api/referrals', 'POST', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/referrals'] });
       toast({ title: "Referral created successfully" });
@@ -76,7 +76,7 @@ export default function PhysiotherapyCareCoordination({ patientId, currentUser }
   });
 
   const shareProgressMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/progress-sharing', data),
+    mutationFn: (data: any) => apiRequest('/api/progress-sharing', 'POST', data),
     onSuccess: () => {
       toast({ title: "Progress shared with referring physician" });
     },
