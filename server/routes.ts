@@ -2318,6 +2318,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         });
         
         return res.json({
+          success: true,
           user: {
             id: 10,
             username: 'ade',
@@ -2329,7 +2330,9 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
               type: org.type || 'clinic',
               themeColor: org.themeColor || '#3B82F6'
             } : null
-          }
+          },
+          message: 'Login successful',
+          organizationMessage: org ? `You are working at ${org.name}` : 'Working at Organization 1'
         });
       }
       
@@ -2351,6 +2354,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         });
         
         return res.json({
+          success: true,
           user: {
             id: 11,
             username: 'syb',
@@ -2362,7 +2366,9 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
               type: org.type || 'clinic',
               themeColor: org.themeColor || '#3B82F6'
             } : null
-          }
+          },
+          message: 'Login successful',
+          organizationMessage: org ? `You are working at ${org.name}` : 'Working at Organization 1'
         });
       }
       
@@ -2384,6 +2390,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         });
         
         return res.json({
+          success: true,
           user: {
             id: 12,
             username: 'akin',
@@ -2395,7 +2402,9 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
               type: org.type || 'clinic',
               themeColor: org.themeColor || '#3B82F6'
             } : null
-          }
+          },
+          message: 'Login successful',
+          organizationMessage: org ? `You are working at ${org.name}` : 'Working at Organization 1'
         });
       }
       
@@ -2417,6 +2426,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         });
         
         return res.json({
+          success: true,
           user: {
             id: 13,
             username: 'seye',
@@ -2428,7 +2438,9 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
               type: org.type || 'clinic',
               themeColor: org.themeColor || '#3B82F6'
             } : null
-          }
+          },
+          message: 'Login successful',
+          organizationMessage: org ? `You are working at ${org.name}` : 'Working at Organization 1'
         });
       }
       

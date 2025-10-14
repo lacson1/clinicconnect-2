@@ -302,7 +302,7 @@ export default function Login() {
                   </Button>
                   
                   <Button
-                    onClick={() => handleDemoLogin('Ade', 'doctor123')}
+                    onClick={() => handleDemoLogin('ade', 'doctor123')}
                     disabled={isLoading}
                     variant="outline"
                     className="w-full h-10 justify-start"

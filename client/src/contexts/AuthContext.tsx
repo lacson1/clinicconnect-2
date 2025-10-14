@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation } from 'wouter';
+import { useToast } from '@/hooks/use-toast';
 
 interface User {
   id: number;
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Check if user is already logged in via session
@@ -66,6 +68,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // No token storage needed - session is managed by cookies
       setUser(data.user);
+      
+      // Show organization assignment message if present (for demo users)
+      if (data.organizationMessage) {
+        toast({
+          title: "Organization Assignment",
+          description: data.organizationMessage,
+          duration: 6000,
+        });
+        
+        // Small delay to ensure toast is visible before redirect
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
       
       // Check if user needs to select organization
       if (data.requiresOrgSelection) {
