@@ -67,7 +67,7 @@ export function OrganizationRegistrationModal({ open, onOpenChange }: Organizati
 
   const createOrganizationMutation = useMutation({
     mutationFn: async (data: OrganizationData) => {
-      return apiRequest("POST", "/api/organizations", data);
+      return apiRequest("/api/organizations", "POST", data);
     },
     onSuccess: () => {
       toast({
