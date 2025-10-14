@@ -91,7 +91,7 @@ export function StaffRegistrationModal({ open, onOpenChange }: StaffRegistration
   const registerStaffMutation = useMutation({
     mutationFn: async (data: StaffRegistrationData) => {
       const { confirmPassword, ...submitData } = data;
-      return apiRequest("POST", "/api/users", submitData);
+      return apiRequest("/api/users", "POST", submitData);
     },
     onSuccess: () => {
       toast({

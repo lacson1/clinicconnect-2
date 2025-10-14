@@ -148,7 +148,7 @@ export default function VisitRecordingModal({
 
   const recordVisitMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", `/api/patients/${data.patientId}/visits`, data);
+      const response = await apiRequest(`/api/patients/${data.patientId}/visits`, "POST", data);
       return response.json();
     },
     onSuccess: () => {

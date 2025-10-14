@@ -72,7 +72,7 @@ export default function SmartAppointmentScheduler({ patientId, defaultDate }: Sm
   });
 
   const bookAppointmentMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/appointments", {
+    mutationFn: (data: any) => apiRequest("/api/appointments", "POST", {
       ...data,
       patientId: parseInt(data.patientId),
       doctorId: parseInt(data.doctorId),
@@ -108,7 +108,7 @@ export default function SmartAppointmentScheduler({ patientId, defaultDate }: Sm
 
   const updateAppointmentStatus = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => 
-      apiRequest("PATCH", `/api/appointments/${id}`, { status }),
+      apiRequest(`/api/appointments/${id}`, "PATCH", { status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
       toast({

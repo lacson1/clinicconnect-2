@@ -55,7 +55,7 @@ export default function ReferralLettersPage() {
   // Save referral letter as document mutation
   const saveReferralMutation = useMutation({
     mutationFn: async (documentData: any) => {
-      const response = await apiRequest('POST', '/api/patient-documents', documentData);
+      const response = await apiRequest('/api/patient-documents', 'POST', documentData);
       return response.json();
     },
     onSuccess: () => {

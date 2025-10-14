@@ -266,7 +266,7 @@ export default function FormBuilder() {
   // Delete form mutation
   const deleteFormMutation = useMutation({
     mutationFn: async (formId: number) => {
-      return apiRequest('DELETE', `/api/consultation-forms/${formId}`);
+      return apiRequest(`/api/consultation-forms/${formId}`, 'DELETE');
     },
     onSuccess: () => {
       toast({

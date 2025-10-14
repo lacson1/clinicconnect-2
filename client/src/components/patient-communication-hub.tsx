@@ -109,7 +109,7 @@ export function PatientCommunicationHub({ patientId }: { patientId?: number }) {
 
   // Mark message as read mutation
   const markAsReadMutation = useMutation({
-    mutationFn: (messageId: number) => apiRequest('PATCH', `/api/messages/${messageId}/read`),
+    mutationFn: (messageId: number) => apiRequest(`/api/messages/${messageId}/read`, 'PATCH'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/messages', selectedPatient] });
     }

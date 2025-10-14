@@ -77,7 +77,7 @@ export default function Profile() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileForm) => {
-      return apiRequest("PUT", "/api/profile", data);
+      return apiRequest("/api/profile", "PUT", data);
     },
     onSuccess: () => {
       // Refresh user session and invalidate profile cache

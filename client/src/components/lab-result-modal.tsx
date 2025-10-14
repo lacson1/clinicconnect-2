@@ -71,7 +71,7 @@ export default function LabResultModal({
 
   const addLabResultMutation = useMutation({
     mutationFn: async (data: InsertLabResult) => {
-      const response = await apiRequest("POST", `/api/patients/${data.patientId}/labs`, data);
+      const response = await apiRequest(`/api/patients/${data.patientId}/labs`, "POST", data);
       return response.json();
     },
     onSuccess: () => {

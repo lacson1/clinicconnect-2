@@ -23,7 +23,7 @@ export default function Referrals() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      const response = await apiRequest('PATCH', `/api/referrals/${id}`, { status });
+      const response = await apiRequest(`/api/referrals/${id}`, 'PATCH', { status });
       return response.json();
     },
     onSuccess: () => {

@@ -118,7 +118,7 @@ export function PharmacyWorkflow({ medicines }: PharmacyWorkflowProps) {
       }
       
       // Update medicine quantity
-      const response = await apiRequest("PATCH", `/api/medicines/${data.medicineId}`, {
+      const response = await apiRequest(`/api/medicines/${data.medicineId}`, "PATCH", {
         quantity: medicine.quantity - data.quantity
       });
       return response.json();
@@ -145,7 +145,7 @@ export function PharmacyWorkflow({ medicines }: PharmacyWorkflowProps) {
   const restockMutation = useMutation({
     mutationFn: async (data: RestockForm) => {
       const medicine = medicines.find(m => m.id === data.medicineId);
-      const response = await apiRequest("PATCH", `/api/medicines/${data.medicineId}`, {
+      const response = await apiRequest(`/api/medicines/${data.medicineId}`, "PATCH", {
         quantity: medicine.quantity + data.quantity
       });
       return response.json();

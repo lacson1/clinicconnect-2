@@ -43,7 +43,7 @@ export default function ConsultationDashboard() {
 
   // Update appointment status mutation
   const updateAppointmentMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest('PATCH', `/api/appointments/${id}`, data),
+    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/appointments/${id}`, 'PATCH', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/appointments'] });
       toast({ title: 'Success', description: 'Appointment updated successfully' });

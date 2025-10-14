@@ -102,7 +102,7 @@ export default function EditVisit() {
 
   // Update visit mutation
   const updateVisitMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('PATCH', `/api/patients/${patientId}/visits/${visitId}`, data),
+    mutationFn: (data: any) => apiRequest(`/api/patients/${patientId}/visits/${visitId}`, 'PATCH', data),
     onSuccess: () => {
       toast({
         title: "Visit updated",
