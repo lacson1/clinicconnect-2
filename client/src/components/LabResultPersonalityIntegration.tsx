@@ -89,16 +89,12 @@ export function LabResultPersonalityIntegration({
         }
       };
 
-      const response = await apiRequest('/api/lab-results/ai-analysis', {
-        method: 'POST',
-        body: analysisData,
-      });
-
-      return response;
+      const response = await apiRequest('/api/lab-results/ai-analysis', 'POST', analysisData);
+      return await response.json();
     },
     onSuccess: (analysis) => {
       setAiAnalysis(analysis);
-      setIntegrationStatus('analyzed');
+      setIntegrationStatus('reviewed');
       setShowAnalysisDialog(true);
       toast({
         title: "AI Analysis Complete",
@@ -132,12 +128,8 @@ export function LabResultPersonalityIntegration({
         }
       };
 
-      const response = await apiRequest('/api/patients/integrate-lab-results', {
-        method: 'POST',
-        body: integrationData,
-      });
-
-      return response;
+      const response = await apiRequest('/api/patients/integrate-lab-results', 'POST', integrationData);
+      return await response.json();
     },
     onSuccess: () => {
       setIntegrationStatus('integrated');

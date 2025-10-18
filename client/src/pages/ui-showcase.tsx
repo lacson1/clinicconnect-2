@@ -237,6 +237,10 @@ export default function UIShowcase() {
           address: '123 Test Street'
         });
         
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const createResponse = await response.json();
         
         if (createResponse && createResponse.id) {
@@ -293,7 +297,16 @@ export default function UIShowcase() {
       try {
         await new Promise(resolve => setTimeout(resolve, 300));
         const listResponse = await fetch('/api/patients');
+        
+        if (!listResponse.ok) {
+          throw new Error(`HTTP ${listResponse.status}: ${listResponse.statusText}`);
+        }
+        
         const patients = await listResponse.json();
+        
+        if (!Array.isArray(patients)) {
+          throw new Error('Response is not an array');
+        }
         
         const foundPatient = patients.find((p: any) => p.id === createdPatientId);
         
