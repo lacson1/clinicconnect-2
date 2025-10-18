@@ -249,30 +249,46 @@ export function LabResultPersonalityIntegration({
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleAnalyzeResults}
-                disabled={analyzeResultsMutation.isPending || integrationStatus === 'integrated'}
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
-              >
-                {analyzeResultsMutation.isPending ? (
-                  <Activity className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Brain className="w-4 h-4 mr-2" />
-                )}
-                {analyzeResultsMutation.isPending ? 'Analyzing...' : 'Call Personality AI'}
-              </Button>
-              
-              {aiAnalysis && (
+            {labResults.length === 0 ? (
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-yellow-900">No Lab Results Available</p>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      Please add lab test results first before requesting AI analysis. Visit the "Results" tab to add new lab results.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex gap-2">
                 <Button 
-                  variant="outline"
-                  onClick={() => setShowAnalysisDialog(true)}
+                  onClick={handleAnalyzeResults}
+                  disabled={analyzeResultsMutation.isPending || integrationStatus === 'integrated'}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  data-testid="button-call-personality-ai"
                 >
-                  <FileText className="w-4 h-4 mr-2" />
-                  View Analysis
+                  {analyzeResultsMutation.isPending ? (
+                    <Activity className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Brain className="w-4 h-4 mr-2" />
+                  )}
+                  {analyzeResultsMutation.isPending ? 'Analyzing...' : 'Call Personality AI'}
                 </Button>
-              )}
-            </div>
+                
+                {aiAnalysis && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => setShowAnalysisDialog(true)}
+                    data-testid="button-view-analysis"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    View Analysis
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

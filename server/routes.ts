@@ -11255,6 +11255,14 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       const { patientId, labResults, patientData, clinicalContext } = req.body;
       const organizationId = req.user!.organizationId;
 
+      // Validate lab results are provided
+      if (!labResults || labResults.length === 0) {
+        return res.status(400).json({ 
+          error: 'No lab results provided',
+          message: 'Cannot perform AI analysis without lab results. Please add lab test results first.'
+        });
+      }
+
       // Verify patient belongs to organization
       const [patient] = await db
         .select()
