@@ -572,15 +572,21 @@ export default function AppointmentsPage() {
               <div className="space-y-2">
                 <Label htmlFor="patient">Patient *</Label>
                 <Select value={selectedPatient?.toString() || ''} onValueChange={(value) => setSelectedPatient(parseInt(value))}>
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="select-patient">
                     <SelectValue placeholder="Select patient" />
                   </SelectTrigger>
                   <SelectContent>
-                    {patients.map((patient: Patient) => (
-                      <SelectItem key={patient.id} value={patient.id.toString()}>
-                        {patient.firstName} {patient.lastName}
+                    {patients.length === 0 ? (
+                      <SelectItem value="no-patients" disabled>
+                        No patients available
                       </SelectItem>
-                    ))}
+                    ) : (
+                      patients.map((patient: Patient) => (
+                        <SelectItem key={patient.id} value={patient.id.toString()}>
+                          {patient.firstName} {patient.lastName}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -588,15 +594,21 @@ export default function AppointmentsPage() {
               <div className="space-y-2">
                 <Label htmlFor="staff">Healthcare Provider *</Label>
                 <Select value={selectedStaff?.toString() || ''} onValueChange={(value) => setSelectedStaff(parseInt(value))}>
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="select-provider">
                     <SelectValue placeholder="Select healthcare provider" />
                   </SelectTrigger>
                   <SelectContent>
-                    {healthcareStaff.map((staff: HealthcareStaff) => (
-                      <SelectItem key={staff.id} value={staff.id.toString()}>
-                        {staff.role === 'doctor' ? 'Dr.' : ''} {staff.firstName || staff.username} {staff.lastName || ''} ({staff.role})
+                    {healthcareStaff.length === 0 ? (
+                      <SelectItem value="no-staff" disabled>
+                        No healthcare staff available
                       </SelectItem>
-                    ))}
+                    ) : (
+                      healthcareStaff.map((staff: HealthcareStaff) => (
+                        <SelectItem key={staff.id} value={staff.id.toString()}>
+                          {staff.role === 'doctor' ? 'Dr.' : ''} {staff.firstName || staff.username} {staff.lastName || ''} ({staff.role})
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -631,7 +643,7 @@ export default function AppointmentsPage() {
               <div className="space-y-2">
                 <Label htmlFor="time">Time *</Label>
                 <Select value={selectedTime} onValueChange={setSelectedTime}>
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="select-time">
                     <SelectValue placeholder="Select time" />
                   </SelectTrigger>
                   <SelectContent>
@@ -647,7 +659,7 @@ export default function AppointmentsPage() {
               <div className="space-y-2">
                 <Label htmlFor="type">Appointment Type *</Label>
                 <Select value={appointmentType} onValueChange={setAppointmentType}>
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="select-appointment-type">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -663,7 +675,7 @@ export default function AppointmentsPage() {
               <div className="space-y-2">
                 <Label htmlFor="duration">Duration (minutes)</Label>
                 <Select value={duration} onValueChange={setDuration}>
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="select-duration">
                     <SelectValue placeholder="Select duration" />
                   </SelectTrigger>
                   <SelectContent>
@@ -680,6 +692,7 @@ export default function AppointmentsPage() {
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>
               <Textarea
+                data-testid="input-notes"
                 placeholder="Additional notes for the appointment..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -689,12 +702,17 @@ export default function AppointmentsPage() {
 
             <div className="flex gap-2">
               <Button 
+                data-testid="button-schedule-appointment"
                 onClick={handleCreateAppointment}
                 disabled={createAppointmentMutation.isPending}
               >
                 {createAppointmentMutation.isPending ? 'Scheduling...' : 'Schedule Appointment'}
               </Button>
-              <Button variant="outline" onClick={() => setIsCreating(false)}>
+              <Button 
+                data-testid="button-cancel-appointment"
+                variant="outline" 
+                onClick={() => setIsCreating(false)}
+              >
                 Cancel
               </Button>
             </div>
