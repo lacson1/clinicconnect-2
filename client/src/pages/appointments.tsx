@@ -162,23 +162,45 @@ export default function AppointmentsPage() {
 
   // Create appointment mutation
   const createAppointmentMutation = useMutation({
-    mutationFn: (data: any) => {
-      return apiRequest('/api/appointments', 'POST', data);
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('/api/appointments', 'POST', data);
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/appointments'] });
-      toast({ title: 'Success', description: 'Appointment scheduled successfully' });
+      toast({ 
+        title: 'Success', 
+        description: 'Appointment scheduled successfully',
+        variant: 'default'
+      });
       resetForm();
       setIsCreating(false);
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || 
-                          error?.response?.data?.error || 
-                          error?.message || 
-                          'Failed to schedule appointment';
+      // Parse error message - check if it's a 409 conflict error
+      let errorTitle = 'Scheduling Error';
+      let errorMessage = 'Failed to schedule appointment';
+      
+      if (error?.message) {
+        const errorText = error.message;
+        
+        // Check for time slot conflict (409 error)
+        if (errorText.includes('409') || errorText.includes('Time slot conflict')) {
+          errorTitle = 'Time Slot Conflict';
+          // Extract the detailed error message from the JSON response
+          const match = errorText.match(/{"message":"([^"]+)","error":"([^"]+)"/);
+          if (match && match[2]) {
+            errorMessage = match[2];
+          } else {
+            errorMessage = 'This time slot is already booked. Please choose a different time.';
+          }
+        } else {
+          errorMessage = errorText.replace(/^\d+:\s*/, ''); // Remove status code prefix
+        }
+      }
       
       toast({
-        title: 'Error',
+        title: errorTitle,
         description: errorMessage,
         variant: 'destructive'
       });
