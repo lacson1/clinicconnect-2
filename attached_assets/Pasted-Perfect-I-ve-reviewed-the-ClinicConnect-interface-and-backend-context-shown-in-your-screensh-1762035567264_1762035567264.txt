@@ -1,0 +1,129 @@
+Perfect ✅ — I’ve reviewed the **ClinicConnect** interface and backend context shown in your screenshot and Replit workspace. Based on what’s visible in both the **patient dashboard** and the **file structure**, here are the **10 most important fixes** you should prioritize next:
+
+---
+
+### ⚙️ **1. Persistent Authentication Fix (Part 2)**
+
+Although the major `401` errors were fixed, the **autocomplete** and **notification** endpoints still fail intermittently.
+**Fix:**
+
+* Add `credentials: 'include'` to **all** fetch calls (especially `useAutocomplete`, `useNotifications` hooks).
+* Double-check the backend CORS middleware (`Access-Control-Allow-Credentials: true`).
+
+---
+
+### 🩺 **2. Patient Summary Data Not Syncing**
+
+Patient cards show:
+
+> Visits: 0, Active Rx: 0, Last Visit: None
+> Even though the database likely has related records.
+> **Fix:**
+
+* Verify backend join query in `/api/patients/:id/summary`.
+* Add cache invalidation with **React Query** on update (e.g. after creating a visit).
+
+---
+
+### 🧠 **3. Missing Fallback States**
+
+If a patient has no data, the UI feels blank.
+**Fix:**
+
+* Add empty-state messages:
+
+  > “No visits yet — click *Add Visit* to start a consultation.”
+  > “No lab results available.”
+
+---
+
+### 💾 **4. Lab Tests Overload**
+
+Lab count (`16`) loads but there’s no trend or visualization.
+**Fix:**
+
+* Add a mini **chart component** for labs history (e.g., `LabTrendChart.tsx`).
+* Color-code abnormal vs normal results.
+
+---
+
+### 🧭 **5. Navigation Bar Overflow**
+
+The tab bar (`Overview | Visit | Vitals | Labs | Medication | …`) clips on smaller screens.
+**Fix:**
+
+* Wrap in `overflow-x-auto flex-nowrap` container.
+* Add scrollbar hints and swipe gestures for mobile.
+
+---
+
+### 🧾 **6. “Actions” Menu Enhancement**
+
+The `+ Actions` dropdown is too generic.
+**Fix:**
+
+* Add quick actions (Add Visit, Add Lab, Add Document).
+* Use icons and tooltips for clarity.
+
+---
+
+### 🔔 **7. Notifications & Online Status**
+
+The top-right notification icon and “Online” badge are static.
+**Fix:**
+
+* Connect to a **WebSocket or SSE** endpoint for real-time updates.
+* Blink/animate icon on new notification arrival.
+
+---
+
+### 🧱 **8. Folder Organization**
+
+Your Replit `client` folder mixes pages, assets, and logic.
+**Fix:**
+Restructure as:
+
+```
+client/
+ ├─ api/
+ ├─ components/
+ ├─ hooks/
+ ├─ pages/
+ ├─ styles/
+ └─ utils/
+```
+
+And extract all fetch logic into `/api/request.ts`.
+
+---
+
+### ⚡ **9. Performance and Loading**
+
+Large initial bundle (likely >2 MB) causing slow load.
+**Fix:**
+
+* Use **lazy loading** for subpages (Vitals, Medications, Labs).
+* Optimize icons & PNGs (convert to SVG or WebP).
+
+---
+
+### 🔐 **10. Security & Compliance**
+
+Visible patient PII (name, DOB, phone, address) could violate HIPAA if used in demos.
+**Fix:**
+
+* Mask sensitive data in demo mode (e.g., `08••••5678`).
+* Add `.env` toggle for production anonymization.
+* Confirm HTTPS-only deployment (Replit default is HTTP).
+
+---
+
+### ⚡ Bonus Upgrades
+
+* Add **dark mode toggle**.
+* Implement **AI-generated visit summary** (hook into your OpenAI or Azure endpoint).
+* Include **Last Updated** timestamp for patient data freshness.
+
+---
+
+Would you like me to turn these into a **structured “Fix Plan Table”** (with priority, time estimate, and checklist format) — ready to paste into Notion or Replit’s project tracker?
