@@ -7,14 +7,13 @@ import { securityHeaders } from "./middleware/security";
 
 const app = express();
 
-// Security headers middleware (must be first)
-app.use(securityHeaders);
-
-// CORS configuration
+// CORS configuration (must be before security headers to set proper origin)
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin || req.headers.host || '*';
+  res.header('Access-Control-Allow-Origin', origin);
+  res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie');
   
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
@@ -22,6 +21,9 @@ app.use((req, res, next) => {
     next();
   }
 });
+
+// Security headers middleware (after CORS)
+app.use(securityHeaders);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

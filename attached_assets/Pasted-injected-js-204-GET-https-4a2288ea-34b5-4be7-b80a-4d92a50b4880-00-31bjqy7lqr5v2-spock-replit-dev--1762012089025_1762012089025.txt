@@ -1,0 +1,838 @@
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/autocomplete/address 401 (Unauthorized)
+apply @ injected.js:204
+queryFn @ autocomplete-input.tsx:128
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19416
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+(anonymous) @ chunk-276SZO74.js?v=68a8b5fa:18627
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/notifications 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:2245
+4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev:24678/:1  Failed to load resource: net::ERR_CONNECTION_TIMED_OUT
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Loading the stylesheet '<URL>' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked.
+Loading the stylesheet '<URL>' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked.
+Loading the stylesheet '<URL>' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked.
+Loading the stylesheet '<URL>' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked.
+Loading the stylesheet '<URL>' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked.
+Loading the stylesheet '<URL>' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked.
+Loading the script '<URL>' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.
+Loading the script '<URL>' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.
+Loading the script '<URL>' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.
+Loading the script '<URL>' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.
+Loading the script '<URL>' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.
+Loading the script '<URL>' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/profile 401 (Unauthorized)
+apply @ injected.js:204
+refreshUser @ AuthContext.tsx:113
+(anonymous) @ AuthContext.tsx:39
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/@fs/home/runner/workspace/attached_assets/particle-lines-futuristic-gradient-background_1760322867271.jpg:1  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/@fs/home/runner/workspace/attached_assets/particle-lines-futuristic-gradient-background_1760322867271.jpg 502 (Bad Gateway)
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/profile 401 (Unauthorized)
+apply @ injected.js:204
+refreshUser @ AuthContext.tsx:113
+(anonymous) @ AuthContext.tsx:39
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/profile 401 (Unauthorized)
+apply @ injected.js:204
+refreshUser @ AuthContext.tsx:113
+(anonymous) @ AuthContext.tsx:39
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/profile 401 (Unauthorized)
+apply @ injected.js:204
+refreshUser @ AuthContext.tsx:113
+(anonymous) @ AuthContext.tsx:39
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+completion_list.html?username=&colorScheme=&screenX=64&screenY=34&effectiveWindowWidth=1443&isDark=…:12  GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/utils.js net::ERR_FILE_NOT_FOUND
+utils.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+utils.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+completion_list.html?username=&colorScheme=&screenX=64&screenY=34&effectiveWindowWidth=1443&isDark=…:14  GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/heuristicsRedefinitions.js net::ERR_FILE_NOT_FOUND
+heuristicsRedefinitions.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+heuristicsRedefinitions.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+completion_list.html?username=&colorScheme=&screenX=64&screenY=34&effectiveWindowWidth=1443&isDark=…:13  GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/extensionState.js net::ERR_FILE_NOT_FOUND
+extensionState.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+extensionState.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: The message port closed before a response was received.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/notifications 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/patients 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/dashboard/stats 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/organizations/user-organizations 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19416
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+(anonymous) @ chunk-276SZO74.js?v=68a8b5fa:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=68a8b5fa:555
+flush @ @tanstack_react-query.js?v=68a8b5fa:569
+batch @ @tanstack_react-query.js?v=68a8b5fa:587
+dispatch_fn @ @tanstack_react-query.js?v=68a8b5fa:996
+onError @ @tanstack_react-query.js?v=68a8b5fa:861
+reject @ @tanstack_react-query.js?v=68a8b5fa:465
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:508
+Promise.catch
+run @ @tanstack_react-query.js?v=68a8b5fa:498
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/patients 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19416
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+(anonymous) @ chunk-276SZO74.js?v=68a8b5fa:18627
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/autocomplete/address 401 (Unauthorized)
+apply @ injected.js:204
+queryFn @ autocomplete-input.tsx:128
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19416
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+(anonymous) @ chunk-276SZO74.js?v=68a8b5fa:18627
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/notifications 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=68a8b5fa:2243
+updateTimers_fn @ @tanstack_react-query.js?v=68a8b5fa:2250
+onQueryUpdate @ @tanstack_react-query.js?v=68a8b5fa:2206
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:998
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:997
+batch @ @tanstack_react-query.js?v=68a8b5fa:583
+dispatch_fn @ @tanstack_react-query.js?v=68a8b5fa:996
+onError @ @tanstack_react-query.js?v=68a8b5fa:861
+reject @ @tanstack_react-query.js?v=68a8b5fa:465
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:508
+Promise.catch
+run @ @tanstack_react-query.js?v=68a8b5fa:498
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/notifications 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=68a8b5fa:2243
+updateTimers_fn @ @tanstack_react-query.js?v=68a8b5fa:2250
+onQueryUpdate @ @tanstack_react-query.js?v=68a8b5fa:2206
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:998
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:997
+batch @ @tanstack_react-query.js?v=68a8b5fa:583
+dispatch_fn @ @tanstack_react-query.js?v=68a8b5fa:996
+onError @ @tanstack_react-query.js?v=68a8b5fa:861
+reject @ @tanstack_react-query.js?v=68a8b5fa:465
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:508
+Promise.catch
+run @ @tanstack_react-query.js?v=68a8b5fa:498
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=68a8b5fa:2243
+updateTimers_fn @ @tanstack_react-query.js?v=68a8b5fa:2250
+onQueryUpdate @ @tanstack_react-query.js?v=68a8b5fa:2206
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:998
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:997
+batch @ @tanstack_react-query.js?v=68a8b5fa:583
+dispatch_fn @ @tanstack_react-query.js?v=68a8b5fa:996
+onError @ @tanstack_react-query.js?v=68a8b5fa:861
+reject @ @tanstack_react-query.js?v=68a8b5fa:465
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:508
+Promise.catch
+run @ @tanstack_react-query.js?v=68a8b5fa:498
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/profile 401 (Unauthorized)
+apply @ injected.js:204
+refreshUser @ AuthContext.tsx:113
+(anonymous) @ AuthContext.tsx:39
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+completion_list.html?username=&colorScheme=&screenX=64&screenY=34&effectiveWindowWidth=1443&isDark=…:12  GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/utils.js net::ERR_FILE_NOT_FOUND
+utils.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+completion_list.html?username=&colorScheme=&screenX=64&screenY=34&effectiveWindowWidth=1443&isDark=…:13  GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/extensionState.js net::ERR_FILE_NOT_FOUND
+extensionState.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+completion_list.html?username=&colorScheme=&screenX=64&screenY=34&effectiveWindowWidth=1443&isDark=…:14  GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/heuristicsRedefinitions.js net::ERR_FILE_NOT_FOUND
+heuristicsRedefinitions.js:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/profile 401 (Unauthorized)
+apply @ injected.js:204
+refreshUser @ AuthContext.tsx:113
+(anonymous) @ AuthContext.tsx:39
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+completion_list.html?username=&colorScheme=&screenX=64&screenY=34&effectiveWindowWidth=1443&isDark=…:12  GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/utils.js net::ERR_FILE_NOT_FOUND
+completion_list.html?username=&colorScheme=&screenX=64&screenY=34&effectiveWindowWidth=1443&isDark=…:13  GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/extensionState.js net::ERR_FILE_NOT_FOUND
+completion_list.html?username=&colorScheme=&screenX=64&screenY=34&effectiveWindowWidth=1443&isDark=…:14  GET chrome-extension://pejdijmoenmkgeppbflobdenhhabjlaj/heuristicsRedefinitions.js net::ERR_FILE_NOT_FOUND
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/dashboard/stats 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/patients 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/notifications 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/organizations/user-organizations 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19416
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+(anonymous) @ chunk-276SZO74.js?v=68a8b5fa:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=68a8b5fa:555
+flush @ @tanstack_react-query.js?v=68a8b5fa:569
+batch @ @tanstack_react-query.js?v=68a8b5fa:587
+dispatch_fn @ @tanstack_react-query.js?v=68a8b5fa:996
+onError @ @tanstack_react-query.js?v=68a8b5fa:861
+reject @ @tanstack_react-query.js?v=68a8b5fa:465
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:508
+Promise.catch
+run @ @tanstack_react-query.js?v=68a8b5fa:498
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/autocomplete/address 401 (Unauthorized)
+apply @ injected.js:204
+queryFn @ autocomplete-input.tsx:128
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19416
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+(anonymous) @ chunk-276SZO74.js?v=68a8b5fa:18627
+injected.js:204  GET https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/notifications 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:71
+fetchFn @ @tanstack_react-query.js?v=68a8b5fa:840
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=68a8b5fa:2243
+updateTimers_fn @ @tanstack_react-query.js?v=68a8b5fa:2250
+onQueryUpdate @ @tanstack_react-query.js?v=68a8b5fa:2206
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:998
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:997
+batch @ @tanstack_react-query.js?v=68a8b5fa:583
+dispatch_fn @ @tanstack_react-query.js?v=68a8b5fa:996
+onError @ @tanstack_react-query.js?v=68a8b5fa:861
+reject @ @tanstack_react-query.js?v=68a8b5fa:465
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:508
+Promise.catch
+run @ @tanstack_react-query.js?v=68a8b5fa:498
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+fetch @ @tanstack_react-query.js?v=68a8b5fa:926
+executeFetch_fn @ @tanstack_react-query.js?v=68a8b5fa:2211
+onSubscribe @ @tanstack_react-query.js?v=68a8b5fa:1898
+subscribe @ @tanstack_react-query.js?v=68a8b5fa:24
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3022
+subscribeToStore @ chunk-276SZO74.js?v=68a8b5fa:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=68a8b5fa:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=68a8b5fa:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=68a8b5fa:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=68a8b5fa:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=68a8b5fa:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=68a8b5fa:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=68a8b5fa:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=68a8b5fa:9119
+commitRootImpl @ chunk-276SZO74.js?v=68a8b5fa:19432
+commitRoot @ chunk-276SZO74.js?v=68a8b5fa:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=68a8b5fa:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=68a8b5fa:18718
+workLoop @ chunk-276SZO74.js?v=68a8b5fa:197
+flushWork @ chunk-276SZO74.js?v=68a8b5fa:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=68a8b5fa:384
+injected.js:204  POST https://4a2288ea-34b5-4be7-b80a-4d92a50b4880-00-31bjqy7lqr5v2.spock.replit.dev/api/patients 401 (Unauthorized)
+apply @ injected.js:204
+apiRequest @ queryClient.ts:42
+mutationFn @ patient-registration-modal.tsx:73
+fn @ @tanstack_react-query.js?v=68a8b5fa:1189
+run @ @tanstack_react-query.js?v=68a8b5fa:494
+start @ @tanstack_react-query.js?v=68a8b5fa:536
+execute @ @tanstack_react-query.js?v=68a8b5fa:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=68a8b5fa:2630
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3295
+onSubmit @ patient-registration-modal.tsx:174
+(anonymous) @ chunk-YGCRICWC.js?v=68a8b5fa:1465
+await in (anonymous)
+callCallback2 @ chunk-276SZO74.js?v=68a8b5fa:3674
+invokeGuardedCallbackDev @ chunk-276SZO74.js?v=68a8b5fa:3699
+invokeGuardedCallback @ chunk-276SZO74.js?v=68a8b5fa:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-276SZO74.js?v=68a8b5fa:3736
+executeDispatch @ chunk-276SZO74.js?v=68a8b5fa:7014
+processDispatchQueueItemsInOrder @ chunk-276SZO74.js?v=68a8b5fa:7034
+processDispatchQueue @ chunk-276SZO74.js?v=68a8b5fa:7043
+dispatchEventsForPlugins @ chunk-276SZO74.js?v=68a8b5fa:7051
+(anonymous) @ chunk-276SZO74.js?v=68a8b5fa:7174
+batchedUpdates$1 @ chunk-276SZO74.js?v=68a8b5fa:18913
+batchedUpdates @ chunk-276SZO74.js?v=68a8b5fa:3579
+dispatchEventForPluginEventSystem @ chunk-276SZO74.js?v=68a8b5fa:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-276SZO74.js?v=68a8b5fa:5478
+dispatchEvent @ chunk-276SZO74.js?v=68a8b5fa:5472
+dispatchDiscreteEvent @ chunk-276SZO74.js?v=68a8b5fa:5449
+injected.js:27 Patient registration error: Error: 401: {"message":"Authentication required"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:50:3)
+    at async Object.mutationFn (patient-registration-modal.tsx:73:24)
+(anonymous) @ injected.js:27
+onError @ patient-registration-modal.tsx:90
+execute @ @tanstack_react-query.js?v=68a8b5fa:1254
+await in execute
+mutate @ @tanstack_react-query.js?v=68a8b5fa:2630
+(anonymous) @ @tanstack_react-query.js?v=68a8b5fa:3295
+onSubmit @ patient-registration-modal.tsx:174
+(anonymous) @ chunk-YGCRICWC.js?v=68a8b5fa:1465
+await in (anonymous)
+callCallback2 @ chunk-276SZO74.js?v=68a8b5fa:3674
+invokeGuardedCallbackDev @ chunk-276SZO74.js?v=68a8b5fa:3699
+invokeGuardedCallback @ chunk-276SZO74.js?v=68a8b5fa:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-276SZO74.js?v=68a8b5fa:3736
+executeDispatch @ chunk-276SZO74.js?v=68a8b5fa:7014
+processDispatchQueueItemsInOrder @ chunk-276SZO74.js?v=68a8b5fa:7034
+processDispatchQueue @ chunk-276SZO74.js?v=68a8b5fa:7043
+dispatchEventsForPlugins @ chunk-276SZO74.js?v=68a8b5fa:7051
+(anonymous) @ chunk-276SZO74.js?v=68a8b5fa:7174
+batchedUpdates$1 @ chunk-276SZO74.js?v=68a8b5fa:18913
+batchedUpdates @ chunk-276SZO74.js?v=68a8b5fa:3579
+dispatchEventForPluginEventSystem @ chunk-276SZO74.js?v=68a8b5fa:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-276SZO74.js?v=68a8b5fa:5478
+dispatchEvent @ chunk-276SZO74.js?v=68a8b5fa:5472
+dispatchDiscreteEvent @ chunk-276SZO74.js?v=68a8b5fa:5449

@@ -125,7 +125,9 @@ export function AutocompleteInput({
     queryKey: [`/api/autocomplete/${fieldType}`, organizationId],
     queryFn: async () => {
       try {
-        const response = await fetch(`/api/autocomplete/${fieldType}${organizationId ? `?organizationId=${organizationId}` : ''}`);
+        const response = await fetch(`/api/autocomplete/${fieldType}${organizationId ? `?organizationId=${organizationId}` : ''}`, {
+          credentials: 'include',
+        });
         if (response.ok) {
           return await response.json();
         }
