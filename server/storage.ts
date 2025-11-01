@@ -209,12 +209,12 @@ export interface IStorage {
 
   // AI Consultations
   getAiConsultations(filters?: { patientId?: number; organizationId?: number; status?: string }): Promise<AiConsultation[]>;
-  getAiConsultation(id: number): Promise<AiConsultation | undefined>;
+  getAiConsultation(id: number, organizationId?: number): Promise<AiConsultation | undefined>;
   createAiConsultation(consultation: InsertAiConsultation): Promise<AiConsultation>;
-  updateAiConsultation(id: number, updates: Partial<InsertAiConsultation>): Promise<AiConsultation>;
+  updateAiConsultation(id: number, updates: Partial<InsertAiConsultation>, organizationId?: number): Promise<AiConsultation>;
   
   // Clinical Notes
-  getClinicalNoteByConsultation(consultationId: number): Promise<ClinicalNote | undefined>;
+  getClinicalNoteByConsultation(consultationId: number, organizationId?: number): Promise<ClinicalNote | undefined>;
   createClinicalNote(note: InsertClinicalNote): Promise<ClinicalNote>;
   updateClinicalNote(id: number, updates: Partial<InsertClinicalNote>): Promise<ClinicalNote>;
 }
@@ -1124,8 +1124,12 @@ export class DatabaseStorage implements IStorage {
     return await query.orderBy(desc(aiConsultations.createdAt));
   }
 
-  async getAiConsultation(id: number): Promise<AiConsultation | undefined> {
-    const [consultation] = await db.select().from(aiConsultations).where(eq(aiConsultations.id, id));
+  async getAiConsultation(id: number, organizationId?: number): Promise<AiConsultation | undefined> {
+    const conditions = [eq(aiConsultations.id, id)];
+    if (organizationId) {
+      conditions.push(eq(aiConsultations.organizationId, organizationId));
+    }
+    const [consultation] = await db.select().from(aiConsultations).where(and(...conditions));
     return consultation || undefined;
   }
 
@@ -1137,18 +1141,26 @@ export class DatabaseStorage implements IStorage {
     return consultation;
   }
 
-  async updateAiConsultation(id: number, updates: Partial<InsertAiConsultation>): Promise<AiConsultation> {
+  async updateAiConsultation(id: number, updates: Partial<InsertAiConsultation>, organizationId?: number): Promise<AiConsultation> {
+    const conditions = [eq(aiConsultations.id, id)];
+    if (organizationId) {
+      conditions.push(eq(aiConsultations.organizationId, organizationId));
+    }
     const [consultation] = await db
       .update(aiConsultations)
       .set(updates)
-      .where(eq(aiConsultations.id, id))
+      .where(and(...conditions))
       .returning();
     return consultation;
   }
 
   // Clinical Notes
-  async getClinicalNoteByConsultation(consultationId: number): Promise<ClinicalNote | undefined> {
-    const [note] = await db.select().from(clinicalNotes).where(eq(clinicalNotes.consultationId, consultationId));
+  async getClinicalNoteByConsultation(consultationId: number, organizationId?: number): Promise<ClinicalNote | undefined> {
+    const conditions = [eq(clinicalNotes.consultationId, consultationId)];
+    if (organizationId) {
+      conditions.push(eq(clinicalNotes.organizationId, organizationId));
+    }
+    const [note] = await db.select().from(clinicalNotes).where(and(...conditions));
     return note || undefined;
   }
 

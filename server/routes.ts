@@ -5714,6 +5714,10 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       const { patientId, status } = req.query;
       const userOrgId = req.user?.currentOrganizationId || req.user?.organizationId;
       
+      if (!userOrgId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+      
       const consultations = await storage.getAiConsultations({
         patientId: patientId ? parseInt(patientId as string) : undefined,
         status: status as string,
@@ -5728,10 +5732,16 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
   });
 
   // Get single AI consultation
-  app.get("/api/ai-consultations/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/ai-consultations/:id", authenticateToken, async (req: TenantRequest, res) => {
     try {
       const id = parseInt(req.params.id);
-      const consultation = await storage.getAiConsultation(id);
+      const userOrgId = req.user?.currentOrganizationId || req.user?.organizationId;
+      
+      if (!userOrgId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+      
+      const consultation = await storage.getAiConsultation(id, userOrgId);
       
       if (!consultation) {
         return res.status(404).json({ message: "Consultation not found" });
@@ -5750,6 +5760,10 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       const { patientId, chiefComplaint } = req.body;
       const userOrgId = req.user?.currentOrganizationId || req.user?.organizationId;
       
+      if (!userOrgId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+      
       // Validate patient exists and belongs to the same organization
       const patient = await storage.getPatient(parseInt(patientId));
       if (!patient) {
@@ -5763,7 +5777,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         patientId: parseInt(patientId),
         providerId: req.user!.id,
         chiefComplaint: chiefComplaint || '',
-        organizationId: userOrgId || 1,
+        organizationId: userOrgId,
         status: 'in_progress' as const,
         transcript: []
       };
@@ -5777,13 +5791,18 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
   });
 
   // Add message to consultation
-  app.post("/api/ai-consultations/:id/messages", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/ai-consultations/:id/messages", authenticateToken, async (req: TenantRequest, res) => {
     try {
       const { simulatePatientResponse, generateClinicalNotes } = await import('./openai');
       const id = parseInt(req.params.id);
       const { message, role } = req.body;
+      const userOrgId = req.user?.currentOrganizationId || req.user?.organizationId;
       
-      const consultation = await storage.getAiConsultation(id);
+      if (!userOrgId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+      
+      const consultation = await storage.getAiConsultation(id, userOrgId);
       if (!consultation) {
         return res.status(404).json({ message: "Consultation not found" });
       }
@@ -5792,6 +5811,10 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       const patient = await storage.getPatient(consultation.patientId);
       if (!patient) {
         return res.status(404).json({ message: "Patient not found" });
+      }
+      // Verify patient belongs to same organization
+      if (patient.organizationId !== userOrgId) {
+        return res.status(403).json({ message: "Access denied" });
       }
       
       // Add user's message
@@ -5805,7 +5828,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       ];
       
       // Update consultation with new message
-      await storage.updateAiConsultation(id, { transcript: newTranscript as any });
+      await storage.updateAiConsultation(id, { transcript: newTranscript as any }, userOrgId);
       
       // If doctor's message, simulate patient response
       let patientResponse = null;
@@ -5836,7 +5859,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
           patientResponse
         ];
         
-        await storage.updateAiConsultation(id, { transcript: updatedTranscript as any });
+        await storage.updateAiConsultation(id, { transcript: updatedTranscript as any }, userOrgId);
       }
       
       res.json({ 
@@ -5856,7 +5879,11 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       const id = parseInt(req.params.id);
       const userOrgId = req.user?.currentOrganizationId || req.user?.organizationId;
       
-      const consultation = await storage.getAiConsultation(id);
+      if (!userOrgId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+      
+      const consultation = await storage.getAiConsultation(id, userOrgId);
       if (!consultation) {
         return res.status(404).json({ message: "Consultation not found" });
       }
@@ -5864,6 +5891,10 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       const patient = await storage.getPatient(consultation.patientId);
       if (!patient) {
         return res.status(404).json({ message: "Patient not found" });
+      }
+      // Verify patient belongs to same organization
+      if (patient.organizationId !== userOrgId) {
+        return res.status(403).json({ message: "Access denied" });
       }
       
       const patientContext = {
@@ -5878,7 +5909,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       
       const clinicalNoteData = {
         consultationId: id,
-        organizationId: userOrgId || 1,
+        organizationId: userOrgId,
         ...notes
       };
       
@@ -5888,7 +5919,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       await storage.updateAiConsultation(id, { 
         status: 'completed' as any,
         completedAt: new Date() as any
-      });
+      }, userOrgId);
       
       res.status(201).json(clinicalNote);
     } catch (error) {
@@ -5898,10 +5929,22 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
   });
 
   // Get clinical notes for a consultation
-  app.get("/api/ai-consultations/:id/clinical-notes", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/ai-consultations/:id/clinical-notes", authenticateToken, async (req: TenantRequest, res) => {
     try {
       const id = parseInt(req.params.id);
-      const notes = await storage.getClinicalNoteByConsultation(id);
+      const userOrgId = req.user?.currentOrganizationId || req.user?.organizationId;
+      
+      if (!userOrgId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+      
+      // First verify the consultation belongs to user's organization
+      const consultation = await storage.getAiConsultation(id, userOrgId);
+      if (!consultation) {
+        return res.status(404).json({ message: "Consultation not found" });
+      }
+      
+      const notes = await storage.getClinicalNoteByConsultation(id, userOrgId);
       
       if (!notes) {
         return res.status(404).json({ message: "Clinical notes not found" });
