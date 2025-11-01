@@ -5997,6 +5997,97 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
+  // Add clinical notes to patient record (one-click feature)
+  app.post("/api/ai-consultations/:id/add-to-record", authenticateToken, async (req: TenantRequest, res) => {
+    try {
+      const consultationId = parseInt(req.params.id);
+      const userOrgId = req.user?.currentOrganizationId || req.user?.organizationId;
+      const userId = req.user?.id;
+      
+      if (!userOrgId || !userId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+      
+      // Get the consultation and verify organization access
+      const consultation = await storage.getAiConsultation(consultationId, userOrgId);
+      if (!consultation) {
+        return res.status(404).json({ message: "Consultation not found" });
+      }
+      
+      // Get the clinical notes
+      const clinicalNote = await storage.getClinicalNoteByConsultation(consultationId, userOrgId);
+      if (!clinicalNote) {
+        return res.status(404).json({ message: "Clinical notes not found. Please generate notes first." });
+      }
+      
+      // Check if already added to patient record
+      if (clinicalNote.addedToPatientRecord) {
+        return res.status(400).json({ 
+          message: "Clinical notes already added to patient record",
+          addedAt: clinicalNote.addedToRecordAt
+        });
+      }
+      
+      // Create a visit record from the clinical notes
+      const visitData = {
+        patientId: consultation.patientId,
+        doctorId: userId,
+        visitDate: new Date(),
+        complaint: clinicalNote.chiefComplaint || clinicalNote.subjective,
+        diagnosis: clinicalNote.diagnosis,
+        treatment: clinicalNote.plan,
+        followUpDate: clinicalNote.followUpDate || null,
+        visitType: 'consultation',
+        status: 'final' as const,
+        organizationId: userOrgId
+      };
+      
+      const visit = await storage.createVisit(visitData as any);
+      
+      // Create prescription records for medications if any
+      if (clinicalNote.medications && Array.isArray(clinicalNote.medications) && clinicalNote.medications.length > 0) {
+        for (const med of clinicalNote.medications) {
+          try {
+            await storage.createPrescription({
+              patientId: consultation.patientId,
+              visitId: visit.id,
+              medicationName: med.name,
+              dosage: med.dosage,
+              frequency: med.frequency,
+              duration: med.duration,
+              instructions: (med as any).reasoning || '',
+              status: 'active',
+              organizationId: userOrgId
+            } as any);
+          } catch (error) {
+            console.error('Error creating prescription:', error);
+            // Continue with other medications even if one fails
+          }
+        }
+      }
+      
+      // Mark clinical note as added to patient record
+      await storage.updateClinicalNote(clinicalNote.id!, {
+        addedToPatientRecord: true,
+        addedToRecordAt: new Date()
+      } as any, userOrgId);
+      
+      // Update consultation status
+      await storage.updateAiConsultation(consultationId, {
+        status: 'added_to_record' as any
+      }, userOrgId);
+      
+      res.status(200).json({
+        message: "Clinical notes successfully added to patient record",
+        visit: visit,
+        prescriptionsCreated: clinicalNote.medications?.length || 0
+      });
+    } catch (error) {
+      console.error('Error adding to patient record:', error);
+      res.status(500).json({ message: "Failed to add to patient record" });
+    }
+  });
+
   // Optimized: Nursing workflow dashboard
   app.get("/api/nursing/dashboard", authenticateToken, requireAnyRole(['nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
