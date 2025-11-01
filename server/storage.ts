@@ -19,6 +19,8 @@ import {
   labEquipment,
   labWorksheets,
   worksheetItems,
+  aiConsultations,
+  clinicalNotes,
   type Patient, 
   type InsertPatient,
   type Visit,
@@ -57,6 +59,10 @@ import {
   type InsertLabWorksheet,
   type WorksheetItem,
   type InsertWorksheetItem,
+  type AiConsultation,
+  type InsertAiConsultation,
+  type ClinicalNote,
+  type InsertClinicalNote,
   type UpsertReplitAuthUser
 } from "@shared/schema";
 import { db } from "./db";
@@ -200,6 +206,17 @@ export interface IStorage {
     lowStockItems: number;
     pendingLabs: number;
   }>;
+
+  // AI Consultations
+  getAiConsultations(filters?: { patientId?: number; organizationId?: number; status?: string }): Promise<AiConsultation[]>;
+  getAiConsultation(id: number): Promise<AiConsultation | undefined>;
+  createAiConsultation(consultation: InsertAiConsultation): Promise<AiConsultation>;
+  updateAiConsultation(id: number, updates: Partial<InsertAiConsultation>): Promise<AiConsultation>;
+  
+  // Clinical Notes
+  getClinicalNoteByConsultation(consultationId: number): Promise<ClinicalNote | undefined>;
+  createClinicalNote(note: InsertClinicalNote): Promise<ClinicalNote>;
+  updateClinicalNote(id: number, updates: Partial<InsertClinicalNote>): Promise<ClinicalNote>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1083,6 +1100,73 @@ export class DatabaseStorage implements IStorage {
 
   async removeWorksheetItem(id: number): Promise<void> {
     await db.delete(worksheetItems).where(eq(worksheetItems.id, id));
+  }
+
+  // AI Consultations
+  async getAiConsultations(filters?: { patientId?: number; organizationId?: number; status?: string }): Promise<AiConsultation[]> {
+    const conditions = [];
+
+    if (filters?.patientId) {
+      conditions.push(eq(aiConsultations.patientId, filters.patientId));
+    }
+    if (filters?.organizationId) {
+      conditions.push(eq(aiConsultations.organizationId, filters.organizationId));
+    }
+    if (filters?.status) {
+      conditions.push(eq(aiConsultations.status, filters.status));
+    }
+
+    let query = db.select().from(aiConsultations);
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(desc(aiConsultations.createdAt));
+  }
+
+  async getAiConsultation(id: number): Promise<AiConsultation | undefined> {
+    const [consultation] = await db.select().from(aiConsultations).where(eq(aiConsultations.id, id));
+    return consultation || undefined;
+  }
+
+  async createAiConsultation(insertConsultation: InsertAiConsultation): Promise<AiConsultation> {
+    const [consultation] = await db
+      .insert(aiConsultations)
+      .values(insertConsultation)
+      .returning();
+    return consultation;
+  }
+
+  async updateAiConsultation(id: number, updates: Partial<InsertAiConsultation>): Promise<AiConsultation> {
+    const [consultation] = await db
+      .update(aiConsultations)
+      .set(updates)
+      .where(eq(aiConsultations.id, id))
+      .returning();
+    return consultation;
+  }
+
+  // Clinical Notes
+  async getClinicalNoteByConsultation(consultationId: number): Promise<ClinicalNote | undefined> {
+    const [note] = await db.select().from(clinicalNotes).where(eq(clinicalNotes.consultationId, consultationId));
+    return note || undefined;
+  }
+
+  async createClinicalNote(insertNote: InsertClinicalNote): Promise<ClinicalNote> {
+    const [note] = await db
+      .insert(clinicalNotes)
+      .values(insertNote)
+      .returning();
+    return note;
+  }
+
+  async updateClinicalNote(id: number, updates: Partial<InsertClinicalNote>): Promise<ClinicalNote> {
+    const [note] = await db
+      .update(clinicalNotes)
+      .set(updates)
+      .where(eq(clinicalNotes.id, id))
+      .returning();
+    return note;
   }
 }
 

@@ -5705,6 +5705,206 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
+  // ====== AI-POWERED CONSULTATIONS ======
+  // Reference: blueprint:javascript_openai_ai_integrations
+  
+  // List AI consultations
+  app.get("/api/ai-consultations", authenticateToken, async (req: TenantRequest, res) => {
+    try {
+      const { patientId, status } = req.query;
+      const userOrgId = req.user?.currentOrganizationId || req.user?.organizationId;
+      
+      const consultations = await storage.getAiConsultations({
+        patientId: patientId ? parseInt(patientId as string) : undefined,
+        status: status as string,
+        organizationId: userOrgId
+      });
+      
+      res.json(consultations);
+    } catch (error) {
+      console.error('Error fetching AI consultations:', error);
+      res.status(500).json({ message: "Failed to fetch consultations" });
+    }
+  });
+
+  // Get single AI consultation
+  app.get("/api/ai-consultations/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const consultation = await storage.getAiConsultation(id);
+      
+      if (!consultation) {
+        return res.status(404).json({ message: "Consultation not found" });
+      }
+      
+      res.json(consultation);
+    } catch (error) {
+      console.error('Error fetching AI consultation:', error);
+      res.status(500).json({ message: "Failed to fetch consultation" });
+    }
+  });
+
+  // Create new AI consultation
+  app.post("/api/ai-consultations", authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const { patientId, chiefComplaint } = req.body;
+      const userOrgId = req.user?.currentOrganizationId || req.user?.organizationId;
+      
+      const consultationData = {
+        patientId: parseInt(patientId),
+        providerId: req.user!.id,
+        chiefComplaint: chiefComplaint || '',
+        organizationId: userOrgId || 1,
+        status: 'in_progress' as const,
+        transcript: []
+      };
+      
+      const consultation = await storage.createAiConsultation(consultationData);
+      res.status(201).json(consultation);
+    } catch (error) {
+      console.error('Error creating AI consultation:', error);
+      res.status(500).json({ message: "Failed to create consultation" });
+    }
+  });
+
+  // Add message to consultation
+  app.post("/api/ai-consultations/:id/messages", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { simulatePatientResponse, generateClinicalNotes } = await import('./openai');
+      const id = parseInt(req.params.id);
+      const { message, role } = req.body;
+      
+      const consultation = await storage.getAiConsultation(id);
+      if (!consultation) {
+        return res.status(404).json({ message: "Consultation not found" });
+      }
+      
+      // Get patient details
+      const patient = await storage.getPatient(consultation.patientId);
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+      
+      // Add user's message
+      const newTranscript = [
+        ...(consultation.transcript || []),
+        {
+          role: role || 'user',
+          content: message,
+          timestamp: new Date().toISOString()
+        }
+      ];
+      
+      // Update consultation with new message
+      await storage.updateAiConsultation(id, { transcript: newTranscript as any });
+      
+      // If doctor's message, simulate patient response
+      let patientResponse = null;
+      if (role === 'user' || role === 'doctor') {
+        const patientContext = {
+          name: `${patient.firstName} ${patient.lastName}`,
+          age: new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear(),
+          gender: patient.gender,
+          medicalHistory: patient.medicalHistory || undefined,
+          allergies: patient.allergies || undefined
+        };
+        
+        const response = await simulatePatientResponse(
+          newTranscript,
+          patientContext,
+          consultation.chiefComplaint || 'General consultation'
+        );
+        
+        patientResponse = {
+          role: 'assistant',
+          content: response,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Add patient response to transcript
+        const updatedTranscript = [
+          ...newTranscript,
+          patientResponse
+        ];
+        
+        await storage.updateAiConsultation(id, { transcript: updatedTranscript as any });
+      }
+      
+      res.json({ 
+        userMessage: newTranscript[newTranscript.length - 1],
+        patientResponse 
+      });
+    } catch (error) {
+      console.error('Error adding message:', error);
+      res.status(500).json({ message: "Failed to add message" });
+    }
+  });
+
+  // Generate clinical notes from consultation
+  app.post("/api/ai-consultations/:id/generate-notes", authenticateToken, async (req: TenantRequest, res) => {
+    try {
+      const { generateClinicalNotes } = await import('./openai');
+      const id = parseInt(req.params.id);
+      const userOrgId = req.user?.currentOrganizationId || req.user?.organizationId;
+      
+      const consultation = await storage.getAiConsultation(id);
+      if (!consultation) {
+        return res.status(404).json({ message: "Consultation not found" });
+      }
+      
+      const patient = await storage.getPatient(consultation.patientId);
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+      
+      const patientContext = {
+        name: `${patient.firstName} ${patient.lastName}`,
+        age: new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear(),
+        gender: patient.gender,
+        medicalHistory: patient.medicalHistory || undefined,
+        allergies: patient.allergies || undefined
+      };
+      
+      const notes = await generateClinicalNotes(consultation.transcript || [], patientContext);
+      
+      const clinicalNoteData = {
+        consultationId: id,
+        organizationId: userOrgId || 1,
+        ...notes
+      };
+      
+      const clinicalNote = await storage.createClinicalNote(clinicalNoteData as any);
+      
+      // Mark consultation as completed
+      await storage.updateAiConsultation(id, { 
+        status: 'completed' as any,
+        completedAt: new Date() as any
+      });
+      
+      res.status(201).json(clinicalNote);
+    } catch (error) {
+      console.error('Error generating clinical notes:', error);
+      res.status(500).json({ message: "Failed to generate clinical notes" });
+    }
+  });
+
+  // Get clinical notes for a consultation
+  app.get("/api/ai-consultations/:id/clinical-notes", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const notes = await storage.getClinicalNoteByConsultation(id);
+      
+      if (!notes) {
+        return res.status(404).json({ message: "Clinical notes not found" });
+      }
+      
+      res.json(notes);
+    } catch (error) {
+      console.error('Error fetching clinical notes:', error);
+      res.status(500).json({ message: "Failed to fetch clinical notes" });
+    }
+  });
+
   // Optimized: Nursing workflow dashboard
   app.get("/api/nursing/dashboard", authenticateToken, requireAnyRole(['nurse', 'admin']), async (req: AuthRequest, res) => {
     try {
