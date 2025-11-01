@@ -1172,11 +1172,16 @@ export class DatabaseStorage implements IStorage {
     return note;
   }
 
-  async updateClinicalNote(id: number, updates: Partial<InsertClinicalNote>): Promise<ClinicalNote> {
+  async updateClinicalNote(id: number, updates: Partial<InsertClinicalNote>, organizationId?: number): Promise<ClinicalNote> {
+    const conditions = [eq(clinicalNotes.id, id)];
+    if (organizationId) {
+      conditions.push(eq(clinicalNotes.organizationId, organizationId));
+    }
+    
     const [note] = await db
       .update(clinicalNotes)
       .set(updates)
-      .where(eq(clinicalNotes.id, id))
+      .where(and(...conditions))
       .returning();
     return note;
   }
