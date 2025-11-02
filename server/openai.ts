@@ -337,3 +337,137 @@ Return ONLY a JSON array of question strings.`;
   const parsed = JSON.parse(content);
   return parsed.questions || parsed.suggestions || [];
 }
+
+interface LabTestSuggestion {
+  testId?: number;
+  testName: string;
+  testCode?: string;
+  loincCode?: string;
+  category: string;
+  reasoning: string;
+  urgency: 'routine' | 'urgent' | 'stat';
+  priority: number;
+  clinicalSignificance: string;
+  estimatedCost?: number;
+}
+
+interface LabTestSuggestionContext {
+  symptoms?: string;
+  diagnosis?: string;
+  patientAge?: number;
+  patientGender?: string;
+  medicalHistory?: string;
+  currentMedications?: string;
+  recentLabResults?: string;
+  availableTests: Array<{
+    id: number;
+    name: string;
+    code?: string;
+    loincCode?: string;
+    category: string;
+    description?: string;
+    cost?: string;
+  }>;
+}
+
+export async function suggestLabTests(
+  context: LabTestSuggestionContext
+): Promise<LabTestSuggestion[]> {
+  const { symptoms, diagnosis, patientAge, patientGender, medicalHistory, currentMedications, recentLabResults, availableTests } = context;
+
+  const testCatalog = availableTests.map(t => 
+    `${t.name} (${t.code || 'N/A'}) - ${t.category}${t.description ? ': ' + t.description : ''}`
+  ).join('\n');
+
+  const systemPrompt = `You are an expert clinical laboratory consultant helping physicians order appropriate lab tests.
+
+Available Lab Tests in Catalog:
+${testCatalog}
+
+CRITICAL INSTRUCTIONS:
+- Only suggest tests that exist in the available catalog above
+- Match suggested tests to actual test names from the catalog
+- Provide clear clinical reasoning for each test
+- Consider cost-effectiveness and diagnostic yield
+- Prioritize tests by clinical importance (1=highest priority, 10=lowest)
+- Assign appropriate urgency levels (routine, urgent, stat)
+- Consider patient demographics, symptoms, and medical history
+- Avoid redundant or unnecessary testing
+- Focus on tests relevant to Southwest Nigerian healthcare context
+
+Return a JSON object with this exact structure:
+{
+  "suggestions": [
+    {
+      "testName": "Exact name from catalog",
+      "testCode": "Code if available",
+      "loincCode": "LOINC code if known",
+      "category": "Test category",
+      "reasoning": "Clear clinical reasoning for why this test is needed",
+      "urgency": "routine|urgent|stat",
+      "priority": 1-10,
+      "clinicalSignificance": "What will this test help diagnose or rule out"
+    }
+  ],
+  "clinicalRationale": "Overall rationale for the testing strategy",
+  "diagnosticApproach": "Brief explanation of the diagnostic approach"
+}`;
+
+  let userPrompt = 'Clinical Scenario:\n';
+  if (symptoms) userPrompt += `Symptoms: ${symptoms}\n`;
+  if (diagnosis) userPrompt += `Diagnosis/Condition: ${diagnosis}\n`;
+  if (patientAge) userPrompt += `Patient Age: ${patientAge} years\n`;
+  if (patientGender) userPrompt += `Patient Gender: ${patientGender}\n`;
+  if (medicalHistory) userPrompt += `Medical History: ${medicalHistory}\n`;
+  if (currentMedications) userPrompt += `Current Medications: ${currentMedications}\n`;
+  if (recentLabResults) userPrompt += `Recent Lab Results: ${recentLabResults}\n`;
+
+  userPrompt += '\nPlease suggest appropriate lab tests from the available catalog.';
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.4,
+    max_tokens: 1500
+  });
+
+  const content = response.choices[0]?.message?.content;
+  if (!content) {
+    return [];
+  }
+
+  const parsed = JSON.parse(content);
+  const suggestions = parsed.suggestions || [];
+
+  const mappedSuggestions = suggestions
+    .map((suggestion: any) => {
+      const matchedTest = availableTests.find(t => 
+        t.name.toLowerCase() === suggestion.testName?.toLowerCase() ||
+        t.code?.toLowerCase() === suggestion.testCode?.toLowerCase()
+      );
+
+      if (!matchedTest) {
+        return null;
+      }
+
+      return {
+        testId: matchedTest.id,
+        testName: matchedTest.name,
+        testCode: matchedTest.code || '',
+        loincCode: matchedTest.loincCode || '',
+        category: matchedTest.category || '',
+        reasoning: suggestion.reasoning || '',
+        urgency: suggestion.urgency || 'routine',
+        priority: suggestion.priority || 5,
+        clinicalSignificance: suggestion.clinicalSignificance || '',
+        estimatedCost: matchedTest.cost ? parseFloat(matchedTest.cost) : undefined
+      };
+    })
+    .filter((suggestion: LabTestSuggestion | null): suggestion is LabTestSuggestion => suggestion !== null);
+
+  return mappedSuggestions;
+}

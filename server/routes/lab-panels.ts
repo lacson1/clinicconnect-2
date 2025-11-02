@@ -1,7 +1,7 @@
 import { Express } from 'express';
 import { db } from '../db';
-import { labPanels, labPanelTests, labTests, labDepartments, labOrders, labOrderItems } from '../../shared/schema';
-import { eq, desc, and, inArray } from 'drizzle-orm';
+import { labPanels, labPanelTests, labTests, labDepartments, labOrders, labOrderItems, patients } from '../../shared/schema';
+import { eq, desc, and, inArray, or, isNull } from 'drizzle-orm';
 import { authenticateToken, type AuthRequest } from '../middleware/auth';
 import { tenantMiddleware, type TenantRequest } from '../middleware/tenant';
 
@@ -208,6 +208,93 @@ export function setupLabPanelsRoutes(app: Express) {
       console.error("Error creating lab order from panel:", error);
       res.status(500).json({ 
         message: "Failed to create lab order from panel",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.get('/api/lab-tests/ai-suggest', authenticateToken, tenantMiddleware, async (req: TenantRequest, res) => {
+    try {
+      const { suggestLabTests } = await import('../openai');
+      const organizationId = req.tenant?.id || (req as any).user?.organizationId;
+      
+      if (!organizationId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+
+      const { 
+        symptoms, 
+        diagnosis, 
+        patientId 
+      } = req.query;
+
+      if (!symptoms && !diagnosis) {
+        return res.status(400).json({ 
+          message: "Either symptoms or diagnosis is required" 
+        });
+      }
+
+      let patientContext: any = {};
+
+      if (patientId) {
+        const patientData = await db
+          .select()
+          .from(patients)
+          .where(and(
+            eq(patients.id, parseInt(patientId as string)),
+            eq(patients.organizationId, organizationId)
+          ))
+          .limit(1);
+
+        if (patientData.length > 0) {
+          const patient = patientData[0];
+          const birthDate = new Date(patient.dateOfBirth);
+          const age = new Date().getFullYear() - birthDate.getFullYear();
+          
+          patientContext = {
+            patientAge: age,
+            patientGender: patient.gender,
+            medicalHistory: patient.medicalHistory || undefined,
+          };
+        }
+      }
+
+      const availableTests = await db
+        .select({
+          id: labTests.id,
+          name: labTests.name,
+          code: labTests.code,
+          loincCode: labTests.loincCode,
+          category: labTests.category,
+          description: labTests.description,
+          cost: labTests.cost,
+        })
+        .from(labTests)
+        .where(and(
+          eq(labTests.isActive, true),
+          or(
+            isNull(labTests.organizationId),
+            eq(labTests.organizationId, organizationId)
+          )
+        ))
+        .orderBy(labTests.category, labTests.name);
+
+      const suggestions = await suggestLabTests({
+        symptoms: symptoms as string,
+        diagnosis: diagnosis as string,
+        ...patientContext,
+        availableTests,
+      });
+
+      res.json({
+        suggestions,
+        totalSuggestions: suggestions.length,
+        catalogSize: availableTests.length,
+      });
+    } catch (error) {
+      console.error("Error generating AI lab test suggestions:", error);
+      res.status(500).json({ 
+        message: "Failed to generate lab test suggestions",
         error: error instanceof Error ? error.message : String(error)
       });
     }
