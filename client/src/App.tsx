@@ -74,6 +74,7 @@ import OrganizationStaff from "@/pages/organization-staff";
 import UIShowcase from "@/pages/ui-showcase";
 import AiConsultationsListPage from "@/pages/ai-consultations-list";
 import AiConsultationPage from "@/pages/ai-consultation";
+import TabDemo from "@/pages/tab-demo";
 
 function AuthenticatedApp() {
   const { user } = useAuth();
@@ -180,6 +181,7 @@ function AuthenticatedApp() {
                   <Route path="/role-management" component={RoleManagement} />
                   <Route path="/staff-access-control" component={StaffAccessControl} />
                   <Route path="/ui-showcase" component={UIShowcase} />
+                  <Route path="/tab-demo" component={TabDemo} />
                   <Route component={NotFound} />
                 </Switch>
               </div>

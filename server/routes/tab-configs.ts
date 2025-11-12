@@ -1,7 +1,7 @@
 import { Express } from 'express';
 import { db } from '../db';
 import { tabConfigs, insertTabConfigSchema } from '../../shared/schema';
-import { eq, and, or } from 'drizzle-orm';
+import { eq, and, or, inArray } from 'drizzle-orm';
 import { authenticateToken, type AuthRequest } from '../middleware/auth';
 import { tenantMiddleware, type TenantRequest } from '../middleware/tenant';
 
@@ -97,6 +97,7 @@ export function setupTabConfigRoutes(app: Express) {
     try {
       const tabId = parseInt(req.params.id);
       const userId = req.user?.id;
+      const organizationId = req.tenant?.id;
 
       const [existingTab] = await db
         .select()
@@ -109,6 +110,17 @@ export function setupTabConfigRoutes(app: Express) {
 
       if (existingTab.isSystemDefault) {
         return res.status(403).json({ error: 'Cannot modify system default tabs' });
+      }
+
+      // Multi-tenant access control: verify ownership
+      if (existingTab.scope === 'organization' && existingTab.organizationId !== organizationId) {
+        return res.status(403).json({ error: 'Cannot edit another organization\'s tab' });
+      }
+
+      if (existingTab.scope === 'role') {
+        if (existingTab.organizationId !== organizationId || existingTab.roleId !== req.user?.roleId) {
+          return res.status(403).json({ error: 'Cannot edit another role\'s tab' });
+        }
       }
 
       if (existingTab.scope === 'user' && existingTab.userId !== userId) {
@@ -140,9 +152,53 @@ export function setupTabConfigRoutes(app: Express) {
   app.patch('/api/tab-configs/reorder', authenticateToken, tenantMiddleware, async (req: TenantRequest & AuthRequest, res) => {
     try {
       const { tabs } = req.body;
+      const organizationId = req.tenant?.id;
+      const userId = req.user?.id;
+
+      if (!organizationId) {
+        return res.status(403).json({ error: 'Organization context required' });
+      }
 
       if (!Array.isArray(tabs)) {
         return res.status(400).json({ error: 'Invalid request format' });
+      }
+
+      if (tabs.length === 0) {
+        return res.json({ message: 'No tabs to reorder', count: 0 });
+      }
+
+      // Fetch all tabs to verify ownership before reordering
+      const tabIds = tabs.map(t => t.id);
+      const existingTabs = await db
+        .select()
+        .from(tabConfigs)
+        .where(inArray(tabConfigs.id, tabIds));
+
+      // SECURITY: Ensure ALL requested tabs were found
+      // If counts don't match, some IDs don't exist or belong to another tenant
+      if (existingTabs.length !== tabs.length) {
+        return res.status(403).json({ error: 'Cannot reorder tabs that do not belong to your organization' });
+      }
+
+      // Verify each tab belongs to current tenant/user
+      // SECURITY: Also filter out system defaults to prevent global ordering changes
+      for (const tab of existingTabs) {
+        // System defaults cannot be reordered (immutable)
+        if (tab.isSystemDefault) {
+          return res.status(403).json({ error: 'Cannot reorder system default tabs' });
+        }
+
+        if (tab.scope === 'organization' && tab.organizationId !== organizationId) {
+          return res.status(403).json({ error: 'Cannot reorder another organization\'s tabs' });
+        }
+        if (tab.scope === 'role') {
+          if (tab.organizationId !== organizationId || tab.roleId !== req.user?.roleId) {
+            return res.status(403).json({ error: 'Cannot reorder another role\'s tabs' });
+          }
+        }
+        if (tab.scope === 'user' && tab.userId !== userId) {
+          return res.status(403).json({ error: 'Cannot reorder another user\'s tabs' });
+        }
       }
 
       const updates = await Promise.all(
@@ -167,6 +223,7 @@ export function setupTabConfigRoutes(app: Express) {
     try {
       const tabId = parseInt(req.params.id);
       const userId = req.user?.id;
+      const organizationId = req.tenant?.id;
 
       const [existingTab] = await db
         .select()
@@ -179,6 +236,17 @@ export function setupTabConfigRoutes(app: Express) {
 
       if (existingTab.isSystemDefault) {
         return res.status(403).json({ error: 'Cannot delete system default tabs' });
+      }
+
+      // Multi-tenant access control: verify ownership
+      if (existingTab.scope === 'organization' && existingTab.organizationId !== organizationId) {
+        return res.status(403).json({ error: 'Cannot delete another organization\'s tab' });
+      }
+
+      if (existingTab.scope === 'role') {
+        if (existingTab.organizationId !== organizationId || existingTab.roleId !== req.user?.roleId) {
+          return res.status(403).json({ error: 'Cannot delete another role\'s tab' });
+        }
       }
 
       if (existingTab.scope === 'user' && existingTab.userId !== userId) {
