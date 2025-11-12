@@ -8,6 +8,7 @@ import apiKeysRouter from "./api-keys";
 import apiDocsRouter from "./api-docs";
 import accessControlRouter from "./access-control";
 import organizationsRouter from "./organizations";
+import { setupTabConfigRoutes } from "./tab-configs";
 // import { setupAppointmentRoutes } from "./appointments";
 // import { setupAuthRoutes } from "./auth";
 // import { setupAnalyticsRoutes } from "./analytics";
@@ -61,6 +62,10 @@ export function setupRoutes(app: Express): void {
   // Organization Management routes
   console.log("Setting up organization management routes...");
   app.use('/api/organizations', organizationsRouter);
+  
+  // Tab Configurations routes
+  console.log("Setting up tab configurations routes...");
+  setupTabConfigRoutes(app);
   
   // TODO: Add remaining modules as they are created:
   // setupAppointmentRoutes(app);

@@ -1,5 +1,5 @@
 import { db } from './db';
-import { tabConfigs } from '@/shared/schema';
+import { tabConfigs } from '../shared/schema';
 import { eq } from 'drizzle-orm';
 
 export async function seedTabConfigs() {
