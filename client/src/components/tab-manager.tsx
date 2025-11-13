@@ -259,26 +259,46 @@ export function TabManager({ open, onOpenChange }: TabManagerProps) {
   // Update tab mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<TabConfig> }) => {
-      await apiRequest(`/api/tab-configs/${id}`, 'PATCH', data);
+      const response = await apiRequest(`/api/tab-configs/${id}`, 'PATCH', data);
+      return response;
     },
     onMutate: async ({ id, data }) => {
-      // Optimistically update local state
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({ queryKey: ['/api/tab-configs'] });
+      
+      // Snapshot the previous value
+      const previousTabs = queryClient.getQueryData<TabConfig[]>(['/api/tab-configs']);
+      
+      // Optimistically update both local state and query cache
       setTabs(prevTabs => 
         prevTabs.map(tab => 
-          tab.id === id ? { ...tab, ...data } : tab
+          tab.id === id ? { ...tab, ...data, updatedAt: new Date() } : tab
         )
       );
+      
+      queryClient.setQueryData<TabConfig[]>(['/api/tab-configs'], (old) =>
+        old ? old.map(tab => 
+          tab.id === id ? { ...tab, ...data, updatedAt: new Date() } : tab
+        ) : []
+      );
+      
+      // Return context with previous value
+      return { previousTabs };
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      // Refetch to ensure we have server state
       queryClient.invalidateQueries({ queryKey: ['/api/tab-configs'] });
       toast({
         title: 'Success',
         description: 'Tab updated successfully',
       });
     },
-    onError: (error: any) => {
-      // Rollback on error
-      queryClient.invalidateQueries({ queryKey: ['/api/tab-configs'] });
+    onError: (error: any, variables, context) => {
+      // Rollback to previous state on error
+      if (context?.previousTabs) {
+        queryClient.setQueryData(['/api/tab-configs'], context.previousTabs);
+        setTabs(context.previousTabs);
+      }
       
       const errorMessage = error?.message || error?.error || 'Failed to update tab';
       toast({
@@ -286,6 +306,10 @@ export function TabManager({ open, onOpenChange }: TabManagerProps) {
         description: errorMessage,
         variant: 'destructive',
       });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure sync
+      queryClient.invalidateQueries({ queryKey: ['/api/tab-configs'] });
     },
   });
 
@@ -387,12 +411,16 @@ export function TabManager({ open, onOpenChange }: TabManagerProps) {
 
   function handleSaveEdit() {
     if (editingTab) {
+      const updateData = {
+        label: editingTab.label,
+        icon: editingTab.icon,
+        isVisible: editingTab.isVisible,
+        settings: editingTab.settings,
+      };
+      
       updateMutation.mutate({
         id: editingTab.id,
-        data: {
-          label: editingTab.label,
-          icon: editingTab.icon,
-        },
+        data: updateData,
       });
       setEditingTab(null);
     }
