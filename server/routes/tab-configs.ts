@@ -1,4 +1,4 @@
-import { Express } from 'express';
+import { Express, Request, Response, NextFunction } from 'express';
 import { db } from '../db';
 import { tabConfigs, insertTabConfigSchema } from '../../shared/schema';
 import { eq, and, or, inArray } from 'drizzle-orm';
@@ -7,9 +7,33 @@ import { tenantMiddleware, type TenantRequest } from '../middleware/tenant';
 
 type TabScope = 'system' | 'organization' | 'role' | 'user';
 
+// Combined type for tenant + auth requests
+interface CombinedRequest extends Request {
+  user?: {
+    id: number;
+    username: string;
+    role: string;
+    roleId?: number;
+    organizationId?: number;
+    currentOrganizationId?: number;
+  };
+  tenant?: {
+    id: number;
+    name: string;
+    type: string;
+    logoUrl?: string;
+    themeColor: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    website?: string;
+    isActive: boolean;
+  };
+}
+
 export function setupTabConfigRoutes(app: Express) {
   // Get tab configurations with scope hierarchy resolution
-  app.get('/api/tab-configs', authenticateToken, tenantMiddleware, async (req: TenantRequest & AuthRequest, res) => {
+  app.get('/api/tab-configs', authenticateToken, tenantMiddleware, async (req: CombinedRequest, res: Response) => {
     try {
       const organizationId = req.tenant?.id;
       const userId = req.user?.id;
@@ -63,7 +87,7 @@ export function setupTabConfigRoutes(app: Express) {
   });
 
   // Create a new custom tab
-  app.post('/api/tab-configs', authenticateToken, tenantMiddleware, async (req: TenantRequest & AuthRequest, res) => {
+  app.post('/api/tab-configs', authenticateToken, tenantMiddleware, async (req: CombinedRequest, res: Response) => {
     try {
       const organizationId = req.tenant?.id;
       const userId = req.user?.id;
@@ -93,7 +117,7 @@ export function setupTabConfigRoutes(app: Express) {
   });
 
   // Update tab configuration
-  app.patch('/api/tab-configs/:id', authenticateToken, tenantMiddleware, async (req: TenantRequest & AuthRequest, res) => {
+  app.patch('/api/tab-configs/:id', authenticateToken, tenantMiddleware, async (req: CombinedRequest, res: Response) => {
     try {
       const tabId = parseInt(req.params.id);
       const userId = req.user?.id;
@@ -149,7 +173,7 @@ export function setupTabConfigRoutes(app: Express) {
   });
 
   // Reorder tabs
-  app.patch('/api/tab-configs/reorder', authenticateToken, tenantMiddleware, async (req: TenantRequest & AuthRequest, res) => {
+  app.patch('/api/tab-configs/reorder', authenticateToken, tenantMiddleware, async (req: CombinedRequest, res: Response) => {
     try {
       const { tabs } = req.body;
       const organizationId = req.tenant?.id;
@@ -219,7 +243,7 @@ export function setupTabConfigRoutes(app: Express) {
   });
 
   // Delete a custom tab
-  app.delete('/api/tab-configs/:id', authenticateToken, tenantMiddleware, async (req: TenantRequest & AuthRequest, res) => {
+  app.delete('/api/tab-configs/:id', authenticateToken, tenantMiddleware, async (req: CombinedRequest, res: Response) => {
     try {
       const tabId = parseInt(req.params.id);
       const userId = req.user?.id;
@@ -263,7 +287,7 @@ export function setupTabConfigRoutes(app: Express) {
   });
 
   // Seed tab configurations
-  app.post('/api/tab-configs/seed', authenticateToken, async (req: AuthRequest, res) => {
+  app.post('/api/tab-configs/seed', authenticateToken, async (req: AuthRequest, res: Response) => {
     try {
       if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin' && req.user?.role !== 'super_admin') {
         return res.status(403).json({ error: 'Admin access required' });

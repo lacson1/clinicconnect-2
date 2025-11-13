@@ -11,6 +11,7 @@ declare module 'express-session' {
       id: number;
       username: string;
       role: string;
+      roleId?: number;
       organizationId?: number;
       currentOrganizationId?: number; // Currently selected organization
     };
@@ -24,6 +25,7 @@ export interface AuthRequest extends Request {
     id: number;
     username: string;
     role: string;
+    roleId?: number; // RBAC role reference
     organizationId?: number;
     currentOrganizationId?: number; // Currently selected organization
   };
@@ -52,6 +54,7 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
       id: sessionUser.id,
       username: sessionUser.username,
       role: sessionUser.role,
+      roleId: sessionUser.roleId || user?.roleId || undefined,
       organizationId: sessionUser.organizationId || undefined,
       currentOrganizationId: sessionUser.currentOrganizationId || sessionUser.organizationId || undefined
     };
