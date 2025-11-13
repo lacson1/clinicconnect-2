@@ -8,6 +8,22 @@
 
 See `PRODUCTION_CLEANUP_SUMMARY.md` for detailed cleanup documentation.
 
+### Recent Updates (November 13, 2025 - Afternoon)
+**Critical Bug Fixes:**
+- ✅ Fixed PostgreSQL compatibility issues in patient health metrics endpoints (ReferenceError, date function syntax)
+- ✅ Resolved variable name conflict in `/api/patients/:id/health-metrics` causing initialization errors
+- ✅ Updated SQL date functions from SQLite syntax to PostgreSQL (`DATE('now')` → `CURRENT_DATE - INTERVAL`, `DATETIME('now')` → `NOW()`)
+
+**UI/UX Improvements:**
+- ✅ Fixed calendar DOM nesting warnings using custom DayButton component with proper ARIA attributes
+- ✅ Implemented patient billing tab with server-side filtering to prevent cross-patient data leakage
+- ✅ Removed 20+ console.log statements from production code (keeping error logging intact)
+
+**Security Enhancements:**
+- ✅ Backend route `/api/invoices` now accepts `patientId` query parameter for server-side filtering
+- ✅ PatientBillingTab component uses `/api/invoices?patientId=${id}` to fetch only patient-specific data
+- ✅ Eliminated client-side filtering that previously exposed all invoices to frontend
+
 ## Overview
 Bluequee is a comprehensive digital health platform designed for rural healthcare delivery in Southwest Nigeria. Its primary purpose is to provide robust, secure, and user-friendly tools for clinic management, patient care, and administration. Key capabilities include advanced medical communication, intelligent lab result analysis, and enhanced patient engagement, all while ensuring security, compliance, and accessibility. The platform aims to streamline operations related to patient data, appointments, prescriptions, and secure communication.
 

@@ -12188,20 +12188,20 @@ PRIORITY LEVEL: ${priorityLevel.toUpperCase()}
       let dateFilter;
       switch (timeframe) {
         case '7d':
-          dateFilter = sql`DATE('now', '-7 days')`;
+          dateFilter = sql`CURRENT_DATE - INTERVAL '7 days'`;
           break;
         case '90d':
-          dateFilter = sql`DATE('now', '-90 days')`;
+          dateFilter = sql`CURRENT_DATE - INTERVAL '90 days'`;
           break;
         case '1y':
-          dateFilter = sql`DATE('now', '-1 year')`;
+          dateFilter = sql`CURRENT_DATE - INTERVAL '1 year'`;
           break;
         default:
-          dateFilter = sql`DATE('now', '-30 days')`;
+          dateFilter = sql`CURRENT_DATE - INTERVAL '30 days'`;
       }
 
       // Fetch vital signs data to calculate health metrics
-      const vitalSigns = await db.select()
+      const vitalSignsData = await db.select()
         .from(vitalSigns)
         .where(and(
           eq(vitalSigns.patientId, patientId),
@@ -12213,9 +12213,9 @@ PRIORITY LEVEL: ${priorityLevel.toUpperCase()}
       // Calculate health metrics from vital signs
       const healthMetrics = [];
       
-      if (vitalSigns.length > 0) {
-        const latest = vitalSigns[0];
-        const previous = vitalSigns[1];
+      if (vitalSignsData.length > 0) {
+        const latest = vitalSignsData[0];
+        const previous = vitalSignsData[1];
         
         // Blood Pressure
         if (latest.bloodPressureSystolic && latest.bloodPressureDiastolic) {
@@ -12310,20 +12310,20 @@ PRIORITY LEVEL: ${priorityLevel.toUpperCase()}
       let dateFilter;
       switch (timeframe) {
         case '7d':
-          dateFilter = sql`DATE('now', '-7 days')`;
+          dateFilter = sql`CURRENT_DATE - INTERVAL '7 days'`;
           break;
         case '90d':
-          dateFilter = sql`DATE('now', '-90 days')`;
+          dateFilter = sql`CURRENT_DATE - INTERVAL '90 days'`;
           break;
         case '1y':
-          dateFilter = sql`DATE('now', '-1 year')`;
+          dateFilter = sql`CURRENT_DATE - INTERVAL '1 year'`;
           break;
         default:
-          dateFilter = sql`DATE('now', '-30 days')`;
+          dateFilter = sql`CURRENT_DATE - INTERVAL '30 days'`;
       }
 
       const vitalTrends = await db.select({
-        date: sql<string>`DATE(${vitalSigns.recordedAt})`,
+        date: sql<string>`CAST(${vitalSigns.recordedAt} AS DATE)`,
         systolic: vitalSigns.bloodPressureSystolic,
         diastolic: vitalSigns.bloodPressureDiastolic,
         heartRate: vitalSigns.heartRate,
@@ -12379,7 +12379,7 @@ PRIORITY LEVEL: ${priorityLevel.toUpperCase()}
         .from(appointments)
         .where(and(
           eq(appointments.patientId, patientId),
-          lt(appointments.appointmentTime, sql`DATETIME('now')`),
+          lt(appointments.appointmentTime, sql`NOW()`),
           eq(appointments.status, 'scheduled'),
           eq(appointments.organizationId, req.user!.organizationId!)
         ));
