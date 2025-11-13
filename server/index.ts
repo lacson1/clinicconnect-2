@@ -4,6 +4,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { sessionConfig } from "./middleware/session";
 import { securityHeaders } from "./middleware/security";
+import { seedTabPresets } from "./seedTabPresets";
 
 const app = express();
 
@@ -62,6 +63,13 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Seed tab presets on startup (idempotent - only creates if not exists)
+  try {
+    await seedTabPresets();
+  } catch (error) {
+    console.error('Failed to seed tab presets:', error);
+  }
+
   // Setup new modular routes (patients, laboratory, prescriptions)
   setupRoutes(app);
   

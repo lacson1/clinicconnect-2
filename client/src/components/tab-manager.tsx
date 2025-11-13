@@ -71,6 +71,17 @@ interface TabConfig {
   isSystemDefault: boolean;
   displayOrder: number;
   scope: string;
+  isMandatory?: boolean;
+  category?: string;
+}
+
+interface TabPreset {
+  id: number;
+  name: string;
+  description: string;
+  scope: string;
+  icon: string;
+  isDefault: boolean;
 }
 
 interface TabManagerProps {
@@ -147,9 +158,19 @@ function SortableTabItem({ tab, onEdit, onDelete, onToggleVisibility }: Sortable
             System
           </span>
         )}
+        {tab.isMandatory && (
+          <span className="text-xs px-2 py-0.5 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-full">
+            Mandatory
+          </span>
+        )}
         {!tab.isVisible && (
           <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
             Hidden
+          </span>
+        )}
+        {tab.category && (
+          <span className="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full">
+            {tab.category}
           </span>
         )}
       </div>
@@ -161,11 +182,11 @@ function SortableTabItem({ tab, onEdit, onDelete, onToggleVisibility }: Sortable
           onClick={() => onToggleVisibility(tab)}
           data-testid={`toggle-visibility-${tab.key}`}
           title={
-            tab.isSystemDefault 
-              ? 'System tabs cannot be hidden' 
+            tab.isMandatory
+              ? 'Mandatory tabs cannot be hidden' 
               : tab.isVisible ? 'Hide tab' : 'Show tab'
           }
-          disabled={tab.isSystemDefault}
+          disabled={tab.isMandatory}
           className={tab.isSystemDefault ? 'opacity-50 cursor-not-allowed' : ''}
         >
           {tab.isVisible ? (
@@ -206,6 +227,8 @@ export function TabManager({ open, onOpenChange }: TabManagerProps) {
   const [tabs, setTabs] = useState<TabConfig[]>([]);
   const [editingTab, setEditingTab] = useState<TabConfig | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showPresetDialog, setShowPresetDialog] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<TabPreset | null>(null);
   const [newTabLabel, setNewTabLabel] = useState('');
   const [newTabIcon, setNewTabIcon] = useState('Settings2');
   const { toast } = useToast();
@@ -221,6 +244,12 @@ export function TabManager({ open, onOpenChange }: TabManagerProps) {
   // Fetch tab configurations
   const { data: fetchedTabs, isLoading } = useQuery<TabConfig[]>({
     queryKey: ['/api/tab-configs'],
+    enabled: open,
+  });
+
+  // Fetch presets
+  const { data: presets } = useQuery<TabPreset[]>({
+    queryKey: ['/api/tab-presets'],
     enabled: open,
   });
 
@@ -364,6 +393,29 @@ export function TabManager({ open, onOpenChange }: TabManagerProps) {
     },
   });
 
+  // Apply preset mutation
+  const applyPresetMutation = useMutation({
+    mutationFn: async ({ presetId, targetScope }: { presetId: number; targetScope: string }) => {
+      await apiRequest(`/api/tab-presets/${presetId}/apply`, 'POST', { targetScope });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tab-configs'] });
+      setShowPresetDialog(false);
+      setSelectedPreset(null);
+      toast({
+        title: 'Success',
+        description: 'Preset applied successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error?.error || 'Failed to apply preset',
+        variant: 'destructive',
+      });
+    },
+  });
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
@@ -390,19 +442,32 @@ export function TabManager({ open, onOpenChange }: TabManagerProps) {
   }
 
   function handleToggleVisibility(tab: TabConfig) {
-    if (tab.isSystemDefault) {
+    if (tab.isMandatory) {
       toast({
-        title: 'Cannot modify system tab',
-        description: 'System default tabs cannot be hidden. You can only customize their visibility in organization or user-specific configurations.',
+        title: 'Cannot hide mandatory tab',
+        description: 'This tab is required and cannot be hidden.',
         variant: 'destructive',
       });
       return;
     }
     
-    updateMutation.mutate({
-      id: tab.id,
-      data: { isVisible: !tab.isVisible },
-    });
+    // Use new visibility endpoint
+    const newVisibility = !tab.isVisible;
+    apiRequest(`/api/tab-configs/${tab.id}/visibility`, 'PATCH', { isVisible: newVisibility })
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/tab-configs'] });
+        toast({
+          title: 'Success',
+          description: newVisibility ? 'Tab shown successfully' : 'Tab hidden successfully',
+        });
+      })
+      .catch((error: any) => {
+        toast({
+          title: 'Error',
+          description: error?.error || 'Failed to update tab visibility',
+          variant: 'destructive',
+        });
+      });
   }
 
   function handleEdit(tab: TabConfig) {
@@ -494,6 +559,10 @@ export function TabManager({ open, onOpenChange }: TabManagerProps) {
           </div>
 
           <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setShowPresetDialog(true)} data-testid="apply-preset-button">
+              <LayoutGrid className="h-4 w-4 mr-2" />
+              Apply Preset
+            </Button>
             <Button variant="outline" onClick={() => setShowAddDialog(true)} data-testid="add-tab-button">
               <Plus className="h-4 w-4 mr-2" />
               Add Custom Tab
@@ -550,6 +619,62 @@ export function TabManager({ open, onOpenChange }: TabManagerProps) {
             </Button>
             <Button onClick={handleSaveEdit} data-testid="save-edit-tab">
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Apply Preset Dialog */}
+      <Dialog open={showPresetDialog} onOpenChange={setShowPresetDialog}>
+        <DialogContent data-testid="preset-dialog">
+          <DialogHeader>
+            <DialogTitle>Apply Preset Layout</DialogTitle>
+            <DialogDescription>Choose a preset tab layout to quickly configure your view.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-4">
+            {presets?.map((preset) => (
+              <div
+                key={preset.id}
+                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                  selectedPreset?.id === preset.id
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'
+                }`}
+                onClick={() => setSelectedPreset(preset)}
+                data-testid={`preset-option-${preset.id}`}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="font-medium text-gray-900 dark:text-gray-100">{preset.name}</div>
+                  {preset.isDefault && (
+                    <span className="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full">
+                      Default
+                    </span>
+                  )}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">{preset.description}</div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowPresetDialog(false);
+              setSelectedPreset(null);
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (selectedPreset) {
+                  applyPresetMutation.mutate({ 
+                    presetId: selectedPreset.id, 
+                    targetScope: 'user' 
+                  });
+                }
+              }}
+              disabled={!selectedPreset || applyPresetMutation.isPending}
+              data-testid="confirm-apply-preset"
+            >
+              {applyPresetMutation.isPending ? 'Applying...' : 'Apply Preset'}
             </Button>
           </DialogFooter>
         </DialogContent>

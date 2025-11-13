@@ -11,6 +11,8 @@ export interface TabConfig {
   isVisible: boolean;
   isSystemDefault: boolean;
   scope: string;
+  isMandatory?: boolean;
+  category?: string;
 }
 
 const FALLBACK_TABS: TabConfig[] = [
