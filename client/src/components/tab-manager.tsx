@@ -159,7 +159,13 @@ function SortableTabItem({ tab, onEdit, onDelete, onToggleVisibility }: Sortable
           size="sm"
           onClick={() => onToggleVisibility(tab)}
           data-testid={`toggle-visibility-${tab.key}`}
-          title={tab.isVisible ? 'Hide tab' : 'Show tab'}
+          title={
+            tab.isSystemDefault 
+              ? 'System tabs cannot be hidden' 
+              : tab.isVisible ? 'Hide tab' : 'Show tab'
+          }
+          disabled={tab.isSystemDefault}
+          className={tab.isSystemDefault ? 'opacity-50 cursor-not-allowed' : ''}
         >
           {tab.isVisible ? (
             <Eye className="h-4 w-4 text-gray-600 dark:text-gray-400" />
@@ -269,12 +275,14 @@ export function TabManager({ open, onOpenChange }: TabManagerProps) {
         description: 'Tab updated successfully',
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       // Rollback on error
       queryClient.invalidateQueries({ queryKey: ['/api/tab-configs'] });
+      
+      const errorMessage = error?.message || error?.error || 'Failed to update tab';
       toast({
-        title: 'Error',
-        description: 'Failed to update tab',
+        title: 'Update failed',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -345,6 +353,15 @@ export function TabManager({ open, onOpenChange }: TabManagerProps) {
   }
 
   function handleToggleVisibility(tab: TabConfig) {
+    if (tab.isSystemDefault) {
+      toast({
+        title: 'Cannot modify system tab',
+        description: 'System default tabs cannot be hidden. You can only customize their visibility in organization or user-specific configurations.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     updateMutation.mutate({
       id: tab.id,
       data: { isVisible: !tab.isVisible },
