@@ -1,6 +1,6 @@
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { DayPicker, DayProps } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -24,8 +24,7 @@ function Calendar({
         caption_label: "text-sm font-medium",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input"
         ),
         nav_button_previous: "absolute left-1",
         nav_button_next: "absolute right-1",
@@ -57,6 +56,28 @@ function Calendar({
         IconRight: ({ className, ...props }) => (
           <ChevronRight className={cn("h-4 w-4", className)} {...props} />
         ),
+        DayButton: ({ day, modifiers, ...buttonProps }: DayProps) => {
+          const classNames = cn(
+            "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-md hover:bg-accent hover:text-accent-foreground cursor-pointer inline-flex items-center justify-center text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+            modifiers.selected && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+            modifiers.today && "bg-accent text-accent-foreground",
+            modifiers.outside && "text-muted-foreground opacity-50",
+            modifiers.disabled && "text-muted-foreground opacity-50 cursor-not-allowed"
+          );
+          
+          return (
+            <div
+              {...buttonProps}
+              className={classNames}
+              role="gridcell"
+              aria-selected={modifiers.selected}
+              tabIndex={modifiers.disabled ? -1 : 0}
+              onClick={!modifiers.disabled ? buttonProps.onClick : undefined}
+            >
+              {day.getDate()}
+            </div>
+          );
+        },
       }}
       {...props}
     />
