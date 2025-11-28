@@ -12178,6 +12178,47 @@ PRIORITY LEVEL: ${priorityLevel.toUpperCase()}
     }
   });
 
+  // Patient-specific Appointments
+  app.get('/api/patients/:id/appointments', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const userOrgId = req.user?.organizationId;
+      
+      if (!userOrgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      const patientAppointments = await db.select({
+        id: appointments.id,
+        patientId: appointments.patientId,
+        doctorId: appointments.doctorId,
+        doctorName: users.username,
+        appointmentDate: appointments.appointmentDate,
+        appointmentTime: appointments.appointmentTime,
+        duration: appointments.duration,
+        type: appointments.type,
+        status: appointments.status,
+        notes: appointments.notes,
+        priority: appointments.priority,
+        organizationId: appointments.organizationId,
+        createdAt: appointments.createdAt,
+        updatedAt: appointments.updatedAt
+      })
+      .from(appointments)
+      .leftJoin(users, eq(appointments.doctorId, users.id))
+      .where(and(
+        eq(appointments.patientId, patientId),
+        eq(appointments.organizationId, userOrgId)
+      ))
+      .orderBy(desc(appointments.appointmentDate), desc(appointments.appointmentTime));
+      
+      res.json(patientAppointments);
+    } catch (error) {
+      console.error('Error fetching patient appointments:', error);
+      res.status(500).json({ message: "Failed to fetch patient appointments" });
+    }
+  });
+
   // Advanced Patient Care - Health Metrics
   app.get('/api/patients/:id/health-metrics', authenticateToken, async (req: AuthRequest, res) => {
     try {

@@ -132,6 +132,8 @@ import { DocumentPreviewCarousel } from './document-preview-carousel';
 import CustomPrescriptionPrint from './custom-prescription-print';
 import CustomLabOrderPrint from './custom-lab-order-print';
 import { MedicationReviewAssignmentModal } from './medication-review-assignment-modal';
+import { PatientAppointmentsTab } from './patient-appointments-tab';
+import { PatientBillingTab } from './patient-billing-tab';
 import { MedicationReviewAssignmentsList } from './medication-review-assignments-list';
 import VaccinationManagement from './vaccination-management';
 import { useAuth } from '@/contexts/AuthContext';
@@ -3466,6 +3468,36 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
             <PatientCommunicationHub
               patientId={patient.id}
             />
+          </TabsContent>
+
+          {/* Appointments Tab - Detailed Implementation */}
+          <TabsContent value="appointments" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-blue-500" />
+                  Appointments & Scheduling
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PatientAppointmentsTab patientId={patient.id} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Billing Tab */}
+          <TabsContent value="billing" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CardIcon className="h-5 w-5 text-green-500" />
+                  Patient Billing
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PatientBillingTab patient={patient} />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
         
