@@ -134,10 +134,12 @@ import CustomLabOrderPrint from './custom-lab-order-print';
 import { MedicationReviewAssignmentModal } from './medication-review-assignment-modal';
 import { PatientAppointmentsTab } from './patient-appointments-tab';
 import { PatientBillingTab } from './patient-billing-tab';
+import { PatientInsuranceTab } from './patient-insurance-tab';
+import { PatientHistoryTab } from './patient-history-tab';
 import { MedicationReviewAssignmentsList } from './medication-review-assignments-list';
 import VaccinationManagement from './vaccination-management';
 import { useAuth } from '@/contexts/AuthContext';
-import { CheckCircle, MoreVertical, Eye, Download, Share, Printer } from 'lucide-react';
+import { CheckCircle, MoreVertical, Eye, Download, Share, Printer, Shield } from 'lucide-react';
 import { LabResultPersonalityIntegration } from './LabResultPersonalityIntegration';
 import ConsentCapture from './consent-capture';
 import InsuranceManagement from './insurance-management';
@@ -3496,6 +3498,36 @@ This is a valid prescription for dispensing at any licensed pharmacy in Nigeria.
               </CardHeader>
               <CardContent>
                 <PatientBillingTab patient={patient} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Insurance Tab */}
+          <TabsContent value="insurance" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-blue-500" />
+                  Insurance Coverage
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PatientInsuranceTab patientId={patient.id} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Medical History Tab */}
+          <TabsContent value="history" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="h-5 w-5 text-purple-500" />
+                  Medical History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PatientHistoryTab patientId={patient.id} />
               </CardContent>
             </Card>
           </TabsContent>

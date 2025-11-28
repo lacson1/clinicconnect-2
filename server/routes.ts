@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { fileStorage } from "./storage-service";
-import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, insertSafetyAlertSchema, insertPharmacyActivitySchema, insertMedicationReviewSchema, insertMedicationReviewAssignmentSchema, insertProceduralReportSchema, insertConsentFormSchema, insertPatientConsentSchema, insertMessageSchema, insertAppointmentReminderSchema, insertAvailabilitySlotSchema, insertBlackoutDateSchema, insertInvoiceSchema, insertInvoiceItemSchema, insertPaymentSchema, insertInsuranceClaimSchema, insertServicePriceSchema, insertPatientInsuranceSchema, insertPatientReferralSchema, insertPinnedConsultationFormSchema, insertTelemedicineSessionSchema, users, auditLogs, labTests, medications, medicines, labOrders, labOrderItems, labResults, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, appointments, safetyAlerts, pharmacyActivities, medicationReviews, medicationReviewAssignments, prescriptions, pharmacies, proceduralReports, consentForms, patientConsents, messages, appointmentReminders, availabilitySlots, blackoutDates, invoices, invoiceItems, payments, insuranceClaims, servicePrices, medicalDocuments, vaccinations, roles, permissions, rolePermissions, patientInsurance, patientReferrals, pinnedConsultationForms, telemedicineSessions, userOrganizations } from "@shared/schema";
+import { insertPatientSchema, insertVisitSchema, insertLabResultSchema, insertMedicineSchema, insertPrescriptionSchema, insertUserSchema, insertReferralSchema, insertLabTestSchema, insertConsultationFormSchema, insertConsultationRecordSchema, insertVaccinationSchema, insertAllergySchema, insertMedicalHistorySchema, insertAppointmentSchema, insertSafetyAlertSchema, insertPharmacyActivitySchema, insertMedicationReviewSchema, insertMedicationReviewAssignmentSchema, insertProceduralReportSchema, insertConsentFormSchema, insertPatientConsentSchema, insertMessageSchema, insertAppointmentReminderSchema, insertAvailabilitySlotSchema, insertBlackoutDateSchema, insertInvoiceSchema, insertInvoiceItemSchema, insertPaymentSchema, insertInsuranceClaimSchema, insertServicePriceSchema, insertPatientInsuranceSchema, insertPatientReferralSchema, insertPinnedConsultationFormSchema, insertTelemedicineSessionSchema, users, auditLogs, labTests, medications, medicines, labOrders, labOrderItems, labResults, consultationForms, consultationRecords, organizations, visits, patients, vitalSigns, appointments, safetyAlerts, pharmacyActivities, medicationReviews, medicationReviewAssignments, prescriptions, pharmacies, proceduralReports, consentForms, patientConsents, messages, appointmentReminders, availabilitySlots, blackoutDates, invoices, invoiceItems, payments, insuranceClaims, servicePrices, medicalDocuments, vaccinations, roles, permissions, rolePermissions, patientInsurance, patientReferrals, pinnedConsultationForms, telemedicineSessions, userOrganizations, medicalHistory } from "@shared/schema";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { db } from "./db";
@@ -3614,6 +3614,141 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     } catch (error) {
       console.error('Error deleting insurance record:', error);
       res.status(500).json({ message: "Failed to delete insurance record" });
+    }
+  });
+
+  // Patient Medical History Routes
+  app.get('/api/patients/:id/medical-history', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const userOrgId = req.user?.organizationId;
+      
+      // Verify patient belongs to user's organization
+      const [patient] = await db.select().from(patients)
+        .where(and(eq(patients.id, patientId), eq(patients.organizationId, userOrgId!)))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(403).json({ message: "Access denied - patient not in your organization" });
+      }
+      
+      const historyRecords = await db.select()
+        .from(medicalHistory)
+        .where(eq(medicalHistory.patientId, patientId))
+        .orderBy(desc(medicalHistory.dateOccurred));
+
+      res.json(historyRecords);
+    } catch (error) {
+      console.error('Error fetching patient medical history:', error);
+      res.status(500).json({ message: "Failed to fetch medical history records" });
+    }
+  });
+
+  app.post('/api/patients/:id/medical-history', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const userOrgId = req.user?.organizationId;
+      
+      // Verify patient belongs to user's organization
+      const [patient] = await db.select().from(patients)
+        .where(and(eq(patients.id, patientId), eq(patients.organizationId, userOrgId!)))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(403).json({ message: "Access denied - patient not in your organization" });
+      }
+      
+      // Validate request body with schema
+      const validationResult = insertMedicalHistorySchema.omit({ id: true, patientId: true, createdAt: true }).safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ message: "Invalid data", errors: validationResult.error.errors });
+      }
+      
+      const [newHistory] = await db.insert(medicalHistory).values({
+        ...validationResult.data,
+        patientId
+      }).returning();
+
+      res.status(201).json(newHistory);
+    } catch (error) {
+      console.error('Error creating medical history entry:', error);
+      res.status(500).json({ message: "Failed to create medical history entry" });
+    }
+  });
+
+  app.patch('/api/patients/:id/medical-history/:historyId', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const historyId = parseInt(req.params.historyId);
+      const userOrgId = req.user?.organizationId;
+      
+      // Verify patient belongs to user's organization
+      const [patient] = await db.select().from(patients)
+        .where(and(eq(patients.id, patientId), eq(patients.organizationId, userOrgId!)))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(403).json({ message: "Access denied - patient not in your organization" });
+      }
+      
+      // Validate and sanitize update fields
+      const allowedFields = ['condition', 'type', 'dateOccurred', 'status', 'description', 'treatment', 'notes'];
+      const sanitizedData: Record<string, any> = {};
+      for (const key of allowedFields) {
+        if (key in req.body) {
+          sanitizedData[key] = req.body[key];
+        }
+      }
+      
+      const [updated] = await db.update(medicalHistory)
+        .set(sanitizedData)
+        .where(and(
+          eq(medicalHistory.id, historyId),
+          eq(medicalHistory.patientId, patientId)
+        ))
+        .returning();
+
+      if (!updated) {
+        return res.status(404).json({ message: "Medical history entry not found" });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      console.error('Error updating medical history entry:', error);
+      res.status(500).json({ message: "Failed to update medical history entry" });
+    }
+  });
+
+  app.delete('/api/patients/:id/medical-history/:historyId', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const historyId = parseInt(req.params.historyId);
+      const userOrgId = req.user?.organizationId;
+      
+      // Verify patient belongs to user's organization
+      const [patient] = await db.select().from(patients)
+        .where(and(eq(patients.id, patientId), eq(patients.organizationId, userOrgId!)))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(403).json({ message: "Access denied - patient not in your organization" });
+      }
+      
+      const [deleted] = await db.delete(medicalHistory)
+        .where(and(
+          eq(medicalHistory.id, historyId),
+          eq(medicalHistory.patientId, patientId)
+        ))
+        .returning();
+
+      if (!deleted) {
+        return res.status(404).json({ message: "Medical history entry not found" });
+      }
+
+      res.json({ message: "Medical history entry deleted successfully" });
+    } catch (error) {
+      console.error('Error deleting medical history entry:', error);
+      res.status(500).json({ message: "Failed to delete medical history entry" });
     }
   });
 
