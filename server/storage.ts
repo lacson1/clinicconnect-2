@@ -62,8 +62,7 @@ import {
   type AiConsultation,
   type InsertAiConsultation,
   type ClinicalNote,
-  type InsertClinicalNote,
-  type UpsertReplitAuthUser
+  type InsertClinicalNote
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, gte, lte, and, ilike, or, sql } from "drizzle-orm";
@@ -111,10 +110,6 @@ export interface IStorage {
   getUserWithOrganization(id: number): Promise<{ organizationId: number | null } | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
-  // Replit Auth - Reference: blueprint:javascript_log_in_with_replit
-  getReplitAuthUser(replitAuthId: string): Promise<User | undefined>;
-  upsertReplitAuthUser(user: UpsertReplitAuthUser): Promise<User>;
-
   // Referrals
   getReferral(id: number): Promise<Referral | undefined>;
   getReferrals(filters?: { toRole?: string; fromUserId?: number; status?: string }): Promise<Referral[]>;
@@ -530,51 +525,6 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .insert(users)
       .values(insertUser)
-      .returning();
-    return user;
-  }
-
-  // Replit Auth - Reference: blueprint:javascript_log_in_with_replit
-  async getReplitAuthUser(replitAuthId: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.replitAuthId, replitAuthId));
-    return user || undefined;
-  }
-
-  async upsertReplitAuthUser(userData: UpsertReplitAuthUser): Promise<User> {
-    // Check if user with this Replit Auth ID exists
-    const existingUser = await this.getReplitAuthUser(userData.replitAuthId);
-
-    if (existingUser) {
-      // Update existing user
-      const [user] = await db
-        .update(users)
-        .set({
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          profileImageUrl: userData.profileImageUrl,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.replitAuthId, userData.replitAuthId))
-        .returning();
-      return user;
-    }
-
-    // Create new user with Replit Auth data
-    // Use email or a generated username for required username field
-    const username = userData.email || `replit_${userData.replitAuthId}`;
-    const [user] = await db
-      .insert(users)
-      .values({
-        replitAuthId: userData.replitAuthId,
-        username: username,
-        password: '', // Empty password for Replit Auth users
-        role: 'doctor', // Default role, can be changed by admin
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        profileImageUrl: userData.profileImageUrl,
-      })
       .returning();
     return user;
   }

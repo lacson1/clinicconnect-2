@@ -36,11 +36,6 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
       'http://127.0.0.1:5173',
     ];
 
-// In development, also allow Replit domains
-if (process.env.NODE_ENV !== 'production') {
-  // Allow any replit.dev or replit.app domain in development
-  ALLOWED_ORIGINS.push(/\.replit\.dev$/, /\.replit\.app$/, /\.repl\.co$/);
-}
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
