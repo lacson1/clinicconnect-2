@@ -1,4 +1,5 @@
 # Multi-stage Dockerfile for optimized ClinicConnect deployment
+# Cache bust: 2024-12-02-v2
 
 # Stage 1: Build frontend
 FROM node:20-alpine AS frontend-builder
