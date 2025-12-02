@@ -45,7 +45,7 @@ if (!isDevelopment && process.env.DATABASE_URL) {
 
     sessionStore = new PgSession({
       pool: pgPool,
-      tableName: 'user_sessions',
+      tableName: 'sessions', // Must match Drizzle schema in shared/schema.ts
       createTableIfMissing: true,
       pruneSessionInterval: 60 * 15, // Prune expired sessions every 15 minutes
       errorLog: (err: Error) => {
@@ -60,9 +60,9 @@ if (!isDevelopment && process.env.DATABASE_URL) {
   } catch (error: any) {
     console.warn('⚠️  Failed to initialize PostgreSQL session store:', error?.message || error);
     console.warn('   Falling back to MemoryStore (not recommended for production)');
-    console.warn('   Ensure the user_sessions table exists in your database.');
+    console.warn('   Ensure the sessions table exists in your database.');
     console.warn('   Run migrations or manually create the table:');
-    console.warn('   CREATE TABLE IF NOT EXISTS user_sessions (sid VARCHAR PRIMARY KEY, sess JSON NOT NULL, expire TIMESTAMP NOT NULL);');
+    console.warn('   CREATE TABLE IF NOT EXISTS sessions (sid VARCHAR PRIMARY KEY, sess JSON NOT NULL, expire TIMESTAMP NOT NULL);');
     sessionStore = undefined;
   }
 } else {
