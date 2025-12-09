@@ -35,7 +35,7 @@ export const organizations = pgTable('organizations', {
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 // RBAC System Tables
 export const roles = pgTable('roles', {
@@ -43,20 +43,20 @@ export const roles = pgTable('roles', {
   name: varchar('name', { length: 50 }).unique().notNull(),
   description: varchar('description', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 export const permissions = pgTable('permissions', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 100 }).unique().notNull(),
   description: varchar('description', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 export const rolePermissions = pgTable('role_permissions', {
   id: serial('id').primaryKey(),
   roleId: integer('role_id').references(() => roles.id).notNull(),
   permissionId: integer('permission_id').references(() => permissions.id).notNull()
-});
+} as any);
 
 // User-Organization membership table (for multi-organization support)
 export const userOrganizations = pgTable('user_organizations', {
@@ -66,7 +66,7 @@ export const userOrganizations = pgTable('user_organizations', {
   roleId: integer('role_id').references(() => roles.id), // Role within this organization
   isDefault: boolean('is_default').default(false), // Default organization for this user
   joinedAt: timestamp('joined_at').defaultNow()
-});
+} as any);
 
 // Session storage table for authentication
 export const sessions = pgTable(
@@ -105,7 +105,7 @@ export const users = pgTable('users', {
   twoFactorEnabled: boolean('two_factor_enabled').default(false),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 export const patients = pgTable("patients", {
   id: serial("id").primaryKey(),
@@ -136,7 +136,7 @@ export const patients = pgTable("patients", {
   insuranceId: varchar("insurance_id", { length: 50 }),
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+} as any);
 
 export const visits = pgTable("visits", {
   id: serial("id").primaryKey(),
@@ -155,7 +155,7 @@ export const visits = pgTable("visits", {
   status: text("status").notNull().default("draft"), // 'draft' | 'final'
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp("created_at").defaultNow(),
-});
+} as any);
 
 export const labResults = pgTable("lab_results", {
   id: serial("id").primaryKey(),
@@ -168,7 +168,7 @@ export const labResults = pgTable("lab_results", {
   notes: text("notes"),
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp("created_at").defaultNow(),
-});
+} as any);
 
 export const medicines = pgTable("medicines", {
   id: serial("id").primaryKey(),
@@ -188,7 +188,7 @@ export const medicines = pgTable("medicines", {
   commonConditions: text("common_conditions"), // JSON array of conditions this treats
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+} as any);
 
 export const prescriptions = pgTable("prescriptions", {
   id: serial("id").primaryKey(),
@@ -208,7 +208,7 @@ export const prescriptions = pgTable("prescriptions", {
   pharmacyId: integer("pharmacy_id").references(() => pharmacies.id), // Reference to selected pharmacy
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+} as any);
 
 export const referrals = pgTable('referrals', {
   id: serial('id').primaryKey(),
@@ -218,7 +218,7 @@ export const referrals = pgTable('referrals', {
   reason: varchar('reason', { length: 255 }),
   date: date('date').defaultNow(),
   status: varchar('status', { length: 20 }).default('pending')
-});
+} as any);
 
 export const vitalSigns = pgTable('vital_signs', {
   id: serial('id').primaryKey(),
@@ -234,7 +234,7 @@ export const vitalSigns = pgTable('vital_signs', {
   recordedAt: timestamp('recorded_at').defaultNow().notNull(),
   recordedBy: varchar('recorded_by', { length: 100 }).notNull(),
   organizationId: integer('organization_id').references(() => organizations.id)
-});
+} as any);
 
 export const auditLogs = pgTable('audit_logs', {
   id: serial('id').primaryKey(),
@@ -246,7 +246,7 @@ export const auditLogs = pgTable('audit_logs', {
   ipAddress: varchar('ip_address', { length: 45 }), // IPv4/IPv6 support
   userAgent: varchar('user_agent', { length: 500 }),
   timestamp: timestamp('timestamp').defaultNow().notNull()
-});
+} as any);
 
 // Patient-Staff Secure Messages
 export const messages = pgTable('messages', {
@@ -266,7 +266,7 @@ export const messages = pgTable('messages', {
   assignedTo: integer('assigned_to').references(() => users.id),
   routingReason: text('routing_reason'),
   organizationId: integer('organization_id').references(() => organizations.id),
-});
+} as any);
 
 export const labTests = pgTable('lab_tests', {
   id: serial('id').primaryKey(),
@@ -287,7 +287,7 @@ export const labTests = pgTable('lab_tests', {
   estimatedTime: varchar('estimated_time', { length: 50 }), // e.g., "2-4 hours"
   cost: decimal('cost', { precision: 10, scale: 2 }),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 export const labOrders = pgTable('lab_orders', {
   id: serial('id').primaryKey(),
@@ -306,7 +306,7 @@ export const labOrders = pgTable('lab_orders', {
   reviewedAt: timestamp('reviewed_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at')
-});
+} as any);
 
 export const labOrderItems = pgTable('lab_order_items', {
   id: serial('id').primaryKey(),
@@ -322,7 +322,7 @@ export const labOrderItems = pgTable('lab_order_items', {
   verifiedBy: integer('verified_by').references(() => users.id),
   verifiedAt: timestamp('verified_at'),
   completedAt: timestamp('completed_at')
-});
+} as any);
 
 // Lab departments/sections
 export const labDepartments = pgTable('lab_departments', {
@@ -334,7 +334,7 @@ export const labDepartments = pgTable('lab_departments', {
   organizationId: integer('organization_id').references(() => organizations.id),
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 // Lab equipment/instruments
 export const labEquipment = pgTable('lab_equipment', {
@@ -348,7 +348,7 @@ export const labEquipment = pgTable('lab_equipment', {
   nextMaintenanceDate: date('next_maintenance_date'),
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 // Lab worksheets/batches for processing multiple samples together
 export const labWorksheets = pgTable('lab_worksheets', {
@@ -364,7 +364,7 @@ export const labWorksheets = pgTable('lab_worksheets', {
   verifiedAt: timestamp('verified_at'),
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 // Track which lab order items are processed in which worksheet
 export const worksheetItems = pgTable('worksheet_items', {
@@ -373,7 +373,7 @@ export const worksheetItems = pgTable('worksheet_items', {
   labOrderItemId: integer('lab_order_item_id').notNull().references(() => labOrderItems.id),
   position: integer('position'), // Position in the worksheet
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 // Lab panels - Common test groupings (CBC, BMP, Lipid Panel, etc.)
 export const labPanels = pgTable('lab_panels', {
@@ -391,7 +391,7 @@ export const labPanels = pgTable('lab_panels', {
   organizationId: integer('organization_id').references(() => organizations.id),
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 // Junction table linking panels to individual tests
 export const labPanelTests = pgTable('lab_panel_tests', {
@@ -401,7 +401,7 @@ export const labPanelTests = pgTable('lab_panel_tests', {
   isRequired: boolean('is_required').default(true), // Some tests in panel may be optional
   displayOrder: integer('display_order'), // Order to display tests in panel
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 export const medications = pgTable('medications', {
   id: serial('id').primaryKey(),
@@ -427,7 +427,7 @@ export const medications = pgTable('medications', {
   prescriptionRequired: boolean('prescription_required').default(true),
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 // Specialty Assessments - Specialist-specific assessment templates
 export const consultationForms = pgTable('consultation_forms', {
@@ -440,7 +440,7 @@ export const consultationForms = pgTable('consultation_forms', {
   formStructure: json('form_structure').notNull(), // JSON structure defining fields
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 // Consultation Records - Completed specialty assessments linked to patients
 export const consultationRecords = pgTable('consultation_records', {
@@ -453,7 +453,7 @@ export const consultationRecords = pgTable('consultation_records', {
   status: varchar('status', { length: 20 }).default('draft').notNull(), // draft, completed, reviewed
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 export const vaccinations = pgTable('vaccinations', {
   id: serial('id').primaryKey(),
@@ -466,7 +466,7 @@ export const vaccinations = pgTable('vaccinations', {
   notes: text('notes'),
   nextDueDate: date('next_due_date'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+} as any);
 
 export const allergies = pgTable('allergies', {
   id: serial('id').primaryKey(),
@@ -477,7 +477,7 @@ export const allergies = pgTable('allergies', {
   reaction: text('reaction').notNull(),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+} as any);
 
 export const medicalHistory = pgTable('medical_history', {
   id: serial('id').primaryKey(),
@@ -490,7 +490,7 @@ export const medicalHistory = pgTable('medical_history', {
   treatment: text('treatment'),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+} as any);
 
 export const dischargeLetters = pgTable('discharge_letters', {
   id: serial('id').primaryKey(),
@@ -514,7 +514,7 @@ export const dischargeLetters = pgTable('discharge_letters', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+} as any);
 
 export const appointments = pgTable('appointments', {
   id: serial('id').primaryKey(),
@@ -530,7 +530,7 @@ export const appointments = pgTable('appointments', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
-});
+} as any);
 
 export const comments = pgTable('comments', {
   id: serial('id').primaryKey(),
@@ -544,7 +544,7 @@ export const comments = pgTable('comments', {
   isRead: boolean('is_read').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
-});
+} as any);
 
 // Pharmacy Activity Logs
 export const pharmacyActivities = pgTable('pharmacy_activities', {
@@ -563,7 +563,7 @@ export const pharmacyActivities = pgTable('pharmacy_activities', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
-});
+} as any);
 
 // Pharmacies table for prescription routing
 export const pharmacies = pgTable('pharmacies', {
@@ -581,7 +581,7 @@ export const pharmacies = pgTable('pharmacies', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
-});
+} as any);
 
 // Medication Review Assignments
 export const medicationReviewAssignments = pgTable('medication_review_assignments', {
@@ -600,7 +600,7 @@ export const medicationReviewAssignments = pgTable('medication_review_assignment
   assignedAt: timestamp('assigned_at').defaultNow().notNull(),
   startedAt: timestamp('started_at'),
   completedAt: timestamp('completed_at')
-});
+} as any);
 
 // Enhanced Medication Reviews
 export const medicationReviews = pgTable('medication_reviews', {
@@ -638,7 +638,7 @@ export const medicationReviews = pgTable('medication_reviews', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
-});
+} as any);
 
 // Pinned Consultation Forms
 export const pinnedConsultationForms = pgTable('pinned_consultation_forms', {
@@ -647,7 +647,7 @@ export const pinnedConsultationForms = pgTable('pinned_consultation_forms', {
   consultationFormId: integer('consultation_form_id').references(() => consultationForms.id).notNull(),
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow().notNull()
-});
+} as any);
 
 // Error Tracking Tables
 export const errorLogs = pgTable('error_logs', {
@@ -670,7 +670,7 @@ export const errorLogs = pgTable('error_logs', {
   metadata: json('metadata'), // Additional error context
   createdAt: timestamp('created_at').defaultNow().notNull(),
   resolvedAt: timestamp('resolved_at')
-});
+} as any);
 
 export const systemHealth = pgTable('system_health', {
   id: serial('id').primaryKey(),
@@ -679,7 +679,7 @@ export const systemHealth = pgTable('system_health', {
   unit: varchar('unit', { length: 20 }), // ms, %, MB, etc.
   organizationId: integer('organization_id').references(() => organizations.id),
   timestamp: timestamp('timestamp').defaultNow().notNull()
-});
+} as any);
 
 // Type definitions for new tables
 export type Pharmacy = typeof pharmacies.$inferSelect;
@@ -704,7 +704,7 @@ export const insertSystemHealthSchema = createInsertSchema(systemHealth);
 export const insertPinnedConsultationFormSchema = createInsertSchema(pinnedConsultationForms).omit({
   id: true,
   createdAt: true
-});
+} as any);
 
 // Relations
 export const patientsRelations = relations(patients, ({ many }) => ({
@@ -870,12 +870,12 @@ export const appointmentsRelations = relations(appointments, ({ one }) => ({
 export const insertPatientSchema = createInsertSchema(patients).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertVisitSchema = createInsertSchema(visits).omit({
   id: true,
   visitDate: true,
-}).extend({
+} as any).extend({
   patientId: z.number(),
   bloodPressure: z.string().optional().nullable(),
   heartRate: z.coerce.number().optional().nullable(),
@@ -909,27 +909,27 @@ export const visitFormSchema = z.object({
   followUpDate: z.string().optional().nullable(),
   visitType: z.string().optional(),
   status: z.string().optional(),
-});
+} as any);
 
 export const insertLabResultSchema = createInsertSchema(labResults).omit({
   id: true,
   testDate: true,
-});
+} as any);
 
 export const insertMedicineSchema = createInsertSchema(medicines).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertPrescriptionSchema = createInsertSchema(prescriptions).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 // Profile update schema (excludes password and username for security)
 export const updateProfileSchema = createInsertSchema(users).omit({
@@ -937,56 +937,56 @@ export const updateProfileSchema = createInsertSchema(users).omit({
   username: true,
   password: true,
   createdAt: true,
-});
+} as any);
 
 export const insertReferralSchema = createInsertSchema(referrals).omit({
   id: true,
   date: true,
-});
+} as any);
 
 export const insertAppointmentSchema = createInsertSchema(appointments).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 // Lab schema exports
 export const insertLabTestSchema = createInsertSchema(labTests).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertLabOrderSchema = createInsertSchema(labOrders).omit({
   id: true,
   createdAt: true,
   completedAt: true,
-});
+} as any);
 
 export const insertLabOrderItemSchema = createInsertSchema(labOrderItems).omit({
   id: true,
   completedAt: true,
   verifiedAt: true,
-});
+} as any);
 
 export const insertLabPanelSchema = createInsertSchema(labPanels).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertLabPanelTestSchema = createInsertSchema(labPanelTests).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertLabDepartmentSchema = createInsertSchema(labDepartments).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertLabEquipmentSchema = createInsertSchema(labEquipment).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertLabWorksheetSchema = createInsertSchema(labWorksheets).omit({
   id: true,
@@ -994,12 +994,12 @@ export const insertLabWorksheetSchema = createInsertSchema(labWorksheets).omit({
   startedAt: true,
   completedAt: true,
   verifiedAt: true,
-});
+} as any);
 
 export const insertWorksheetItemSchema = createInsertSchema(worksheetItems).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -1061,7 +1061,7 @@ export const insertMedicationReviewAssignmentSchema = createInsertSchema(medicat
   completedAt: true,
   assignedBy: true,
   organizationId: true,
-});
+} as any);
 
 
 
@@ -1073,13 +1073,13 @@ export const insertConsultationFormSchema = createInsertSchema(consultationForms
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 export const insertConsultationRecordSchema = createInsertSchema(consultationRecords).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 export type ConsultationForm = typeof consultationForms.$inferSelect;
 export type InsertConsultationForm = z.infer<typeof insertConsultationFormSchema>;
@@ -1090,23 +1090,23 @@ export type InsertConsultationRecord = z.infer<typeof insertConsultationRecordSc
 export const insertVaccinationSchema = createInsertSchema(vaccinations).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertAllergySchema = createInsertSchema(allergies).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertMedicalHistorySchema = createInsertSchema(medicalHistory).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertDischargeLetterSchema = createInsertSchema(dischargeLetters).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 // Medical Records Types
 export type Vaccination = typeof vaccinations.$inferSelect;
@@ -1121,14 +1121,14 @@ export type InsertDischargeLetter = z.infer<typeof insertDischargeLetterSchema>;
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
   id: true,
   timestamp: true,
-});
+} as any);
 
 export const insertMessageSchema = createInsertSchema(messages).omit({
   id: true,
   sentAt: true,
   readAt: true,
   repliedAt: true,
-});
+} as any);
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
@@ -1147,12 +1147,12 @@ export const medicalDocuments = pgTable('medical_documents', {
   size: integer('size').notNull(),
   mimeType: varchar('mime_type', { length: 100 }).notNull(),
   organizationId: integer('organization_id').references(() => organizations.id).notNull(),
-});
+} as any);
 
 export const insertMedicalDocumentSchema = createInsertSchema(medicalDocuments).omit({
   id: true,
   uploadedAt: true,
-});
+} as any);
 
 export type MedicalDocument = typeof medicalDocuments.$inferSelect;
 export type InsertMedicalDocument = z.infer<typeof insertMedicalDocumentSchema>;
@@ -1169,12 +1169,12 @@ export const performanceMetrics = pgTable('performance_metrics', {
   userId: integer('user_id').references(() => users.id),
   organizationId: integer('organization_id').references(() => organizations.id),
   timestamp: timestamp('timestamp').defaultNow().notNull(),
-});
+} as any);
 
 export const insertPerformanceMetricSchema = createInsertSchema(performanceMetrics).omit({
   id: true,
   timestamp: true,
-});
+} as any);
 
 export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
 export type InsertPerformanceMetric = z.infer<typeof insertPerformanceMetricSchema>;
@@ -1207,7 +1207,7 @@ export const proceduralReports = pgTable('procedural_reports', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 // Consent Forms
 export const consentForms = pgTable('consent_forms', {
@@ -1224,7 +1224,7 @@ export const consentForms = pgTable('consent_forms', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 // Patient Consents (Signed consent records)
 export const patientConsents = pgTable('patient_consents', {
@@ -1248,7 +1248,7 @@ export const patientConsents = pgTable('patient_consents', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 // Relations for procedural reports
 export const proceduralReportsRelations = relations(proceduralReports, ({ one, many }) => ({
@@ -1278,19 +1278,19 @@ export const insertProceduralReportSchema = createInsertSchema(proceduralReports
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 export const insertConsentFormSchema = createInsertSchema(consentForms).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 export const insertPatientConsentSchema = createInsertSchema(patientConsents).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 // Patient Insurance
 export const patientInsurance = pgTable('patient_insurance', {
@@ -1318,7 +1318,7 @@ export const patientInsurance = pgTable('patient_insurance', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 // Patient Referrals
 export const patientReferrals = pgTable('patient_referrals', {
@@ -1339,7 +1339,7 @@ export const patientReferrals = pgTable('patient_referrals', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 // Relations for new tables
 export const patientInsuranceRelations = relations(patientInsurance, ({ one }) => ({
@@ -1358,13 +1358,13 @@ export const insertPatientInsuranceSchema = createInsertSchema(patientInsurance)
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 export const insertPatientReferralSchema = createInsertSchema(patientReferrals).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 // Types for new tables
 export type ProceduralReport = typeof proceduralReports.$inferSelect;
@@ -1382,7 +1382,7 @@ export const insertCommentSchema = createInsertSchema(comments).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 export type Comment = typeof comments.$inferSelect;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
@@ -1393,7 +1393,7 @@ export type InsertLabTest = z.infer<typeof insertLabTestSchema>;
 export const insertMedicationSchema = createInsertSchema(medications).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export type Medication = typeof medications.$inferSelect;
 export type InsertMedication = z.infer<typeof insertMedicationSchema>;
@@ -1413,12 +1413,12 @@ export const safetyAlerts = pgTable('safety_alerts', {
   dateResolved: timestamp('date_resolved'),
   resolvedBy: integer('resolved_by').references(() => users.id),
   metadata: json('metadata'), // Additional data like vital readings, lab values, etc.
-});
+} as any);
 
 export const insertSafetyAlertSchema = createInsertSchema(safetyAlerts).omit({
   id: true,
   dateAdded: true,
-});
+} as any);
 
 export type SafetyAlert = typeof safetyAlerts.$inferSelect;
 export type InsertSafetyAlert = z.infer<typeof insertSafetyAlertSchema>;
@@ -1443,7 +1443,7 @@ export const invoices = pgTable('invoices', {
   createdBy: integer('created_by').references(() => users.id).notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 export const invoiceItems = pgTable('invoice_items', {
   id: serial('id').primaryKey(),
@@ -1455,7 +1455,7 @@ export const invoiceItems = pgTable('invoice_items', {
   unitPrice: decimal('unit_price', { precision: 10, scale: 2 }).notNull(),
   totalPrice: decimal('total_price', { precision: 10, scale: 2 }).notNull(),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 export const payments = pgTable('payments', {
   id: serial('id').primaryKey(),
@@ -1471,7 +1471,7 @@ export const payments = pgTable('payments', {
   notes: text('notes'),
   processedBy: integer('processed_by').references(() => users.id).notNull(),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 export const insuranceClaims = pgTable('insurance_claims', {
   id: serial('id').primaryKey(),
@@ -1492,7 +1492,7 @@ export const insuranceClaims = pgTable('insurance_claims', {
   createdBy: integer('created_by').references(() => users.id).notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 export const servicePrices = pgTable('service_prices', {
   id: serial('id').primaryKey(),
@@ -1508,7 +1508,7 @@ export const servicePrices = pgTable('service_prices', {
   createdBy: integer('created_by').references(() => users.id).notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 // Relations for billing tables
 export const invoicesRelations = relations(invoices, ({ one, many }) => ({
@@ -1548,29 +1548,29 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 export const insertInvoiceItemSchema = createInsertSchema(invoiceItems).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertPaymentSchema = createInsertSchema(payments).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertInsuranceClaimSchema = createInsertSchema(insuranceClaims).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 export const insertServicePriceSchema = createInsertSchema(servicePrices).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-});
+} as any);
 
 // Types for billing
 export type Invoice = typeof invoices.$inferSelect;
@@ -1595,7 +1595,7 @@ export const appointmentReminders = pgTable('appointment_reminders', {
   failureReason: text('failure_reason'),
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 // Appointment Availability Slots
 export const availabilitySlots = pgTable('availability_slots', {
@@ -1608,7 +1608,7 @@ export const availabilitySlots = pgTable('availability_slots', {
   isActive: boolean('is_active').default(true),
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 // Holiday/Blackout Dates
 export const blackoutDates = pgTable('blackout_dates', {
@@ -1620,22 +1620,22 @@ export const blackoutDates = pgTable('blackout_dates', {
   isRecurring: boolean('is_recurring').default(false), // for annual holidays
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow()
-});
+} as any);
 
 export const insertAppointmentReminderSchema = createInsertSchema(appointmentReminders).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertAvailabilitySlotSchema = createInsertSchema(availabilitySlots).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export const insertBlackoutDateSchema = createInsertSchema(blackoutDates).omit({
   id: true,
   createdAt: true,
-});
+} as any);
 
 export type AppointmentReminder = typeof appointmentReminders.$inferSelect;
 export type InsertAppointmentReminder = z.infer<typeof insertAppointmentReminderSchema>;
@@ -1658,17 +1658,17 @@ export const telemedicineSessions = pgTable('telemedicine_sessions', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow(),
   completedAt: timestamp('completed_at')
-});
+} as any);
 
 export const insertTelemedicineSessionSchema = createInsertSchema(telemedicineSessions).omit({
   id: true,
   createdAt: true,
   completedAt: true
-}).extend({
+} as any).extend({
   doctorId: z.number().optional(),
   organizationId: z.number().optional(),
   scheduledTime: z.string().or(z.date())
-});
+} as any);
 
 export type TelemedicineSession = typeof telemedicineSessions.$inferSelect;
 export type InsertTelemedicineSession = z.infer<typeof insertTelemedicineSessionSchema>;
@@ -1687,14 +1687,14 @@ export const apiKeys = pgTable('api_keys', {
   expiresAt: timestamp('expires_at'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
   lastUsedAt: true
-});
+} as any);
 
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type InsertApiKey = z.infer<typeof insertApiKeySchema>;
@@ -1731,7 +1731,7 @@ export const aiConsultations = pgTable('ai_consultations', {
   createdAt: timestamp('created_at').defaultNow(),
   completedAt: timestamp('completed_at'),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 export const clinicalNotes = pgTable('clinical_notes', {
   id: serial('id').primaryKey(),
@@ -1791,19 +1791,19 @@ export const clinicalNotes = pgTable('clinical_notes', {
   organizationId: integer('organization_id').references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 export const insertAiConsultationSchema = createInsertSchema(aiConsultations).omit({
   id: true,
   createdAt: true,
   completedAt: true
-});
+} as any);
 
 export const insertClinicalNoteSchema = createInsertSchema(clinicalNotes).omit({
   id: true,
   createdAt: true,
   updatedAt: true
-});
+} as any);
 
 // Dismissed Notifications - Track which notifications users have dismissed
 export const dismissedNotifications = pgTable('dismissed_notifications', {
@@ -1812,12 +1812,12 @@ export const dismissedNotifications = pgTable('dismissed_notifications', {
   organizationId: integer('organization_id').references(() => organizations.id).notNull(),
   notificationId: varchar('notification_id', { length: 255 }).notNull(), // e.g., "visit-123", "prescription-456"
   dismissedAt: timestamp('dismissed_at').defaultNow()
-});
+} as any);
 
 export const insertDismissedNotificationSchema = createInsertSchema(dismissedNotifications).omit({
   id: true,
   dismissedAt: true
-});
+} as any);
 
 export type AiConsultation = typeof aiConsultations.$inferSelect;
 export type InsertAiConsultation = z.infer<typeof insertAiConsultationSchema>;
@@ -1830,7 +1830,7 @@ export type InsertDismissedNotification = z.infer<typeof insertDismissedNotifica
 export const insertUserOrganizationSchema = createInsertSchema(userOrganizations).omit({
   id: true,
   joinedAt: true
-});
+} as any);
 
 export type UserOrganization = typeof userOrganizations.$inferSelect;
 export type InsertUserOrganization = z.infer<typeof insertUserOrganizationSchema>;
@@ -1862,13 +1862,13 @@ export const tabConfigs = pgTable('tab_configs', {
   createdBy: integer('created_by').references(() => users.id),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 export const insertTabConfigSchema = createInsertSchema(tabConfigs).omit({
   id: true,
   createdAt: true,
   updatedAt: true
-});
+} as any);
 
 export type TabConfig = typeof tabConfigs.$inferSelect;
 export type InsertTabConfig = z.infer<typeof insertTabConfigSchema>;
@@ -1885,13 +1885,13 @@ export const tabPresets = pgTable('tab_presets', {
   createdBy: integer('created_by').references(() => users.id),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
-});
+} as any);
 
 export const insertTabPresetSchema = createInsertSchema(tabPresets).omit({
   id: true,
   createdAt: true,
   updatedAt: true
-});
+} as any);
 
 export type TabPreset = typeof tabPresets.$inferSelect;
 export type InsertTabPreset = z.infer<typeof insertTabPresetSchema>;
@@ -1906,11 +1906,11 @@ export const tabPresetItems = pgTable('tab_preset_items', {
   customLabel: varchar('custom_label', { length: 100 }), // Override default label
   customIcon: varchar('custom_icon', { length: 50 }), // Override default icon
   customSettings: json('custom_settings').$type<Record<string, any>>(), // Override default settings
-});
+} as any);
 
 export const insertTabPresetItemSchema = createInsertSchema(tabPresetItems).omit({
   id: true
-});
+} as any);
 
 export type TabPresetItem = typeof tabPresetItems.$inferSelect;
 export type InsertTabPresetItem = z.infer<typeof insertTabPresetItemSchema>;

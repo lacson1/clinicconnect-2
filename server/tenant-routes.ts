@@ -12,7 +12,7 @@ const createOrganizationSchema = createInsertSchema(organizations).omit({
   id: true,
   createdAt: true,
   updatedAt: true
-});
+} as any);
 
 export function setupTenantRoutes(app: Express) {
   
