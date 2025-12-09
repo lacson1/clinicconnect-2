@@ -12,44 +12,7 @@ import { logger } from "./lib/logger";
 import { validateAndLogEnvironment, getEnvironmentSummary } from "./lib/env-validator";
 
 // Dynamic imports for seeding (may fail if tables don't exist)
-const seedTabPresets = async () => {
-  try {
-    const module = await import("./seedTabPresets");
-    await module.seedTabPresets();
-  } catch (error: any) {
-    if (error?.code === '42P01') {
-      // Table doesn't exist - will be created on db:push
-    } else {
-      throw error;
-    }
-  }
-};
-
-const seedTabConfigs = async () => {
-  try {
-    const module = await import("./seedTabConfigs");
-    await module.seedTabConfigs();
-  } catch (error: any) {
-    if (error?.code === '42P01') {
-      // Table doesn't exist - will be created on db:push
-    } else {
-      throw error;
-    }
-  }
-};
-
-const seedMockData = async () => {
-  try {
-    const module = await import("./seedMockData");
-    await module.seedMockData();
-  } catch (error: any) {
-    if (error?.code === '42P01') {
-      // Table doesn't exist - will be created on db:push
-    } else {
-      throw error;
-    }
-  }
-};
+// Seed functions removed - no automatic data seeding
 
 const app = express();
 
@@ -143,53 +106,10 @@ app.use(isProduction ? prodLogger : devLogger);
     }
     
     // ===========================================
-    // STEP 2: Database Seeding (Development)
+    // STEP 2: Database Setup
     // ===========================================
-    // Note: Seeding will be skipped if database tables don't exist yet
-    // Run 'npm run db:push' to create tables, then restart the server
-    
-    // Seed tab configurations on startup (idempotent - only creates if not exists)
-    try {
-      logger.info('Seeding tab configurations...');
-      await seedTabConfigs();
-    } catch (error: any) {
-      if (error?.code === '42P01') {
-        logger.warn('Tables not found - run "npm run db:push" to create database schema');
-      } else {
-        logger.error('Failed to seed tab configurations:', error?.message || error);
-      }
-    }
-
-    // Seed tab presets on startup (idempotent - only creates if not exists)
-    try {
-      logger.info('Seeding tab presets...');
-      await seedTabPresets();
-    } catch (error: any) {
-      if (error?.code !== '42P01') {
-        logger.error('Failed to seed tab presets:', error?.message || error);
-      }
-    }
-
-    // Seed mock data (2 patients, 2 staff) on startup (idempotent)
-    try {
-      logger.debug('Seeding mock data...');
-      await seedMockData();
-    } catch (error: any) {
-      if (error?.code !== '42P01') {
-        logger.error('Failed to seed mock data:', error?.message || error);
-      }
-    }
-
-    // Seed comprehensive lab test catalog on startup (idempotent)
-    try {
-      logger.info('Seeding lab test catalog...');
-      const { seedComprehensiveLabTests } = await import('./seedComprehensiveLabTests');
-      await seedComprehensiveLabTests();
-    } catch (error: any) {
-      if (error?.code !== '42P01') {
-        logger.error('Failed to seed lab test catalog:', error?.message || error);
-      }
-    }
+    // Note: Database seeding has been removed
+    // Run 'npm run db:push' to create tables if needed
 
     // Setup new modular routes (patients, laboratory, prescriptions)
     setupRoutes(app);

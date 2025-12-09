@@ -520,19 +520,5 @@ export function setupTabConfigRoutes(app: Express) {
     }
   });
 
-  // Seed tab configurations
-  app.post('/api/tab-configs/seed', authenticateToken, async (req: AuthRequest, res: Response) => {
-    try {
-      if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin' && req.user?.role !== 'super_admin') {
-        return res.status(403).json({ error: 'Admin access required' });
-      }
-
-      const { seedTabConfigs } = await import('../seedTabConfigs');
-      const result = await seedTabConfigs();
-      res.json(result);
-    } catch (error) {
-      console.error('Error seeding tab configs:', error);
-      res.status(500).json({ error: 'Failed to seed tab configurations' });
-    }
-  });
+  // Tab configuration seeding endpoint removed
 }

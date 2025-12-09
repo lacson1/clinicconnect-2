@@ -10,8 +10,6 @@
         "start": "NODE_ENV=production node dist/index.js",
         "check": "tsc",
         "db:push": "drizzle-kit push",
-        "seed:mock": "tsx server/run-mock-seed.ts",
-        "seed:medications": "tsx server/run-medication-seed.ts",
         "debug": "tsx server/debug-app.ts",
         "test": "vitest",
         "test:ui": "vitest --ui",

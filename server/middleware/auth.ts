@@ -44,6 +44,9 @@ if (!JWT_SECRET) {
   console.warn('   Set JWT_SECRET environment variable for production.');
 }
 
+// Export JWT_SECRET for use in other modules (read-only)
+export const getJwtSecret = (): string => JWT_SECRET;
+
 const SESSION_TIMEOUT = parseInt(process.env.SESSION_TIMEOUT_MS || '86400000', 10); // Default 24 hours
 
 export interface AuthRequest extends Request {
@@ -104,8 +107,15 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
           currentOrganizationId: decoded.organizationId
         };
         return next();
-      } catch (jwtError) {
+      } catch (jwtError: any) {
         // Token is invalid or expired
+        if (jwtError.name === 'TokenExpiredError') {
+          return res.status(401).json({ message: 'Token has expired. Please login again.' });
+        }
+        if (jwtError.name === 'JsonWebTokenError') {
+          return res.status(401).json({ message: 'Invalid token. Please login again.' });
+        }
+        console.error('JWT verification error:', jwtError);
         return res.status(401).json({ message: 'Invalid or expired token' });
       }
     }
@@ -199,8 +209,11 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
           organizationId: decoded.organizationId,
           currentOrganizationId: decoded.organizationId
         };
-      } catch (jwtError) {
+      } catch (jwtError: any) {
         // Token is invalid, but we don't fail - it's optional auth
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('Optional JWT verification failed:', jwtError.name);
+        }
       }
     }
     
@@ -230,5 +243,20 @@ export const generateToken = (user: { id: number; username: string; role: string
 
 // Verify a JWT token
 export const verifyToken = (token: string): any => {
-  return jwt.verify(token, JWT_SECRET);
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (error: any) {
+    // Re-throw with more context
+    if (error.name === 'TokenExpiredError') {
+      const expiredError = new Error('Token has expired');
+      (expiredError as any).name = 'TokenExpiredError';
+      throw expiredError;
+    }
+    if (error.name === 'JsonWebTokenError') {
+      const invalidError = new Error('Invalid token');
+      (invalidError as any).name = 'JsonWebTokenError';
+      throw invalidError;
+    }
+    throw error;
+  }
 };

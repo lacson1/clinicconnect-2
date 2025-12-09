@@ -8,7 +8,7 @@ import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { db } from "./db";
 import { eq, desc, or, ilike, gte, lte, lt, and, isNotNull, isNull, inArray, sql, notExists, ne } from "drizzle-orm";
-import { authenticateToken, requireRole, requireAnyRole, requireSuperOrOrgAdmin, hashPassword, comparePassword, generateToken, type AuthRequest } from "./middleware/auth";
+import { authenticateToken, requireRole, requireAnyRole, requireSuperOrOrgAdmin, hashPassword, comparePassword, generateToken, verifyToken, getJwtSecret, type AuthRequest } from "./middleware/auth";
 import { authenticateSession, type SessionRequest } from "./middleware/session";
 import { tenantMiddleware, type TenantRequest } from "./middleware/tenant";
 
@@ -27,7 +27,6 @@ import { setupOrganizationStaffRoutes } from "./organization-staff";
 import { setupTenantRoutes } from "./tenant-routes";
 import { setupSuperAdminRoutes } from "./super-admin-routes";
 import { setupComplianceReportRoutes } from "./routes/compliance-reports";
-import { setupLabSeedRoutes } from "./routes/lab-seed";
 import { setupLabPanelsRoutes } from "./routes/lab-panels";
 import adminDashboardRoutes from "./routes/admin-dashboard";
 import bulkUsersRoutes from "./routes/bulk-users";
@@ -5332,30 +5331,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
     }
   });
 
-  // Seed comprehensive lab test catalog (admin only)
-  app.post('/api/lab-tests/seed-catalog', authenticateToken, requireAnyRole(['admin', 'superadmin', 'super_admin']), async (req: AuthRequest, res) => {
-    try {
-      const { seedComprehensiveLabTests } = await import('./seedComprehensiveLabTests');
-      const result = await seedComprehensiveLabTests();
-      
-      // Create audit log
-      const auditLogger = new AuditLogger(req);
-      await auditLogger.logSystemAction("Lab Test Catalog Seeded", {
-        addedCount: result.added,
-        skippedCount: result.skipped,
-        performedBy: req.user?.username
-      });
-      
-      res.json({ 
-        message: `Lab test catalog seeded successfully`,
-        added: result.added,
-        skipped: result.skipped
-      });
-    } catch (error) {
-      console.error("Error seeding lab test catalog:", error);
-      res.status(500).json({ message: "Failed to seed lab test catalog" });
-    }
-  });
+  // Lab test catalog seeding endpoint removed
 
   // Lab Orders endpoints
   app.post('/api/patients/:id/lab-orders', authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
@@ -9621,7 +9597,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
         return res.status(401).json({ error: 'No token provided' });
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret') as any;
+      const decoded = verifyToken(token) as any;
       
       // Fetch patient data
       const [patient] = await db.select()
@@ -9796,7 +9772,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
       // Create patient session token (simplified for demo)
       const patientToken = jwt.sign(
         { patientId: patient.id, type: 'patient' },
-        process.env.JWT_SECRET || 'fallback_secret',
+        getJwtSecret(),
         { expiresIn: '24h' }
       );
       
@@ -12684,8 +12660,7 @@ Provide JSON response with: summary, systemHealth (score, trend, riskFactors), r
   // Setup compliance report generation routes
   setupComplianceReportRoutes(app);
   
-  // Setup lab catalog seeding route
-  setupLabSeedRoutes(app);
+  // Lab catalog seeding route removed
   
   // Setup lab panels management routes
   setupLabPanelsRoutes(app);
