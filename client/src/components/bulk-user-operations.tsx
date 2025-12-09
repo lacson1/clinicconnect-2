@@ -27,7 +27,7 @@ import {
   AlertTriangle,
   CheckCircle2
 } from "lucide-react";
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 interface BulkUserOperationsProps {
   selectedUsers: number[];
@@ -103,17 +103,38 @@ export default function BulkUserOperations({ selectedUsers, onComplete }: BulkUs
     setImportFile(file);
     const reader = new FileReader();
 
-    reader.onload = (event) => {
-      const data = event.target?.result;
-      const workbook = XLSX.read(data, { type: 'binary' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-      
-      setImportPreview(jsonData.slice(0, 5)); // Preview first 5 rows
+    reader.onload = async (event) => {
+      try {
+        const arrayBuffer = event.target?.result as ArrayBuffer;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(arrayBuffer);
+        
+        const worksheet = workbook.worksheets[0];
+        const jsonData: any[] = [];
+        
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return; // Skip header row
+          
+          const rowData: any = {};
+          row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+            const headerCell = worksheet.getRow(1).getCell(colNumber);
+            const header = headerCell.value?.toString() || `Column${colNumber}`;
+            rowData[header] = cell.value?.toString() || '';
+          });
+          jsonData.push(rowData);
+        });
+        
+        setImportPreview(jsonData.slice(0, 5)); // Preview first 5 rows
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to read Excel file",
+          variant: "destructive",
+        });
+      }
     };
 
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   };
 
   // Execute import
@@ -121,21 +142,42 @@ export default function BulkUserOperations({ selectedUsers, onComplete }: BulkUs
     if (!importFile) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const data = event.target?.result;
-      const workbook = XLSX.read(data, { type: 'binary' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-      
-      bulkImportMutation.mutate(jsonData);
+    reader.onload = async (event) => {
+      try {
+        const arrayBuffer = event.target?.result as ArrayBuffer;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(arrayBuffer);
+        
+        const worksheet = workbook.worksheets[0];
+        const jsonData: any[] = [];
+        
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return; // Skip header row
+          
+          const rowData: any = {};
+          row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+            const headerCell = worksheet.getRow(1).getCell(colNumber);
+            const header = headerCell.value?.toString() || `Column${colNumber}`;
+            rowData[header] = cell.value?.toString() || '';
+          });
+          jsonData.push(rowData);
+        });
+        
+        bulkImportMutation.mutate(jsonData);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to read Excel file",
+          variant: "destructive",
+        });
+      }
     };
 
-    reader.readAsBinaryString(importFile);
+    reader.readAsArrayBuffer(importFile);
   };
 
   // Export template
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
     const template = [
       {
         username: 'johndoe',
@@ -149,10 +191,36 @@ export default function BulkUserOperations({ selectedUsers, onComplete }: BulkUs
       }
     ];
 
-    const worksheet = XLSX.utils.json_to_sheet(template);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
-    XLSX.writeFile(workbook, 'user-import-template.xlsx');
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Users');
+    
+    // Add headers
+    const headers = Object.keys(template[0]);
+    worksheet.addRow(headers);
+    
+    // Add data
+    template.forEach(row => {
+      worksheet.addRow(headers.map(header => row[header as keyof typeof row]));
+    });
+
+    // Auto-fit columns
+    worksheet.columns.forEach((column) => {
+      column.width = 15;
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'user-import-template.xlsx';
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   };
 
   // Export selected users
@@ -164,10 +232,43 @@ export default function BulkUserOperations({ selectedUsers, onComplete }: BulkUs
       );
       const users = await response.json();
 
-      const worksheet = XLSX.utils.json_to_sheet(users);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
-      XLSX.writeFile(workbook, `users-export-${new Date().toISOString().split('T')[0]}.xlsx`);
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Users');
+      
+      if (users.length > 0) {
+        const headers = Object.keys(users[0]);
+        worksheet.addRow(headers);
+        
+        users.forEach((user: any) => {
+          worksheet.addRow(headers.map(header => user[header] ?? ''));
+        });
+
+        // Auto-fit columns
+        worksheet.columns.forEach((column) => {
+          let maxLength = 0;
+          column.eachCell?.({ includeEmpty: true }, (cell) => {
+            const columnLength = cell.value ? cell.value.toString().length : 10;
+            if (columnLength > maxLength) {
+              maxLength = columnLength;
+            }
+          });
+          column.width = Math.min(maxLength + 2, 50);
+        });
+      }
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `users-export-${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
       toast({
         title: "Export Complete",

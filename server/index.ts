@@ -128,14 +128,20 @@ app.use(isProduction ? prodLogger : devLogger);
     // importantly only setup vite in development and after
     // setting up all the other routes so the catch-all route
     // doesn't interfere with the other routes
-    if (app.get("env") === "development") {
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    if (isDevelopment) {
       await setupVite(app, server);
     } else {
       serveStatic(app);
     }
 
-    // 404 handler for API routes (must be after all routes)
-    app.use('/api/*', notFoundHandler);
+    // 404 handler for API routes (must be after all routes) - Express 5 compatible
+    app.use((req, res, next) => {
+      if (req.path.startsWith('/api')) {
+        return notFoundHandler(req, res, next);
+      }
+      next();
+    });
     
     // Global error handler (must be last middleware)
     app.use(globalErrorHandler);

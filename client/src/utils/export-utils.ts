@@ -1,33 +1,87 @@
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 export interface ExportData {
   [key: string]: any;
 }
 
-export const exportToExcel = (data: ExportData[], filename: string) => {
-  const worksheet = XLSX.utils.json_to_sheet(data);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
-  
-  // Add some styling
-  const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
-  for (let C = range.s.c; C <= range.e.c; ++C) {
-    const address = XLSX.utils.encode_col(C) + "1";
-    if (!worksheet[address]) continue;
-    worksheet[address].s = {
-      font: { bold: true },
-      fill: { fgColor: { rgb: "3B82F6" } },
-      alignment: { horizontal: "center" }
+export const exportToExcel = async (data: ExportData[], filename: string) => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Data');
+
+  // Get headers from first data object
+  if (data.length > 0) {
+    const headers = Object.keys(data[0]);
+    
+    // Add headers with styling
+    const headerRow = worksheet.addRow(headers);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF3B82F6' }
     };
+    headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Add data rows
+    data.forEach((row) => {
+      const values = headers.map(header => row[header] ?? '');
+      worksheet.addRow(values);
+    });
+
+    // Auto-fit columns
+    worksheet.columns.forEach((column) => {
+      let maxLength = 0;
+      column.eachCell?.({ includeEmpty: true }, (cell) => {
+        const columnLength = cell.value ? cell.value.toString().length : 10;
+        if (columnLength > maxLength) {
+          maxLength = columnLength;
+        }
+      });
+      column.width = Math.min(maxLength + 2, 50);
+    });
   }
-  
-  XLSX.writeFile(workbook, `${filename}.xlsx`);
+
+  // Generate buffer and download
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { 
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+  });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${filename}.xlsx`;
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 };
 
 export const exportToCSV = (data: ExportData[], filename: string) => {
-  const worksheet = XLSX.utils.json_to_sheet(data);
-  const csv = XLSX.utils.sheet_to_csv(worksheet);
+  if (data.length === 0) {
+    return;
+  }
+
+  // Get headers
+  const headers = Object.keys(data[0]);
   
+  // Create CSV content
+  const csvRows = [
+    headers.join(','), // Header row
+    ...data.map(row => 
+      headers.map(header => {
+        const value = row[header] ?? '';
+        // Escape commas and quotes in values
+        const stringValue = String(value);
+        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      }).join(',')
+    )
+  ];
+  
+  const csv = csvRows.join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
@@ -39,6 +93,7 @@ export const exportToCSV = (data: ExportData[], filename: string) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 };
 
 export const exportToPDF = async (elementId: string, filename: string) => {
