@@ -71,12 +71,12 @@
 
 ## ❌ Common Failures
 
-| Error | Fix |
-|-------|-----|
+| Error                      | Fix                                                 |
+| -------------------------- | --------------------------------------------------- |
 | `DATABASE_URL must be set` | Set `${clinicconnect-db.DATABASE_URL}` in dashboard |
-| `JWT_SECRET not set` | Set as SECRET type in dashboard |
-| `SESSION_SECRET not set` | Set as SECRET type in dashboard |
-| Health check fails | Fix above issues, then redeploy |
+| `JWT_SECRET not set`       | Set as SECRET type in dashboard                     |
+| `SESSION_SECRET not set`   | Set as SECRET type in dashboard                     |
+| Health check fails         | Fix above issues, then redeploy                     |
 
 ---
 
