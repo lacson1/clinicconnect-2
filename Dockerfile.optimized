@@ -88,7 +88,16 @@ RUN echo '#!/bin/sh' > /app/start.sh && \
     echo 'set -e' >> /app/start.sh && \
     echo 'echo "🔄 Running database migrations..."' >> /app/start.sh && \
     echo 'export NODE_TLS_REJECT_UNAUTHORIZED=0' >> /app/start.sh && \
-    echo 'npx drizzle-kit push --force || echo "⚠️ Migration failed - check DATABASE_URL and SSL settings"' >> /app/start.sh && \
+    echo 'echo "⏱️  Setting migration timeout (5 minutes)..."' >> /app/start.sh && \
+    echo 'timeout 300 npx drizzle-kit push --force 2>&1 || {' >> /app/start.sh && \
+    echo '  EXIT_CODE=$?' >> /app/start.sh && \
+    echo '  if [ $EXIT_CODE -eq 124 ]; then' >> /app/start.sh && \
+    echo '    echo "⚠️  Migration timed out after 5 minutes - continuing anyway"' >> /app/start.sh && \
+    echo '  else' >> /app/start.sh && \
+    echo '    echo "⚠️  Migration failed (exit code: $EXIT_CODE) - check DATABASE_URL and SSL settings"' >> /app/start.sh && \
+    echo '    echo "⚠️  Continuing with application startup..."' >> /app/start.sh && \
+    echo '  fi' >> /app/start.sh && \
+    echo '}' >> /app/start.sh && \
     echo 'echo "🚀 Starting application..."' >> /app/start.sh && \
     echo 'exec node dist/index.js' >> /app/start.sh && \
     chmod +x /app/start.sh

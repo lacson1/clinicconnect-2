@@ -7,7 +7,8 @@ import { sessionLogger as logger } from '../lib/logger';
 const isProduction = process.env.NODE_ENV === 'production';
 let SESSION_SECRET = process.env.SESSION_SECRET;
 
-if (!SESSION_SECRET) {
+// Validate SESSION_SECRET
+if (!SESSION_SECRET || SESSION_SECRET.trim().length === 0) {
   if (isProduction) {
     // CRITICAL: In production, require SESSION_SECRET to be set
     logger.error('SESSION_SECRET environment variable is required in production.');
@@ -19,6 +20,15 @@ if (!SESSION_SECRET) {
     SESSION_SECRET = crypto.randomBytes(64).toString('base64');
     logger.warn('SESSION_SECRET not set. Generated temporary secret (dev mode only).');
     logger.warn('Sessions will not persist across server restarts.');
+  }
+} else if (SESSION_SECRET.length < 32) {
+  // Validate minimum length
+  if (isProduction) {
+    logger.error(`SESSION_SECRET is too short (${SESSION_SECRET.length} chars). Minimum 32 characters required.`);
+    logger.error('Generate a secure secret with: openssl rand -base64 64');
+    process.exit(1);
+  } else {
+    logger.warn(`SESSION_SECRET is too short (${SESSION_SECRET.length} chars). Minimum 32 recommended.`);
   }
 }
 
@@ -39,37 +49,60 @@ if (!isDevelopment && process.env.DATABASE_URL) {
     const pgPool = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
       ssl: {
-        rejectUnauthorized: false, // Accept self-signed certificates
+        rejectUnauthorized: false, // Accept self-signed certificates (required for DigitalOcean)
       },
       // Connection pool settings
       max: 5, // Smaller pool for session store
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
+      connectionTimeoutMillis: 30000, // Increased timeout for managed databases
     });
     
     // Test the connection before creating session store
     pgPool.on('error', (err: Error) => {
-      console.error('Session store pool error:', err.message);
+      logger.error('Session store pool error:', err.message);
+    });
+
+    // Test database connection first (using callback, not async/await)
+    // Note: This is a best-effort test. The session store will handle connection errors at runtime.
+    pgPool.connect((err: Error, client: any, release: () => void) => {
+      if (err) {
+        logger.warn('⚠️  Initial database connection test failed (will retry at runtime):', err.message);
+      } else {
+        // Test query to verify connection
+        client.query('SELECT 1', (queryErr: Error) => {
+          release();
+          if (queryErr) {
+            logger.warn('⚠️  Database query test failed (will retry at runtime):', queryErr.message);
+          } else {
+            logger.info('✅ Database connection verified for session store');
+          }
+        });
+      }
     });
 
     sessionStore = new PgSession({
       pool: pgPool,
       tableName: 'sessions', // Must match Drizzle schema in shared/schema.ts
-      createTableIfMissing: true,
+      createTableIfMissing: true, // Automatically create sessions table if missing
       pruneSessionInterval: 60 * 15, // Prune expired sessions every 15 minutes
       errorLog: (err: Error) => {
         // Suppress "already exists" errors (expected during table creation)
-        if (!err.message?.includes('already exists')) {
+        if (!err.message?.includes('already exists') && 
+            !err.message?.includes('duplicate') &&
+            !err.message?.toLowerCase().includes('relation')?.includes('already exists')) {
           logger.error('Session store error:', err.message);
         }
       },
     });
     
-    logger.info('Using PostgreSQL session store with SSL');
+    logger.info('✅ Using PostgreSQL session store with SSL');
+    logger.info('✅ Sessions table will be created automatically if missing');
   } catch (error: any) {
-    logger.warn('Failed to initialize PostgreSQL session store:', error?.message || error);
-    logger.warn('Falling back to MemoryStore (not recommended for production)');
-    logger.warn('Ensure the sessions table exists in your database.');
+    logger.error('❌ Failed to initialize PostgreSQL session store:', error?.message || error);
+    logger.error('❌ Error details:', error?.stack || 'No stack trace available');
+    logger.warn('⚠️  Falling back to MemoryStore (not recommended for production)');
+    logger.warn('⚠️  Sessions will not persist across server restarts');
+    logger.warn('⚠️  To fix: Ensure DATABASE_URL is correct and database is accessible');
     sessionStore = undefined;
   }
 } else {
