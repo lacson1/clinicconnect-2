@@ -16,11 +16,16 @@ import {
   Plus,
   Bell,
   Users,
-  Stethoscope
+  Stethoscope,
+  X,
+  CalendarDays,
+  TrendingUp,
+  Play
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 interface Appointment {
   id: number;
@@ -177,56 +182,64 @@ export default function SmartAppointmentScheduler({ patientId, defaultDate }: Sm
   ).slice(0, 5);
 
   return (
-    <div className="space-y-6">
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-5 h-5 text-blue-600" />
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+      {/* Quick Stats - Enhanced Design */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <Card className="healthcare-card border-l-4 border-l-blue-500 hover:shadow-md transition-shadow">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{todayAppointments.length}</div>
-                <div className="text-sm text-gray-600">Today's Appointments</div>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Today's Appointments</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{todayAppointments.length}</p>
+              </div>
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Clock className="w-5 h-5 text-green-600" />
+        <Card className="healthcare-card border-l-4 border-l-green-500 hover:shadow-md transition-shadow">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{getAvailableTimeSlots().length}</div>
-                <div className="text-sm text-gray-600">Available Slots</div>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Available Slots</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{getAvailableTimeSlots().length}</p>
+              </div>
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Users className="w-5 h-5 text-orange-600" />
+        <Card className="healthcare-card border-l-4 border-l-orange-500 hover:shadow-md transition-shadow">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">In Progress</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">
                   {appointments.filter(apt => apt.status === 'in-progress').length}
-                </div>
-                <div className="text-sm text-gray-600">In Progress</div>
+                </p>
+              </div>
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5 text-red-600" />
+        <Card className="healthcare-card border-l-4 border-l-red-500 hover:shadow-md transition-shadow">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Urgent Cases</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">
                   {appointments.filter(apt => apt.priority === 'urgent').length}
-                </div>
-                <div className="text-sm text-gray-600">Urgent Cases</div>
+                </p>
+              </div>
+              <div className="p-2 bg-red-100 rounded-lg">
+                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
               </div>
             </div>
           </CardContent>
@@ -234,120 +247,166 @@ export default function SmartAppointmentScheduler({ patientId, defaultDate }: Sm
       </div>
 
       {/* Main Scheduler */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Smart Appointment Scheduler
+      <Card className="healthcare-card shadow-sm">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <CalendarDays className="w-5 h-5 text-primary" />
+            Appointment Scheduler
           </CardTitle>
           <Button
             onClick={() => setIsBooking(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+            size="sm"
           >
             <Plus className="w-4 h-4" />
-            Schedule Appointment
+            <span className="hidden sm:inline">Schedule Appointment</span>
+            <span className="sm:hidden">Schedule</span>
           </Button>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Date Selector */}
-          <div className="flex items-center space-x-4">
-            <Label>Select Date:</Label>
+          {/* Date Selector - Enhanced */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-muted/30 rounded-lg border border-border/50">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-primary" />
+              <Label className="text-base font-semibold">Select Date:</Label>
+            </div>
             <Input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-auto"
+              className="w-full sm:w-auto max-w-[200px] border-2 focus:border-primary/50"
             />
+            <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
+              <TrendingUp className="w-4 h-4" />
+              <span>{getAvailableTimeSlots().length} slots available</span>
+            </div>
           </div>
 
-          {/* Appointments List */}
+          {/* Appointments List - Enhanced */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">
-              Appointments for {new Date(selectedDate).toLocaleDateString()}
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+                <Clock className="w-5 h-5 text-primary" />
+                Appointments for {new Date(selectedDate).toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </h3>
+              {appointments.length > 0 && (
+                <Badge variant="secondary" className="text-sm">
+                  {appointments.length} {appointments.length === 1 ? 'appointment' : 'appointments'}
+                </Badge>
+              )}
+            </div>
             
             {isLoading ? (
-              <div className="animate-pulse space-y-2">
+              <div className="animate-pulse space-y-3">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="h-16 bg-gray-200 rounded"></div>
+                  <div key={i} className="h-20 bg-muted rounded-lg"></div>
                 ))}
               </div>
             ) : appointments.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p>No appointments scheduled for this date</p>
-              </div>
+              <Card className="healthcare-card">
+                <CardContent className="p-12 text-center">
+                  <Calendar className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+                  <h4 className="text-lg font-semibold text-foreground mb-2">No appointments scheduled</h4>
+                  <p className="text-muted-foreground mb-4">
+                    This date is available for scheduling. Click "Schedule Appointment" to book a slot.
+                  </p>
+                  <Button onClick={() => setIsBooking(true)} className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    Schedule First Appointment
+                  </Button>
+                </CardContent>
+              </Card>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {appointments
                   .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime))
                   .map((appointment) => (
-                    <div
+                    <Card
                       key={appointment.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                      className="healthcare-card hover:shadow-md transition-all border-l-4 border-l-transparent hover:border-l-primary"
                     >
-                      <div className="flex items-center space-x-4">
-                        <div className="flex flex-col items-center">
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm font-medium">
-                            {appointment.appointmentTime}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {appointment.duration}min
-                          </span>
-                        </div>
-                        
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <User className="w-4 h-4 text-gray-400" />
-                            <span className="font-medium">{appointment.patientName}</span>
-                            <Badge className={getPriorityColor(appointment.priority)}>
-                              {appointment.priority}
-                            </Badge>
+                      <CardContent className="p-4 sm:p-5">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                          <div className="flex items-start gap-4 flex-1 min-w-0">
+                            <div className="flex flex-col items-center justify-center p-3 bg-primary/10 rounded-lg min-w-[80px]">
+                              <Clock className="w-5 h-5 text-primary mb-1" />
+                              <span className="text-base font-bold text-foreground">
+                                {appointment.appointmentTime}
+                              </span>
+                              <span className="text-xs text-muted-foreground mt-0.5">
+                                {appointment.duration} min
+                              </span>
+                            </div>
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2">
+                                  <User className="w-4 h-4 text-primary/60" />
+                                  <span className="font-semibold text-base">{appointment.patientName}</span>
+                                </div>
+                                <Badge className={getPriorityColor(appointment.priority)}>
+                                  {appointment.priority}
+                                </Badge>
+                                <Badge className={getStatusColor(appointment.status)}>
+                                  {appointment.status}
+                                </Badge>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1.5">
+                                  <Stethoscope className="w-3.5 h-3.5 text-primary/60" />
+                                  Dr. {appointment.doctorName}
+                                </span>
+                                <span className="flex items-center gap-1.5">
+                                  <span className="text-primary/60">•</span>
+                                  <span className="capitalize">{appointment.type}</span>
+                                </span>
+                              </div>
+                              {appointment.notes && (
+                                <p className="text-sm text-muted-foreground mt-2 p-2 bg-muted/50 rounded border-l-2 border-l-primary/30">
+                                  {appointment.notes}
+                                </p>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <Stethoscope className="w-3 h-3" />
-                            <span>Dr. {appointment.doctorName}</span>
-                            <span>•</span>
-                            <span>{appointment.type}</span>
-                          </div>
-                          {appointment.notes && (
-                            <p className="text-xs text-gray-500 mt-1">{appointment.notes}</p>
-                          )}
-                        </div>
-                      </div>
 
-                      <div className="flex items-center space-x-2">
-                        <Badge className={getStatusColor(appointment.status)}>
-                          {appointment.status}
-                        </Badge>
-                        
-                        {appointment.status === 'scheduled' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateAppointmentStatus.mutate({
-                              id: appointment.id,
-                              status: 'confirmed'
-                            })}
-                          >
-                            Confirm
-                          </Button>
-                        )}
-                        
-                        {appointment.status === 'confirmed' && (
-                          <Button
-                            size="sm"
-                            onClick={() => updateAppointmentStatus.mutate({
-                              id: appointment.id,
-                              status: 'in-progress'
-                            })}
-                          >
-                            Start
-                          </Button>
-                        )}
-                      </div>
-                    </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {appointment.status === 'scheduled' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateAppointmentStatus.mutate({
+                                  id: appointment.id,
+                                  status: 'confirmed'
+                                })}
+                                className="gap-2"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                                Confirm
+                              </Button>
+                            )}
+                            
+                            {appointment.status === 'confirmed' && (
+                              <Button
+                                size="sm"
+                                onClick={() => updateAppointmentStatus.mutate({
+                                  id: appointment.id,
+                                  status: 'in-progress'
+                                })}
+                                className="gap-2"
+                              >
+                                <Play className="w-4 h-4" />
+                                Start
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
               </div>
             )}
@@ -355,21 +414,36 @@ export default function SmartAppointmentScheduler({ patientId, defaultDate }: Sm
         </CardContent>
       </Card>
 
-      {/* Book Appointment Modal */}
-      {isBooking && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold mb-4">Schedule New Appointment</h3>
-            
-            <div className="space-y-4">
-              {!patientId && (
-                <div>
-                  <Label htmlFor="patient">Patient</Label>
+      {/* Book Appointment Modal - Using Dialog Component */}
+      <Dialog open={isBooking} onOpenChange={setIsBooking}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Plus className="w-5 h-5 text-primary" />
+              Schedule New Appointment
+            </DialogTitle>
+            <DialogDescription>
+              Fill in the details below to schedule a new appointment for {new Date(selectedDate).toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric' 
+              })}.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-5 py-4">
+            {!patientId && (
+              <div className="space-y-2">
+                <Label htmlFor="patient" className="text-sm font-semibold flex items-center gap-2">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  Patient *
+                </Label>
+                {patients.length > 0 ? (
                   <Select
                     value={newAppointment.patientId}
                     onValueChange={(value) => setNewAppointment(prev => ({ ...prev, patientId: value }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 w-full">
                       <SelectValue placeholder="Select patient" />
                     </SelectTrigger>
                     <SelectContent>
@@ -380,73 +454,101 @@ export default function SmartAppointmentScheduler({ patientId, defaultDate }: Sm
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-              )}
+                ) : (
+                  <div className="h-11 w-full rounded-md border border-input bg-muted/50 flex items-center justify-center text-sm text-muted-foreground">
+                    No patients available
+                  </div>
+                )}
+              </div>
+            )}
 
-              <div>
-                <Label htmlFor="doctor">Doctor</Label>
-                <Select
-                  value={newAppointment.doctorId}
-                  onValueChange={(value) => setNewAppointment(prev => ({ ...prev, doctorId: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select doctor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {doctors.map((doctor: any) => (
-                      <SelectItem key={doctor.id} value={doctor.id.toString()}>
-                        Dr. {doctor.username}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="doctor" className="text-sm font-semibold flex items-center gap-2">
+                  <Stethoscope className="w-4 h-4 text-muted-foreground" />
+                  Doctor *
+                </Label>
+                {doctors.length > 0 ? (
+                  <Select
+                    value={newAppointment.doctorId}
+                    onValueChange={(value) => setNewAppointment(prev => ({ ...prev, doctorId: value }))}
+                  >
+                    <SelectTrigger className="h-11 w-full">
+                      <SelectValue placeholder="Select doctor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {doctors.map((doctor: any) => (
+                        <SelectItem key={doctor.id} value={doctor.id.toString()}>
+                          Dr. {doctor.username}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="h-11 w-full rounded-md border border-input bg-muted/50 flex items-center justify-center text-sm text-muted-foreground">
+                    No doctors available
+                  </div>
+                )}
               </div>
 
-              <div>
-                <Label htmlFor="time">Time</Label>
-                <Select
-                  value={newAppointment.appointmentTime}
-                  onValueChange={(value) => setNewAppointment(prev => ({ ...prev, appointmentTime: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getAvailableTimeSlots().map((slot) => (
-                      <SelectItem key={slot} value={slot}>
-                        {slot}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="space-y-2">
+                <Label htmlFor="time" className="text-sm font-semibold flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  Time Slot *
+                </Label>
+                {getAvailableTimeSlots().length > 0 ? (
+                  <Select
+                    value={newAppointment.appointmentTime}
+                    onValueChange={(value) => setNewAppointment(prev => ({ ...prev, appointmentTime: value }))}
+                  >
+                    <SelectTrigger className="h-11 w-full">
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getAvailableTimeSlots().map((slot) => (
+                        <SelectItem key={slot} value={slot}>
+                          {slot}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="h-11 w-full rounded-md border border-input bg-muted/50 flex items-center justify-center text-sm text-muted-foreground">
+                    No time slots available for this date
+                  </div>
+                )}
               </div>
+            </div>
 
-              <div>
-                <Label htmlFor="duration">Duration (minutes)</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="duration" className="text-sm font-semibold">Duration</Label>
                 <Select
                   value={newAppointment.duration}
                   onValueChange={(value) => setNewAppointment(prev => ({ ...prev, duration: value }))}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
+                  <SelectTrigger className="h-11 w-full">
+                    <SelectValue placeholder="Select duration" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="15">15 minutes</SelectItem>
                     <SelectItem value="30">30 minutes</SelectItem>
                     <SelectItem value="45">45 minutes</SelectItem>
                     <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="90">1.5 hours</SelectItem>
+                    <SelectItem value="120">2 hours</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div>
-                <Label htmlFor="type">Appointment Type</Label>
+              <div className="space-y-2">
+                <Label htmlFor="type" className="text-sm font-semibold">Appointment Type</Label>
                 <Select
                   value={newAppointment.type}
                   onValueChange={(value) => setNewAppointment(prev => ({ ...prev, type: value }))}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
+                  <SelectTrigger className="h-11 w-full">
+                    <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="consultation">Consultation</SelectItem>
@@ -454,74 +556,125 @@ export default function SmartAppointmentScheduler({ patientId, defaultDate }: Sm
                     <SelectItem value="check-up">Check-up</SelectItem>
                     <SelectItem value="emergency">Emergency</SelectItem>
                     <SelectItem value="vaccination">Vaccination</SelectItem>
+                    <SelectItem value="surgery">Surgery</SelectItem>
+                    <SelectItem value="therapy">Therapy</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="priority">Priority</Label>
-                <Select
-                  value={newAppointment.priority}
-                  onValueChange={(value) => setNewAppointment(prev => ({ ...prev, priority: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea
-                  id="notes"
-                  placeholder="Additional notes..."
-                  value={newAppointment.notes}
-                  onChange={(e) => setNewAppointment(prev => ({ ...prev, notes: e.target.value }))}
-                />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 mt-6">
-              <Button variant="outline" onClick={() => setIsBooking(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleBookAppointment} disabled={bookAppointmentMutation.isPending}>
-                {bookAppointmentMutation.isPending ? "Scheduling..." : "Schedule Appointment"}
-              </Button>
+            <div className="space-y-2">
+              <Label htmlFor="priority" className="text-sm font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-muted-foreground" />
+                Priority
+              </Label>
+              <Select
+                value={newAppointment.priority}
+                onValueChange={(value) => setNewAppointment(prev => ({ ...prev, priority: value }))}
+              >
+                <SelectTrigger className="h-11 w-full">
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="notes" className="text-sm font-semibold">Notes</Label>
+              <Textarea
+                id="notes"
+                placeholder="Add any additional notes or special instructions..."
+                value={newAppointment.notes}
+                onChange={(e) => setNewAppointment(prev => ({ ...prev, notes: e.target.value }))}
+                className="min-h-[100px] resize-none"
+                rows={4}
+              />
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Upcoming Appointments Preview */}
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setIsBooking(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleBookAppointment} 
+              disabled={bookAppointmentMutation.isPending}
+              className="gap-2"
+            >
+              {bookAppointmentMutation.isPending ? (
+                <>
+                  <Clock className="w-4 h-4 animate-spin" />
+                  Scheduling...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Schedule Appointment
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upcoming Appointments Preview - Enhanced */}
       {upcomingAppointments.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5" />
+        <Card className="healthcare-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Bell className="w-5 h-5 text-primary" />
               Upcoming Appointments
+              <Badge variant="secondary" className="ml-2">
+                {upcomingAppointments.length}
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {upcomingAppointments.map((appointment) => (
-                <div key={appointment.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                  <div>
-                    <span className="font-medium">{appointment.patientName}</span>
-                    <span className="text-sm text-gray-600 ml-2">
-                      {new Date(appointment.appointmentDate).toLocaleDateString()} at {appointment.appointmentTime}
-                    </span>
-                  </div>
-                  <Badge className={getPriorityColor(appointment.priority)}>
-                    {appointment.priority}
-                  </Badge>
-                </div>
+                <Card 
+                  key={appointment.id} 
+                  className="healthcare-card hover:shadow-md transition-all border-l-4 border-l-primary/30"
+                >
+                  <CardContent className="p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <Calendar className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold">{appointment.patientName}</span>
+                            <Badge className={getPriorityColor(appointment.priority)}>
+                              {appointment.priority}
+                            </Badge>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5" />
+                              {new Date(appointment.appointmentDate).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })} at {appointment.appointmentTime}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <Stethoscope className="w-3.5 h-3.5" />
+                              Dr. {appointment.doctorName}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <Badge className={getStatusColor(appointment.status)}>
+                        {appointment.status}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </CardContent>

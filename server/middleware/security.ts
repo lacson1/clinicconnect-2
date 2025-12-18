@@ -88,6 +88,22 @@ class SecurityManagerClass {
   }
 
   /**
+   * Clear login attempts for a username (useful for development/testing)
+   */
+  clearLoginAttempts(username: string): void {
+    this.loginAttempts.delete(username);
+    console.log(`[SECURITY] Cleared login attempts for ${username}`);
+  }
+
+  /**
+   * Clear all login attempts (useful for development/testing)
+   */
+  clearAllLoginAttempts(): void {
+    this.loginAttempts.clear();
+    console.log(`[SECURITY] Cleared all login attempts`);
+  }
+
+  /**
    * Validate password strength
    */
   validatePassword(password: string): PasswordValidation {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "wouter";
-import { AlertCircle, Edit, Stethoscope, Pill, FlaskRound, Plus, History, Printer, CheckCircle, Download, Eye, ClipboardCheck, TestTube } from "lucide-react";
+import { AlertCircle, Edit, Stethoscope, Pill, FlaskRound, Plus, History, Printer, CheckCircle, Download, Eye, ClipboardCheck, TestTube, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -645,8 +645,8 @@ function LabResultInputModal({
     <div className="min-h-screen bg-slate-50">
       {/* Industry-Standard Patient Banner */}
       <header className="bg-white shadow-sm border-b border-slate-200 px-4 py-3 sticky top-0 z-10">
-        <div className="max-w-full flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className="max-w-full flex items-center justify-between gap-4">
+          <div className="flex items-center space-x-4 flex-1 min-w-0">
             {/* Patient Avatar */}
             <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center ring-2 ring-primary/20">
               <span className="text-white font-semibold text-xl">
@@ -699,8 +699,22 @@ function LabResultInputModal({
                 )}
               </div>
               
-              {/* Third Line: PCP, Language, Emergency Contact indicators */}
-              <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
+              {/* Third Line: Contact, Language, Emergency Contact indicators */}
+              <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-500 mt-1">
+                {patient.phone && patient.phone.trim() !== '' && (
+                  <span className="flex items-center gap-1.5 bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+                    <Phone className="h-3.5 w-3.5" />
+                    <span className="font-medium">{patient.phone}</span>
+                  </span>
+                )}
+                {patient.email && patient.email.trim() !== '' && (
+                  <span className="flex items-center gap-1.5 bg-slate-100 text-slate-700 px-2 py-0.5 rounded max-w-[260px]">
+                    <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="font-medium truncate select-text cursor-text" title={patient.email}>
+                      {patient.email}
+                    </span>
+                  </span>
+                )}
                 {(patient as any).preferredLanguage && (patient as any).preferredLanguage !== 'English' && (
                   <span className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
                     🌐 {(patient as any).preferredLanguage}
@@ -715,9 +729,15 @@ function LabResultInputModal({
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          
+          {/* Action Buttons - Clean and Professional */}
+          <div className="flex flex-wrap items-center gap-2.5 flex-shrink-0">
             {(user?.role === 'admin' || user?.role === 'doctor' || user?.role === 'nurse') && (
-              <Button variant="outline">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="h-9 px-4 border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
                 <Edit className="mr-2 h-4 w-4" />
                 Edit Info
               </Button>
@@ -725,11 +745,20 @@ function LabResultInputModal({
             
             {user?.role === 'doctor' && (
               <>
-                <Button onClick={() => setShowVisitModal(true)}>
+                <Button 
+                  onClick={() => setShowVisitModal(true)}
+                  size="sm"
+                  className="h-9 px-4 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                >
                   <Stethoscope className="mr-2 h-4 w-4" />
                   Record Visit
                 </Button>
-                <Button variant="outline" onClick={() => setShowPrescriptionModal(true)}>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowPrescriptionModal(true)}
+                  size="sm"
+                  className="h-9 px-4 border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-sm hover:shadow-md"
+                >
                   <Pill className="mr-2 h-4 w-4" />
                   Add Prescription
                 </Button>
@@ -737,7 +766,12 @@ function LabResultInputModal({
             )}
             
             {(user?.role === 'nurse' || user?.role === 'doctor') && (
-              <Button variant="outline" onClick={() => setShowLabModal(true)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowLabModal(true)}
+                size="sm"
+                className="h-9 px-4 border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
                 <FlaskRound className="mr-2 h-4 w-4" />
                 Add Lab Result
               </Button>

@@ -151,8 +151,8 @@ export const dateRangeSchema = z.object({
 
 export const loginSchema = z.object({
   username: z.string()
-    .min(1, 'Username is required')
-    .max(50, 'Username must be at most 50 characters'),
+    .min(1, 'Username or email is required')
+    .max(100, 'Username or email must be at most 100 characters'),
   password: z.string()
     .min(1, 'Password is required')
     .max(128, 'Password must be at most 128 characters'),
@@ -171,13 +171,12 @@ export const registerSchema = z.object({
     .regex(/[0-9]/, 'Password must contain at least one number'),
   email: z.string()
     .email('Invalid email address')
-    .optional(),
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
   firstName: z.string()
-    .min(1, 'First name is required')
     .max(50, 'First name must be at most 50 characters')
     .optional(),
   lastName: z.string()
-    .min(1, 'Last name is required')
     .max(50, 'Last name must be at most 50 characters')
     .optional(),
   role: z.enum(['doctor', 'nurse', 'pharmacist', 'lab_tech', 'receptionist', 'admin'])
@@ -189,6 +188,35 @@ export const changePasswordSchema = z.object({
   newPassword: z.string()
     .min(8, 'New password must be at least 8 characters')
     .max(128, 'New password must be at most 128 characters')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
+  confirmPassword: z.string(),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
+
+export const forgotPasswordSchema = z.union([
+  z.object({
+    username: z.string()
+      .min(1, 'Username is required')
+      .max(100, 'Username must be at most 100 characters'),
+  }),
+  z.object({
+    email: z.string()
+      .email('Invalid email address')
+      .min(1, 'Email is required'),
+  }),
+]);
+
+export const resetPasswordSchema = z.object({
+  token: z.string()
+    .min(1, 'Reset token is required')
+    .max(100, 'Invalid reset token'),
+  newPassword: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(128, 'Password must be at most 128 characters')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
     .regex(/[0-9]/, 'Password must contain at least one number'),
@@ -241,6 +269,8 @@ export const createVisitSchema = z.object({
 // Export types inferred from schemas
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type CreatePatientInput = z.infer<typeof createPatientSchema>;
 export type UpdatePatientInput = z.infer<typeof updatePatientSchema>;
 export type CreateVisitInput = z.infer<typeof createVisitSchema>;
@@ -259,6 +289,8 @@ export default {
   loginSchema,
   registerSchema,
   changePasswordSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   createPatientSchema,
   updatePatientSchema,
   createVisitSchema,

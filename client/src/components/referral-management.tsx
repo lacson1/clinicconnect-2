@@ -106,6 +106,19 @@ export default function ReferralManagement({ patientId }: ReferralManagementProp
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Safety check for patientId
+  if (!patientId || patientId <= 0) {
+    return (
+      <div className="p-4">
+        <div className="text-center py-12 text-gray-500">
+          <AlertCircle className="mx-auto h-12 w-12 mb-4 opacity-50" />
+          <h3 className="text-lg font-medium mb-2">Invalid Patient</h3>
+          <p className="text-sm">Please select a valid patient to view referrals.</p>
+        </div>
+      </div>
+    );
+  }
+
   const form = useForm<ReferralFormData>({
     resolver: zodResolver(referralSchema),
     defaultValues: {
@@ -115,9 +128,11 @@ export default function ReferralManagement({ patientId }: ReferralManagementProp
   });
 
   // Fetch patient referrals
-  const { data: referrals = [], isLoading } = useQuery<PatientReferral[]>({
+  const { data: referrals = [], isLoading, error, isError } = useQuery<PatientReferral[]>({
     queryKey: [`/api/patients/${patientId}/referrals`],
-    enabled: !!patientId
+    enabled: !!patientId,
+    retry: 1,
+    refetchOnWindowFocus: false
   });
 
   // Create referral mutation
@@ -235,7 +250,34 @@ export default function ReferralManagement({ patientId }: ReferralManagementProp
   };
 
   if (isLoading) {
-    return <div className="p-4">Loading referrals...</div>;
+    return (
+      <div className="p-4 flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto mb-2"></div>
+          <p className="text-sm text-gray-500">Loading referrals...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-4">
+        <div className="text-center py-12 text-red-600">
+          <AlertCircle className="mx-auto h-12 w-12 mb-4 opacity-50" />
+          <h3 className="text-lg font-medium mb-2">Error Loading Referrals</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            {error instanceof Error ? error.message : 'Failed to load referrals. Please try again.'}
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/referrals`] })}
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (

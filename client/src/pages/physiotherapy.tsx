@@ -29,7 +29,8 @@ import {
   Minus,
   Heart,
   Brain,
-  Zap
+  Zap,
+  Eye
 } from "lucide-react";
 import PhysiotherapyAssessment from "@/components/physiotherapy-assessment";
 import EnhancedPhysiotherapyDashboard from "@/components/enhanced-physiotherapy-dashboard";
@@ -41,6 +42,8 @@ export default function PhysiotherapyPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [showAssessmentDialog, setShowAssessmentDialog] = useState(false);
+  const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
+  const [showAssessmentViewDialog, setShowAssessmentViewDialog] = useState(false);
 
   // Fetch patients
   const { data: patients = [] } = useQuery({
@@ -67,9 +70,32 @@ export default function PhysiotherapyPage() {
     .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
+  // Latest assessment per patient (for quick "View" from the patient list)
+  const latestAssessmentByPatientId = (() => {
+    const map = new Map<number, any>();
+    for (const a of assessments) {
+      const patientId = Number(a.patientId);
+      if (!Number.isFinite(patientId)) continue;
+      const existing = map.get(patientId);
+      if (!existing) {
+        map.set(patientId, a);
+        continue;
+      }
+      if (new Date(a.createdAt).getTime() > new Date(existing.createdAt).getTime()) {
+        map.set(patientId, a);
+      }
+    }
+    return map;
+  })();
+
   const handlePatientSelect = (patient: any) => {
     setSelectedPatient(patient);
     setShowAssessmentDialog(true);
+  };
+
+  const handleViewAssessment = (assessment: any) => {
+    setSelectedAssessment(assessment);
+    setShowAssessmentViewDialog(true);
   };
 
   return (
@@ -202,10 +228,32 @@ export default function PhysiotherapyPage() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
-                              <Activity className="w-4 h-4 mr-2" />
-                              New Assessment
-                            </Button>
+                            <div className="flex items-center gap-2 justify-end">
+                              {latestAssessmentByPatientId.get(Number(patient.id)) && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewAssessment(latestAssessmentByPatientId.get(Number(patient.id)));
+                                  }}
+                                >
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  View
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                className="bg-purple-600 hover:bg-purple-700"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePatientSelect(patient);
+                                }}
+                              >
+                                <Activity className="w-4 h-4 mr-2" />
+                                New Assessment
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -277,6 +325,16 @@ export default function PhysiotherapyPage() {
                                 Duration: {formData.sessionDuration} min
                               </div>
                             )}
+                            <div className="mt-3 flex justify-end">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleViewAssessment(assessment)}
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                View
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -324,6 +382,82 @@ export default function PhysiotherapyPage() {
               patientId={selectedPatient.id}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* View Assessment Dialog */}
+      <Dialog open={showAssessmentViewDialog} onOpenChange={setShowAssessmentViewDialog}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Assessment Details</DialogTitle>
+            {selectedAssessment && (
+              <div className="text-sm text-gray-600 space-y-1">
+                <div>
+                  Patient: {(() => {
+                    const p = patients.find((pt: any) => pt.id === selectedAssessment.patientId);
+                    return p ? `${p.firstName} ${p.lastName}` : 'Unknown Patient';
+                  })()}
+                </div>
+                <div className="text-xs">
+                  Recorded: {format(new Date(selectedAssessment.createdAt), 'MMM dd, yyyy • hh:mm a')}
+                </div>
+              </div>
+            )}
+          </DialogHeader>
+
+          {selectedAssessment ? (
+            <div className="space-y-4">
+              {(() => {
+                const formData = selectedAssessment.formData || {};
+                const fields: Array<{ key: string; label: string }> = [
+                  { key: "mobilityAssessment", label: "Mobility Assessment" },
+                  { key: "rangeOfMotion", label: "Range of Motion" },
+                  { key: "strengthAssessment", label: "Strength Assessment" },
+                  { key: "balanceCoordination", label: "Balance & Coordination" },
+                  { key: "painAssessment", label: "Pain Assessment" },
+                  { key: "functionalCapacity", label: "Functional Capacity" },
+                  { key: "treatmentModalities", label: "Treatment Modalities" },
+                  { key: "exercisesPrescribed", label: "Exercises Prescribed" },
+                  { key: "homeExercises", label: "Home Exercise Program" },
+                  { key: "assistiveDevices", label: "Assistive Devices" },
+                  { key: "treatmentPlan", label: "Treatment Plan" },
+                  { key: "progressNotes", label: "Progress Notes" },
+                  { key: "goals", label: "Goals" },
+                  { key: "precautions", label: "Precautions" },
+                  { key: "nextSession", label: "Next Session" },
+                  { key: "sessionDuration", label: "Session Duration (min)" }
+                ];
+
+                const visibleFields = fields.filter(f => {
+                  const v = formData?.[f.key];
+                  return v !== undefined && v !== null && String(v).trim() !== "";
+                });
+
+                if (visibleFields.length === 0) {
+                  return (
+                    <div className="text-sm text-gray-600">
+                      No saved assessment details were found for this record.
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {visibleFields.map(({ key, label }) => (
+                      <div key={key} className="rounded-lg border p-4 bg-gray-50">
+                        <div className="text-xs font-medium text-gray-600 mb-1">
+                          {label}
+                        </div>
+                        <div className="text-sm text-gray-900 whitespace-pre-wrap">
+                          {String(formData[key])}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+          ) : null}
         </DialogContent>
       </Dialog>
     </div>

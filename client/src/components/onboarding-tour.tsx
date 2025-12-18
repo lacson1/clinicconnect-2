@@ -138,14 +138,14 @@ export default function OnboardingTour({
       >
         <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-xl shadow-2xl max-w-sm overflow-hidden">
           {/* Quick dismiss bar */}
-          <div className="flex items-center justify-between px-3 py-1.5 bg-black/10">
-            <span className="text-xs text-white/70 flex items-center gap-1">
+          <div className="flex items-center justify-between px-3 py-2 bg-black/10 border-b border-white/10">
+            <span className="text-xs text-white/80 font-medium flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" />
               Quick Start Guide
             </span>
             <button 
               onClick={handleDismiss}
-              className="text-white/70 hover:text-white p-1 rounded transition-colors"
+              className="text-white/60 hover:text-white hover:bg-white/10 p-1.5 rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-transparent"
               aria-label="Dismiss"
             >
               <X className="h-3.5 w-3.5" />
@@ -223,14 +223,14 @@ export default function OnboardingTour({
           <div className="flex items-center gap-1">
             <button 
               onClick={() => setIsExpanded(false)}
-              className="p-1 hover:bg-white/20 rounded transition-colors"
+              className="p-1.5 hover:bg-white/20 rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-transparent"
               aria-label="Minimize"
             >
               <Minimize2 className="h-3.5 w-3.5" />
             </button>
             <button 
               onClick={handleDismiss}
-              className="p-1 hover:bg-white/20 rounded transition-colors"
+              className="p-1.5 hover:bg-white/20 rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-transparent"
               aria-label="Close"
             >
               <X className="h-3.5 w-3.5" />

@@ -57,6 +57,12 @@ export default function EditVisit() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const formatDateSafe = (value?: string | null) => {
+    if (!value) return '—';
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString();
+  };
+
   const [formData, setFormData] = useState({
     visitType: '',
     bloodPressure: '',
@@ -72,13 +78,15 @@ export default function EditVisit() {
 
   // Fetch patient data
   const { data: patient } = useQuery<Patient>({
-    queryKey: ['/api/patients', patientId],
+    // NOTE: our global queryFn uses queryKey[0] as the URL, so this must be the full endpoint
+    queryKey: [`/api/patients/${patientId}`],
     enabled: !!patientId,
   });
 
   // Fetch visit data
   const { data: visit, isLoading: visitLoading } = useQuery<Visit>({
-    queryKey: ['/api/patients', patientId, 'visits', visitId],
+    // NOTE: our global queryFn uses queryKey[0] as the URL, so this must be the full endpoint
+    queryKey: [`/api/patients/${patientId}/visits/${visitId}`],
     enabled: !!patientId && !!visitId,
   });
 
@@ -108,8 +116,9 @@ export default function EditVisit() {
         title: "Visit updated",
         description: "Visit record has been successfully updated",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/patients', patientId, 'visits'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/patients', patientId, 'activity-trail'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/visits`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/patients/${patientId}/activity-trail`] });
       navigate(`/patients/${patientId}`);
     },
     onError: () => {
@@ -199,7 +208,7 @@ export default function EditVisit() {
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900">Edit Visit</h1>
                   <p className="text-sm text-gray-500">
-                    {patient.firstName} {patient.lastName} • {new Date(visit.visitDate).toLocaleDateString()}
+                    {patient.firstName} {patient.lastName} • {formatDateSafe(visit.visitDate)}
                   </p>
                 </div>
               </div>
@@ -223,18 +232,22 @@ export default function EditVisit() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                 <div>
                   <span className="font-medium text-gray-500">Name:</span>
                   <p className="text-gray-900">{patient.firstName} {patient.lastName}</p>
                 </div>
                 <div>
                   <span className="font-medium text-gray-500">Date of Birth:</span>
-                  <p className="text-gray-900">{new Date(patient.dateOfBirth).toLocaleDateString()}</p>
+                  <p className="text-gray-900">{formatDateSafe(patient.dateOfBirth)}</p>
                 </div>
                 <div>
                   <span className="font-medium text-gray-500">Gender:</span>
                   <p className="text-gray-900 capitalize">{patient.gender}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-500">Phone:</span>
+                  <p className="text-gray-900">{patient.phone || '—'}</p>
                 </div>
               </div>
             </CardContent>

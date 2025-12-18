@@ -21,9 +21,18 @@ interface User {
   };
 }
 
+interface SignupData {
+  username: string;
+  password: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   login: (username: string, password: string) => Promise<void>;
+  signup: (data: SignupData) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   isLoading: boolean;
@@ -170,6 +179,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const signup = async (data: SignupData) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      const responseData = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        // Handle API error response format: { success: false, error: { code, message } }
+        const errorMessage = responseData.error?.message || responseData.message || 'Signup failed. Please try again.';
+        
+        if (response.status === 400) {
+          throw new Error(errorMessage);
+        }
+        if (response.status === 409) {
+          throw new Error(errorMessage);
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Handle API success response format: { success: true, data: {...}, message: "..." }
+      const result = responseData.data || responseData;
+      const message = responseData.message || result.message || 'Your account has been created successfully. You can now login.';
+
+      // Show success message
+      toast({
+        title: "Account Created!",
+        description: message,
+        duration: 5000,
+      });
+
+      // Redirect to login page after successful signup
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setLocation('/login');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Signup failed. Please try again.';
+      toast({
+        title: "Signup Failed",
+        description: errorMessage,
+        variant: "destructive",
+        duration: 5000,
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = useCallback(async () => {
     logger.debug('Logging out user...');
     try {
@@ -215,7 +279,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, refreshUser, isLoading }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, refreshUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

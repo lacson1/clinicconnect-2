@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Users, Calendar, Activity, Search, UserPlus, Plus,
-  Eye, Settings, BarChart3, Zap
+  Eye, Settings, BarChart3, Zap, AlertCircle
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import PatientRegistrationModal from "@/components/patient-registration-modal";
 import { useRole } from "@/components/role-guard";
+import { useAuth } from "@/contexts/AuthContext";
 import { useGlobalShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { OrganizationSwitcher } from "@/components/organization-switcher";
 import { DashboardCharts } from "@/components/analytics/dashboard-charts";
@@ -22,24 +24,41 @@ interface DashboardStats {
   todayVisits: number;
   pendingLabs: number;
   lowStockItems: number;
+  patientGrowthPercent?: number;
+  upcomingAppointments?: number;
 }
 
 export default function Dashboard() {
   const [showPatientModal, setShowPatientModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { user } = useRole();
+  const { refreshUser } = useAuth();
   const [, setLocation] = useLocation();
 
   // Initialize global keyboard shortcuts
   useGlobalShortcuts();
 
-  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
+  const { data: stats, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useQuery<DashboardStats>({
     queryKey: ['/api/dashboard/stats'],
   });
 
   const { data: allPatients } = useQuery({
     queryKey: ['/api/patients'],
   });
+
+  // Compute error message (must be before any early returns to satisfy React hooks rules)
+  const statsErrorMessage = useMemo(() => {
+    if (!statsError) return "";
+    return statsError instanceof Error ? statsError.message : String(statsError);
+  }, [statsError]);
+
+  // If the stats call returns 401, refresh session (will drop to Login if session is expired)
+  useEffect(() => {
+    if (!statsErrorMessage) return;
+    if (statsErrorMessage.includes("401") || statsErrorMessage.toLowerCase().includes("authentication")) {
+      refreshUser();
+    }
+  }, [statsErrorMessage, refreshUser]);
 
   if (statsLoading) {
     return (
@@ -113,6 +132,26 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
+        {statsError && (
+          <Alert className="mb-6 border-slate-200 bg-white">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Stats temporarily unavailable</AlertTitle>
+            <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <span className="text-slate-600">
+                We couldn’t fetch dashboard stats right now. Please retry.
+              </span>
+              <div className="flex gap-2">
+                <Button onClick={() => refetchStats()} variant="outline" size="sm">
+                  Retry
+                </Button>
+                <Button onClick={() => setLocation('/login')} size="sm">
+                  Login
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Tabs for different dashboard views */}
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
@@ -138,9 +177,13 @@ export default function Dashboard() {
                     <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200">Active</Badge>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-3xl font-bold text-foreground group-hover:text-blue-700 transition-colors">{stats?.totalPatients || 0}</p>
+                    <p className="text-3xl font-bold text-foreground group-hover:text-blue-700 transition-colors">{stats ? stats.totalPatients : '—'}</p>
                     <p className="text-sm font-medium text-muted-foreground">Total Patients</p>
-                    <p className="text-xs text-green-600 font-medium">+12% from last month</p>
+                    {stats?.patientGrowthPercent !== undefined && stats.patientGrowthPercent !== 0 && (
+                      <p className={`text-xs font-medium ${stats.patientGrowthPercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {stats.patientGrowthPercent >= 0 ? '+' : ''}{stats.patientGrowthPercent}% from last month
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -158,9 +201,11 @@ export default function Dashboard() {
                     <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">Active</Badge>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-3xl font-bold text-foreground group-hover:text-green-700 transition-colors">{stats?.todayVisits || 0}</p>
+                    <p className="text-3xl font-bold text-foreground group-hover:text-green-700 transition-colors">{stats ? stats.todayVisits : '—'}</p>
                     <p className="text-sm font-medium text-muted-foreground">Today's Visits</p>
-                    <p className="text-xs text-blue-600 font-medium">3 scheduled next</p>
+                    {stats?.upcomingAppointments !== undefined && stats.upcomingAppointments > 0 && (
+                      <p className="text-xs text-blue-600 font-medium">{stats.upcomingAppointments} scheduled next</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -178,7 +223,7 @@ export default function Dashboard() {
                     <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200">Pending</Badge>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-3xl font-bold text-foreground group-hover:text-orange-700 transition-colors">{stats?.pendingLabs || 0}</p>
+                    <p className="text-3xl font-bold text-foreground group-hover:text-orange-700 transition-colors">{stats ? stats.pendingLabs : '—'}</p>
                     <p className="text-sm font-medium text-muted-foreground">Lab Orders</p>
                     <p className="text-xs text-slate-600 font-medium">Awaiting results</p>
                   </div>
@@ -198,7 +243,7 @@ export default function Dashboard() {
                     <Badge variant="secondary" className="bg-red-100 text-red-700 border-red-200">Alert</Badge>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-3xl font-bold text-foreground group-hover:text-red-700 transition-colors">{stats?.lowStockItems || 0}</p>
+                    <p className="text-3xl font-bold text-foreground group-hover:text-red-700 transition-colors">{stats ? stats.lowStockItems : '—'}</p>
                     <p className="text-sm font-medium text-muted-foreground">Low Stock Items</p>
                     <p className="text-xs text-red-600 font-medium">Needs attention</p>
                   </div>

@@ -39,21 +39,35 @@ export default function Patients() {
       </div>
 
       {/* Enhanced Fixed Tab Navigation */}
-      <div className="fixed-tabs-container bg-gradient-to-r from-background/95 to-muted/30 backdrop-blur-sm border-b border-border/60">
-        <div className="px-6 py-3">
+      <div className="fixed-tabs-container bg-white/95 backdrop-blur-md border-b border-border/60 shadow-sm sticky top-0 z-40">
+        <div className="px-4 sm:px-6 py-3.5">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-100/80 backdrop-blur-sm border border-slate-200/60 rounded-lg p-1 shadow-sm">
-              <TabsTrigger value="patients" className="flex items-center gap-2 text-slate-600 font-medium transition-all duration-200 hover:text-slate-900 hover:bg-white/80 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-md data-[state=active]:border data-[state=active]:border-blue-200/50">
-                <Users className="w-4 h-4" />
-                Patient Records
+            <TabsList className="inline-flex h-12 items-center justify-start rounded-xl bg-gradient-to-r from-slate-50/80 to-blue-50/50 backdrop-blur-sm border border-slate-200/60 p-1.5 text-muted-foreground shadow-inner w-full sm:w-auto gap-1">
+              <TabsTrigger 
+                value="patients" 
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-5 py-2.5 text-sm font-semibold ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-primary/30 data-[state=active]:scale-[1.02] hover:bg-white/70 hover:text-foreground hover:scale-[1.01] relative"
+              >
+                <Users className="w-4 h-4 transition-transform data-[state=active]:scale-110" />
+                <span className="hidden sm:inline">Patient Records</span>
+                <span className="sm:hidden">Records</span>
+                <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-primary rounded-full transition-all duration-200 data-[state=active]:w-3/4"></span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2 text-slate-600 font-medium transition-all duration-200 hover:text-slate-900 hover:bg-white/80 data-[state=active]:bg-white data-[state=active]:text-green-700 data-[state=active]:shadow-md data-[state=active]:border data-[state=active]:border-green-200/50">
-                <BarChart3 className="w-4 h-4" />
-                Analytics
+              <TabsTrigger 
+                value="analytics" 
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-5 py-2.5 text-sm font-semibold ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-primary/30 data-[state=active]:scale-[1.02] hover:bg-white/70 hover:text-foreground hover:scale-[1.01] relative"
+              >
+                <BarChart3 className="w-4 h-4 transition-transform data-[state=active]:scale-110" />
+                <span>Analytics</span>
+                <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-primary rounded-full transition-all duration-200 data-[state=active]:w-3/4"></span>
               </TabsTrigger>
-              <TabsTrigger value="appointments" className="flex items-center gap-2 text-slate-600 font-medium transition-all duration-200 hover:text-slate-900 hover:bg-white/80 data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-md data-[state=active]:border data-[state=active]:border-purple-200/50">
-                <Calendar className="w-4 h-4" />
-                Appointments
+              <TabsTrigger 
+                value="appointments" 
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-5 py-2.5 text-sm font-semibold ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-primary/30 data-[state=active]:scale-[1.02] hover:bg-white/70 hover:text-foreground hover:scale-[1.01] relative"
+              >
+                <Calendar className="w-4 h-4 transition-transform data-[state=active]:scale-110" />
+                <span className="hidden sm:inline">Appointments</span>
+                <span className="sm:hidden">Appts</span>
+                <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-primary rounded-full transition-all duration-200 data-[state=active]:w-3/4"></span>
               </TabsTrigger>
             </TabsList>
           </Tabs>

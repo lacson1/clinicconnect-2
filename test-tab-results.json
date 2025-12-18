@@ -1,0 +1,858 @@
+{
+  "timestamp": "2025-12-18T22:25:09.832Z",
+  "totalTabs": 22,
+  "totalTests": 144,
+  "passedTests": 22,
+  "failedTests": 0,
+  "pendingTests": 122,
+  "testPlan": [
+    {
+      "tab": "overview",
+      "functions": [
+        "Display patient summary",
+        "Show medical stats (visits, labs, meds)",
+        "Display recent visits",
+        "Show active problems/diagnoses",
+        "Display patient alerts"
+      ]
+    },
+    {
+      "tab": "medications",
+      "functions": [
+        "Switch between Current/Past/Repeat/Summary",
+        "Display active medications",
+        "Display discontinued medications",
+        "Display repeat medications",
+        "View medication details",
+        "Add prescription (if doctor)",
+        "Update medication status",
+        "Send to repeat medications",
+        "Send to dispensary"
+      ]
+    },
+    {
+      "tab": "safety",
+      "functions": [
+        "Display safety alerts",
+        "Show real-time safety indicators",
+        "Display allergy warnings",
+        "Show drug interaction warnings"
+      ]
+    },
+    {
+      "tab": "timeline",
+      "functions": [
+        "Display activity timeline",
+        "Filter by visit type",
+        "Filter by lab results",
+        "Filter by consultations",
+        "Filter by prescriptions",
+        "Reset filters",
+        "Expand/collapse timeline events"
+      ]
+    },
+    {
+      "tab": "vitals",
+      "functions": [
+        "Display vital signs tracker",
+        "Record new vital signs",
+        "View vital signs history",
+        "Display vital signs charts"
+      ]
+    },
+    {
+      "tab": "record-visit",
+      "functions": [
+        "Select visit type",
+        "Enter chief complaint",
+        "Enter history of present illness",
+        "Record vital signs",
+        "Enter physical examination",
+        "Add diagnosis",
+        "Add treatment plan",
+        "Add medications",
+        "Add follow-up instructions",
+        "Submit visit form"
+      ]
+    },
+    {
+      "tab": "documents",
+      "subTabs": [
+        "medical-records",
+        "consent-forms",
+        "discharge-letters",
+        "insurance",
+        "referrals"
+      ],
+      "functions": [
+        "View medical records",
+        "Upload document",
+        "View consent forms",
+        "Create consent form",
+        "View discharge letters",
+        "Generate discharge letter",
+        "View insurance documents",
+        "Manage referrals"
+      ]
+    },
+    {
+      "tab": "labs",
+      "subTabs": [
+        "orders",
+        "results",
+        "reviewed",
+        "pending",
+        "history"
+      ],
+      "functions": [
+        "Create lab order",
+        "View lab orders",
+        "View lab results",
+        "View reviewed results",
+        "View pending orders",
+        "Add lab result",
+        "Review lab result",
+        "View lab history",
+        "Print lab results"
+      ]
+    },
+    {
+      "tab": "specialty",
+      "functions": [
+        "Select consultation form",
+        "View specialty consultations",
+        "Create specialty consultation"
+      ]
+    },
+    {
+      "tab": "med-reviews",
+      "functions": [
+        "View medication review assignments",
+        "Create medication review",
+        "Assign medication review",
+        "Complete medication review"
+      ]
+    },
+    {
+      "tab": "vaccinations",
+      "functions": [
+        "View vaccination records",
+        "Add vaccination",
+        "View vaccination schedule",
+        "View due vaccinations"
+      ]
+    },
+    {
+      "tab": "communication",
+      "functions": [
+        "View messages",
+        "Send message",
+        "View communication history",
+        "Send appointment reminders",
+        "Send prescription reminders"
+      ]
+    },
+    {
+      "tab": "appointments",
+      "functions": [
+        "View appointments",
+        "Create appointment",
+        "Edit appointment",
+        "Cancel appointment",
+        "View appointment history"
+      ]
+    },
+    {
+      "tab": "billing",
+      "functions": [
+        "View billing information",
+        "View invoices",
+        "View payment history",
+        "Generate invoice"
+      ]
+    },
+    {
+      "tab": "insurance",
+      "functions": [
+        "View insurance information",
+        "Add insurance",
+        "Update insurance",
+        "View insurance claims"
+      ]
+    },
+    {
+      "tab": "history",
+      "functions": [
+        "View medical history",
+        "Add medical history",
+        "Edit medical history",
+        "View family history",
+        "View social history"
+      ]
+    },
+    {
+      "tab": "imaging",
+      "functions": [
+        "View imaging studies",
+        "Upload imaging",
+        "View imaging reports"
+      ]
+    },
+    {
+      "tab": "allergies",
+      "functions": [
+        "View allergies",
+        "Add allergy",
+        "Edit allergy",
+        "Remove allergy"
+      ]
+    },
+    {
+      "tab": "immunizations",
+      "functions": [
+        "View immunizations",
+        "Add immunization",
+        "Edit immunization record"
+      ]
+    },
+    {
+      "tab": "procedures",
+      "functions": [
+        "View procedures",
+        "Add procedure",
+        "Edit procedure",
+        "View procedure history"
+      ]
+    },
+    {
+      "tab": "care-plans",
+      "functions": [
+        "View care plans",
+        "Add care goal",
+        "Edit care plan",
+        "View care plan history"
+      ]
+    },
+    {
+      "tab": "notes",
+      "functions": [
+        "View clinical notes",
+        "Display note details",
+        "View SOAP notes",
+        "View consultation notes"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "tab": "overview",
+      "function": "Display patient summary",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "overview",
+      "function": "Show medical stats (visits, labs, meds)",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "overview",
+      "function": "Display recent visits",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "overview",
+      "function": "Show active problems/diagnoses",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "overview",
+      "function": "Display patient alerts",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "medications",
+      "function": "Switch between Current/Past/Repeat/Summary",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "medications",
+      "function": "Display active medications",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "medications",
+      "function": "Display discontinued medications",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "medications",
+      "function": "Display repeat medications",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "medications",
+      "function": "View medication details",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "medications",
+      "function": "Add prescription (if doctor)",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "medications",
+      "function": "Update medication status",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "medications",
+      "function": "Send to repeat medications",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "medications",
+      "function": "Send to dispensary",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "safety",
+      "function": "Display safety alerts",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "safety",
+      "function": "Show real-time safety indicators",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "safety",
+      "function": "Display allergy warnings",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "safety",
+      "function": "Show drug interaction warnings",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "timeline",
+      "function": "Display activity timeline",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "timeline",
+      "function": "Filter by visit type",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "timeline",
+      "function": "Filter by lab results",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "timeline",
+      "function": "Filter by consultations",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "timeline",
+      "function": "Filter by prescriptions",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "timeline",
+      "function": "Reset filters",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "timeline",
+      "function": "Expand/collapse timeline events",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "vitals",
+      "function": "Display vital signs tracker",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "vitals",
+      "function": "Record new vital signs",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "vitals",
+      "function": "View vital signs history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "vitals",
+      "function": "Display vital signs charts",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "record-visit",
+      "function": "Select visit type",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "record-visit",
+      "function": "Enter chief complaint",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "record-visit",
+      "function": "Enter history of present illness",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "record-visit",
+      "function": "Record vital signs",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "record-visit",
+      "function": "Enter physical examination",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "record-visit",
+      "function": "Add diagnosis",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "record-visit",
+      "function": "Add treatment plan",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "record-visit",
+      "function": "Add medications",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "record-visit",
+      "function": "Add follow-up instructions",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "record-visit",
+      "function": "Submit visit form",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents",
+      "function": "View medical records",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents",
+      "function": "Upload document",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents",
+      "function": "View consent forms",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents",
+      "function": "Create consent form",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents",
+      "function": "View discharge letters",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents",
+      "function": "Generate discharge letter",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents",
+      "function": "View insurance documents",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents",
+      "function": "Manage referrals",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents/medical-records",
+      "function": "Sub-tab navigation",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents/consent-forms",
+      "function": "Sub-tab navigation",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents/discharge-letters",
+      "function": "Sub-tab navigation",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents/insurance",
+      "function": "Sub-tab navigation",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "documents/referrals",
+      "function": "Sub-tab navigation",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs",
+      "function": "Create lab order",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs",
+      "function": "View lab orders",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs",
+      "function": "View lab results",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs",
+      "function": "View reviewed results",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs",
+      "function": "View pending orders",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs",
+      "function": "Add lab result",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs",
+      "function": "Review lab result",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs",
+      "function": "View lab history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs",
+      "function": "Print lab results",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs/orders",
+      "function": "Sub-tab navigation",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs/results",
+      "function": "Sub-tab navigation",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs/reviewed",
+      "function": "Sub-tab navigation",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs/pending",
+      "function": "Sub-tab navigation",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "labs/history",
+      "function": "Sub-tab navigation",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "specialty",
+      "function": "Select consultation form",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "specialty",
+      "function": "View specialty consultations",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "specialty",
+      "function": "Create specialty consultation",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "med-reviews",
+      "function": "View medication review assignments",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "med-reviews",
+      "function": "Create medication review",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "med-reviews",
+      "function": "Assign medication review",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "med-reviews",
+      "function": "Complete medication review",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "vaccinations",
+      "function": "View vaccination records",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "vaccinations",
+      "function": "Add vaccination",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "vaccinations",
+      "function": "View vaccination schedule",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "vaccinations",
+      "function": "View due vaccinations",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "communication",
+      "function": "View messages",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "communication",
+      "function": "Send message",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "communication",
+      "function": "View communication history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "communication",
+      "function": "Send appointment reminders",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "communication",
+      "function": "Send prescription reminders",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "appointments",
+      "function": "View appointments",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "appointments",
+      "function": "Create appointment",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "appointments",
+      "function": "Edit appointment",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "appointments",
+      "function": "Cancel appointment",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "appointments",
+      "function": "View appointment history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "billing",
+      "function": "View billing information",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "billing",
+      "function": "View invoices",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "billing",
+      "function": "View payment history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "billing",
+      "function": "Generate invoice",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "insurance",
+      "function": "View insurance information",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "insurance",
+      "function": "Add insurance",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "insurance",
+      "function": "Update insurance",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "insurance",
+      "function": "View insurance claims",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "history",
+      "function": "View medical history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "history",
+      "function": "Add medical history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "history",
+      "function": "Edit medical history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "history",
+      "function": "View family history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "history",
+      "function": "View social history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "imaging",
+      "function": "View imaging studies",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "imaging",
+      "function": "Upload imaging",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "imaging",
+      "function": "View imaging reports",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "allergies",
+      "function": "View allergies",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "allergies",
+      "function": "Add allergy",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "allergies",
+      "function": "Edit allergy",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "allergies",
+      "function": "Remove allergy",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "immunizations",
+      "function": "View immunizations",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "immunizations",
+      "function": "Add immunization",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "immunizations",
+      "function": "Edit immunization record",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "procedures",
+      "function": "View procedures",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "procedures",
+      "function": "Add procedure",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "procedures",
+      "function": "Edit procedure",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "procedures",
+      "function": "View procedure history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "care-plans",
+      "function": "View care plans",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "care-plans",
+      "function": "Add care goal",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "care-plans",
+      "function": "Edit care plan",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "care-plans",
+      "function": "View care plan history",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "notes",
+      "function": "View clinical notes",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "notes",
+      "function": "Display note details",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "notes",
+      "function": "View SOAP notes",
+      "status": "PENDING_MANUAL_TEST"
+    },
+    {
+      "tab": "notes",
+      "function": "View consultation notes",
+      "status": "PENDING_MANUAL_TEST"
+    }
+  ]
+}

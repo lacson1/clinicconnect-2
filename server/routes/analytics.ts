@@ -301,5 +301,50 @@ export function setupAnalyticsRoutes(): Router {
     }
   });
 
+  // Dashboard Stats Route (simplified version)
+  router.get("/dashboard/stats", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const orgId = req.user?.organizationId;
+      if (!orgId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Get basic stats
+      const [patientCount] = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(patients)
+        .where(eq(patients.organizationId, orgId));
+
+      const [visitCount] = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(visits)
+        .where(and(
+          eq(visits.organizationId, orgId),
+          gte(visits.visitDate, today)
+        ));
+
+      const [appointmentCount] = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(appointments)
+        .where(and(
+          eq(appointments.organizationId, orgId),
+          gte(appointments.appointmentDate, today)
+        ));
+
+      res.json({
+        totalPatients: Number(patientCount?.count || 0),
+        todayVisits: Number(visitCount?.count || 0),
+        todayAppointments: Number(appointmentCount?.count || 0),
+        updatedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+    }
+  });
+
   return router;
 }

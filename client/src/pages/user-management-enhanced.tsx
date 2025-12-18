@@ -103,8 +103,10 @@ export default function UserManagementEnhanced() {
   });
 
   // Fetch organizations
-  const { data: organizations = [] } = useQuery({
+  const { data: organizations = [], isLoading: organizationsLoading, error: organizationsError } = useQuery({
     queryKey: ["/api/organizations"],
+    retry: 1,
+    refetchOnWindowFocus: false
   });
 
   // Create user mutation
@@ -473,11 +475,19 @@ export default function UserManagementEnhanced() {
                           <SelectValue placeholder="Select organization" />
                         </SelectTrigger>
                         <SelectContent>
-                          {(organizations as any[]).map((org) => (
+                          {organizationsLoading ? (
+                            <SelectItem value="loading" disabled>Loading organizations...</SelectItem>
+                          ) : organizationsError ? (
+                            <SelectItem value="error" disabled>Error loading organizations</SelectItem>
+                          ) : organizations.length === 0 ? (
+                            <SelectItem value="no-orgs" disabled>No organizations available</SelectItem>
+                          ) : (
+                            (organizations as any[]).map((org) => (
                             <SelectItem key={org.id} value={org.id.toString()}>
                               {org.name}
                             </SelectItem>
-                          ))}
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -835,11 +845,19 @@ export default function UserManagementEnhanced() {
                     <SelectValue placeholder="Select organization" />
                   </SelectTrigger>
                   <SelectContent>
-                    {(organizations as any[]).map((org) => (
+                    {organizationsLoading ? (
+                      <SelectItem value="loading" disabled>Loading organizations...</SelectItem>
+                    ) : organizationsError ? (
+                      <SelectItem value="error" disabled>Error loading organizations</SelectItem>
+                    ) : organizations.length === 0 ? (
+                      <SelectItem value="no-orgs" disabled>No organizations available</SelectItem>
+                    ) : (
+                      (organizations as any[]).map((org) => (
                       <SelectItem key={org.id} value={org.id.toString()}>
                         {org.name}
                       </SelectItem>
-                    ))}
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>

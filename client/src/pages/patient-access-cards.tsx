@@ -44,6 +44,7 @@ export default function PatientAccessCards() {
   const [activeTab, setActiveTab] = useState('search');
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
+  const processingPatientsRef = useRef<Set<number>>(new Set());
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -92,7 +93,8 @@ export default function PatientAccessCards() {
         background: '#ffffff',
         lineColor: '#000000'
       });
-      return canvas.toDataURL();
+      const barcodeDataURL = canvas.toDataURL();
+      return barcodeDataURL;
     } catch (error) {
       console.error('Error generating barcode:', error);
       return '';
@@ -101,31 +103,58 @@ export default function PatientAccessCards() {
 
   // Add patient with code generation
   const addPatient = async (patient: Patient) => {
-    if (selectedPatients.find(p => p.id === patient.id)) return;
+    // Prevent duplicate processing using ref - check and add atomically
+    if (processingPatientsRef.current.has(patient.id)) {
+      return;
+    }
     
-    const qrCode = includeQR ? await generateQRCode(patient) : undefined;
-    const barcode = includeBarcode ? generateBarcode(patient) : undefined;
+    // Mark as processing BEFORE setState to prevent race conditions
+    processingPatientsRef.current.add(patient.id);
     
-    const accessCard: AccessCardData = {
-      patient,
-      qrCode,
-      barcode,
-      portalUrl: `${window.location.origin}/patient-portal`,
-      generatedAt: new Date().toISOString()
-    };
-    
-    setSelectedPatients([...selectedPatients, patient]);
-    setAccessCards(prev => [...prev, accessCard]);
-    
-    toast({
-      title: "Patient Added",
-      description: `${patient.firstName} ${patient.lastName} added to access card generation queue.`
+    // Check for duplicate and add patient atomically using functional update
+    let wasAdded = false;
+    setSelectedPatients(prev => {
+      if (prev.find(p => p.id === patient.id)) {
+        return prev; // Return unchanged if duplicate
+      }
+      wasAdded = true;
+      return [...prev, patient];
     });
+    
+    // If patient was already selected, clean up and exit early
+    if (!wasAdded) {
+      processingPatientsRef.current.delete(patient.id);
+      return;
+    }
+    
+    try {
+      // Generate codes asynchronously
+      const qrCode = includeQR ? await generateQRCode(patient) : undefined;
+      const barcode = includeBarcode ? generateBarcode(patient) : undefined;
+      
+      const accessCard: AccessCardData = {
+        patient,
+        qrCode,
+        barcode,
+        portalUrl: `${window.location.origin}/patient-portal`,
+        generatedAt: new Date().toISOString()
+      };
+      
+      setAccessCards(prev => [...prev, accessCard]);
+      
+      toast({
+        title: "Patient Added",
+        description: `${patient.firstName} ${patient.lastName} added to access card generation queue.`
+      });
+    } finally {
+      // Remove from processing set
+      processingPatientsRef.current.delete(patient.id);
+    }
   };
 
   const removePatient = (patientId: number) => {
-    setSelectedPatients(selectedPatients.filter(p => p.id !== patientId));
-    setAccessCards(accessCards.filter(card => card.patient.id !== patientId));
+    setSelectedPatients(prev => prev.filter(p => p.id !== patientId));
+    setAccessCards(prev => prev.filter(card => card.patient.id !== patientId));
   };
 
   // Send notifications mutation
@@ -151,7 +180,9 @@ export default function PatientAccessCards() {
 
   const printCards = () => {
     const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    if (!printWindow) {
+      return;
+    }
 
     const getCardHTML = (card: AccessCardData) => {
       const { patient, qrCode, barcode } = card;

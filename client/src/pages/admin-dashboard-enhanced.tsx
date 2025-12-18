@@ -93,6 +93,7 @@ export default function AdminDashboardEnhanced() {
   const { user } = useRole();
   const [autoRefresh, setAutoRefresh] = useState(false); // Disabled by default
   const [refreshInterval, setRefreshInterval] = useState(60000); // 60 seconds (was 30)
+  const [filterAbsent, setFilterAbsent] = useState<'all' | 'absent'>('all');
 
   // Fetch system health - only poll if auto-refresh enabled
   const { data: systemHealth, refetch: refetchHealth } = useQuery<SystemHealth>({
@@ -110,7 +111,12 @@ export default function AdminDashboardEnhanced() {
 
   // Fetch recent activity - only poll if auto-refresh enabled
   const { data: recentActivity = [] } = useQuery<RecentActivity[]>({
-    queryKey: ['/api/admin/recent-activity'],
+    queryKey: ['/api/admin/recent-activity', 100], // Request up to 100 activities
+    queryFn: async () => {
+      const response = await fetch('/api/admin/recent-activity?limit=100');
+      if (!response.ok) throw new Error('Failed to fetch recent activity');
+      return response.json();
+    },
     refetchInterval: autoRefresh ? refreshInterval : false,
     staleTime: 2 * 60 * 1000, // Cache for 2 minutes
   });
@@ -149,6 +155,11 @@ export default function AdminDashboardEnhanced() {
       exportStaffActivity(staffActivity);
     }
   };
+
+  // Filter staff activity based on absent filter
+  const filteredStaffActivity = filterAbsent === 'absent' 
+    ? staffActivity.filter(staff => staff.status === 'offline')
+    : staffActivity;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -484,7 +495,11 @@ export default function AdminDashboardEnhanced() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Recent System Activity</CardTitle>
-                  <CardDescription>Last 20 administrative actions</CardDescription>
+                  <CardDescription>
+                    {recentActivity.length > 0 
+                      ? `Showing ${recentActivity.length} recent administrative actions`
+                      : 'No recent activity'}
+                  </CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleExportActivity}>
                   <Download className="h-4 w-4 mr-2" />
@@ -492,7 +507,7 @@ export default function AdminDashboardEnhanced() {
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto">
                   {recentActivity.length === 0 ? (
                     <p className="text-center text-muted-foreground py-8">No recent activity</p>
                   ) : (
@@ -526,28 +541,50 @@ export default function AdminDashboardEnhanced() {
                   <CardTitle>Staff Activity Monitor</CardTitle>
                   <CardDescription>Real-time staff status and productivity</CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleExportStaffActivity}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant={filterAbsent === 'all' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => setFilterAbsent('all')}
+                  >
+                    All Staff
+                  </Button>
+                  <Button 
+                    variant={filterAbsent === 'absent' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => setFilterAbsent('absent')}
+                  >
+                    Absent Only
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleExportStaffActivity}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {staffActivity.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">No staff activity data</p>
+                  {filteredStaffActivity.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      {filterAbsent === 'absent' ? 'No absent staff members' : 'No staff activity data'}
+                    </p>
                   ) : (
-                    staffActivity.map((staff) => (
+                    filteredStaffActivity.map((staff) => (
                       <div key={staff.id} className="flex items-center justify-between p-4 rounded-lg border">
                         <div className="flex items-center gap-4">
                           <div className={`w-3 h-3 rounded-full ${staff.status === 'online' ? 'bg-green-500' : staff.status === 'busy' ? 'bg-orange-500' : 'bg-gray-400'}`}></div>
                           <div>
                             <p className="font-medium">{staff.name}</p>
                             <p className="text-sm text-muted-foreground">{staff.role}</p>
+                            <p className="text-xs text-muted-foreground">Last active: {staff.lastActive}</p>
                           </div>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-medium">{staff.tasksCompleted} tasks completed</p>
                           <p className="text-xs text-muted-foreground">{staff.currentTask}</p>
+                          {staff.status === 'offline' && (
+                            <Badge variant="secondary" className="mt-1">Absent</Badge>
+                          )}
                         </div>
                       </div>
                     ))
