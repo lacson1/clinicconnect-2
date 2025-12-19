@@ -1864,10 +1864,30 @@ export const tabConfigs = pgTable('tab_configs', {
   updatedAt: timestamp('updated_at').defaultNow()
 });
 
-export const insertTabConfigSchema = createInsertSchema(tabConfigs).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true
+// Manual schema definition to avoid drizzle-zod issues with JSON fields
+export const insertTabConfigSchema = z.object({
+  organizationId: z.number().optional().nullable(),
+  scope: z.enum(['system', 'organization', 'role', 'user']),
+  roleId: z.number().optional().nullable(),
+  userId: z.number().optional().nullable(),
+  key: z.string().max(100),
+  label: z.string().max(100),
+  icon: z.string().max(50).optional().nullable(),
+  contentType: z.enum(['builtin_component', 'query_widget', 'markdown', 'iframe']),
+  settings: z.object({
+    componentName: z.string().optional(),
+    query: z.string().optional(),
+    markdown: z.string().optional(),
+    iframeUrl: z.string().optional(),
+    allowedDomains: z.array(z.string()).optional(),
+    customStyles: z.record(z.string()).optional(),
+  }).optional().nullable(),
+  isVisible: z.boolean().default(true),
+  isSystemDefault: z.boolean().default(false),
+  isMandatory: z.boolean().default(false),
+  category: z.string().max(50).optional().nullable(),
+  displayOrder: z.number(),
+  createdBy: z.number().optional().nullable(),
 });
 
 export type TabConfig = typeof tabConfigs.$inferSelect;

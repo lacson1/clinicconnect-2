@@ -57,7 +57,7 @@ export default function PatientVitalSignsTracker({ patientId }: PatientVitalSign
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: vitals = [], isLoading } = useQuery<VitalSigns[]>({
+  const { data: vitals = [], isLoading, error } = useQuery<VitalSigns[]>({
     queryKey: [`/api/patients/${patientId}/vitals`],
     enabled: !!patientId,
   });
@@ -155,6 +155,20 @@ export default function PatientVitalSignsTracker({ patientId }: PatientVitalSign
               <div className="h-20 bg-gray-200 rounded"></div>
               <div className="h-20 bg-gray-200 rounded"></div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-red-600 dark:text-red-400 mb-2">Failed to load vital signs</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Please try again later</p>
           </div>
         </CardContent>
       </Card>

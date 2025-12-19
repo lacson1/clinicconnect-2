@@ -26,6 +26,8 @@ import { setupNotificationRoutes } from "./notifications";
 import { setupSuggestionRoutes } from "./suggestions";
 import { setupSystemRoutes } from "./system";
 import { setupIntegrationRoutes } from "./integrations";
+import { setupConsultationFormsRoutes } from "./consultation-forms";
+import aiConsultationsRouter from "./ai-consultations";
 // import { setupPatientPortalRoutes } from "./patient-portal";
 // import { setupBillingRoutes } from "./billing";
 // import { setupSystemRoutes } from "./system";
@@ -39,15 +41,27 @@ export function setupRoutes(app: Express): void {
   
   // Health check routes (for monitoring)
   console.log("Setting up health check routes...");
+  if (!healthRouter) {
+    throw new Error('healthRouter is not defined');
+  }
   app.use('/api/health', healthRouter);
+  console.log("✓ Health routes registered at /api/health");
   
   // Authentication routes (must be first for security)
   console.log("Setting up authentication routes...");
+  if (!authRouter) {
+    throw new Error('authRouter is not defined');
+  }
   app.use('/api/auth', authRouter);
+  console.log("✓ Auth routes registered at /api/auth");
   
   // Profile routes
   console.log("Setting up profile routes...");
+  if (!profileRouter) {
+    throw new Error('profileRouter is not defined');
+  }
   app.use('/api/profile', profileRouter);
+  console.log("✓ Profile routes registered at /api/profile");
   
   // Core healthcare functionality - ONLY modules that exist
   console.log("Setting up patient routes...");
@@ -126,6 +140,16 @@ export function setupRoutes(app: Express): void {
   const integrationRouter = setupIntegrationRoutes();
   app.use('/api', integrationRouter);
   
+  // Consultation Forms routes
+  console.log("Setting up consultation forms routes...");
+  const consultationFormsRouter = setupConsultationFormsRoutes();
+  app.use('/api', consultationFormsRouter);
+  
+  // AI Consultations routes
+  console.log("Setting up AI consultations routes...");
+  app.use('/api/ai-consultations', aiConsultationsRouter);
+  console.log("✓ AI consultations routes registered at /api/ai-consultations");
+  
   // Public REST API routes
   console.log("Setting up public API routes...");
   app.use('/api/v1', publicApiRouter);
@@ -145,6 +169,8 @@ export function setupRoutes(app: Express): void {
   // Access Control & Role Management routes
   console.log("Setting up access control routes...");
   app.use('/api/access-control', accessControlRouter);
+  // Also expose /api/staff as an alias for /api/access-control/staff
+  app.use('/api/staff', accessControlRouter);
   
   // Organization Management routes
   console.log("Setting up organization management routes...");
@@ -158,15 +184,9 @@ export function setupRoutes(app: Express): void {
   console.log("Setting up tab presets routes...");
   setupTabPresetRoutes(app);
   
-  // TODO: Add remaining modules as they are migrated from routes.ts:
-  // setupAppointmentRoutes(app);
-  // setupAnalyticsRoutes(app);
-  // setupBillingRoutes(app);
-  // setupIntegrationRoutes(app);
-  // setupPatientPortalRoutes(app);
-  // setupSuggestionRoutes(app);
-  // setupNotificationRoutes(app);
-  // setupSystemRoutes(app);
+  // Note: All modular routes are now set up above.
+  // Additional routes from routes.ts (dashboard stats, patient search, etc.)
+  // are loaded via registerRoutes() in server/index.ts
   
-  console.log("=== ROUTES SETUP COMPLETE ===");
+  console.log("=== MODULAR ROUTES SETUP COMPLETE ===");
 }

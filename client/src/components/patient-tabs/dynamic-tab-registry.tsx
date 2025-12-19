@@ -12,8 +12,10 @@ import {
   History,
   FileCheck,
   MessageSquare,
+  StickyNote,
 } from 'lucide-react';
 import { PatientBillingTab } from '../patient-billing-tab';
+import { PatientNotesTab } from '../patient-notes-tab';
 
 export interface TabRenderProps {
   patient: any;
@@ -197,6 +199,13 @@ export const SYSTEM_TAB_REGISTRY: Record<string, SystemTabDefinition> = {
       </div>
     ),
   },
+  
+  notes: {
+    key: 'notes',
+    defaultLabel: 'Notes',
+    icon: StickyNote,
+    render: ({ patient }) => <PatientNotesTab patient={patient} />,
+  },
 };
 
 /**
@@ -217,6 +226,7 @@ export function getTabIcon(iconName: string): LucideIcon {
     History,
     FileCheck,
     MessageSquare,
+    StickyNote,
   };
   
   return iconMap[iconName] || FileText;

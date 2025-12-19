@@ -434,50 +434,70 @@ Generated: ${new Date().toLocaleString()}
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
       {/* Top Actions Bar */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-slate-200/60">
-        <div className="max-w-7xl mx-auto px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <Button
                 onClick={() => navigate(`/patients/${patientId}`)}
                 variant="ghost"
                 size="sm"
-                className="gap-2 text-slate-600 hover:text-slate-900"
+                className="gap-2 text-slate-600 hover:text-slate-900 h-9 px-2.5"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Back to Patient
+                <span className="hidden sm:inline">Back to Patient</span>
               </Button>
               
-              <div className="h-6 w-px bg-slate-300" />
+              <div className="hidden sm:block h-6 w-px bg-slate-300" />
               
-              <nav className="flex items-center gap-1.5 text-sm">
-                <button onClick={() => navigate('/patients')} className="text-slate-500 hover:text-primary transition-colors">
+              <nav className="flex items-center gap-1.5 text-sm min-w-0">
+                <button
+                  onClick={() => navigate('/patients')}
+                  className="text-slate-500 hover:text-primary transition-colors flex-shrink-0"
+                >
                   Patients
                 </button>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                <button onClick={() => navigate(`/patients/${patientId}`)} className="text-slate-500 hover:text-primary transition-colors">
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                <button
+                  onClick={() => navigate(`/patients/${patientId}`)}
+                  className="text-slate-500 hover:text-primary transition-colors min-w-0 truncate"
+                  title={`${patient.firstName} ${patient.lastName}`}
+                >
                   {patient.firstName} {patient.lastName}
                 </button>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                <span className="text-slate-900 font-medium">Visit #{visit.id}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                <span className="text-slate-900 font-medium flex-shrink-0">Visit #{visit.id}</span>
               </nav>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button onClick={handlePrint} variant="outline" size="sm" className="gap-2">
+            <div className="flex items-center gap-2 justify-end sm:justify-start">
+              <Button
+                onClick={handlePrint}
+                variant="outline"
+                size="sm"
+                className="gap-2 h-9 px-3 sm:px-4"
+                title="Print"
+              >
                 <Printer className="w-4 h-4" />
-                Print
+                <span className="hidden sm:inline">Print</span>
               </Button>
-              <Button onClick={handleExport} variant="outline" size="sm" className="gap-2">
+              <Button
+                onClick={handleExport}
+                variant="outline"
+                size="sm"
+                className="gap-2 h-9 px-3 sm:px-4"
+                title="Export"
+              >
                 <Download className="w-4 h-4" />
-                Export
+                <span className="hidden sm:inline">Export</span>
               </Button>
               <Button
                 onClick={() => navigate(`/patients/${patientId}/visits/${visitId}/edit`)}
-                className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                className="gap-2 h-9 px-3 sm:px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                 size="sm"
               >
                 <Edit className="w-4 h-4" />
-                Edit Visit
+                <span className="hidden sm:inline">Edit Visit</span>
+                <span className="sm:hidden">Edit</span>
               </Button>
             </div>
           </div>

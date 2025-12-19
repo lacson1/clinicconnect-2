@@ -6,11 +6,12 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./tests/setup.ts'],
+    environment: 'node', // Default to node for server tests
+    setupFiles: ['./tests/setup-server.ts'],
     include: [
       'client/src/**/*.{test,spec}.{js,ts,jsx,tsx}',
       'server/**/*.{test,spec}.{js,ts}',
+      'shared/**/*.{test,spec}.{js,ts}',
       'tests/**/*.{test,spec}.{js,ts}',
     ],
     exclude: [

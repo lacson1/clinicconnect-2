@@ -68,8 +68,11 @@ const ConsentManagement = lazy(() => import("@/pages/consent-management"));
 const StaffMessages = lazy(() => import("@/pages/staff-messages"));
 const BillingPage = lazy(() => import("@/pages/billing"));
 const CompliancePage = lazy(() => import("@/pages/compliance"));
-// Login is imported directly (not lazy) since it's needed immediately for unauthenticated users
+// Login, Signup, and Password Reset pages are imported directly (not lazy) since they're needed immediately for unauthenticated users
 import Login from "@/pages/login";
+import Signup from "@/pages/signup";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
 const NotFound = lazy(() => import("@/pages/not-found"));
 const ConsultationRecordDetails = lazy(() => import("@/pages/consultation-record-details"));
 const HelpAndSupport = lazy(() => import("@/pages/help-support"));
@@ -256,6 +259,9 @@ function Router() {
       <Switch>
         <Route path="/patient-portal" component={PatientPortal} />
         <Route path="/login" component={Login} />
+        <Route path="/signup" component={Signup} />
+        <Route path="/forgot-password" component={ForgotPassword} />
+        <Route path="/reset-password" component={ResetPassword} />
         <Route>
           {() => {
             // Show loading state while checking authentication

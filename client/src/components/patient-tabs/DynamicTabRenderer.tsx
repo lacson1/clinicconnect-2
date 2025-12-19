@@ -203,8 +203,8 @@ export function DynamicTabRenderer({ patient, defaultTab = 'overview', ...props 
       <Tabs defaultValue={defaultTab} className="w-full">
         <div className="relative mb-6">
           {/* Tab List Container with Scroll */}
-          <div className="relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 border-2 border-blue-200/60 dark:border-blue-800/60 rounded-2xl p-3 shadow-2xl backdrop-blur-lg ring-1 ring-blue-100/50 dark:ring-blue-900/50">
-            <TabsList ref={tabsListRef} className="inline-flex w-full h-auto min-h-[80px] items-start justify-start gap-1.5 sm:gap-2 bg-transparent p-0 overflow-x-auto scrollbar-thin scroll-smooth">
+          <div className="relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 border-2 border-blue-200/60 dark:border-blue-800/60 rounded-xl sm:rounded-2xl p-2.5 sm:p-3 shadow-lg sm:shadow-2xl backdrop-blur-lg ring-1 ring-blue-100/50 dark:ring-blue-900/50">
+            <TabsList ref={tabsListRef} className="inline-flex w-full h-auto min-h-[70px] sm:min-h-[80px] items-start justify-start gap-2 bg-transparent p-0 overflow-x-auto scrollbar-thin scroll-smooth">
               {resolvedTabs.map((tab) => {
                 const IconComponent = SYSTEM_TAB_REGISTRY[tab.key]?.icon || getTabIcon(tab.icon);
 
@@ -212,12 +212,12 @@ export function DynamicTabRenderer({ patient, defaultTab = 'overview', ...props 
                   <TabsTrigger
                     key={tab.key}
                     value={tab.key}
-                    className="flex-shrink-0 flex flex-col items-center justify-center gap-1 sm:gap-1.5 min-w-[90px] sm:min-w-[110px] max-w-[120px] sm:max-w-[140px] text-[11px] sm:text-xs font-bold px-2 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-xl data-[state=active]:text-blue-900 dark:data-[state=active]:text-blue-100 data-[state=active]:border-2 data-[state=active]:border-blue-300 dark:data-[state=active]:border-blue-600 data-[state=active]:scale-105 hover:bg-white/80 dark:hover:bg-gray-800/80 hover:shadow-lg hover:scale-[1.02] active:scale-95 text-blue-800 dark:text-blue-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    className="flex-shrink-0 flex flex-col items-center justify-center gap-1.5 sm:gap-2 min-w-[90px] sm:min-w-[110px] max-w-[120px] sm:max-w-[140px] text-[11px] sm:text-xs font-semibold px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-300 ease-out data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-xl data-[state=active]:text-blue-900 dark:data-[state=active]:text-blue-100 data-[state=active]:border-2 data-[state=active]:border-blue-500 dark:data-[state=active]:border-blue-600 data-[state=active]:scale-[1.05] data-[state=active]:ring-2 data-[state=active]:ring-blue-200/50 dark:data-[state=active]:ring-blue-800/50 hover:bg-white/80 dark:hover:bg-gray-800/80 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] text-blue-800 dark:text-blue-200 bg-white/50 dark:bg-gray-800/50 border border-blue-200/40 dark:border-blue-800/40 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     data-testid={`tab-${tab.key}`}
                     title={tab.label}
                   >
-                    <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 group-data-[state=active]:text-blue-600 dark:group-data-[state=active]:text-blue-400 transition-colors" />
-                    <span className="font-semibold truncate w-full text-center leading-tight">{tab.label}</span>
+                    <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 group-data-[state=active]:w-[22px] group-data-[state=active]:h-[22px] sm:group-data-[state=active]:w-[26px] sm:group-data-[state=active]:h-[26px] flex-shrink-0 group-data-[state=active]:text-blue-600 dark:group-data-[state=active]:text-blue-400 transition-all duration-300" />
+                    <span className="font-semibold group-data-[state=active]:font-bold truncate w-full text-center leading-tight">{tab.label}</span>
                     {!tab.isSystemDefault && (
                       <span className="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded whitespace-nowrap">
                         Custom

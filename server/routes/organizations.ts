@@ -6,6 +6,59 @@ import { authenticateToken, type AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
+// Get organization by ID
+router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    const orgId = parseInt(req.params.id);
+
+    // If user is superadmin, can access any organization
+    if (req.user.role === 'superadmin') {
+      const [org] = await db
+        .select()
+        .from(organizations)
+        .where(eq(organizations.id, orgId));
+      
+      if (!org) {
+        return res.status(404).json({ message: 'Organization not found' });
+      }
+      return res.json(org);
+    }
+
+    // Otherwise, verify user has access to this organization
+    const [userOrg] = await db
+      .select()
+      .from(userOrganizations)
+      .where(
+        and(
+          eq(userOrganizations.userId, req.user.id),
+          eq(userOrganizations.organizationId, orgId)
+        )
+      );
+
+    if (!userOrg) {
+      return res.status(403).json({ message: 'You do not have access to this organization' });
+    }
+
+    const [org] = await db
+      .select()
+      .from(organizations)
+      .where(eq(organizations.id, orgId));
+
+    if (!org) {
+      return res.status(404).json({ message: 'Organization not found' });
+    }
+
+    res.json(org);
+  } catch (error) {
+    console.error('Error fetching organization:', error);
+    res.status(500).json({ message: 'Failed to fetch organization' });
+  }
+});
+
 // Get all organizations (root route)
 router.get('/', authenticateToken, async (req: AuthRequest, res) => {
   try {

@@ -241,7 +241,15 @@ router.get('/dashboard/stats', authenticateToken, requireAnyRole(['admin', 'supe
 router.get('/recent-activity', authenticateToken, requireAnyRole(['admin', 'super_admin', 'superadmin']), async (req: AuthRequest, res) => {
   try {
     const organizationId = req.user?.organizationId;
-    const limit = parseInt(req.query.limit as string) || 20;
+    const limit = parseInt(req.query.limit as string) || 100; // Increased default from 20 to 100
+    
+    // Build conditions array for filtering
+    const conditions = [];
+    
+    // Filter by organization if organizationId is provided (for multi-tenant security)
+    if (organizationId) {
+      conditions.push(eq(users.organizationId, organizationId));
+    }
     
     const activities = await db
       .select({
@@ -254,6 +262,7 @@ router.get('/recent-activity', authenticateToken, requireAnyRole(['admin', 'supe
       })
       .from(auditLogs)
       .leftJoin(users, eq(auditLogs.userId, users.id))
+      .where(conditions.length > 0 ? and(...conditions) : sql`true`)
       .orderBy(desc(auditLogs.timestamp))
       .limit(limit);
     

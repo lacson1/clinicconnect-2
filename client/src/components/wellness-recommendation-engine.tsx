@@ -9,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Heart, 
@@ -49,6 +49,7 @@ export default function WellnessRecommendationEngine({ patientId, currentUser }:
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showCustomRecommendation, setShowCustomRecommendation] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch patient data for personalized recommendations
   const { data: patient } = useQuery({
@@ -96,9 +97,11 @@ export default function WellnessRecommendationEngine({ patientId, currentUser }:
 
   const wellnessScore = calculateWellnessScore();
 
+  // Calculate age once at component level for use in multiple places
+  const age = patient?.dateOfBirth ? new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear() : 30;
+
   // Generate personalized recommendations based on patient data
   const generateRecommendations = () => {
-    const age = patient?.dateOfBirth ? new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear() : 30;
     const gender = patient?.gender || 'unknown';
     const hasRecentVisits = visits?.length > 0;
     const activePrescriptions = prescriptions?.filter((p: any) => p.status === 'active') || [];
@@ -201,16 +204,46 @@ export default function WellnessRecommendationEngine({ patientId, currentUser }:
 
   // Mutations for recommendation actions
   const createWellnessPlanMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/wellness-plans', 'POST', data),
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('/api/wellness-plans', 'POST', data);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || 'Failed to create wellness plan');
+      }
+      return response.json();
+    },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/wellness-plans'] });
       toast({ title: "Wellness plan created successfully" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to create wellness plan",
+        variant: "destructive"
+      });
     },
   });
 
   const trackProgressMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/wellness-progress', 'POST', data),
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('/api/wellness-progress', 'POST', data);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || 'Failed to track progress');
+      }
+      return response.json();
+    },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/wellness-progress'] });
       toast({ title: "Progress tracked successfully" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to track progress",
+        variant: "destructive"
+      });
     },
   });
 
@@ -218,7 +251,7 @@ export default function WellnessRecommendationEngine({ patientId, currentUser }:
     const planData = {
       patientId,
       recommendationIds,
-      createdBy: currentUser.id,
+      createdBy: currentUser?.id,
       status: 'active',
       createdAt: new Date().toISOString()
     };

@@ -21,7 +21,7 @@ export function PatientBillingTab({ patient }: PatientBillingTabProps) {
   }
 
   // Fetch patient-specific invoices from server
-  const { data: patientInvoices = [], isLoading } = useQuery<any[]>({
+  const { data: patientInvoices = [], isLoading, error } = useQuery<any[]>({
     queryKey: [`/api/invoices?patientId=${patient.id}`],
   });
 
@@ -59,6 +59,13 @@ export function PatientBillingTab({ patient }: PatientBillingTabProps) {
           <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">Loading invoices...</p>
         </div>
+      ) : error ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-red-600 dark:text-red-400 mb-4">Failed to load invoices</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Please try again later</p>
+          </CardContent>
+        </Card>
       ) : patientInvoices.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">

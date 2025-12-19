@@ -289,27 +289,27 @@ export default function Sidebar({ onStartTour }: SidebarProps = {}) {
         </Button>
 
         {/* Logo Section */}
-        <div className={`${isCollapsed ? 'p-2' : 'p-5'} border-b border-sidebar-border bg-sidebar transition-all duration-300 flex-shrink-0`}>
+        <div className={`${isCollapsed ? 'p-2' : 'p-4'} border-b border-sidebar-border bg-sidebar transition-all duration-300 flex-shrink-0`}>
           <div className={`flex items-center w-full ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className={`${isCollapsed ? 'w-9 h-9' : 'w-11 h-11'} bg-gradient-to-br from-sky-500 via-blue-500 to-violet-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/25 transition-all duration-300`}>
-              <HeartPulse className={`text-white ${isCollapsed ? 'h-5 w-5' : 'h-6 w-6'} transition-all duration-300`} />
+            <div className={`${isCollapsed ? 'w-9 h-9' : 'w-10 h-10'} bg-gradient-to-br from-sky-500 via-blue-500 to-violet-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-500/20 transition-all duration-300 ring-1 ring-blue-500/10`}>
+              <HeartPulse className={`text-white ${isCollapsed ? 'h-5 w-5' : 'h-5 w-5'} transition-all duration-300`} />
             </div>
             <div className={`transition-all duration-300 flex-1 min-w-0 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
-              <h1 className="text-lg font-bold text-sidebar-foreground leading-tight tracking-tight">ClinicConnect</h1>
-              <p className="text-[10px] font-medium text-muted-foreground leading-tight tracking-wide uppercase">Healthcare Management</p>
+              <h1 className="text-base font-bold text-sidebar-foreground leading-tight tracking-tight">ClinicConnect</h1>
+              <p className="text-[10px] font-medium text-muted-foreground leading-tight tracking-wide uppercase mt-0.5">Healthcare Management</p>
             </div>
           </div>
 
           {/* Current Organization Badge - Always visible when not collapsed */}
           {!isCollapsed && user?.organization && (
             <div className="mt-3 w-full">
-              <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-lg border border-emerald-200/60 dark:border-emerald-700/40">
-                <Building2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+              <div className="flex items-center gap-2.5 px-3 py-2 bg-gradient-to-r from-emerald-50/80 to-teal-50/80 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-lg border border-emerald-200/50 dark:border-emerald-700/30 shadow-sm">
+                <Building2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-200 truncate">
+                  <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-200 truncate leading-tight">
                     {user.organization.name}
                   </p>
-                  <p className="text-[10px] text-emerald-600/80 dark:text-emerald-400/70 capitalize">
+                  <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/60 capitalize leading-tight mt-0.5">
                     {user.organization.type || 'Healthcare Facility'}
                   </p>
                 </div>
@@ -326,8 +326,8 @@ export default function Sidebar({ onStartTour }: SidebarProps = {}) {
         </div>
 
         {/* Navigation Menu with smooth scrolling */}
-        <nav className={`flex-1 ${isCollapsed ? 'p-2' : 'px-3 py-4'} transition-all duration-300 overflow-y-auto sidebar-scrollbar bg-sidebar`}>
-          <div className="space-y-1.5">
+        <nav className={`flex-1 ${isCollapsed ? 'p-2' : 'px-3 py-3'} transition-all duration-300 overflow-y-auto sidebar-scrollbar bg-sidebar`}>
+          <div className="space-y-1">
             {navigationGroups.map((group, index) => {
               // Get color classes based on group color property
               const getGroupStyles = (color: string) => {
@@ -424,7 +424,7 @@ export default function Sidebar({ onStartTour }: SidebarProps = {}) {
                 <div key={group.name}>
                   {/* Section divider for visual clarity */}
                   {index > 0 && !isCollapsed && ['Patients', 'Clinical Services', 'Finance & Analytics', 'Administration'].includes(group.name) && (
-                    <div className="my-3 border-t border-border/70"></div>
+                    <div className="my-2.5 border-t border-border/50"></div>
                   )}
 
                   <Collapsible
@@ -433,7 +433,7 @@ export default function Sidebar({ onStartTour }: SidebarProps = {}) {
                   >
                     <CollapsibleTrigger asChild>
                       <button
-                        className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 group relative ${isOpen ? `${styles.active} shadow-sm` : `text-sidebar-foreground ${styles.hover} hover:shadow-sm`
+                        className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200 group relative ${isOpen ? `${styles.active} shadow-sm` : `text-sidebar-foreground ${styles.hover} hover:shadow-sm`
                           }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -441,8 +441,8 @@ export default function Sidebar({ onStartTour }: SidebarProps = {}) {
                         }}
                       >
                         <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2.5'}`}>
-                          <div className={`p-1.5 rounded-lg shadow-sm ${isOpen ? styles.iconBg : 'bg-muted'}`}>
-                            <group.icon className={`w-4 h-4 flex-shrink-0 ${isOpen ? styles.iconColor : 'text-muted-foreground'}`} />
+                          <div className={`p-1.5 rounded-md shadow-sm transition-colors ${isOpen ? styles.iconBg : 'bg-muted/60'}`}>
+                            <group.icon className={`w-4 h-4 flex-shrink-0 transition-colors ${isOpen ? styles.iconColor : 'text-muted-foreground'}`} />
                           </div>
                           <span className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
                             {group.name}
@@ -464,7 +464,7 @@ export default function Sidebar({ onStartTour }: SidebarProps = {}) {
                     </CollapsibleTrigger>
 
                     <CollapsibleContent className={`${isCollapsed ? 'hidden' : 'block'} overflow-visible`}>
-                      <div className={`ml-4 mt-1.5 space-y-1 pl-4 py-2 border-l-2 ${isOpen ? styles.activeBorder : 'border-border'} bg-card/80 dark:bg-card/60 rounded-r-lg transition-colors duration-200`}>
+                      <div className={`ml-4 mt-1 space-y-0.5 pl-4 py-1.5 border-l-2 ${isOpen ? styles.activeBorder : 'border-border/50'} bg-card/50 dark:bg-card/40 rounded-r-md transition-colors duration-200`}>
                         {group.items.map((item) => {
                           const Icon = item.icon;
                           const itemActive = isActive(item.href);
@@ -473,13 +473,13 @@ export default function Sidebar({ onStartTour }: SidebarProps = {}) {
                             <Link
                               key={item.name}
                               href={item.href}
-                              className={`group relative flex items-center space-x-2.5 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${itemActive
+                              className={`group relative flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm transition-all duration-200 ${itemActive
                                 ? `bg-primary/10 text-primary font-semibold shadow-sm`
-                                : "text-foreground/80 font-medium hover:bg-muted hover:text-foreground hover:shadow-sm"
+                                : "text-foreground/70 font-medium hover:bg-muted/80 hover:text-foreground"
                                 }`}
                               onClick={handleMobileLinkClick}
                             >
-                              <Icon className={`w-4 h-4 flex-shrink-0 transition-colors ${itemActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
+                              <Icon className={`w-4 h-4 flex-shrink-0 transition-colors ${itemActive ? 'text-primary' : 'text-muted-foreground/80 group-hover:text-foreground'}`} />
                               <span className={`transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
                                 {item.name}
                               </span>
@@ -508,50 +508,62 @@ export default function Sidebar({ onStartTour }: SidebarProps = {}) {
         </nav>
 
         {/* User Profile */}
-        <div className={`${isCollapsed ? 'p-2' : 'p-4'} border-t border-sidebar-border bg-sidebar transition-all duration-300`}>
+        <div className={`${isCollapsed ? 'p-2' : 'p-3'} border-t border-sidebar-border bg-sidebar transition-all duration-300 mt-auto`}>
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} group relative`}>
-            <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-purple-600 text-white rounded-xl flex items-center justify-center text-sm font-semibold flex-shrink-0 shadow-sm">
-              {user?.firstName?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || 'U'}
+            <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-purple-600 text-white rounded-lg flex items-center justify-center text-sm font-semibold flex-shrink-0 shadow-md ring-1 ring-violet-500/20 hover:ring-violet-500/40 transition-all">
+              {user?.firstName?.[0]?.toUpperCase() || user?.lastName?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
             </div>
-            <div className={`flex-1 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
-              <p className="text-sm font-semibold text-sidebar-foreground">{user?.firstName || user?.username}</p>
-              <p className="text-[11px] text-muted-foreground capitalize font-medium">{user?.role?.replace(/_/g, ' ')}</p>
+            <div className={`flex-1 min-w-0 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
+              <p className="text-sm font-semibold text-sidebar-foreground truncate leading-tight">
+                {user?.firstName && user?.lastName 
+                  ? `${user.firstName} ${user.lastName}` 
+                  : user?.firstName || user?.username || user?.email || 'User'}
+              </p>
+              <p className="text-[11px] text-muted-foreground capitalize font-medium truncate leading-tight mt-0.5">
+                {user?.role?.replace(/_/g, ' ') || 'User'}
+              </p>
             </div>
 
             {/* Tooltip for collapsed state */}
             {isCollapsed && (
-              <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50 pointer-events-none border border-border">
-                {user?.firstName || user?.username} ({user?.role})
+              <div className="absolute left-full ml-2 px-3 py-2 bg-popover text-popover-foreground text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50 pointer-events-none border border-border shadow-lg">
+                <div className="font-semibold">
+                  {user?.firstName && user?.lastName 
+                    ? `${user.firstName} ${user.lastName}` 
+                    : user?.firstName || user?.username || user?.email || 'User'}
+                </div>
+                <div className="text-xs text-muted-foreground capitalize mt-0.5">
+                  {user?.role?.replace(/_/g, ' ') || 'User'}
+                </div>
               </div>
             )}
           </div>
 
-          <div className={`mt-3 space-y-1 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
+          <div className={`mt-2.5 space-y-1 ${isCollapsed ? 'flex flex-col items-center gap-1' : ''}`}>
             <Button
               variant="ghost"
-              size={isCollapsed ? "sm" : "sm"}
+              size="sm"
               onClick={handleLogout}
-              className={`text-red-600 hover:text-red-700 hover:bg-red-50/80 transition-all duration-200 ${isCollapsed ? 'w-8 h-8 p-1' : 'w-full justify-start text-xs font-medium'
+              className={`text-red-600 hover:text-red-700 hover:bg-red-50/80 dark:hover:bg-red-950/30 transition-all duration-200 ${isCollapsed ? 'w-8 h-8 p-0' : 'w-full justify-start text-xs font-medium px-3 py-2 h-8'
                 }`}
+              title={isCollapsed ? "Sign Out" : undefined}
             >
-              <LogOut className="w-4 h-4" />
-              {!isCollapsed && <span className="ml-2">Sign Out</span>}
+              <LogOut className={`w-4 h-4 ${isCollapsed ? '' : 'mr-2'}`} />
+              {!isCollapsed && <span>Sign Out</span>}
             </Button>
 
             {onStartTour && (
-              <div className={isCollapsed ? 'flex flex-col items-center' : ''}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onStartTour}
-                  className={`text-sky-600 hover:text-sky-700 hover:bg-sky-50/80 transition-all duration-200 ${isCollapsed ? 'w-8 h-8 p-1' : 'w-full justify-start text-xs font-medium'
-                    }`}
-                  title="Take a tour of the system"
-                >
-                  <HelpCircle className="w-4 h-4" />
-                  {!isCollapsed && <span className="ml-2">Help & Tour</span>}
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onStartTour}
+                className={`text-sky-600 hover:text-sky-700 hover:bg-sky-50/80 dark:hover:bg-sky-950/30 transition-all duration-200 ${isCollapsed ? 'w-8 h-8 p-0' : 'w-full justify-start text-xs font-medium px-3 py-2 h-8'
+                  }`}
+                title={isCollapsed ? "Help & Tour" : undefined}
+              >
+                <HelpCircle className={`w-4 h-4 ${isCollapsed ? '' : 'mr-2'}`} />
+                {!isCollapsed && <span>Help & Tour</span>}
+              </Button>
             )}
           </div>
         </div>

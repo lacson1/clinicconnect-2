@@ -87,11 +87,14 @@ const isProduction = process.env.NODE_ENV === 'production';
 app.use(isProduction ? prodLogger : devLogger);
 
 (async () => {
+  console.log('[SERVER] Async startup function started');
   try {
     // ===========================================
     // STEP 1: Validate Environment Variables
     // ===========================================
+    console.log('[SERVER] About to log startup message...');
     logger.info('Starting ClinicConnect Healthcare Platform...');
+    console.log('[SERVER] Startup message logged');
     logger.info('Validating environment configuration...');
     
     const envValid = validateAndLogEnvironment();
@@ -112,10 +115,26 @@ app.use(isProduction ? prodLogger : devLogger);
     // Run 'npm run db:push' to create tables if needed
 
     // Setup new modular routes (patients, laboratory, prescriptions)
-    setupRoutes(app);
+    // This includes /api/auth and /api/profile routes
+    try {
+      setupRoutes(app);
+      logger.info('Modular routes setup completed successfully');
+    } catch (error) {
+      logger.error('Error setting up modular routes:', error);
+      throw error;
+    }
     
-    // Setup remaining routes from old routes.ts (auth, profile, dashboard, etc.)
-    await registerRoutes(app);
+    // Setup remaining routes from old routes.ts (dashboard, search, suggestions, etc.)
+    // Note: Core routes are in setupRoutes(), but registerRoutes() contains additional
+    // routes like dashboard stats, patient search, global search, etc.
+    // Run this asynchronously to not block server startup
+    logger.info('Setting up legacy routes (registerRoutes) asynchronously...');
+    registerRoutes(app).then(() => {
+      logger.info('Legacy routes setup completed successfully');
+    }).catch((error) => {
+      logger.error('Error setting up legacy routes (non-fatal):', error);
+      // Don't throw - allow server to continue even if some routes fail
+    });
 
     // Use port 5001 (port 5000 is often taken by macOS AirPlay)
     // this serves both the API and the client.

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticateToken, requireAnyRole, type AuthRequest } from "../middleware/auth";
 import { storage } from "../storage";
-import { insertPatientSchema, insertVisitSchema, patients, visits, vaccinations, prescriptions, labResults, labOrders } from "@shared/schema";
+import { insertPatientSchema, insertVisitSchema, patients, visits, vaccinations, prescriptions, labResults, labOrders, vitalSigns, safetyAlerts, auditLogs, consultationRecords, medicalHistory, insertMedicalHistorySchema } from "@shared/schema";
 import { z } from "zod";
 import { db } from "../db";
 import { eq, desc, or, ilike, and, sql } from "drizzle-orm";
@@ -191,7 +191,196 @@ export function setupPatientRoutes(): Router {
     }
   });
 
-  // Get patient by ID
+  // Get all medical history for a patient - MUST be before /patients/:id route (route ordering)
+  router.get("/patients/:id/medical-history", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const userOrgId = req.user?.organizationId;
+      
+      if (!userOrgId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+      
+      // Verify patient belongs to user's organization
+      const [patient] = await db.select().from(patients)
+        .where(and(eq(patients.id, patientId), eq(patients.organizationId, userOrgId)))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(403).json({ message: "Access denied - patient not in your organization" });
+      }
+      
+      const historyRecords = await db.select()
+        .from(medicalHistory)
+        .where(eq(medicalHistory.patientId, patientId))
+        .orderBy(desc(medicalHistory.dateOccurred));
+
+      res.json(historyRecords);
+    } catch (error) {
+      console.error('Error fetching patient medical history:', error);
+      res.status(500).json({ message: "Failed to fetch medical history records" });
+    }
+  });
+
+  router.post("/patients/:id/medical-history", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const organizationId = req.user?.currentOrganizationId || req.user?.organizationId;
+      
+      if (!organizationId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      // Verify patient belongs to user's organization
+      const [patient] = await db.select().from(patients)
+        .where(and(eq(patients.id, patientId), eq(patients.organizationId, organizationId)))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+      
+      // Use schema validation instead of manual validation
+      const validatedData = insertMedicalHistorySchema.parse({
+        ...req.body,
+        patientId
+      });
+      
+      const [newHistory] = await db.insert(medicalHistory).values(validatedData).returning();
+
+      res.status(201).json(newHistory);
+    } catch (error) {
+      console.error('Error creating medical history entry:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid medical history data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create medical history entry" });
+    }
+  });
+
+  router.patch("/patients/:id/medical-history/:historyId", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const historyId = parseInt(req.params.historyId);
+      const userOrgId = req.user?.organizationId;
+      
+      if (!userOrgId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+      
+      // Verify patient belongs to user's organization
+      const [patient] = await db.select().from(patients)
+        .where(and(eq(patients.id, patientId), eq(patients.organizationId, userOrgId)))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(403).json({ message: "Access denied - patient not in your organization" });
+      }
+      
+      // Validate and sanitize update fields
+      const allowedFields = ['condition', 'type', 'dateOccurred', 'status', 'description', 'treatment', 'notes'];
+      const sanitizedData: Record<string, any> = {};
+      for (const key of allowedFields) {
+        if (key in req.body) {
+          sanitizedData[key] = req.body[key];
+        }
+      }
+      
+      const [updated] = await db.update(medicalHistory)
+        .set(sanitizedData)
+        .where(and(
+          eq(medicalHistory.id, historyId),
+          eq(medicalHistory.patientId, patientId)
+        ))
+        .returning();
+
+      if (!updated) {
+        return res.status(404).json({ message: "Medical history record not found" });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      console.error('Error updating medical history entry:', error);
+      res.status(500).json({ message: "Failed to update medical history entry" });
+    }
+  });
+
+  router.delete("/patients/:id/medical-history/:historyId", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const historyId = parseInt(req.params.historyId);
+      const userOrgId = req.user?.organizationId;
+      
+      if (!userOrgId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+      
+      // Verify patient belongs to user's organization
+      const [patient] = await db.select().from(patients)
+        .where(and(eq(patients.id, patientId), eq(patients.organizationId, userOrgId)))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(403).json({ message: "Access denied - patient not in your organization" });
+      }
+      
+      const [deleted] = await db.delete(medicalHistory)
+        .where(and(
+          eq(medicalHistory.id, historyId),
+          eq(medicalHistory.patientId, patientId)
+        ))
+        .returning();
+
+      if (!deleted) {
+        return res.status(404).json({ message: "Medical history record not found" });
+      }
+
+      res.json({ message: "Medical history record deleted successfully" });
+    } catch (error) {
+      console.error('Error deleting medical history entry:', error);
+      res.status(500).json({ message: "Failed to delete medical history entry" });
+    }
+  });
+
+  // Get all clinical notes for a patient - MUST be before /patients/:id route (route ordering)
+  router.get("/patients/:id/clinical-notes", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      
+      if (isNaN(patientId)) {
+        return res.status(400).json({ message: "Invalid patient ID" });
+      }
+      
+      const userOrgId = req.user?.organizationId;
+      
+      if (!userOrgId) {
+        return res.status(403).json({ message: "Organization context required" });
+      }
+      
+      // Verify patient belongs to user's organization
+      const patient = await storage.getPatient(patientId);
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+      
+      if (patient.organizationId !== userOrgId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const notes = await storage.getClinicalNotesByPatient(patientId, userOrgId);
+      
+      // Return empty array if no notes found (this is valid)
+      res.json(notes || []);
+    } catch (error) {
+      console.error('Error fetching patient clinical notes:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch clinical notes";
+      res.status(500).json({ 
+        message: "Failed to fetch clinical notes",
+        error: errorMessage 
+      });
+    }
+  });
+
   router.get("/patients/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -584,6 +773,227 @@ export function setupPatientRoutes(): Router {
     } catch (error) {
       console.error("Error in global search:", error);
       res.status(500).json({ message: "Search failed" });
+    }
+  });
+
+  // Vital Signs Routes
+  router.get("/patients/:id/vitals", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const organizationId = req.user?.currentOrganizationId || req.user?.organizationId;
+      
+      if (!organizationId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+      
+      // Verify patient belongs to the same organization
+      const [patient] = await db
+        .select()
+        .from(patients)
+        .where(and(
+          eq(patients.id, patientId),
+          eq(patients.organizationId, organizationId)
+        ))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+      
+      const vitals = await db
+        .select()
+        .from(vitalSigns)
+        .where(and(
+          eq(vitalSigns.patientId, patientId),
+          eq(vitalSigns.organizationId, organizationId)
+        ))
+        .orderBy(desc(vitalSigns.recordedAt));
+      
+      res.json(vitals);
+    } catch (error) {
+      console.error('Error fetching vitals:', error);
+      res.status(500).json({ message: "Failed to fetch vital signs" });
+    }
+  });
+
+  router.post("/patients/:id/vitals", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const { 
+        bloodPressureSystolic,
+        bloodPressureDiastolic,
+        heartRate,
+        temperature,
+        respiratoryRate,
+        oxygenSaturation,
+        weight,
+        height
+      } = req.body;
+
+      // Get organizationId from user context
+      const organizationId = req.user?.currentOrganizationId || req.user?.organizationId;
+      if (!organizationId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+
+      const [vital] = await db
+        .insert(vitalSigns)
+        .values({
+          patientId,
+          organizationId,
+          bloodPressureSystolic: bloodPressureSystolic ? parseInt(bloodPressureSystolic) : null,
+          bloodPressureDiastolic: bloodPressureDiastolic ? parseInt(bloodPressureDiastolic) : null,
+          heartRate: heartRate ? parseInt(heartRate) : null,
+          temperature: temperature ? parseFloat(temperature) : null,
+          respiratoryRate: respiratoryRate ? parseInt(respiratoryRate) : null,
+          oxygenSaturation: oxygenSaturation ? parseInt(oxygenSaturation) : null,
+          weight: weight ? parseFloat(weight) : null,
+          height: height ? parseFloat(height) : null,
+          recordedAt: new Date(),
+          recordedBy: req.user?.username || 'Unknown'
+        })
+        .returning();
+
+      res.json(vital);
+    } catch (error: any) {
+      console.error('Error recording vitals:', error);
+      
+      // Provide more specific error messages
+      if (error.code === '23503') {
+        return res.status(400).json({ message: "Invalid patient ID or organization" });
+      }
+      if (error.code === '23502') {
+        return res.status(400).json({ message: `Missing required field: ${error.column || 'unknown'}` });
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to record vital signs",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  });
+
+  // Safety Alerts Route
+  router.get("/patients/:id/safety-alerts", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const organizationId = req.user?.currentOrganizationId || req.user?.organizationId;
+      
+      if (!organizationId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+
+      // Verify patient belongs to the same organization
+      const [patient] = await db
+        .select()
+        .from(patients)
+        .where(and(
+          eq(patients.id, patientId),
+          eq(patients.organizationId, organizationId)
+        ))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+
+      // Get safety alerts for patient (if table exists, otherwise return empty array)
+      const alerts = await db
+        .select()
+        .from(safetyAlerts)
+        .where(and(
+          eq(safetyAlerts.patientId, patientId),
+          eq(safetyAlerts.organizationId, organizationId)
+        ))
+        .orderBy(desc(safetyAlerts.createdAt))
+        .catch(() => []); // Return empty array if table doesn't exist
+      
+      res.json(Array.isArray(alerts) ? alerts : []);
+    } catch (error) {
+      console.error('Error fetching safety alerts:', error);
+      res.json([]); // Return empty array on error
+    }
+  });
+
+  // Activity Trail Route
+  router.get("/patients/:id/activity-trail", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const organizationId = req.user?.currentOrganizationId || req.user?.organizationId;
+      
+      if (!organizationId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+
+      // Verify patient belongs to the same organization
+      const [patient] = await db
+        .select()
+        .from(patients)
+        .where(and(
+          eq(patients.id, patientId),
+          eq(patients.organizationId, organizationId)
+        ))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+
+      // Get audit logs for patient
+      const activityTrail = await db
+        .select()
+        .from(auditLogs)
+        .where(and(
+          eq(auditLogs.patientId, patientId),
+          eq(auditLogs.organizationId, organizationId)
+        ))
+        .orderBy(desc(auditLogs.createdAt))
+        .limit(100)
+        .catch(() => []); // Return empty array if table doesn't exist
+      
+      res.json(Array.isArray(activityTrail) ? activityTrail : []);
+    } catch (error) {
+      console.error('Error fetching activity trail:', error);
+      res.json([]); // Return empty array on error
+    }
+  });
+
+  // Consultation Records Route
+  router.get("/patients/:id/consultation-records", authenticateToken, requireAnyRole(['doctor', 'nurse', 'admin']), async (req: AuthRequest, res) => {
+    try {
+      const patientId = parseInt(req.params.id);
+      const organizationId = req.user?.currentOrganizationId || req.user?.organizationId;
+      
+      if (!organizationId) {
+        return res.status(400).json({ message: "Organization context required" });
+      }
+
+      // Verify patient belongs to the same organization
+      const [patient] = await db
+        .select()
+        .from(patients)
+        .where(and(
+          eq(patients.id, patientId),
+          eq(patients.organizationId, organizationId)
+        ))
+        .limit(1);
+      
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+
+      // Get consultation records for patient
+      const records = await db
+        .select()
+        .from(consultationRecords)
+        .where(eq(consultationRecords.patientId, patientId))
+        .orderBy(desc(consultationRecords.createdAt))
+        .catch(() => []); // Return empty array if table doesn't exist
+      
+      res.json(Array.isArray(records) ? records : []);
+    } catch (error) {
+      console.error('Error fetching consultation records:', error);
+      res.json([]); // Return empty array on error
     }
   });
 

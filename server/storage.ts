@@ -21,6 +21,7 @@ import {
   worksheetItems,
   aiConsultations,
   clinicalNotes,
+  appointments,
   type Patient, 
   type InsertPatient,
   type Visit,
@@ -65,7 +66,7 @@ import {
   type InsertClinicalNote
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, gte, lte, and, ilike, or, sql } from "drizzle-orm";
+import { eq, desc, gte, lte, gt, and, ilike, or, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // Patients
@@ -200,6 +201,8 @@ export interface IStorage {
     todayVisits: number;
     lowStockItems: number;
     pendingLabs: number;
+    patientGrowthPercent?: number;
+    upcomingAppointments?: number;
   }>;
 
   // AI Consultations
@@ -210,6 +213,7 @@ export interface IStorage {
   
   // Clinical Notes
   getClinicalNoteByConsultation(consultationId: number, organizationId?: number): Promise<ClinicalNote | undefined>;
+  getClinicalNotesByPatient(patientId: number, organizationId?: number): Promise<Array<ClinicalNote & { consultation?: Partial<AiConsultation> }>>;
   createClinicalNote(note: InsertClinicalNote): Promise<ClinicalNote>;
   updateClinicalNote(id: number, updates: Partial<InsertClinicalNote>): Promise<ClinicalNote>;
 }
@@ -669,11 +673,48 @@ export class DatabaseStorage implements IStorage {
     todayVisits: number;
     lowStockItems: number;
     pendingLabs: number;
+    patientGrowthPercent?: number;
+    upcomingAppointments?: number;
   }> {
     // Organization-filtered patient count
     const totalPatientsResult = await db.select()
       .from(patients)
       .where(eq(patients.organizationId, organizationId));
+    
+    // Calculate patient growth percentage from last month
+    const lastMonth = new Date();
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+    const lastMonthStart = new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1);
+    const lastMonthEnd = new Date(lastMonth.getFullYear(), lastMonth.getMonth() + 1, 0, 23, 59, 59);
+    
+    const lastMonthPatientsResult = await db.select()
+      .from(patients)
+      .where(
+        and(
+          eq(patients.organizationId, organizationId),
+          gte(patients.createdAt, lastMonthStart),
+          lte(patients.createdAt, lastMonthEnd)
+        )
+      );
+    
+    const thisMonthStart = new Date();
+    thisMonthStart.setDate(1);
+    thisMonthStart.setHours(0, 0, 0, 0);
+    
+    const thisMonthPatientsResult = await db.select()
+      .from(patients)
+      .where(
+        and(
+          eq(patients.organizationId, organizationId),
+          gte(patients.createdAt, thisMonthStart)
+        )
+      );
+    
+    const lastMonthCount = lastMonthPatientsResult.length;
+    const thisMonthCount = thisMonthPatientsResult.length;
+    const patientGrowthPercent = lastMonthCount > 0 
+      ? Math.round(((thisMonthCount - lastMonthCount) / lastMonthCount) * 100)
+      : (thisMonthCount > 0 ? 100 : 0);
     
     // Organization-filtered today's visits
     const today = new Date();
@@ -688,6 +729,27 @@ export class DatabaseStorage implements IStorage {
           eq(patients.organizationId, organizationId),
           gte(visits.visitDate, startOfDay),
           lte(visits.visitDate, endOfDay)
+        )
+      );
+    
+    // Get upcoming appointments (next 7 days)
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    nextWeek.setHours(23, 59, 59, 999);
+    
+    const upcomingAppointmentsResult = await db.select()
+      .from(appointments)
+      .leftJoin(patients, eq(appointments.patientId, patients.id))
+      .where(
+        and(
+          eq(patients.organizationId, organizationId),
+          gte(appointments.appointmentDate, sql`DATE(${tomorrow})`),
+          lte(appointments.appointmentDate, sql`DATE(${nextWeek})`),
+          inArray(appointments.status, ['scheduled', 'confirmed', 'pending'])
         )
       );
     
@@ -717,6 +779,8 @@ export class DatabaseStorage implements IStorage {
       todayVisits: todayVisitsResult.length,
       lowStockItems: lowStockResult.length,
       pendingLabs: pendingLabsResult.length,
+      patientGrowthPercent,
+      upcomingAppointments: upcomingAppointmentsResult.length,
     };
   }
 
@@ -1134,6 +1198,57 @@ export class DatabaseStorage implements IStorage {
       .where(and(...conditions))
       .returning();
     return note;
+  }
+
+  async getClinicalNotesByPatient(patientId: number, organizationId?: number): Promise<Array<ClinicalNote & { consultation?: Partial<AiConsultation> }>> {
+    const conditions = [eq(aiConsultations.patientId, patientId)];
+    if (organizationId) {
+      conditions.push(eq(clinicalNotes.organizationId, organizationId));
+    }
+
+    const notes = await db
+      .select({
+        id: clinicalNotes.id,
+        consultationId: clinicalNotes.consultationId,
+        subjective: clinicalNotes.subjective,
+        objective: clinicalNotes.objective,
+        assessment: clinicalNotes.assessment,
+        plan: clinicalNotes.plan,
+        chiefComplaint: clinicalNotes.chiefComplaint,
+        historyOfPresentIllness: clinicalNotes.historyOfPresentIllness,
+        pastMedicalHistory: clinicalNotes.pastMedicalHistory,
+        medications: clinicalNotes.medications,
+        vitalSigns: clinicalNotes.vitalSigns,
+        diagnosis: clinicalNotes.diagnosis,
+        differentialDiagnoses: clinicalNotes.differentialDiagnoses,
+        icdCodes: clinicalNotes.icdCodes,
+        suggestedLabTests: clinicalNotes.suggestedLabTests,
+        clinicalWarnings: clinicalNotes.clinicalWarnings,
+        confidenceScore: clinicalNotes.confidenceScore,
+        recommendations: clinicalNotes.recommendations,
+        followUpInstructions: clinicalNotes.followUpInstructions,
+        followUpDate: clinicalNotes.followUpDate,
+        addedToPatientRecord: clinicalNotes.addedToPatientRecord,
+        addedToRecordAt: clinicalNotes.addedToRecordAt,
+        organizationId: clinicalNotes.organizationId,
+        createdAt: clinicalNotes.createdAt,
+        updatedAt: clinicalNotes.updatedAt,
+        consultation: {
+          id: aiConsultations.id,
+          patientId: aiConsultations.patientId,
+          providerId: aiConsultations.providerId,
+          status: aiConsultations.status,
+          chiefComplaint: aiConsultations.chiefComplaint,
+          createdAt: aiConsultations.createdAt,
+          completedAt: aiConsultations.completedAt,
+        }
+      })
+      .from(clinicalNotes)
+      .innerJoin(aiConsultations, eq(clinicalNotes.consultationId, aiConsultations.id))
+      .where(and(...conditions))
+      .orderBy(desc(clinicalNotes.createdAt));
+
+    return notes as Array<ClinicalNote & { consultation?: Partial<AiConsultation> }>;
   }
 }
 

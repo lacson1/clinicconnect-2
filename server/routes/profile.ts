@@ -128,6 +128,7 @@ router.get('/', authenticateToken, asyncHandler(async (req: AuthRequest, res: Re
     id: user.id,
     username: user.username,
     role: user.role,
+    roleId: user.roleId,
     organizationId: currentOrgId,
     firstName: user.firstName,
     lastName: user.lastName,

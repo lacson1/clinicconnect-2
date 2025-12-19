@@ -20,7 +20,7 @@ export default defineConfig({
     // Optimization settings
     minify: 'esbuild',
     target: 'es2020',
-    cssMinify: true,
+    cssMinify: false, // Disabled to prevent CSS class corruption
     rollupOptions: {
       output: {
         manualChunks: {

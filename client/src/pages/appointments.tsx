@@ -156,8 +156,10 @@ export default function AppointmentsPage() {
   });
 
   // Fetch healthcare staff for selection  
-  const { data: healthcareStaff = [] } = useQuery<HealthcareStaff[]>({
-    queryKey: ['/api/users/healthcare-staff']
+  const { data: healthcareStaff = [], isLoading: healthcareStaffLoading, error: healthcareStaffError } = useQuery<HealthcareStaff[]>({
+    queryKey: ['/api/users/healthcare-staff'],
+    retry: 1,
+    refetchOnWindowFocus: false
   });
 
   // Create appointment mutation
@@ -503,11 +505,17 @@ export default function AppointmentsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Providers</SelectItem>
-                    {(healthcareStaff as HealthcareStaff[]).map((staff) => (
+                    {healthcareStaffLoading ? (
+                      <SelectItem value="loading" disabled>Loading providers...</SelectItem>
+                    ) : healthcareStaffError ? (
+                      <SelectItem value="error" disabled>Error loading providers</SelectItem>
+                    ) : (
+                      (healthcareStaff as HealthcareStaff[]).map((staff) => (
                       <SelectItem key={staff.id} value={staff.id.toString()}>
                         {staff.firstName || staff.username} {staff.lastName || ''} ({staff.role})
                       </SelectItem>
-                    ))}
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
 
@@ -595,7 +603,11 @@ export default function AppointmentsPage() {
                       <SelectValue placeholder="Select healthcare provider" />
                     </SelectTrigger>
                     <SelectContent>
-                      {healthcareStaff.length === 0 ? (
+                      {healthcareStaffLoading ? (
+                        <SelectItem value="loading" disabled>Loading providers...</SelectItem>
+                      ) : healthcareStaffError ? (
+                        <SelectItem value="error" disabled>Error loading providers</SelectItem>
+                      ) : healthcareStaff.length === 0 ? (
                         <SelectItem value="no-staff" disabled>
                           No healthcare staff available
                         </SelectItem>
@@ -756,11 +768,19 @@ export default function AppointmentsPage() {
                       <SelectValue placeholder="Select provider" />
                     </SelectTrigger>
                     <SelectContent>
-                      {(healthcareStaff as any[]).map((staff: HealthcareStaff) => (
+                      {healthcareStaffLoading ? (
+                        <SelectItem value="loading" disabled>Loading providers...</SelectItem>
+                      ) : healthcareStaffError ? (
+                        <SelectItem value="error" disabled>Error loading providers</SelectItem>
+                      ) : healthcareStaff.length === 0 ? (
+                        <SelectItem value="no-staff" disabled>No providers available</SelectItem>
+                      ) : (
+                        (healthcareStaff as any[]).map((staff: HealthcareStaff) => (
                         <SelectItem key={staff.id} value={staff.id.toString()}>
                           {staff.role === 'doctor' ? 'Dr.' : ''} {staff.firstName || staff.username} {staff.lastName || ''} ({staff.role})
                         </SelectItem>
-                      ))}
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

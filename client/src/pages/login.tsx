@@ -6,11 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Heart, Shield, Activity, Stethoscope, Users, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { Loader2, Heart, Shield, Activity, Stethoscope, Users, Eye, EyeOff, CheckCircle, UserPlus, Lock } from 'lucide-react';
 import { SiGoogle, SiGithub, SiX, SiApple } from 'react-icons/si';
+import { Link } from 'wouter';
 
-// Import futuristic gradient background
-import backgroundImage from '@assets/particle-lines-futuristic-gradient-background_1760322867271.jpg';
+// Background image is optional - using CSS gradient as primary with optional image overlay
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -45,13 +45,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Futuristic Gradient Background */}
-      <div
-        className="absolute inset-0 bg-cover bg-center animate-[float_20s_ease-in-out_infinite]"
-        style={{
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: '120%'
-        }}
-      />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 animate-pulse" />
 
       {/* Gradient Blend Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-white/30" />
@@ -143,13 +137,13 @@ export default function Login() {
             <CardContent className="space-y-6">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="username">Username or Email</Label>
                   <Input
                     id="username"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter your username"
+                    placeholder="Enter your username or email"
                     required
                     disabled={isLoading}
                     className="h-11"
@@ -222,6 +216,24 @@ export default function Login() {
                     OAuth login (Google, GitHub, etc.) is not yet available. Please use username/password login above.
                   </p>
                 </div>
+              </div>
+
+              {/* Forgot Password Link */}
+              <div className="text-center">
+                <Link href="/forgot-password" className="text-sm text-primary hover:underline font-medium">
+                  <Lock className="inline mr-1 h-3 w-3" />
+                  Forgot password?
+                </Link>
+              </div>
+
+              {/* Signup Link */}
+              <div className="text-center space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Don't have an account?{' '}
+                  <Link href="/signup" className="text-primary hover:underline font-medium">
+                    Sign up
+                  </Link>
+                </p>
               </div>
 
               {/* Demo Accounts */}
